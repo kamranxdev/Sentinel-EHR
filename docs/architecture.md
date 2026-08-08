@@ -2,11 +2,13 @@
 
 This document provides a senior-engineer-level technical breakdown of the architecture, security patterns, hybrid RBAC+ABAC authorization engine, data flows, and database infrastructure of the **MedVault** Electronic Health Record (EHR) platform.
 
+For full implementation details on the Spring Boot package structure, domain module boundaries, encounter-centric data models, and migration steps, see the [Backend Modular Monolith Architecture & Implementation Guide](file:///mnt/workspace/MedVault/docs/backend-modular-architecture-implementation-guide.md).
+
 ---
 
 ## 🏛️ High-Level System Architecture
 
-MedVault is designed as an enterprise-scale, decoupled, multi-tier healthcare application. It isolates the presentation layer, API security gateway, authorization engine, domain business services, persistence abstraction, and underlying storage targets.
+MedVault is designed as a **Modular Monolith** application structured by business domain (Package-by-Feature / Bounded Contexts). It isolates presentation, security, authorization, domain business services, persistence abstraction, and storage layers.
 
 ```mermaid
 flowchart TD

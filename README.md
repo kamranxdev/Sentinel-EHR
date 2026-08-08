@@ -70,6 +70,7 @@ All detailed documentation is organized in the [`docs/`](docs/) directory:
 | :--- | :--- |
 | **[Getting Started](docs/getting-started.md)** | Prerequisites, full credentials matrix, all 3 database execution modes, build & test commands |
 | **[Architecture](docs/architecture.md)** | High-level system architecture, real-world analogies, multi-tier diagrams, hybrid RBAC+ABAC evaluation |
+| **[Backend Modular Architecture Guide](docs/backend-modular-architecture-implementation-guide.md)** | Modular Monolith specification, 21 domain modules, Spring Boot package layout, encounter-centric model, FHIR isolation |
 | **[RBAC & ABAC Matrix](docs/rbac-abac-matrix.md)** | 10 baseline roles, resource permission matrices (Clinical, Vitals, Labs, Medication, Billing), ABAC policies, HIPAA integrity rules |
 | **[RBAC & ABAC Implementation Guide](docs/rbac-abac-implementation-guide.md)** | Step-by-step developer guide for implementing Spring Boot SpEL evaluators and Angular 19 guards/directives |
 | **[Clinical Workflows](docs/workflows.md)** | End-to-end workflow guides for Patient Portal, Physician eRx, Nurse Vitals, Audit Vault, Synthea Pipeline, and FHIR Interop |
@@ -95,6 +96,7 @@ MedVault/
 │
 ├── docs/                     # 📚 Comprehensive Documentation Suite
 │   ├── architecture.md       # System architecture & diagrams
+│   ├── backend-modular-architecture-implementation-guide.md # Modular Monolith backend layout & guide
 │   ├── rbac-abac-matrix.md   # 10 production roles & RBAC+ABAC matrices
 │   ├── rbac-abac-implementation-guide.md # Spring Boot & Angular security code guide
 │   ├── workflows.md          # Clinical & admin workflow guides
