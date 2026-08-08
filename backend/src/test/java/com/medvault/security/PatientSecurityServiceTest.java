@@ -1,7 +1,20 @@
 package com.medvault.security;
 
-import com.medvault.model.*;
-import com.medvault.repository.*;
+import com.medvault.allergies.entity.Allergy;
+import com.medvault.allergies.repository.AllergyRepository;
+import com.medvault.appointments.entity.Appointment;
+import com.medvault.appointments.repository.AppointmentRepository;
+import com.medvault.authorization.abac.AbacSecurityEvaluator;
+import com.medvault.clinicalrecords.repository.MedicalRecordRepository;
+import com.medvault.diagnoses.repository.DiagnosisRepository;
+import com.medvault.encounters.repository.EncounterRepository;
+import com.medvault.patients.entity.Patient;
+import com.medvault.patients.repository.PatientRepository;
+import com.medvault.patients.service.PatientSecurityService;
+import com.medvault.prescriptions.entity.Prescription;
+import com.medvault.prescriptions.repository.PrescriptionRepository;
+import com.medvault.users.repository.UserRepository;
+import com.medvault.vitals.repository.VitalsRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.Authentication;

@@ -1,14 +1,25 @@
 package com.medvault.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.medvault.exception.ResourceNotFoundException;
-import com.medvault.model.*;
-import com.medvault.repository.*;
+import com.medvault.appointments.entity.*;
+import com.medvault.appointments.repository.*;
+import com.medvault.appointments.service.AppointmentWorkflowService;
+import com.medvault.audit.service.AuditService;
+import com.medvault.common.exception.ResourceNotFoundException;
+import com.medvault.diagnoses.entity.Diagnosis;
+import com.medvault.diagnoses.repository.DiagnosisRepository;
+import com.medvault.patients.entity.Patient;
+import com.medvault.patients.repository.PatientRepository;
+import com.medvault.prescriptions.entity.Prescription;
+import com.medvault.prescriptions.repository.PrescriptionRepository;
+import com.medvault.prescriptions.service.SmartSafetyService;
+import com.medvault.users.entity.User;
+import com.medvault.users.repository.UserRepository;
+import com.medvault.vitals.entity.Vitals;
+import com.medvault.vitals.repository.VitalsRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.time.LocalDateTime;

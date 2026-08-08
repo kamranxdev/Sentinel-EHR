@@ -1,6 +1,6 @@
 package com.medvault;
 
-import com.medvault.dto.LoginRequest;
+import com.medvault.auth.dto.LoginRequest;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

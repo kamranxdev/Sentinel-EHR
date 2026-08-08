@@ -1,7 +1,8 @@
 package com.medvault.service;
 
-import com.medvault.model.Patient;
-import com.medvault.repository.*;
+import com.medvault.patients.entity.Patient;
+import com.medvault.patients.repository.PatientRepository;
+import com.medvault.synthetic.service.SyntheaPipelineService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;

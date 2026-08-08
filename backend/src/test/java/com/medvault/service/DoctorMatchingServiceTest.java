@@ -1,13 +1,14 @@
 package com.medvault.service;
 
-import com.medvault.dto.DoctorRecommendationDTO;
-import com.medvault.model.Patient;
-import com.medvault.model.Role;
-import com.medvault.model.User;
-import com.medvault.repository.AppointmentRepository;
-import com.medvault.repository.DiagnosisRepository;
-import com.medvault.repository.PatientRepository;
-import com.medvault.repository.UserRepository;
+import com.medvault.appointments.repository.AppointmentRepository;
+import com.medvault.diagnoses.repository.DiagnosisRepository;
+import com.medvault.patients.entity.Patient;
+import com.medvault.patients.repository.PatientRepository;
+import com.medvault.users.dto.DoctorRecommendationDTO;
+import com.medvault.users.entity.Role;
+import com.medvault.users.entity.User;
+import com.medvault.users.repository.UserRepository;
+import com.medvault.users.service.DoctorMatchingService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

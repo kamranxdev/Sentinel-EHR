@@ -1,16 +1,16 @@
 package com.medvault;
 
-import com.medvault.model.Allergy;
-import com.medvault.model.Diagnosis;
-import com.medvault.model.Patient;
-import com.medvault.model.Prescription;
-import com.medvault.repository.AllergyRepository;
-import com.medvault.repository.DiagnosisRepository;
-import com.medvault.repository.PatientRepository;
-import com.medvault.repository.PrescriptionRepository;
-import com.medvault.service.AuditService;
-import com.medvault.service.SmartSafetyService;
-import com.medvault.service.SmartSafetyService.SafetyCheckResult;
+import com.medvault.allergies.entity.Allergy;
+import com.medvault.allergies.repository.AllergyRepository;
+import com.medvault.audit.service.AuditTrailService;
+import com.medvault.diagnoses.entity.Diagnosis;
+import com.medvault.diagnoses.repository.DiagnosisRepository;
+import com.medvault.patients.entity.Patient;
+import com.medvault.patients.repository.PatientRepository;
+import com.medvault.prescriptions.entity.Prescription;
+import com.medvault.prescriptions.repository.PrescriptionRepository;
+import com.medvault.prescriptions.service.SmartSafetyService;
+import com.medvault.prescriptions.service.SmartSafetyService.SafetyCheckResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -27,7 +27,7 @@ public class SmartSafetyServiceTest {
     private PrescriptionRepository prescriptionRepository;
     private DiagnosisRepository diagnosisRepository;
     private PatientRepository patientRepository;
-    private AuditService auditService;
+    private AuditTrailService auditService;
     private SmartSafetyService safetyService;
 
     @BeforeEach
@@ -36,7 +36,7 @@ public class SmartSafetyServiceTest {
         prescriptionRepository = Mockito.mock(PrescriptionRepository.class);
         diagnosisRepository = Mockito.mock(DiagnosisRepository.class);
         patientRepository = Mockito.mock(PatientRepository.class);
-        auditService = Mockito.mock(AuditService.class);
+        auditService = Mockito.mock(AuditTrailService.class);
 
         safetyService = new SmartSafetyService(allergyRepository, prescriptionRepository, diagnosisRepository, patientRepository, auditService);
     }

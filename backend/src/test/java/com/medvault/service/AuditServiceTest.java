@@ -1,10 +1,10 @@
 package com.medvault.service;
 
-import com.medvault.model.AuditLog;
-import com.medvault.repository.AuditLogRepository;
+import com.medvault.audit.entity.AuditLog;
+import com.medvault.audit.repository.AuditLogRepository;
+import com.medvault.audit.service.AuditService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 

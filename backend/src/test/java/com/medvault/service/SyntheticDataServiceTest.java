@@ -1,8 +1,16 @@
 package com.medvault.service;
 
-import com.medvault.model.Patient;
-import com.medvault.model.User;
-import com.medvault.repository.*;
+import com.medvault.allergies.repository.AllergyRepository;
+import com.medvault.audit.repository.AuditLogRepository;
+import com.medvault.diagnoses.repository.DiagnosisRepository;
+import com.medvault.encounters.repository.EncounterRepository;
+import com.medvault.patients.entity.Patient;
+import com.medvault.patients.repository.PatientRepository;
+import com.medvault.prescriptions.repository.PrescriptionRepository;
+import com.medvault.synthetic.service.SyntheticDataService;
+import com.medvault.users.entity.User;
+import com.medvault.users.repository.UserRepository;
+import com.medvault.vitals.repository.VitalsRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

@@ -1,10 +1,11 @@
 package com.medvault.security;
 
-import com.medvault.model.Patient;
-import com.medvault.model.User;
-import com.medvault.repository.PatientAssignmentRepository;
-import com.medvault.repository.PatientRepository;
-import com.medvault.repository.UserRepository;
+import com.medvault.authorization.abac.AbacSecurityEvaluator;
+import com.medvault.patients.entity.Patient;
+import com.medvault.patients.repository.PatientAssignmentRepository;
+import com.medvault.patients.repository.PatientRepository;
+import com.medvault.users.entity.User;
+import com.medvault.users.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.Authentication;

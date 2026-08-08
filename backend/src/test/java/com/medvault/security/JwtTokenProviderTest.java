@@ -1,5 +1,6 @@
 package com.medvault.security;
 
+import com.medvault.auth.security.JwtTokenProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.Authentication;
