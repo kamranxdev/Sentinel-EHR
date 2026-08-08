@@ -41,9 +41,7 @@ public class AuditLogAspect {
 
         try {
             String username = auth.getName();
-            String roles = auth.getAuthorities().stream()
-                    .map(GrantedAuthority::getAuthority)
-                    .toList().toString();
+            String roles = formatAuthorities(auth);
 
             AuditLog log = new AuditLog();
             log.setUsername(username);
@@ -67,8 +65,7 @@ public class AuditLogAspect {
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = (auth != null && auth.isAuthenticated()) ? auth.getName() : "ANONYMOUS";
-        String roles = (auth != null && auth.isAuthenticated()) ? auth.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority).toList().toString() : "NONE";
+        String roles = (auth != null && auth.isAuthenticated()) ? formatAuthorities(auth) : "NONE";
 
         try {
             AuditLog log = new AuditLog();
@@ -85,5 +82,16 @@ public class AuditLogAspect {
         } catch (Exception loggingEx) {
             logger.error("AOP AUDIT LOG ERROR: Failed to log access denial: {}", loggingEx.getMessage());
         }
+    }
+
+    private String formatAuthorities(Authentication auth) {
+        if (auth == null) return "NONE";
+        String str = auth.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .toList().toString();
+        if (str.length() > 950) {
+            return str.substring(0, 940) + "...]";
+        }
+        return str;
     }
 }

@@ -11,6 +11,8 @@ public class AuditLog {
     private Long id;
 
     private String username;
+
+    @Column(name = "user_role", length = 1000)
     private String userRole;
     private String action; // CREATE, READ, UPDATE, DELETE, LOGIN, ERX_ALERT
     private String entityName;

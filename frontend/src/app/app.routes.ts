@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
 import { roleGuard } from './core/guards/role.guard';
+import { clinicalAccessGuard } from './core/guards/clinical-access.guard';
 
 export const routes: Routes = [
   {
@@ -52,50 +53,50 @@ export const routes: Routes = [
     path: 'doctor/patients',
     loadComponent: () =>
       import('./workspaces/doctor/doctor-patients.component').then((m) => m.DoctorPatientsComponent),
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['ROLE_DOCTOR'] },
+    canActivate: [authGuard, roleGuard, clinicalAccessGuard],
+    data: { roles: ['ROLE_DOCTOR'], permission: 'PATIENT_READ' },
   },
   {
     path: 'doctor/appointments',
     loadComponent: () =>
       import('./workspaces/doctor/doctor-appointments.component').then((m) => m.DoctorAppointmentsComponent),
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['ROLE_DOCTOR'] },
+    canActivate: [authGuard, roleGuard, clinicalAccessGuard],
+    data: { roles: ['ROLE_DOCTOR'], permission: 'APPOINTMENT_READ' },
   },
   {
     path: 'doctor/encounters',
     loadComponent: () =>
       import('./workspaces/doctor/doctor-encounters.component').then((m) => m.DoctorEncountersComponent),
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['ROLE_DOCTOR'] },
+    canActivate: [authGuard, roleGuard, clinicalAccessGuard],
+    data: { roles: ['ROLE_DOCTOR'], permission: 'CLINICAL_NOTE_READ' },
   },
   {
     path: 'doctor/prescriptions',
     loadComponent: () =>
       import('./workspaces/doctor/doctor-prescriptions.component').then((m) => m.DoctorPrescriptionsComponent),
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['ROLE_DOCTOR'] },
+    canActivate: [authGuard, roleGuard, clinicalAccessGuard],
+    data: { roles: ['ROLE_DOCTOR'], permission: 'PRESCRIPTION_READ' },
   },
   {
     path: 'doctor/diagnoses',
     loadComponent: () =>
       import('./workspaces/doctor/doctor-diagnoses.component').then((m) => m.DoctorDiagnosesComponent),
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['ROLE_DOCTOR'] },
+    canActivate: [authGuard, roleGuard, clinicalAccessGuard],
+    data: { roles: ['ROLE_DOCTOR'], permission: 'DIAGNOSIS_READ' },
   },
   {
     path: 'doctor/allergies',
     loadComponent: () =>
       import('./workspaces/doctor/doctor-allergies.component').then((m) => m.DoctorAllergiesComponent),
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['ROLE_DOCTOR'] },
+    canActivate: [authGuard, roleGuard, clinicalAccessGuard],
+    data: { roles: ['ROLE_DOCTOR'], permission: 'ALLERGY_READ' },
   },
   {
     path: 'doctor/vitals',
     loadComponent: () =>
       import('./workspaces/doctor/doctor-vitals.component').then((m) => m.DoctorVitalsComponent),
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['ROLE_DOCTOR'] },
+    canActivate: [authGuard, roleGuard, clinicalAccessGuard],
+    data: { roles: ['ROLE_DOCTOR'], permission: 'VITALS_READ' },
   },
 
   // --- NURSE WORKSPACE ROUTES ---

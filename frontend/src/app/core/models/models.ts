@@ -21,6 +21,7 @@ export interface JwtAuthResponse {
   roles: string[];
   userId: number;
   id?: number;
+  assignedPatientIds?: number[];
 }
 
 export interface Patient {

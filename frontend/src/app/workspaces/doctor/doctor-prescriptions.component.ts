@@ -17,12 +17,15 @@ import { HlmSelectImports } from '@spartan-ng/helm/select';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucidePlus, lucidePill, lucideAlertCircle } from '@ng-icons/lucide';
 
+import { HasPermissionDirective } from '../../core/directives/has-permission.directive';
+
 @Component({
   selector: 'app-doctor-prescriptions',
   standalone: true,
   imports: [
     CommonModule,
     FormsModule,
+    HasPermissionDirective,
     HlmCardImports,
     HlmTableImports,
     HlmBadgeImports,
@@ -43,7 +46,7 @@ import { lucidePlus, lucidePill, lucideAlertCircle } from '@ng-icons/lucide';
           </h1>
           <p class="text-xs text-muted-foreground mt-0.5">Issue eRx orders, check drug interactions, & manage RxNorm codes.</p>
         </div>
-        <button hlmBtn variant="default" size="sm" (click)="openModal()" class="gap-1.5 font-semibold text-xs">
+        <button *hasPermission="'PRESCRIPTION_CREATE'" hlmBtn variant="default" size="sm" (click)="openModal()" class="gap-1.5 font-semibold text-xs">
           <ng-icon name="lucidePlus" size="14" /> Issue New eRx Order
         </button>
       </div>

@@ -136,18 +136,30 @@ export class AuthService {
   }
 
   /**
+   * ABAC: Checks if authenticated user has an active care team relationship with the patient.
+   * Admin/Auditors bypass relationship checks; clinicians match against assigned patient IDs.
+   */
+  hasActiveRelationship(patientId: number): boolean {
+    if (!this.isLoggedIn()) return false;
+    if (this.hasAnyRole(['ROLE_SYS_ADMIN', 'ROLE_ORG_ADMIN', 'ROLE_ADMIN', 'ROLE_AUDITOR'])) {
+      return true;
+    }
+    const user = this.currentUser();
+    if (!user) return false;
+    if (user.assignedPatientIds && user.assignedPatientIds.length > 0) {
+      return user.assignedPatientIds.includes(patientId);
+    }
+    return true;
+  }
+
+  /**
    * Combined RBAC + ABAC: Checks permission AND patient context.
    * Frontend ABAC is advisory — backend enforces the real access decision.
    * Admin/Auditor roles bypass patient-level ABAC on frontend.
    */
   canAccessPatient(patientId: number, permissionCode: string): boolean {
     if (!this.hasPermission(permissionCode)) return false;
-    // Admin/Auditor roles bypass patient-level ABAC
-    if (this.hasAnyRole(['ROLE_SYS_ADMIN', 'ROLE_ORG_ADMIN', 'ROLE_ADMIN', 'ROLE_AUDITOR'])) {
-      return true;
-    }
-    // For all other roles, allow and let backend ABAC enforce
-    return true;
+    return this.hasActiveRelationship(patientId);
   }
 
   isReceptionist(): boolean {
