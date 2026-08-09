@@ -39,7 +39,13 @@ public class MPIController {
         return mpiSearchService.searchMPI(fullName, dateOfBirth, ssn, mrn, phone, email, address, gender, auth);
     }
 
-    @PostMapping("/merge-request")
+    @GetMapping({"/scan", "/scan/", "/duplicate-candidates", "/duplicate-candidates/"})
+    @PreAuthorize("hasAnyAuthority('MPI_SEARCH', 'PATIENT_READ', 'ROLE_RECEPTIONIST', 'ROLE_INTAKE_SPEC', 'ROLE_ADMIN', 'ROLE_SYS_ADMIN', 'RECEPTIONIST', 'ADMIN')")
+    public List<MPIMatchCandidateDTO> scanDuplicateCandidates(Authentication auth) {
+        return mpiSearchService.scanDuplicateCandidates(auth);
+    }
+
+    @PostMapping({"/merge-request", "/merge-request/", "/merge", "/merge/"})
     @PreAuthorize("hasAnyAuthority('MPI_MERGE_REQUEST', 'ROLE_RECEPTIONIST', 'ROLE_ADMIN', 'ROLE_SYS_ADMIN')")
     public ResponseEntity<String> requestChartMerge(@RequestBody MPIMergeRequestDTO mergeRequest, Authentication auth) {
         String result = mpiSearchService.requestChartMerge(mergeRequest, auth);

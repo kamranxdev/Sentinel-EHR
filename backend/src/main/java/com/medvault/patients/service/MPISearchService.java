@@ -1,32 +1,73 @@
 package com.medvault.patients.service;
 
+import com.medvault.allergies.entity.Allergy;
+import com.medvault.allergies.repository.AllergyRepository;
+import com.medvault.appointments.entity.Appointment;
+import com.medvault.appointments.repository.AppointmentRepository;
 import com.medvault.audit.service.AuditTrailService;
+import com.medvault.clinicalrecords.entity.MedicalRecord;
+import com.medvault.clinicalrecords.repository.MedicalRecordRepository;
 import com.medvault.common.exception.ResourceNotFoundException;
+import com.medvault.diagnoses.entity.Diagnosis;
+import com.medvault.diagnoses.repository.DiagnosisRepository;
+import com.medvault.encounters.entity.Encounter;
+import com.medvault.encounters.repository.EncounterRepository;
 import com.medvault.patients.dto.MPIMatchCandidateDTO;
 import com.medvault.patients.dto.MPIMergeRequestDTO;
 import com.medvault.patients.entity.Patient;
+import com.medvault.patients.entity.PatientAssignment;
+import com.medvault.patients.repository.PatientAssignmentRepository;
 import com.medvault.patients.repository.PatientRepository;
+import com.medvault.prescriptions.entity.Prescription;
+import com.medvault.prescriptions.repository.PrescriptionRepository;
+import com.medvault.vitals.entity.Vitals;
+import com.medvault.vitals.repository.VitalsRepository;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class MPISearchService {
 
     private final PatientRepository patientRepository;
     private final AuditTrailService auditService;
+    private final EncounterRepository encounterRepository;
+    private final MedicalRecordRepository medicalRecordRepository;
+    private final PrescriptionRepository prescriptionRepository;
+    private final VitalsRepository vitalsRepository;
+    private final AllergyRepository allergyRepository;
+    private final DiagnosisRepository diagnosisRepository;
+    private final AppointmentRepository appointmentRepository;
+    private final PatientAssignmentRepository patientAssignmentRepository;
 
-    public MPISearchService(PatientRepository patientRepository, AuditTrailService auditService) {
+    public MPISearchService(PatientRepository patientRepository,
+                            AuditTrailService auditService,
+                            EncounterRepository encounterRepository,
+                            MedicalRecordRepository medicalRecordRepository,
+                            PrescriptionRepository prescriptionRepository,
+                            VitalsRepository vitalsRepository,
+                            AllergyRepository allergyRepository,
+                            DiagnosisRepository diagnosisRepository,
+                            AppointmentRepository appointmentRepository,
+                            PatientAssignmentRepository patientAssignmentRepository) {
         this.patientRepository = patientRepository;
         this.auditService = auditService;
+        this.encounterRepository = encounterRepository;
+        this.medicalRecordRepository = medicalRecordRepository;
+        this.prescriptionRepository = prescriptionRepository;
+        this.vitalsRepository = vitalsRepository;
+        this.allergyRepository = allergyRepository;
+        this.diagnosisRepository = diagnosisRepository;
+        this.appointmentRepository = appointmentRepository;
+        this.patientAssignmentRepository = patientAssignmentRepository;
     }
 
     /**
      * Performs Fellegi-Sunter deterministic & probabilistic identity matching across Master Patient Index (MPI).
+     * If query criteria are empty, defaults to automated candidate duplicate scanning across all records.
      */
     public List<MPIMatchCandidateDTO> searchMPI(String fullName,
                                                 LocalDate dateOfBirth,
@@ -37,18 +78,26 @@ public class MPISearchService {
                                                 String address,
                                                 String gender,
                                                 Authentication auth) {
-        auditService.logAction(auth, "MPI_SEARCH", "PATIENT_MPI", "0", 
-            String.format("MPI Search query: Name='%s', DOB='%s', SSN='%s', MRN='%s'", 
-                fullName, dateOfBirth, ssn != null ? "***" : null, mrn));
-
-        List<Patient> allPatients = patientRepository.findAll();
-        List<MPIMatchCandidateDTO> candidates = new ArrayList<>();
-
         String cleanSearchName = fullName != null ? fullName.trim().toLowerCase() : "";
         String cleanSearchSsn = ssn != null ? ssn.replaceAll("[^0-9]", "") : "";
         String cleanSearchMrn = mrn != null ? mrn.trim().toUpperCase() : "";
         String cleanSearchPhone = phone != null ? phone.replaceAll("[^0-9]", "") : "";
         String cleanSearchEmail = email != null ? email.trim().toLowerCase() : "";
+
+        boolean isAllEmpty = cleanSearchName.isEmpty() && dateOfBirth == null && cleanSearchSsn.isEmpty()
+                && cleanSearchMrn.isEmpty() && cleanSearchPhone.isEmpty() && cleanSearchEmail.isEmpty()
+                && (gender == null || gender.trim().isEmpty());
+
+        if (isAllEmpty) {
+            return scanDuplicateCandidates(auth);
+        }
+
+        auditService.logAction(auth, "MPI_SEARCH", "PATIENT_MPI", "0",
+                String.format("MPI Search query: Name='%s', DOB='%s', SSN='%s', MRN='%s'",
+                        fullName, dateOfBirth, ssn != null ? "***" : null, mrn));
+
+        List<Patient> allPatients = patientRepository.findAll();
+        List<MPIMatchCandidateDTO> candidates = new ArrayList<>();
 
         for (Patient p : allPatients) {
             double totalScore = 0.0;
@@ -143,17 +192,7 @@ public class MPISearchService {
             double finalScore = Math.min(100.0, totalScore);
 
             if (finalScore >= 35.0) {
-                String classification;
-                if (finalScore >= 90.0) {
-                    classification = "EXACT_MATCH";
-                } else if (finalScore >= 75.0) {
-                    classification = "HIGH_PROBABILITY_MATCH";
-                } else if (finalScore >= 55.0) {
-                    classification = "POSSIBLE_DUPLICATE";
-                } else {
-                    classification = "LOW_PROBABILITY";
-                }
-
+                String classification = getMatchClassification(finalScore);
                 candidates.add(new MPIMatchCandidateDTO(p, finalScore, classification, matchingFields, conflictingFields));
             }
         }
@@ -162,20 +201,245 @@ public class MPISearchService {
         return candidates;
     }
 
+    /**
+     * Scans the system for potential duplicate patient chart pairs using Fellegi-Sunter algorithm.
+     */
+    public List<MPIMatchCandidateDTO> scanDuplicateCandidates(Authentication auth) {
+        auditService.logAction(auth, "MPI_DUPLICATE_SCAN", "PATIENT_MPI", "0", "Executed system-wide duplicate chart scan.");
+        List<Patient> allPatients = patientRepository.findAll();
+        List<MPIMatchCandidateDTO> candidates = new ArrayList<>();
+
+        for (int i = 0; i < allPatients.size(); i++) {
+            Patient p1 = allPatients.get(i);
+            for (int j = i + 1; j < allPatients.size(); j++) {
+                Patient p2 = allPatients.get(j);
+
+                double score = scorePatientPair(p1, p2);
+                if (score >= 40.0) {
+                    List<String> matching = getMatchingFields(p1, p2);
+                    List<String> conflicting = getConflictingFields(p1, p2);
+                    String classification = getMatchClassification(score);
+
+                    candidates.add(new MPIMatchCandidateDTO(p2, score, classification, matching, conflicting));
+                }
+            }
+        }
+
+        candidates.sort(Comparator.comparingDouble(MPIMatchCandidateDTO::getMatchScore).reversed());
+        return candidates;
+    }
+
+    /**
+     * Performs a full, real transactional chart merge by re-linking all child records (Encounters, Medical Records,
+     * Prescriptions, Vitals, Allergies, Diagnoses, Appointments, Assignments) from duplicate patient to primary patient,
+     * consolidating demographics, and deleting duplicate record to maintain a unified Master Patient Index (MPI).
+     */
     @Transactional
     public String requestChartMerge(MPIMergeRequestDTO mergeRequest, Authentication auth) {
+        if (mergeRequest.getPrimaryPatientId() == null || mergeRequest.getDuplicatePatientId() == null) {
+            throw new IllegalArgumentException("Primary patient ID and Duplicate patient ID must both be specified.");
+        }
+        if (mergeRequest.getPrimaryPatientId().equals(mergeRequest.getDuplicatePatientId())) {
+            throw new IllegalArgumentException("Primary patient ID and Duplicate patient ID cannot be identical.");
+        }
+
         Patient primary = patientRepository.findById(mergeRequest.getPrimaryPatientId())
                 .orElseThrow(() -> new ResourceNotFoundException("Primary patient record #" + mergeRequest.getPrimaryPatientId() + " not found"));
         Patient duplicate = patientRepository.findById(mergeRequest.getDuplicatePatientId())
                 .orElseThrow(() -> new ResourceNotFoundException("Duplicate patient record #" + mergeRequest.getDuplicatePatientId() + " not found"));
 
-        auditService.logAction(auth, "MPI_MERGE_REQUEST", "MPI_CHART_MERGE", 
-            String.valueOf(primary.getId()), 
-            String.format("Initiated MPI chart merge: Primary MRN=%s, Duplicate MRN=%s. Rationale: %s",
-                primary.getPatientCode(), duplicate.getPatientCode(), mergeRequest.getMergeReason()));
+        // 1. Re-link all child clinical entities from duplicate to primary patient
+        List<Encounter> encounters = encounterRepository.findByPatientIdOrderByEncounterDateDesc(duplicate.getId());
+        for (Encounter e : encounters) {
+            e.setPatient(primary);
+            encounterRepository.save(e);
+        }
 
-        return String.format("Chart merge request submitted successfully for Primary MRN %s and Duplicate MRN %s. Audit Log ID created.",
-                primary.getPatientCode(), duplicate.getPatientCode());
+        List<MedicalRecord> records = medicalRecordRepository.findByPatientIdOrderByCreatedAtDesc(duplicate.getId());
+        for (MedicalRecord r : records) {
+            r.setPatient(primary);
+            medicalRecordRepository.save(r);
+        }
+
+        List<Prescription> prescriptions = prescriptionRepository.findByPatientIdOrderByPrescribedAtDesc(duplicate.getId());
+        for (Prescription pr : prescriptions) {
+            pr.setPatient(primary);
+            prescriptionRepository.save(pr);
+        }
+
+        List<Vitals> vitalsList = vitalsRepository.findByPatientIdOrderByRecordedAtDesc(duplicate.getId());
+        for (Vitals v : vitalsList) {
+            v.setPatient(primary);
+            vitalsRepository.save(v);
+        }
+
+        List<Allergy> allergies = allergyRepository.findByPatientIdOrderByRecordedAtDesc(duplicate.getId());
+        for (Allergy a : allergies) {
+            a.setPatient(primary);
+            allergyRepository.save(a);
+        }
+
+        List<Diagnosis> diagnoses = diagnosisRepository.findByPatientIdOrderByRecordedAtDesc(duplicate.getId());
+        for (Diagnosis d : diagnoses) {
+            d.setPatient(primary);
+            diagnosisRepository.save(d);
+        }
+
+        List<Appointment> appointments = appointmentRepository.findByPatientIdOrderByAppointmentDateDesc(duplicate.getId());
+        for (Appointment appt : appointments) {
+            appt.setPatient(primary);
+            appointmentRepository.save(appt);
+        }
+
+        List<PatientAssignment> assignments = patientAssignmentRepository.findByPatientId(duplicate.getId());
+        for (PatientAssignment pa : assignments) {
+            pa.setPatient(primary);
+            patientAssignmentRepository.save(pa);
+        }
+
+        // 2. Consolidate patient demographics & clinical history
+        consolidateDemographicsAndMedicalHistory(primary, duplicate);
+
+        // 3. Re-assign user account link if primary has no user attached
+        if (duplicate.getUser() != null) {
+            if (primary.getUser() == null) {
+                primary.setUser(duplicate.getUser());
+            }
+            duplicate.setUser(null);
+        }
+
+        patientRepository.save(primary);
+
+        String dupCode = duplicate.getPatientCode();
+        String primaryCode = primary.getPatientCode();
+
+        // 4. Remove duplicate patient entity
+        patientRepository.delete(duplicate);
+
+        int totalMergedCount = encounters.size() + records.size() + prescriptions.size() +
+                vitalsList.size() + allergies.size() + diagnoses.size() + appointments.size() + assignments.size();
+
+        auditService.logAction(auth, "MPI_CHART_MERGE", "PATIENT_MPI",
+                String.valueOf(primary.getId()),
+                String.format("Completed MPI chart merge: Primary MRN=%s, Duplicate MRN=%s. Transferred %d total clinical entities (Encounters: %d, Records: %d, eRx: %d, Vitals: %d, Allergies: %d, Diagnoses: %d, Appts: %d). Rationale: %s",
+                        primaryCode, dupCode, totalMergedCount, encounters.size(), records.size(), prescriptions.size(),
+                        vitalsList.size(), allergies.size(), diagnoses.size(), appointments.size(), mergeRequest.getMergeReason()));
+
+        return String.format("Successfully merged Duplicate Chart (MRN: %s) into Primary Master Chart (MRN: %s). Re-linked %d clinical records and updated audit trail.",
+                dupCode, primaryCode, totalMergedCount);
+    }
+
+    private void consolidateDemographicsAndMedicalHistory(Patient primary, Patient duplicate) {
+        if (isStringEmpty(primary.getSsn()) && !isStringEmpty(duplicate.getSsn())) primary.setSsn(duplicate.getSsn());
+        if (isStringEmpty(primary.getAbhaId()) && !isStringEmpty(duplicate.getAbhaId())) primary.setAbhaId(duplicate.getAbhaId());
+        if (isStringEmpty(primary.getNationalId()) && !isStringEmpty(duplicate.getNationalId())) primary.setNationalId(duplicate.getNationalId());
+        if (isStringEmpty(primary.getPhone()) && !isStringEmpty(duplicate.getPhone())) primary.setPhone(duplicate.getPhone());
+        if (isStringEmpty(primary.getEmail()) && !isStringEmpty(duplicate.getEmail())) primary.setEmail(duplicate.getEmail());
+        if (isStringEmpty(primary.getAddress()) && !isStringEmpty(duplicate.getAddress())) primary.setAddress(duplicate.getAddress());
+        if (isStringEmpty(primary.getPinCode()) && !isStringEmpty(duplicate.getPinCode())) primary.setPinCode(duplicate.getPinCode());
+        if (isStringEmpty(primary.getEmergencyContact()) && !isStringEmpty(duplicate.getEmergencyContact())) primary.setEmergencyContact(duplicate.getEmergencyContact());
+        if (isStringEmpty(primary.getBloodType()) && !isStringEmpty(duplicate.getBloodType())) primary.setBloodType(duplicate.getBloodType());
+        if (isStringEmpty(primary.getGender()) && !isStringEmpty(duplicate.getGender())) primary.setGender(duplicate.getGender());
+
+        if (isStringEmpty(primary.getInsuranceProvider()) && !isStringEmpty(duplicate.getInsuranceProvider())) {
+            primary.setInsuranceProvider(duplicate.getInsuranceProvider());
+            primary.setInsurancePolicyNumber(duplicate.getInsurancePolicyNumber());
+            primary.setInsuranceGroupNumber(duplicate.getInsuranceGroupNumber());
+            primary.setCoveragePlan(duplicate.getCoveragePlan());
+        }
+
+        primary.setMedicalAlerts(combineNotes(primary.getMedicalAlerts(), duplicate.getMedicalAlerts()));
+        primary.setFoodAllergies(combineNotes(primary.getFoodAllergies(), duplicate.getFoodAllergies()));
+        primary.setPastMedicalHistory(combineNotes(primary.getPastMedicalHistory(), duplicate.getPastMedicalHistory()));
+        primary.setSeriousConditions(combineNotes(primary.getSeriousConditions(), duplicate.getSeriousConditions()));
+        primary.setSurgeriesAndProcedures(combineNotes(primary.getSurgeriesAndProcedures(), duplicate.getSurgeriesAndProcedures()));
+        primary.setFamilyMedicalHistory(combineNotes(primary.getFamilyMedicalHistory(), duplicate.getFamilyMedicalHistory()));
+    }
+
+    private boolean isStringEmpty(String str) {
+        return str == null || str.trim().isEmpty();
+    }
+
+    private String combineNotes(String base, String addition) {
+        if (isStringEmpty(base)) return addition;
+        if (isStringEmpty(addition)) return base;
+        if (base.contains(addition)) return base;
+        return base + " | Merged: " + addition;
+    }
+
+    private double scorePatientPair(Patient p1, Patient p2) {
+        double score = 0.0;
+        if (p1.getFullName() != null && p2.getFullName() != null) {
+            double nameSim = calculateJaroWinklerSimilarity(p1.getFullName().trim().toLowerCase(), p2.getFullName().trim().toLowerCase());
+            if (nameSim >= 0.95) score += 35.0;
+            else if (nameSim >= 0.80) score += 25.0;
+            else if (nameSim >= 0.60) score += 15.0;
+        }
+
+        if (p1.getDateOfBirth() != null && p2.getDateOfBirth() != null && p1.getDateOfBirth().equals(p2.getDateOfBirth())) {
+            score += 25.0;
+        }
+
+        if (!isStringEmpty(p1.getPhone()) && !isStringEmpty(p2.getPhone())) {
+            String ph1 = p1.getPhone().replaceAll("[^0-9]", "");
+            String ph2 = p2.getPhone().replaceAll("[^0-9]", "");
+            if (!ph1.isEmpty() && ph1.equals(ph2)) score += 15.0;
+        }
+
+        if (!isStringEmpty(p1.getSsn()) && !isStringEmpty(p2.getSsn())) {
+            String s1 = p1.getSsn().replaceAll("[^0-9]", "");
+            String s2 = p2.getSsn().replaceAll("[^0-9]", "");
+            if (!s1.isEmpty() && s1.equals(s2)) score += 40.0;
+        }
+
+        if (!isStringEmpty(p1.getEmail()) && !isStringEmpty(p2.getEmail()) && p1.getEmail().equalsIgnoreCase(p2.getEmail())) {
+            score += 10.0;
+        }
+
+        if (p1.getGender() != null && p2.getGender() != null && p1.getGender().equalsIgnoreCase(p2.getGender())) {
+            score += 5.0;
+        }
+
+        return Math.min(100.0, score);
+    }
+
+    private List<String> getMatchingFields(Patient p1, Patient p2) {
+        List<String> list = new ArrayList<>();
+        if (p1.getFullName() != null && p2.getFullName() != null) {
+            double sim = calculateJaroWinklerSimilarity(p1.getFullName().trim().toLowerCase(), p2.getFullName().trim().toLowerCase());
+            if (sim >= 0.80) list.add("Full Name (" + (int)(sim*100) + "% similarity)");
+        }
+        if (p1.getDateOfBirth() != null && p2.getDateOfBirth() != null && p1.getDateOfBirth().equals(p2.getDateOfBirth())) {
+            list.add("Date of Birth");
+        }
+        if (!isStringEmpty(p1.getPhone()) && !isStringEmpty(p2.getPhone()) && p1.getPhone().replaceAll("[^0-9]", "").equals(p2.getPhone().replaceAll("[^0-9]", ""))) {
+            list.add("Phone Number");
+        }
+        if (!isStringEmpty(p1.getSsn()) && !isStringEmpty(p2.getSsn()) && p1.getSsn().replaceAll("[^0-9]", "").equals(p2.getSsn().replaceAll("[^0-9]", ""))) {
+            list.add("National ID / SSN");
+        }
+        if (!isStringEmpty(p1.getEmail()) && !isStringEmpty(p2.getEmail()) && p1.getEmail().equalsIgnoreCase(p2.getEmail())) {
+            list.add("Email Address");
+        }
+        return list;
+    }
+
+    private List<String> getConflictingFields(Patient p1, Patient p2) {
+        List<String> list = new ArrayList<>();
+        if (p1.getDateOfBirth() != null && p2.getDateOfBirth() != null && !p1.getDateOfBirth().equals(p2.getDateOfBirth())) {
+            list.add("Date of Birth");
+        }
+        if (!isStringEmpty(p1.getSsn()) && !isStringEmpty(p2.getSsn()) && !p1.getSsn().replaceAll("[^0-9]", "").equals(p2.getSsn().replaceAll("[^0-9]", ""))) {
+            list.add("National ID / SSN");
+        }
+        return list;
+    }
+
+    private String getMatchClassification(double score) {
+        if (score >= 90.0) return "EXACT_MATCH";
+        if (score >= 75.0) return "HIGH_PROBABILITY_MATCH";
+        if (score >= 55.0) return "POSSIBLE_DUPLICATE";
+        return "LOW_PROBABILITY";
     }
 
     private double calculateJaroWinklerSimilarity(String s1, String s2) {

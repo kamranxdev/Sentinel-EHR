@@ -21,6 +21,7 @@ import {
   lucideArrowLeft,
   lucideInfo,
   lucideShieldAlert,
+  lucideRefreshCw,
 } from '@ng-icons/lucide';
 
 @Component({
@@ -48,6 +49,7 @@ import {
       lucideArrowLeft,
       lucideInfo,
       lucideShieldAlert,
+      lucideRefreshCw,
     }),
   ],
   template: `
@@ -60,11 +62,18 @@ import {
           </a>
           <div>
             <h1 class="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
-              Master Patient Index (MPI) Probabilistic Search
+              Master Patient Index (MPI) Probabilistic Search & De-duplication
               <span hlmBadge variant="secondary" class="text-[11px] bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">Fellegi-Sunter</span>
             </h1>
             <p class="text-xs text-muted-foreground mt-0.5">Chart de-duplication engine & identity match verification to prevent duplicate medical charts.</p>
           </div>
+        </div>
+        
+        <div class="flex items-center gap-2">
+          <button hlmBtn variant="outline" size="sm" (click)="onScanDuplicates()" [disabled]="searching()" class="text-xs gap-2 border-purple-500/30 text-purple-600 dark:text-purple-400 hover:bg-purple-500/10">
+            <ng-icon name="lucideRefreshCw" size="14" [class.animate-spin]="searching()" />
+            <span>Scan System for Duplicates</span>
+          </button>
         </div>
       </div>
 
@@ -81,7 +90,7 @@ import {
         <form (ngSubmit)="onSearch()" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <div class="space-y-1.5">
             <label class="text-xs font-medium text-foreground">Full Name (Fuzzy/Phonetic)</label>
-            <input hlmInput type="text" [(ngModel)]="fullName" name="fullName" placeholder="e.g. Ramesh Kumar" class="w-full text-xs" />
+            <input hlmInput type="text" [(ngModel)]="fullName" name="fullName" placeholder="e.g. Kamran Khan" class="w-full text-xs" />
           </div>
           <div class="space-y-1.5">
             <label class="text-xs font-medium text-foreground">Date of Birth</label>
@@ -93,7 +102,7 @@ import {
           </div>
           <div class="space-y-1.5">
             <label class="text-xs font-medium text-foreground">MRN / Patient Code</label>
-            <input hlmInput type="text" [(ngModel)]="mrn" name="mrn" placeholder="MRN-100482" class="w-full text-xs" />
+            <input hlmInput type="text" [(ngModel)]="mrn" name="mrn" placeholder="PAT-1001" class="w-full text-xs" />
           </div>
           <div class="space-y-1.5">
             <label class="text-xs font-medium text-foreground">Phone Number</label>
@@ -134,7 +143,7 @@ import {
         <div class="flex items-center justify-between">
           <div>
             <h2 class="text-base font-bold text-foreground">MPI Ranked Candidate Profiles</h2>
-            <p class="text-xs text-muted-foreground">Scored by probabilistic demographic similarity. High confidence matches indicate existing chart.</p>
+            <p class="text-xs text-muted-foreground">Scored by probabilistic demographic similarity. High confidence matches indicate existing duplicate chart.</p>
           </div>
           <span *ngIf="candidates().length > 0" hlmBadge variant="outline" class="text-xs font-mono">
             {{ candidates().length }} Candidates Found
@@ -170,7 +179,7 @@ import {
                 </td>
                 <td hlmTableCell>
                   <div class="font-bold text-foreground text-xs">{{ candidate.patient.fullName }}</div>
-                  <div class="text-[10px] font-mono text-muted-foreground">MRN: {{ candidate.patient.patientCode }}</div>
+                  <div class="text-[10px] font-mono text-muted-foreground">MRN: {{ candidate.patient.patientCode }} (ID: {{ candidate.patient.id }})</div>
                 </td>
                 <td hlmTableCell class="text-xs text-muted-foreground">
                   <div>DOB: {{ candidate.patient.dateOfBirth || 'N/A' }} ({{ candidate.patient.gender }})</div>
@@ -189,13 +198,13 @@ import {
                 <td hlmTableCell class="text-right">
                   <button hlmBtn size="sm" variant="outline" class="text-xs gap-1 text-purple-600 hover:text-purple-700 h-8" (click)="openMergeModal(candidate.patient)">
                     <ng-icon name="lucideGitMerge" size="14" />
-                    <span>Request Merge</span>
+                    <span>Execute Chart Merge</span>
                   </button>
                 </td>
               </tr>
               <tr *ngIf="candidates().length === 0" hlmTableRow>
                 <td hlmTableCell colspan="6" class="text-center text-xs text-muted-foreground py-10">
-                  Execute query above to calculate Master Patient Index (MPI) probabilistic match scores.
+                  No suspect duplicate charts found. Execute search query above or click "Scan System for Duplicates".
                 </td>
               </tr>
             </tbody>
@@ -209,19 +218,26 @@ import {
           <div class="flex items-center justify-between pb-3 border-b border-border">
             <h3 class="text-base font-bold text-foreground flex items-center gap-2">
               <ng-icon name="lucideGitMerge" size="18" class="text-purple-500" />
-              Chart De-duplication Merge Request
+              Transactional MPI Chart Merge
             </h3>
             <button class="text-muted-foreground hover:text-foreground text-xs" (click)="selectedMergePatient.set(null)">&times;</button>
           </div>
 
-          <p class="text-xs text-muted-foreground">
-            Initiating formal chart merge for duplicate profile <strong>{{ selectedMergePatient()?.fullName }}</strong> (MRN: {{ selectedMergePatient()?.patientCode }}).
-          </p>
+          <div class="p-3 bg-muted/40 rounded-lg border border-border space-y-1 text-xs">
+            <div class="font-bold text-foreground">Duplicate Patient Chart to be Merged:</div>
+            <div class="text-muted-foreground font-mono">
+              Name: {{ selectedMergePatient()?.fullName }} | MRN: {{ selectedMergePatient()?.patientCode }} (ID: {{ selectedMergePatient()?.id }})
+            </div>
+            <div class="text-[11px] text-muted-foreground">
+              DOB: {{ selectedMergePatient()?.dateOfBirth || 'N/A' }} | Phone: {{ selectedMergePatient()?.phone || 'N/A' }}
+            </div>
+          </div>
 
           <div class="space-y-3">
             <div class="space-y-1">
-              <label class="text-xs font-medium text-foreground">Primary Master MRN (Target)</label>
-              <input hlmInput type="number" [(ngModel)]="primaryPatientId" placeholder="Primary Patient ID" class="w-full text-xs" />
+              <label class="text-xs font-medium text-foreground">Primary Master Patient ID (Target Master Record)</label>
+              <input hlmInput type="number" [(ngModel)]="primaryPatientId" placeholder="Primary Patient ID (e.g. 1)" class="w-full text-xs" />
+              <p class="text-[11px] text-muted-foreground">All clinical encounters, prescriptions, vitals, and records will be transferred to this primary ID, and the duplicate chart deleted.</p>
             </div>
             <div class="space-y-1">
               <label class="text-xs font-medium text-foreground">Merge Rationale & Auditor Note</label>
@@ -232,7 +248,7 @@ import {
           <div class="flex justify-end gap-2 pt-2">
             <button hlmBtn variant="ghost" size="sm" (click)="selectedMergePatient.set(null)" class="text-xs">Cancel</button>
             <button hlmBtn variant="default" size="sm" (click)="submitMerge()" [disabled]="merging()" class="text-xs bg-purple-600 hover:bg-purple-700">
-              {{ merging() ? 'Submitting...' : 'Submit Merge Request' }}
+              {{ merging() ? 'Merging Records...' : 'Execute Chart Merge' }}
             </button>
           </div>
         </div>
@@ -241,7 +257,7 @@ import {
   `,
 })
 export class ReceptionistMPIComponent implements OnInit {
-  fullName = 'Ramesh Kumar';
+  fullName = 'Kamran Khan';
   dateOfBirth = '';
   ssn = '';
   mrn = '';
@@ -256,7 +272,7 @@ export class ReceptionistMPIComponent implements OnInit {
 
   selectedMergePatient = signal<any>(null);
   primaryPatientId: number | null = 1;
-  mergeReason = 'Duplicate patient identity confirmed via DOB and ABHA/Aadhaar ID matching.';
+  mergeReason = 'Duplicate patient identity confirmed via DOB and phone/SSN matching.';
 
   constructor(
     public authService: AuthService,
@@ -299,6 +315,17 @@ export class ReceptionistMPIComponent implements OnInit {
       });
   }
 
+  onScanDuplicates(): void {
+    this.searching.set(true);
+    this.apiService.scanDuplicateMPI().subscribe({
+      next: (results) => {
+        this.candidates.set(results);
+        this.searching.set(false);
+      },
+      error: () => this.searching.set(false),
+    });
+  }
+
   openMergeModal(patient: any): void {
     this.selectedMergePatient.set(patient);
     this.primaryPatientId = patient.id === 1 ? 2 : 1;
@@ -316,13 +343,17 @@ export class ReceptionistMPIComponent implements OnInit {
         mergeReason: this.mergeReason,
       })
       .subscribe({
-        next: () => {
+        next: (responseMsg) => {
           this.merging.set(false);
           this.selectedMergePatient.set(null);
-          this.mergeNotice.set(`MPI Chart Merge Request for ${dup.fullName || 'MRN ' + dup.patientCode} submitted and logged in WORM Audit Ledger.`);
-          setTimeout(() => this.mergeNotice.set(null), 6000);
+          this.mergeNotice.set(responseMsg || `MPI Chart Merge completed for ${dup.fullName || 'MRN ' + dup.patientCode}.`);
+          setTimeout(() => this.mergeNotice.set(null), 8000);
+          this.onSearch();
         },
-        error: () => this.merging.set(false),
+        error: (err) => {
+          this.merging.set(false);
+          this.mergeNotice.set(`Error merging charts: ${err?.error || err?.message || 'Merge failed.'}`);
+        },
       });
   }
 

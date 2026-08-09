@@ -81,6 +81,10 @@ export class ApiService {
     return this.http.get<any[]>(`${this.baseUrl}/v1/mpi/search?${queryParams.toString()}`);
   }
 
+  scanDuplicateMPI(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/v1/mpi/scan`);
+  }
+
   requestMPIMerge(payload: { primaryPatientId: number; duplicatePatientId: number; mergeReason: string }): Observable<string> {
     return this.http.post(`${this.baseUrl}/v1/mpi/merge-request`, payload, { responseType: 'text' });
   }

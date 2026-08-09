@@ -10,6 +10,7 @@ import java.util.List;
 
 @Repository
 public interface PatientAssignmentRepository extends JpaRepository<PatientAssignment, Long> {
+    List<PatientAssignment> findByPatientId(Long patientId);
     List<PatientAssignment> findByPatientIdAndEndDateIsNull(Long patientId);
     List<PatientAssignment> findByStaffUserIdAndEndDateIsNull(Long staffUserId);
 
