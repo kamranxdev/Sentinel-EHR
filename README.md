@@ -2,7 +2,7 @@
 
 > **HL7 FHIR R4, ABDM & DISHA Compliant Electronic Health Record (EHR) & Clinical Management System**
 
-MedVault is an enterprise-scale Electronic Health Record (EHR) platform tailored for **India and International healthcare ecosystems**. It features multi-persona clinical workspaces, Ayushman Bharat Health Account (ABHA ID) integration, a Smart Allergy Safety Engine, immutable DISHA & ABDM WORM audit logging, HL7 FHIR R4 interoperability, and synthetic patient generation.
+MedVault is an enterprise-scale Electronic Health Record (EHR) platform tailored for healthcare ecosystems. It features multi-persona clinical workspaces, Ayushman Bharat Health Account (ABHA ID) integration, a Smart Allergy Safety Engine, immutable DISHA & ABDM WORM audit logging, HL7 FHIR R4 interoperability, and synthetic patient generation.
 
 ---
 
@@ -58,26 +58,26 @@ Open **http://localhost:4200** and sign in with any demo credential below.
 | **Admin** | `admin` | `admin123` |
 | **Auditor** | `auditor` | `auditor123` |
 
-> For the full credentials matrix with user profiles and scopes, see [Getting Started Guide → Credentials](docs/getting-started.md).
+> For the full credentials matrix with user profiles and scopes, see [Getting Started Guide](docs/developer-setup-guide.md).
 
 ---
 
-## 📚 Documentation
+## 📚 Domain-Driven Documentation Suite
 
-All detailed documentation is organized in the [`docs/`](docs/) directory:
+All documentation is organized in domain subdirectories within [`docs/`](docs/):
 
-| Document | Description |
-| :--- | :--- |
-| **[Getting Started](docs/getting-started.md)** | Prerequisites, full credentials matrix, all 3 database execution modes, build & test commands |
-| **[Architecture](docs/architecture.md)** | High-level system architecture, real-world analogies, multi-tier diagrams, hybrid RBAC+ABAC evaluation |
-| **[Backend Modular Architecture Guide](docs/backend-modular-architecture-implementation-guide.md)** | Modular Monolith specification, 21 domain modules, Spring Boot package layout, encounter-centric model, FHIR isolation |
-| **[RBAC & ABAC Matrix](docs/rbac-abac-matrix.md)** | 10 baseline roles, resource permission matrices (Clinical, Vitals, Labs, Medication, Billing), ABAC policies, ABDM/DISHA integrity rules |
-| **[RBAC & ABAC Implementation Guide](docs/rbac-abac-implementation-guide.md)** | Step-by-step developer guide for implementing Spring Boot SpEL evaluators and Angular 19 guards/directives |
-| **[Clinical Workflows](docs/workflows.md)** | End-to-end workflow guides for Patient Portal, Physician eRx, Nurse Vitals, Audit Vault, Cohort Pipeline, and FHIR Interop |
-| **[Security & Compliance](docs/security.md)** | JWT authentication deep dive, Spring Security filter chain, password hashing, ABDM, DISHA & ISO 27001 compliance mapping, WORM audit log |
-| **[Database Schema](docs/database.md)** | Full entity-relationship diagram, security tables (`permissions`, `departments`, `patient_assignments`), table reference, foreign key map, coding standards |
-| **[API Reference](docs/api-guide.md)** | Complete REST endpoint catalog, request/response examples, FHIR R4 resource API specification |
-| **[Synthea Pipeline](docs/synthea-pipeline.md)** | Synthea framework integration, FHIR-to-entity mapping matrix, LOINC vitals mapping, CLI & web UI usage |
+| Domain | Document | Description |
+| :--- | :--- | :--- |
+| **Quickstart** | **[Getting Started](docs/developer-setup-guide.md)** | Setup guide, execution modes, demo credentials matrix, build & test commands |
+| **Architecture** | **[System Architecture](docs/architecture/system-architecture-spec.md)** | High-level system architecture, package-by-feature modular design, multi-tier diagrams |
+| **Clinical** | **[Clinical Workflows](docs/clinical/clinical-workflows-spec.md)** | Encounter lifecycle, eRx safety engine, SOAP notes, triage & flowsheets |
+| **Clinical** | **[EHR Database Schema](docs/clinical/relational-database-schema.md)** | ER diagram, JPA entities, patient care assignments, security tables |
+| **Security** | **[Security & Compliance](docs/security-compliance/security-hipaa-compliance-spec.md)** | Stateless JWT authentication, security filter chain, WORM audit ledger, HIPAA & ABDM compliance |
+| **Security** | **[RBAC & ABAC Matrix](docs/security-compliance/rbac-abac-security-matrix.md)** | 10 baseline roles, resource permission matrices, SpEL contextual rules |
+| **Interoperability**| **[REST API Reference](docs/interoperability/rest-api-specification.md)** | REST endpoints catalog, JSON payload formats, FHIR R4 exporter APIs |
+| **Interoperability**| **[Synthea Pipeline](docs/interoperability/synthea-pipeline-integration.md)** | Synthetic patient generator setup, FHIR-to-entity mapping, CLI execution |
+| **Workspaces** | **[Workspaces Overview](docs/workspaces/README.md)** | Guides for 9 role-specific clinical workspaces |
+| **Audit** | **[Software Audit Report](docs/audit/software-audit-report.md)** | Exhaustive technical software audit report evaluating all issues (P1-P4) |
 
 ---
 
@@ -94,18 +94,15 @@ MedVault/
 │   ├── src/app/              # Components, Services, Guards, Routes
 │   └── package.json
 │
-├── docs/                     # 📚 Comprehensive Documentation Suite
-│   ├── architecture.md       # System architecture & diagrams
-│   ├── backend-modular-architecture-implementation-guide.md # Modular Monolith backend layout & guide
-│   ├── rbac-abac-matrix.md   # 10 production roles & RBAC+ABAC matrices
-│   ├── rbac-abac-implementation-guide.md # Spring Boot & Angular security code guide
-│   ├── workflows.md          # Clinical & admin workflow guides
-│   ├── security.md           # Security, JWT, HIPAA compliance
-│   ├── database.md           # ER diagram & schema reference
-│   ├── api-guide.md          # REST API & FHIR R4 specification
-│   └── synthea-pipeline.md   # Synthea synthetic data pipeline
+├── docs/                     # 📚 Domain-Driven Documentation Hierarchy
+│   ├── developer-setup-guide.md    # Developer setup & quickstart guide
+│   ├── architecture/         # System architecture & modular monolith design
+│   ├── clinical/             # Clinical workflows & EHR database schema
+│   ├── security-compliance/  # Security, HIPAA compliance & RBAC/ABAC matrix
+│   ├── interoperability/    # REST API specification & Synthea pipeline
+│   ├── workspaces/           # 9 Role-based clinical workspace manuals
+│   └── audit/                # Comprehensive Software Audit Report (P1-P4)
 │
-├── scripts/                  # Automation scripts (Synthea CLI runner)
-├── docker-compose.yml        # PostgreSQL 16 container setup
-└── README.md                 # ← You are here
+├── scripts/                  # Data pipeline execution scripts
+└── docker-compose.yml        # PostgreSQL 16 local container configuration
 ```

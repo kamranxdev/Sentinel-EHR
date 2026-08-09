@@ -78,7 +78,7 @@ npm start
 
 ### Option 3: Cloud PostgreSQL (Supabase / AWS RDS / GCP Cloud SQL)
 
-Set environment variables with your cloud connection string:
+Set environment variables with your connection string:
 ```bash
 export SPRING_DATASOURCE_URL="jdbc:postgresql://db.<project-ref>.supabase.co:5432/postgres?sslmode=require"
 export SPRING_DATASOURCE_DRIVER="org.postgresql.Driver"
@@ -107,3 +107,17 @@ cd backend
 cd frontend
 npm run build
 ```
+
+---
+
+## 📚 Domain-Driven Documentation Suite
+
+- **[System Architecture](file:///mnt/workspace/MedVault/docs/architecture/system-architecture-spec.md)**
+- **[Clinical Workflows](file:///mnt/workspace/MedVault/docs/clinical/clinical-workflows-spec.md)**
+- **[EHR Database Schema](file:///mnt/workspace/MedVault/docs/clinical/relational-database-schema.md)**
+- **[Security & Compliance](file:///mnt/workspace/MedVault/docs/security-compliance/security-hipaa-compliance-spec.md)**
+- **[RBAC & ABAC Matrix](file:///mnt/workspace/MedVault/docs/security-compliance/rbac-abac-security-matrix.md)**
+- **[REST API Specification](file:///mnt/workspace/MedVault/docs/interoperability/rest-api-specification.md)**
+- **[Synthea Pipeline Guide](file:///mnt/workspace/MedVault/docs/interoperability/synthea-pipeline-integration.md)**
+- **[Workspaces Overview](file:///mnt/workspace/MedVault/docs/workspaces/README.md)**
+- **[Software Audit Report](file:///mnt/workspace/MedVault/docs/audit/software-audit-report.md)**

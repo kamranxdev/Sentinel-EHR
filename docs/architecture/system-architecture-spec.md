@@ -2,8 +2,6 @@
 
 This document provides a senior-engineer-level technical breakdown of the architecture, security patterns, hybrid RBAC+ABAC authorization engine, data flows, and database infrastructure of the **MedVault** Electronic Health Record (EHR) platform.
 
-For full implementation details on the Spring Boot package structure, domain module boundaries, encounter-centric data models, and migration steps, see the [Backend Modular Monolith Architecture & Implementation Guide](file:///mnt/workspace/MedVault/docs/backend-modular-architecture-implementation-guide.md).
-
 ---
 
 ## 🏛️ High-Level System Architecture
@@ -20,7 +18,7 @@ flowchart TD
     end
 
     subgraph Security_Layer ["🛡️ Security & API Gateway Layer (Spring Security 6)"]
-        Gateway["REST API Controllers (/api/v1)"]
+        Gateway["REST API Controllers (/api/v1/*)"]
         JWTFilter["JwtAuthenticationFilter (Stateless Bearer Validation)"]
         RBAC["@PreAuthorize Engine (Permission Evaluator)"]
         ABAC["ABAC Policy Engine (Context, Care Team, Dept, Break-Glass)"]
@@ -65,9 +63,47 @@ flowchart TD
 
 ---
 
-## 💡 Real-World Architectural Analogies
+## 🏛️ Package-by-Feature / Modular Monolith Design Rationale
 
-To make MedVault's design intuitive across clinical and engineering teams, consider these core component analogies:
+In a traditional **Package-by-Layer** architecture (`controller/`, `service/`, `model/`, `repository/`), components are grouped purely by technical role. As an EHR system grows to include dozens of clinical features, layer directories become monolithic dumping grounds:
+- Editing a single feature (e.g. `Patient`) requires navigating 5+ distant directories.
+- Technical layers encourage implicit, uncontrolled coupling between unrelated features.
+- Enforcing domain boundaries and access control policies becomes difficult.
+
+By contrast, MedVault organizes code into self-contained business modules (`patients/`, `encounters/`, `prescriptions/`, `authorization/`, `fhir/`). Each module encapsulates its own controllers, services, entities, DTOs, and repositories.
+
+```text
+src/main/java/com/medvault/
+│
+├── MedVaultApplication.java
+│
+├── config/                         # Framework & Security Configuration
+├── common/                         # Cross-Cutting Concerns & Exception Handlers
+├── auth/                           # Identity & Authentication Subsystem
+├── users/                          # User & Staff Management
+├── patients/                       # Master Patient Index (MPI) & Demographics
+├── encounters/                     # Clinical Visits & Encounters
+├── vitals/                         # Vitals Flowsheets & Telemetry
+├── prescriptions/                  # eRx & Smart Allergy Safety Engine
+├── allergies/                      # Patient Allergy Registry
+├── diagnoses/                      # ICD-10/SNOMED Diagnostic Coding
+├── clinicalrecords/                # Progress Notes & Consultations
+├── laboratory/                     # Lab Orders & Results
+├── pharmacy/                       # Medication Dispense Management
+├── nursing/                        # Bedside Nursing Care Logs
+├── billing/                        # Claims, RCM & Invoicing
+├── insurance/                      # Coverage Plans & Prior Authorizations
+├── documents/                      # Clinical Document Repository
+├── notifications/                  # Patient & Provider Alerts
+├── fhir/                           # HL7 FHIR R4 Serialization & Interoperability
+├── synthetic/                      # Synthea Data Generation Pipeline
+├── audit/                          # WORM Compliance Audit Vault
+└── authorization/                  # Hybrid RBAC + ABAC Policy Engine
+```
+
+---
+
+## 💡 Real-World Architectural Analogies
 
 | MedVault Component | Real-World Analogy | Technical Function |
 | :--- | :--- | :--- |
@@ -98,75 +134,21 @@ sequenceDiagram
     Staff->>Client: Request Patient PHI Record
     Client->>JWT: GET /api/v1/patients/1001/medical-record (Bearer Token)
     JWT->>JWT: Verify HMAC-SHA256 Signature & Claims
-    JWT->>RBAC: Pass SecurityContext (Roles & Granted Authorities)
-    
-    alt Missing Required Permission
-        RBAC-->>Client: 403 Forbidden (RBAC Access Denied)
-    else Has Permission (e.g. MEDICAL_HISTORY_READ)
-        RBAC->>ABAC: Evaluate Context Attributes (User Dept, Patient ID, Care Team)
-        
-        alt ABAC Rule Fails (No Care Relationship / Dept Mismatch)
-            ABAC->>Audit: Log Access Violation Attempt
-            ABAC-->>Client: 403 Forbidden (ABAC Context Denied)
-        else ABAC Rule Passes OR Break-Glass Active
-            ABAC->>Service: Execute Domain Method
-            Service->>Audit: Append WORM Audit Entry (READ_CLINICAL_RECORD)
-            Service-->>Client: 200 OK (Patient PHI Payload)
-        end
-    end
+    JWT->>RBAC: Evaluate @PreAuthorize("hasAuthority('PATIENT_READ')")
+    RBAC->>ABAC: Check Treatment Relationship / Department / Break-Glass
+    ABAC-->>Service: Grant Access Context
+    Service->>Audit: Log Access (Who, What, Patient ID, IP, Action)
+    Service-->>Client: Return Encrypted PHI Payload
 ```
 
 ---
 
-## 👥 The 10 Baseline System Roles Matrix Summary
+## 🔗 Related Documentation
 
-| Role | Code | Main Responsibilities & Scope |
-| :--- | :--- | :--- |
-| **System Administrator** | `ROLE_SYS_ADMIN` | Platform configuration, tenant provisioning, system logging. No direct clinical PHI view. |
-| **Organization Administrator** | `ROLE_ORG_ADMIN` | Clinic facility admin, user management, provider scheduling, billing setup. |
-| **Doctor / Physician** | `ROLE_DOCTOR` | Clinical diagnosis, progress notes, order entry (eRx, labs), care plans, break-glass. |
-| **Nurse** | `ROLE_NURSE` | Patient triage, vitals flowsheets, nursing notes, MAR administration, care plan updates. |
-| **Receptionist** | `ROLE_RECEPTIONIST` | Patient intake, demographics, check-in, appointment scheduling, front-desk billing. |
-| **Lab Technician** | `ROLE_LAB_TECH` | Specimen processing, laboratory result entry, lab order status tracking. |
-| **Pharmacist** | `ROLE_PHARMACIST` | Medication reconciliation, dispensing, RxNorm safety verification, MAR view. |
-| **Billing Officer** | `ROLE_BILLING` | Invoicing, insurance claim processing, payment recording, financial reporting. |
-| **Patient** | `ROLE_PATIENT` | Self-service portal: view personal vitals, labs, eRx history, consent, appointments. |
-| **Auditor / Compliance Officer** | `ROLE_AUDITOR` | Read-only inspection of immutable HIPAA audit logs and security access metrics. |
-
----
-
-## 💾 Database Infrastructure Flexibility & Decoupling
-
-MedVault decouples business logic from storage engines using **Spring Data JPA** and **Hibernate ORM**:
-
-```mermaid
-graph LR
-    subgraph Application_Core ["Spring Boot Backend Core"]
-        Entities["JPA Entities (@Entity)"]
-        Repos["18 Repository Interfaces"]
-    end
-
-    subgraph Hibernate_Dialects ["Hibernate Dialect Abstraction"]
-        DialectH2["H2Dialect"]
-        DialectPG["PostgreSQLDialect"]
-    end
-
-    subgraph Execution_Targets ["Target Execution Environment"]
-        TargetH2["RAM (In-Memory H2 DB)"]
-        TargetDocker["Local Docker (PostgreSQL 16)"]
-        TargetCloud["Cloud PostgreSQL (Supabase / AWS RDS)"]
-    end
-
-    Entities --> Repos
-    Repos --> DialectH2
-    Repos --> DialectPG
-    DialectH2 --> TargetH2
-    DialectPG --> TargetDocker
-    DialectPG --> TargetCloud
-```
-
----
-
-## 📋 Comprehensive Endpoint Authorization Mapping
-
-For complete details on permission definitions and attribute policy evaluation rules, refer to [docs/rbac-abac-matrix.md](file:///mnt/workspace/MedVault/docs/rbac-abac-matrix.md).
+- [Clinical Workflows](file:///mnt/workspace/MedVault/docs/clinical/clinical-workflows-spec.md)
+- [EHR Database Schema](file:///mnt/workspace/MedVault/docs/clinical/relational-database-schema.md)
+- [Security & HIPAA Compliance](file:///mnt/workspace/MedVault/docs/security-compliance/security-hipaa-compliance-spec.md)
+- [RBAC & ABAC Matrix](file:///mnt/workspace/MedVault/docs/security-compliance/rbac-abac-security-matrix.md)
+- [REST API Specification](file:///mnt/workspace/MedVault/docs/interoperability/rest-api-specification.md)
+- [Synthea Pipeline Guide](file:///mnt/workspace/MedVault/docs/interoperability/synthea-pipeline-integration.md)
+- [Software Audit Report](file:///mnt/workspace/MedVault/docs/audit/software-audit-report.md)
