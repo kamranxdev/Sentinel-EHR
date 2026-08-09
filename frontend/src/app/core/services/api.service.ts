@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, throwError } from 'rxjs';
 import {
   Allergy,
   Appointment,
@@ -46,8 +46,16 @@ export class ApiService {
     return this.http.get<any>(`${this.baseUrl}/patients/${id}/clinical-history`);
   }
 
+  getMyPatientProfile(): Observable<Patient> {
+    return this.http.get<Patient>(`${this.baseUrl}/patients/me`);
+  }
+
   getPatientByUserId(userId: number): Observable<Patient> {
-    return this.http.get<Patient>(`${this.baseUrl}/patients/user/${userId}`);
+    const numId = Number(userId);
+    if (!userId || isNaN(numId) || numId <= 0) {
+      return this.getMyPatientProfile();
+    }
+    return this.http.get<Patient>(`${this.baseUrl}/patients/user/${numId}`);
   }
 
   createPatient(patient: Partial<Patient>): Observable<Patient> {

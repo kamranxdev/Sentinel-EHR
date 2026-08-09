@@ -68,11 +68,11 @@ export class PatientVitalsComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    const u = this.authService.currentUser();
-    if (u) {
-      this.apiService.getPatientByUserId(u.userId).subscribe((p) => {
+    this.apiService.getMyPatientProfile().subscribe({
+      next: (p) => {
         if (p) this.apiService.getVitalsByPatient(p.id).subscribe((v) => this.vitals.set(v));
-      });
-    }
+      },
+      error: (err) => console.warn('Could not load patient vitals', err),
+    });
   }
 }

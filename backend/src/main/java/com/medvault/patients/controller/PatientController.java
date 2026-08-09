@@ -18,10 +18,12 @@ import com.medvault.users.entity.User;
 import com.medvault.users.repository.UserRepository;
 import com.medvault.vitals.entity.Vitals;
 import com.medvault.vitals.repository.VitalsRepository;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
@@ -116,10 +118,22 @@ public class PatientController {
         return ResponseEntity.ok(historyDTO);
     }
 
+    @GetMapping("/me")
+    @Transactional
+    public ResponseEntity<Patient> getMyPatientProfile(Authentication auth) {
+        if (auth == null || !auth.isAuthenticated()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+        User user = userRepository.findByUsernameOrEmail(auth.getName(), auth.getName())
+                .orElseThrow(() -> new ResourceNotFoundException("Authenticated user record not found: " + auth.getName()));
+        return getPatientByUserId(user.getId(), auth);
+    }
+
     @GetMapping("/user/{userId}")
+    @Transactional
     @PreAuthorize("@patientSecurityService.canAccessUser(authentication, #userId)")
     public ResponseEntity<Patient> getPatientByUserId(@PathVariable Long userId, Authentication auth) {
-        Patient patient = patientRepository.findByUserId(userId)
+        Patient patient = patientRepository.findFirstByUserId(userId)
                 .orElseGet(() -> {
                     User user = userRepository.findById(userId).orElse(null);
                     if (user != null && user.getEmail() != null) {
@@ -132,7 +146,7 @@ public class PatientController {
                     }
                     if (user != null) {
                         Patient p = new Patient();
-                        p.setPatientCode("PAT-" + (1000 + (System.currentTimeMillis() % 9000)));
+                        p.setPatientCode("PAT-" + System.currentTimeMillis());
                         p.setFullName(user.getFullName());
                         p.setEmail(user.getEmail());
                         p.setUser(user);

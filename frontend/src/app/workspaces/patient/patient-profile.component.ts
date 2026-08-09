@@ -446,15 +446,15 @@ export class PatientProfileComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    const user = this.authService.currentUser();
-    if (user) {
-      this.apiService.getPatientByUserId(user.userId).subscribe((p) => {
+    this.apiService.getMyPatientProfile().subscribe({
+      next: (p) => {
         if (p) {
           this.patient.set(p);
           this.profileForm = { ...p };
         }
-      });
-    }
+      },
+      error: (err) => console.warn('Could not load profile', err),
+    });
   }
 
   isInitialSaveCompleted(): boolean {

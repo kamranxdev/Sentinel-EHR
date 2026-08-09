@@ -53,7 +53,12 @@ export class AuthService {
   login(credentials: { username: string; password: string }): Observable<JwtAuthResponse> {
     return this.http.post<JwtAuthResponse>(`${this.apiUrl}/login`, credentials).pipe(
       tap((res) => {
-        res.id = res.userId;
+        const raw = res.userId ?? res.id;
+        const uid = raw != null ? Number(raw) : NaN;
+        if (!isNaN(uid) && uid > 0) {
+          res.userId = uid;
+          res.id = uid;
+        }
         localStorage.setItem('medvault_token', res.accessToken);
         localStorage.setItem('medvault_user', JSON.stringify(res));
         this.currentUser.set(res);
@@ -96,12 +101,31 @@ export class AuthService {
     if (!data) return null;
     try {
       const user = JSON.parse(data);
-      if (user && !user.id && user.userId) user.id = user.userId;
+      if (user) {
+        const raw = user.userId ?? user.id;
+        const uid = raw != null ? Number(raw) : NaN;
+        if (!isNaN(uid) && uid > 0) {
+          user.userId = uid;
+          user.id = uid;
+        } else {
+          delete user.userId;
+          delete user.id;
+        }
+      }
       return user;
     } catch (e) {
       this.logout();
       return null;
     }
+  }
+
+  getValidUserId(): number | null {
+    const user = this.currentUser();
+    if (!user) return null;
+    const raw = user.userId ?? user.id;
+    if (raw == null) return null;
+    const num = Number(raw);
+    return !isNaN(num) && num > 0 ? num : null;
   }
 
   hasRole(role: string): boolean {

@@ -27,8 +27,8 @@ export class PatientContextService {
     this.loading.set(true);
 
     if (this.authService.hasRole('ROLE_PATIENT')) {
-      // Patient user: strictly bind to own record via getPatientByUserId
-      this.apiService.getPatientByUserId(user.userId).subscribe({
+      // Patient user: strictly bind to own record via RESTful getMyPatientProfile
+      this.apiService.getMyPatientProfile().subscribe({
         next: (patient) => {
           this.activePatient.set(patient);
           this.patientList.set([patient]);

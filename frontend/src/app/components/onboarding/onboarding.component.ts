@@ -111,37 +111,37 @@ export class OnboardingComponent implements OnInit {
 
   ngOnInit(): void {
     const user = this.authService.currentUser();
-    if (user) {
-      this.apiService.getPatientByUserId(user.userId).subscribe({
-        next: (p) => {
-          if (p) {
-            this.patient.set(p);
-            this.profileForm = {
-              ...this.profileForm,
-              ...p,
-              fullName: p.fullName || user.fullName,
-              email: p.email || user.username + '@example.com',
-            };
+    this.apiService.getMyPatientProfile().subscribe({
+      next: (p) => {
+        if (p) {
+          this.patient.set(p);
+          this.profileForm = {
+            ...this.profileForm,
+            ...p,
+            fullName: p.fullName || user?.fullName || '',
+            email: p.email || (user ? user.username + '@example.com' : ''),
+          };
 
-            // Smart Step Resumption on Refresh
-            if (!p.phone || !p.address) {
-              this.currentStep.set(1);
-            } else if (!p.emergencyContact) {
-              this.currentStep.set(2);
-            } else if (!p.insuranceProvider) {
-              this.currentStep.set(3);
-            } else if (!p.foodAllergies && !p.dietaryHabits) {
-              this.currentStep.set(4);
-            } else {
-              this.currentStep.set(5);
-            }
+          // Smart Step Resumption on Refresh
+          if (!p.phone || !p.address) {
+            this.currentStep.set(1);
+          } else if (!p.emergencyContact) {
+            this.currentStep.set(2);
+          } else if (!p.insuranceProvider) {
+            this.currentStep.set(3);
+          } else if (!p.foodAllergies && !p.dietaryHabits) {
+            this.currentStep.set(4);
+          } else {
+            this.currentStep.set(5);
           }
-        },
-        error: () => {
+        }
+      },
+      error: () => {
+        if (user) {
           this.profileForm.fullName = user.fullName;
-        },
-      });
-    }
+        }
+      },
+    });
   }
 
   nextStep(): void {

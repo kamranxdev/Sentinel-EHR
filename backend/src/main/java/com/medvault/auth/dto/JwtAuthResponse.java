@@ -12,6 +12,7 @@ public class JwtAuthResponse {
     private Set<String> permissions;
     private String department;
     private Long id;
+    private Long userId;
 
     public JwtAuthResponse() {}
 
@@ -33,6 +34,7 @@ public class JwtAuthResponse {
         this.permissions = permissions;
         this.department = department;
         this.id = id;
+        this.userId = id;
     }
 
     public String getAccessToken() {
@@ -105,5 +107,19 @@ public class JwtAuthResponse {
 
     public void setId(Long id) {
         this.id = id;
+        if (this.userId == null) {
+            this.userId = id;
+        }
+    }
+
+    public Long getUserId() {
+        return userId != null ? userId : id;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+        if (this.id == null) {
+            this.id = userId;
+        }
     }
 }

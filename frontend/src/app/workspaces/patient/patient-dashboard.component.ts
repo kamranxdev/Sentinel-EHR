@@ -218,9 +218,8 @@ export class PatientDashboardComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    const u = this.currentUser;
-    if (u) {
-      this.apiService.getPatientByUserId(u.userId).subscribe((p) => {
+    this.apiService.getMyPatientProfile().subscribe({
+      next: (p) => {
         this.patient.set(p);
         if (p) {
           this.apiService.getPrescriptionsByPatient(p.id).subscribe((rx) => this.activeRxCount.set(rx.length));
@@ -228,8 +227,11 @@ export class PatientDashboardComponent implements OnInit {
             if (v.length > 0) this.latestVitals.set(v[v.length - 1]);
           });
         }
-      });
-    }
+      },
+      error: (err) => {
+        console.warn('Could not load patient record for dashboard', err);
+      },
+    });
   }
 
   isProfileIncomplete(): boolean {

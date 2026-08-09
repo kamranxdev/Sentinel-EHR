@@ -1,5 +1,6 @@
 package com.medvault.patients.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.medvault.users.entity.User;
 import jakarta.persistence.*;
 import java.time.LocalDate;
@@ -7,6 +8,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "patients")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Patient {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

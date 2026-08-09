@@ -83,11 +83,11 @@ export class PatientAppointmentsComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    const u = this.authService.currentUser();
-    if (u) {
-      this.apiService.getPatientByUserId(u.userId).subscribe((p) => {
+    this.apiService.getMyPatientProfile().subscribe({
+      next: (p) => {
         if (p) this.apiService.getAppointmentsByPatient(p.id).subscribe((a) => this.appointments.set(a));
-      });
-    }
+      },
+      error: (err) => console.warn('Could not load patient appointments', err),
+    });
   }
 }

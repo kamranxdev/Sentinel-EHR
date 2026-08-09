@@ -82,9 +82,9 @@ public class PatientSecurityService {
         }
 
         if (authorities.contains("ROLE_PATIENT")) {
-            Optional<User> userOpt = userRepository.findByUsername(authentication.getName());
+            Optional<User> userOpt = userRepository.findByUsernameOrEmail(authentication.getName(), authentication.getName());
             if (userOpt.isPresent()) {
-                Optional<Patient> patientOpt = patientRepository.findByUserId(userOpt.get().getId());
+                Optional<Patient> patientOpt = patientRepository.findFirstByUserId(userOpt.get().getId());
                 return patientOpt.isPresent() && patientOpt.get().getId().equals(patientId);
             }
         }
@@ -109,7 +109,7 @@ public class PatientSecurityService {
         }
 
         if (authorities.contains("ROLE_PATIENT")) {
-            Optional<User> userOpt = userRepository.findByUsername(authentication.getName());
+            Optional<User> userOpt = userRepository.findByUsernameOrEmail(authentication.getName(), authentication.getName());
             return userOpt.isPresent() && userOpt.get().getId().equals(userId);
         }
 
