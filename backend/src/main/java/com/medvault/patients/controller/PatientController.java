@@ -178,16 +178,30 @@ public class PatientController {
         Patient patient = patientRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Patient record with ID " + id + " not found"));
 
-        patient.setFullName(updated.getFullName());
-        patient.setPhone(updated.getPhone());
-        patient.setEmail(updated.getEmail());
-        patient.setAddress(updated.getAddress());
-        patient.setEmergencyContact(updated.getEmergencyContact());
-        patient.setInsuranceProvider(updated.getInsuranceProvider());
-        patient.setInsurancePolicyNumber(updated.getInsurancePolicyNumber());
-        patient.setInsuranceGroupNumber(updated.getInsuranceGroupNumber());
-        patient.setCoveragePlan(updated.getCoveragePlan());
-        patient.setMedicalAlerts(updated.getMedicalAlerts());
+        if (updated.getSsn() != null) patient.setSsn(updated.getSsn());
+        if (updated.getFullName() != null) patient.setFullName(updated.getFullName());
+        if (updated.getDateOfBirth() != null) patient.setDateOfBirth(updated.getDateOfBirth());
+        if (updated.getGender() != null) patient.setGender(updated.getGender());
+        if (updated.getBloodType() != null) patient.setBloodType(updated.getBloodType());
+        if (updated.getPhone() != null) patient.setPhone(updated.getPhone());
+        if (updated.getEmail() != null) patient.setEmail(updated.getEmail());
+        if (updated.getAddress() != null) patient.setAddress(updated.getAddress());
+        if (updated.getEmergencyContact() != null) patient.setEmergencyContact(updated.getEmergencyContact());
+        if (updated.getInsuranceProvider() != null) patient.setInsuranceProvider(updated.getInsuranceProvider());
+        if (updated.getInsurancePolicyNumber() != null) patient.setInsurancePolicyNumber(updated.getInsurancePolicyNumber());
+        if (updated.getInsuranceGroupNumber() != null) patient.setInsuranceGroupNumber(updated.getInsuranceGroupNumber());
+        if (updated.getCoveragePlan() != null) patient.setCoveragePlan(updated.getCoveragePlan());
+        if (updated.getDepartment() != null) patient.setDepartment(updated.getDepartment());
+        if (updated.getMedicalAlerts() != null) patient.setMedicalAlerts(updated.getMedicalAlerts());
+        if (updated.getDietaryHabits() != null) patient.setDietaryHabits(updated.getDietaryHabits());
+        if (updated.getSmokingStatus() != null) patient.setSmokingStatus(updated.getSmokingStatus());
+        if (updated.getAlcoholConsumption() != null) patient.setAlcoholConsumption(updated.getAlcoholConsumption());
+        if (updated.getExerciseRoutine() != null) patient.setExerciseRoutine(updated.getExerciseRoutine());
+        if (updated.getFoodAllergies() != null) patient.setFoodAllergies(updated.getFoodAllergies());
+        if (updated.getPastMedicalHistory() != null) patient.setPastMedicalHistory(updated.getPastMedicalHistory());
+        if (updated.getSeriousConditions() != null) patient.setSeriousConditions(updated.getSeriousConditions());
+        if (updated.getSurgeriesAndProcedures() != null) patient.setSurgeriesAndProcedures(updated.getSurgeriesAndProcedures());
+        if (updated.getFamilyMedicalHistory() != null) patient.setFamilyMedicalHistory(updated.getFamilyMedicalHistory());
 
         Patient saved = patientRepository.save(patient);
         auditService.logAction(auth, "UPDATE", "PATIENT", String.valueOf(id), "Updated demographic profile for patient ID: " + id);
