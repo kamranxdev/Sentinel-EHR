@@ -40,7 +40,7 @@ export class AuthService {
 
   isLoggedIn(): boolean {
     const user = this.currentUser();
-    const token = localStorage.getItem('medvault_token');
+    const token = localStorage.getItem('sentinel_token');
     if (!user || !token || this.isTokenExpired(token)) {
       if (user || token) {
         this.logout();
@@ -59,8 +59,8 @@ export class AuthService {
           res.userId = uid;
           res.id = uid;
         }
-        localStorage.setItem('medvault_token', res.accessToken);
-        localStorage.setItem('medvault_user', JSON.stringify(res));
+        localStorage.setItem('sentinel_token', res.accessToken);
+        localStorage.setItem('sentinel_user', JSON.stringify(res));
         this.currentUser.set(res);
       }),
     );
@@ -76,13 +76,13 @@ export class AuthService {
   }
 
   logout(): void {
-    localStorage.removeItem('medvault_token');
-    localStorage.removeItem('medvault_user');
+    localStorage.removeItem('sentinel_token');
+    localStorage.removeItem('sentinel_user');
     this.currentUser.set(null);
   }
 
   getToken(): string | null {
-    const token = localStorage.getItem('medvault_token');
+    const token = localStorage.getItem('sentinel_token');
     if (this.isTokenExpired(token)) {
       this.logout();
       return null;
@@ -91,13 +91,13 @@ export class AuthService {
   }
 
   getStoredUser(): JwtAuthResponse | null {
-    const token = localStorage.getItem('medvault_token');
+    const token = localStorage.getItem('sentinel_token');
     if (this.isTokenExpired(token)) {
-      localStorage.removeItem('medvault_token');
-      localStorage.removeItem('medvault_user');
+      localStorage.removeItem('sentinel_token');
+      localStorage.removeItem('sentinel_user');
       return null;
     }
-    const data = localStorage.getItem('medvault_user');
+    const data = localStorage.getItem('sentinel_user');
     if (!data) return null;
     try {
       const user = JSON.parse(data);

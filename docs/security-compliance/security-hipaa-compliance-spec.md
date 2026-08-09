@@ -1,12 +1,12 @@
-# MedVault Security & Healthcare Compliance Guide
+# Sentinel Security & Healthcare Compliance Guide
 
-This document details the security infrastructure, authentication model, access control policies, and compliance mechanisms of the **MedVault EHR Platform** under **HIPAA § 164.312**, **ABDM (Ayushman Bharat Digital Mission)**, **DISHA**, **India DPDP Act 2023**, **GDPR**, and **ISO 27001** standards.
+This document details the security infrastructure, authentication model, access control policies, and compliance mechanisms of the **Sentinel EHR Platform** under **HIPAA § 164.312**, **ABDM (Ayushman Bharat Digital Mission)**, **DISHA**, **India DPDP Act 2023**, **GDPR**, and **ISO 27001** standards.
 
 ---
 
 ## 🔐 Authentication Model: Stateless JWT Bearer Tokens
 
-MedVault uses **stateless JWT (JSON Web Token) authentication**, meaning the server does not store session state. Every request carries a self-contained, cryptographically signed token.
+Sentinel uses **stateless JWT (JSON Web Token) authentication**, meaning the server does not store session state. Every request carries a self-contained, cryptographically signed token.
 
 ### Token Anatomy
 
@@ -44,7 +44,7 @@ flowchart LR
 
 ## 📊 Technical Safeguard Compliance Matrix
 
-| Compliance Requirement | Framework Reference | MedVault Implementation |
+| Compliance Requirement | Framework Reference | Sentinel Implementation |
 | :--- | :--- | :--- |
 | **Unique User Identification** | ABDM HDMP / DISHA § 4 | Unique `username` and `id` per user. Bearer JWT token on every API call. |
 | **ABHA Health ID Integration** | ABDM Health ID Spec | Supports 14-digit ABHA Number (`12-3456-7890-1234`) and `@abdm` handles via FHIR identifiers. |
@@ -56,7 +56,7 @@ flowchart LR
 
 ## 🔗 Related Documentation
 
-- [System Architecture](file:///mnt/workspace/MedVault/docs/architecture/system-architecture-spec.md)
-- [Clinical Workflows](file:///mnt/workspace/MedVault/docs/clinical/clinical-workflows-spec.md)
-- [RBAC & ABAC Matrix](file:///mnt/workspace/MedVault/docs/security-compliance/rbac-abac-security-matrix.md)
-- [Software Audit Report](file:///mnt/workspace/MedVault/docs/audit/software-audit-report.md)
+- [System Architecture](file:///mnt/workspace/Sentinel/docs/architecture/system-architecture-spec.md)
+- [Clinical Workflows](file:///mnt/workspace/Sentinel/docs/clinical/clinical-workflows-spec.md)
+- [RBAC & ABAC Matrix](file:///mnt/workspace/Sentinel/docs/security-compliance/rbac-abac-security-matrix.md)
+- [Software Audit Report](file:///mnt/workspace/Sentinel/docs/audit/software-audit-report.md)

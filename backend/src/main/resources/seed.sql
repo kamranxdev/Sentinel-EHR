@@ -1,5 +1,5 @@
 -- ==============================================================================
--- MedVault EHR Database Seed Script
+-- Sentinel EHR Database Seed Script
 -- Compatible with Database SQL Editors (H2, PostgreSQL, MySQL, Oracle, etc.)
 -- ==============================================================================
 
@@ -103,28 +103,28 @@ INSERT INTO role_permissions (role_id, permission_id) SELECT 11, id FROM permiss
 -- Patient: patient (or user_kamran, user_aarav, user_ananya) / patient123
 -- ------------------------------------------------------------------------------
 INSERT INTO users (id, username, password, email, full_name, specialization, department, created_at) 
-VALUES (1, 'admin', '$2a$10$rIxvNrZcsreC0tp5Ik9S4uFff/IyrYl3eiLHyH53l6IyuM5jHY67C', 'admin@medvault.org', 'Dr. Vikramaditya Gupta (Admin/Intake)', NULL, 'Patient Intake & Administration', CURRENT_TIMESTAMP);
+VALUES (1, 'admin', '$2a$10$rIxvNrZcsreC0tp5Ik9S4uFff/IyrYl3eiLHyH53l6IyuM5jHY67C', 'admin@sentinel.org', 'Dr. Vikramaditya Gupta (Admin/Intake)', NULL, 'Patient Intake & Administration', CURRENT_TIMESTAMP);
 
 INSERT INTO users (id, username, password, email, full_name, specialization, department, created_at) 
-VALUES (2, 'doctor', '$2a$10$bvRrisyOUu8PQa8gPJlQjOTPxtPQDosqRBdRoW95EXlrydpL6/IvW', 'doctor@medvault.org', 'Dr. Mahtab Khan', 'Cardiology & Internal Medicine', 'Cardiovascular Medicine', CURRENT_TIMESTAMP);
+VALUES (2, 'doctor', '$2a$10$bvRrisyOUu8PQa8gPJlQjOTPxtPQDosqRBdRoW95EXlrydpL6/IvW', 'doctor@sentinel.org', 'Dr. Mahtab Khan', 'Cardiology & Internal Medicine', 'Cardiovascular Medicine', CURRENT_TIMESTAMP);
 
 INSERT INTO users (id, username, password, email, full_name, specialization, department, created_at) 
-VALUES (3, 'doctor_mahtab', '$2a$10$bvRrisyOUu8PQa8gPJlQjOTPxtPQDosqRBdRoW95EXlrydpL6/IvW', 'mahtab.khan@medvault.org', 'Dr. Mahtab Khan', 'Cardiology & Internal Medicine', 'Cardiovascular Medicine', CURRENT_TIMESTAMP);
+VALUES (3, 'doctor_mahtab', '$2a$10$bvRrisyOUu8PQa8gPJlQjOTPxtPQDosqRBdRoW95EXlrydpL6/IvW', 'mahtab.khan@sentinel.org', 'Dr. Mahtab Khan', 'Cardiology & Internal Medicine', 'Cardiovascular Medicine', CURRENT_TIMESTAMP);
 
 INSERT INTO users (id, username, password, email, full_name, specialization, department, created_at) 
-VALUES (4, 'doctor_rajesh', '$2a$10$bvRrisyOUu8PQa8gPJlQjOTPxtPQDosqRBdRoW95EXlrydpL6/IvW', 'rajesh.sharma@medvault.org', 'Dr. Rajesh Sharma', 'Neurology & Internal Medicine', 'Neurological Sciences', CURRENT_TIMESTAMP);
+VALUES (4, 'doctor_rajesh', '$2a$10$bvRrisyOUu8PQa8gPJlQjOTPxtPQDosqRBdRoW95EXlrydpL6/IvW', 'rajesh.sharma@sentinel.org', 'Dr. Rajesh Sharma', 'Neurology & Internal Medicine', 'Neurological Sciences', CURRENT_TIMESTAMP);
 
 INSERT INTO users (id, username, password, email, full_name, specialization, department, created_at) 
-VALUES (5, 'nurse', '$2a$10$DgGz9Ehsr5I9xvTQ/lbBQeF0AGNdBCr8C7zQgdOVScnY1fEaxXfsG', 'nurse@medvault.org', 'Nurse Priya Verma', NULL, 'Emergency & Acute Care', CURRENT_TIMESTAMP);
+VALUES (5, 'nurse', '$2a$10$DgGz9Ehsr5I9xvTQ/lbBQeF0AGNdBCr8C7zQgdOVScnY1fEaxXfsG', 'nurse@sentinel.org', 'Nurse Priya Verma', NULL, 'Emergency & Acute Care', CURRENT_TIMESTAMP);
 
 INSERT INTO users (id, username, password, email, full_name, specialization, department, created_at) 
-VALUES (6, 'nurse_priya', '$2a$10$DgGz9Ehsr5I9xvTQ/lbBQeF0AGNdBCr8C7zQgdOVScnY1fEaxXfsG', 'priya.verma@medvault.org', 'Nurse Priya Verma', NULL, 'Emergency & Acute Care', CURRENT_TIMESTAMP);
+VALUES (6, 'nurse_priya', '$2a$10$DgGz9Ehsr5I9xvTQ/lbBQeF0AGNdBCr8C7zQgdOVScnY1fEaxXfsG', 'priya.verma@sentinel.org', 'Nurse Priya Verma', NULL, 'Emergency & Acute Care', CURRENT_TIMESTAMP);
 
 INSERT INTO users (id, username, password, email, full_name, specialization, department, created_at) 
-VALUES (7, 'auditor', '$2a$10$3Uj7vg0rhOtYROAzLYvK2.HbXLWJfNM4lfK8DNWsGCsEHLH14A3ei', 'auditor@medvault.org', 'Inspector Suresh Menon (Compliance Auditor)', NULL, 'Regulatory Compliance & Forensics', CURRENT_TIMESTAMP);
+VALUES (7, 'auditor', '$2a$10$3Uj7vg0rhOtYROAzLYvK2.HbXLWJfNM4lfK8DNWsGCsEHLH14A3ei', 'auditor@sentinel.org', 'Inspector Suresh Menon (Compliance Auditor)', NULL, 'Regulatory Compliance & Forensics', CURRENT_TIMESTAMP);
 
 INSERT INTO users (id, username, password, email, full_name, specialization, department, created_at) 
-VALUES (8, 'patient', '$2a$10$1Knu6HwyDwDWpqngg1N6nOoWKupSsqQLU0Mw/3EmTdJ.XKt4e32kC', 'patient@medvault.org', 'Kamran Khan', NULL, NULL, CURRENT_TIMESTAMP);
+VALUES (8, 'patient', '$2a$10$1Knu6HwyDwDWpqngg1N6nOoWKupSsqQLU0Mw/3EmTdJ.XKt4e32kC', 'patient@sentinel.org', 'Kamran Khan', NULL, NULL, CURRENT_TIMESTAMP);
 
 INSERT INTO users (id, username, password, email, full_name, specialization, department, created_at) 
 VALUES (9, 'user_kamran', '$2a$10$1Knu6HwyDwDWpqngg1N6nOoWKupSsqQLU0Mw/3EmTdJ.XKt4e32kC', 'kamran.khan@example.com', 'Kamran Khan', NULL, NULL, CURRENT_TIMESTAMP);
@@ -139,16 +139,16 @@ INSERT INTO users (id, username, password, email, full_name, specialization, dep
 VALUES (12, 'user_rohan', '$2a$10$1Knu6HwyDwDWpqngg1N6nOoWKupSsqQLU0Mw/3EmTdJ.XKt4e32kC', 'rohan.mehta@example.com', 'Rohan Mehta', NULL, NULL, CURRENT_TIMESTAMP);
 
 INSERT INTO users (id, username, password, email, full_name, specialization, department, created_at) 
-VALUES (13, 'receptionist', '$2a$10$U9LDGKztApw0TjXI3gt68.3HMfnpsCf7HlfH40w2YrrlwRMhZAIwq', 'receptionist@medvault.org', 'Receptionist Sarita Verma', NULL, 'Patient Intake & Reception Desk', CURRENT_TIMESTAMP);
+VALUES (13, 'receptionist', '$2a$10$U9LDGKztApw0TjXI3gt68.3HMfnpsCf7HlfH40w2YrrlwRMhZAIwq', 'receptionist@sentinel.org', 'Receptionist Sarita Verma', NULL, 'Patient Intake & Reception Desk', CURRENT_TIMESTAMP);
 
 INSERT INTO users (id, username, password, email, full_name, specialization, department, created_at) 
-VALUES (14, 'labtech', '$2a$10$hWfjzWpgqoy9xSFfTa.X5uTLq.RWkf4jw1qWre4K3NzV3JvT9UH7e', 'labtech@medvault.org', 'Lab Specialist Tech Roy', NULL, 'Clinical Pathology & Laboratory', CURRENT_TIMESTAMP);
+VALUES (14, 'labtech', '$2a$10$hWfjzWpgqoy9xSFfTa.X5uTLq.RWkf4jw1qWre4K3NzV3JvT9UH7e', 'labtech@sentinel.org', 'Lab Specialist Tech Roy', NULL, 'Clinical Pathology & Laboratory', CURRENT_TIMESTAMP);
 
 INSERT INTO users (id, username, password, email, full_name, specialization, department, created_at) 
-VALUES (15, 'pharmacist', '$2a$10$u/Xd8bxyQUr5Nqc/9xQhB.b3liUdM.MNO.SaOVkNbkKsi6EsJZPfa', 'pharmacist@medvault.org', 'PharmD Anita Desai', NULL, 'Clinical Pharmacy Services', CURRENT_TIMESTAMP);
+VALUES (15, 'pharmacist', '$2a$10$u/Xd8bxyQUr5Nqc/9xQhB.b3liUdM.MNO.SaOVkNbkKsi6EsJZPfa', 'pharmacist@sentinel.org', 'PharmD Anita Desai', NULL, 'Clinical Pharmacy Services', CURRENT_TIMESTAMP);
 
 INSERT INTO users (id, username, password, email, full_name, specialization, department, created_at) 
-VALUES (16, 'billing', '$2a$10$JxvglMjc9cihsQTvpClZpeFA.aXuko6xiRl4zU4J3IDqcRRv.GKGS', 'billing@medvault.org', 'Billing Officer Vikram Patel', NULL, 'Revenue Cycle & Patient Billing', CURRENT_TIMESTAMP);
+VALUES (16, 'billing', '$2a$10$JxvglMjc9cihsQTvpClZpeFA.aXuko6xiRl4zU4J3IDqcRRv.GKGS', 'billing@sentinel.org', 'Billing Officer Vikram Patel', NULL, 'Revenue Cycle & Patient Billing', CURRENT_TIMESTAMP);
 
 -- ------------------------------------------------------------------------------
 -- 6. USER ROLES (JOIN TABLE)
@@ -188,7 +188,7 @@ INSERT INTO patients (id, patient_code, ssn, abha_id, national_id, full_name, da
 VALUES (4, 'PAT-1004', '312-00-5582', '91-3120-0558-2004', 'AADHAAR-3120-5582', 'Rohan Mehta', '1990-07-22', 'Male', 'AB+', '+91 98765 88990', 'rohan.mehta@example.com', '88 Bandra Reclamation, Mumbai', '400050', 'Neha Mehta (Sister) - +91 98765 11223', 'Care Health Insurance', 'CARE-3341029', 'GRP-99401', 'Peanut Allergy', 12, CURRENT_TIMESTAMP);
 
 INSERT INTO patients (id, patient_code, ssn, abha_id, national_id, full_name, date_of_birth, gender, blood_type, phone, email, address, pin_code, emergency_contact, insurance_provider, insurance_policy_number, insurance_group_number, coverage_plan, medical_alerts, user_id, created_at) 
-VALUES (5, 'PAT-1005', '999-00-1111', '91-9990-0111-1005', 'AADHAAR-9990-1111', 'Kamran Khan', '1985-04-12', 'Male', 'O+', '+91 98765 43210', 'patient@medvault.org', '742 Marine Drive, Mumbai', '400001', 'Farah Khan (Wife) - +91 98765 98765', 'Star Health Insurance', 'STAR-9874102', 'GRP-55410', 'Premier Comprehensive Care', 'Type 2 Diabetes, Severe Penicillin Allergy, Mild Asthma', 8, CURRENT_TIMESTAMP);
+VALUES (5, 'PAT-1005', '999-00-1111', '91-9990-0111-1005', 'AADHAAR-9990-1111', 'Kamran Khan', '1985-04-12', 'Male', 'O+', '+91 98765 43210', 'patient@sentinel.org', '742 Marine Drive, Mumbai', '400001', 'Farah Khan (Wife) - +91 98765 98765', 'Star Health Insurance', 'STAR-9874102', 'GRP-55410', 'Premier Comprehensive Care', 'Type 2 Diabetes, Severe Penicillin Allergy, Mild Asthma', 8, CURRENT_TIMESTAMP);
 
 -- ------------------------------------------------------------------------------
 -- 8. PATIENT CARE TEAM ASSIGNMENTS (ABAC)
@@ -320,7 +320,7 @@ VALUES (4, 4, 4, '2026-08-10 15:00:00', 'SCHEDULED', 'Neurology Routine Review',
 -- 16. AUDIT LOGS
 -- ------------------------------------------------------------------------------
 INSERT INTO audit_logs (id, username, user_role, action, entity_name, resource_id, ip_address, details, timestamp)
-VALUES (1, 'SYSTEM', 'SYSTEM', 'SEED', 'DATABASE', '0', '127.0.0.1', 'Initialized MedVault EHR database via manual SQL seed script with 10 production roles and RBAC+ABAC matrices.', CURRENT_TIMESTAMP);
+VALUES (1, 'SYSTEM', 'SYSTEM', 'SEED', 'DATABASE', '0', '127.0.0.1', 'Initialized Sentinel EHR database via manual SQL seed script with 10 production roles and RBAC+ABAC matrices.', CURRENT_TIMESTAMP);
 
 INSERT INTO audit_logs (id, username, user_role, action, entity_name, resource_id, ip_address, details, timestamp)
 VALUES (2, 'admin', 'ROLE_SYS_ADMIN', 'CREATE', 'USER', '1', '127.0.0.1', 'Provisioned RBAC clinical access credentials across 10 production roles.', CURRENT_TIMESTAMP);

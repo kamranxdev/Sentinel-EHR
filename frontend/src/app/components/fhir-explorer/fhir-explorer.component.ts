@@ -156,7 +156,7 @@ export class FhirExplorerComponent implements OnInit {
       this.apiService.createFhirPatient(payload).subscribe({
         next: (res) => {
           this.ingestLoading = false;
-          this.ingestStatus = 'SUCCESS: Patient ingested into MedVault! New FHIR ID: ' + res.id;
+          this.ingestStatus = 'SUCCESS: Patient ingested into Sentinel! New FHIR ID: ' + res.id;
           this.selectedResource = 'Patient';
           this.selectedResourceId = res.id;
           this.activeTab = 'query';

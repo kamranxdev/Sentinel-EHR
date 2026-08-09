@@ -8,10 +8,10 @@
         <version>3.2.5</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.medvault</groupId>
-    <artifactId>medvault-backend</artifactId>
+    <groupId>com.sentinel</groupId>
+    <artifactId>sentinel-backend</artifactId>
     <version>1.0.0</version>
-    <name>MedVault EHR Backend</name>
+    <name>Sentinel EHR Backend</name>
     <description>Electronic Health Record System REST API with RBAC</description>
 
     <properties>

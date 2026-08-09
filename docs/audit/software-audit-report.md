@@ -1,14 +1,14 @@
-# MedVault Comprehensive Software Audit Report
+# Sentinel Comprehensive Software Audit Report
 
 **Date of Audit**: August 9, 2026  
-**Audited System**: MedVault Electronic Health Record (EHR) Platform  
+**Audited System**: Sentinel Electronic Health Record (EHR) Platform  
 **Audit Scope**: Complete Codebase Audit — Backend (Spring Boot 3 / Java 17), Frontend (Angular 19 / TypeScript), Security Infrastructure, Database Schemas, Clinical Workflows, REST APIs, Interoperability, and Regulatory Compliance (HIPAA § 164.312, ABDM, DISHA, ISO 27001).
 
 ---
 
 ##  EXECUTIVE SUMMARY
 
-This audit report presents a total software inspection of the **MedVault EHR Platform**. The audit was conducted to identify all discrepancies between the target architectural specification of an enterprise-grade EHR system and the actual codebase implementation.
+This audit report presents a total software inspection of the **Sentinel EHR Platform**. The audit was conducted to identify all discrepancies between the target architectural specification of an enterprise-grade EHR system and the actual codebase implementation.
 
 Contrary to partial quality reviews that focus exclusively on high-priority security defects, this report covers **EVERY identified issue across ALL priority levels**:
 - **Priority 1 (P1 - Critical)**: Immediate security vulnerabilities, patient safety risks, or system corruption hazards.
@@ -37,7 +37,7 @@ Contrary to partial quality reviews that focus exclusively on high-priority secu
 ### 1. Security & Authentication Subsystem
 
 #### Issue 1.1 [P1 - Critical Security] Global Clickjacking Exposure via Unrestricted Frame-Options
-- **Affected Component**: `backend/src/main/java/com/medvault/config/SecurityConfig.java` (Line 64)
+- **Affected Component**: `backend/src/main/java/com/sentinel/config/SecurityConfig.java` (Line 64)
 - **Current State ("How it was NOT supposed to be")**:
   ```java
   http.headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable));
@@ -59,7 +59,7 @@ Contrary to partial quality reviews that focus exclusively on high-priority secu
 - **Remediation**: Replace static property value with environment variable injection `${JWT_SECRET}`.
 
 #### Issue 1.3 [P2 - Major Authorization] Overly Broad Departmental ABAC Matching Policy
-- **Affected Component**: `backend/src/main/java/com/medvault/authorization/abac/AbacSecurityEvaluator.java` (Lines 64-66)
+- **Affected Component**: `backend/src/main/java/com/sentinel/authorization/abac/AbacSecurityEvaluator.java` (Lines 64-66)
 - **Current State ("How it was NOT supposed to be")**:
   ```java
   if (currentUser.getDepartment() != null && currentUser.getDepartment().equalsIgnoreCase(patient.getDepartment())) {
@@ -72,7 +72,7 @@ Contrary to partial quality reviews that focus exclusively on high-priority secu
 - **Remediation**: Refine ABAC evaluator SpEL rules to check active assignment or active encounter status alongside department match.
 
 #### Issue 1.4 [P3 - Moderate Security] Unpaginated Patient Roster Query Endpoint
-- **Affected Component**: `backend/src/main/java/com/medvault/patients/controller/PatientController.java` (Line 75)
+- **Affected Component**: `backend/src/main/java/com/sentinel/patients/controller/PatientController.java` (Line 75)
 - **Current State ("How it was NOT supposed to be")**:
   `patientRepository.findAll()` returns the complete patient database in a single unpaginated JSON array when no search parameter is supplied.
 - **Target State ("How it SHOULD be")**:
@@ -80,8 +80,8 @@ Contrary to partial quality reviews that focus exclusively on high-priority secu
 - **Remediation**: Inject `Pageable` into `getAllPatients` and return `Page<Patient>`.
 
 #### Issue 1.5 [P3 - Moderate Security] CORS Configuration Permits Wildcard Subdomains
-- **Affected Component**: `backend/src/main/java/com/medvault/config/SecurityConfig.java` (Line 74)
-- **Current State ("How it was NOT supposed to be")**: `setAllowedOriginPatterns` permits `http://localhost:[*]` and wildcard `https://*.medvault.com`.
+- **Affected Component**: `backend/src/main/java/com/sentinel/config/SecurityConfig.java` (Line 74)
+- **Current State ("How it was NOT supposed to be")**: `setAllowedOriginPatterns` permits `http://localhost:[*]` and wildcard `https://*.sentinel.com`.
 - **Target State ("How it SHOULD be")**: Origins should be strictly parameterized per environment using explicit domain whitelists.
 - **Remediation**: Move allowed CORS origins to environment-controlled properties.
 
@@ -94,7 +94,7 @@ Contrary to partial quality reviews that focus exclusively on high-priority secu
 ### 2. Clinical Workflows & Smart Safety Engine Subsystem
 
 #### Issue 2.1 [P1 - Safety Risk] Bypass of Drug-Allergy Safety Check via Direct Service Calls
-- **Affected Component**: `backend/src/main/java/com/medvault/prescriptions/service/PrescriptionService.java` (Line 28)
+- **Affected Component**: `backend/src/main/java/com/sentinel/prescriptions/service/PrescriptionService.java` (Line 28)
 - **Current State ("How it was NOT supposed to be")**:
   `PrescriptionService.savePrescription(Prescription prescription)` persists prescription records directly to the database without invoking `SmartSafetyService.checkPrescriptionSafety()`. While `PrescriptionController` calls the safety service, internal service invocations bypass safety validation.
 - **Target State ("How it SHOULD be")**:
@@ -102,7 +102,7 @@ Contrary to partial quality reviews that focus exclusively on high-priority secu
 - **Remediation**: Embed `SmartSafetyService` check inside `PrescriptionService.savePrescription()`.
 
 #### Issue 2.2 [P2 - Clinical Validation] Missing Physiological Range Checks for Vital Signs
-- **Affected Component**: `backend/src/main/java/com/medvault/vitals/entity/Vitals.java` & `VitalsController.java`
+- **Affected Component**: `backend/src/main/java/com/sentinel/vitals/entity/Vitals.java` & `VitalsController.java`
 - **Current State ("How it was NOT supposed to be")**:
   Vitals numeric fields (systolic BP, heart rate, temperature) lack Jakarta Validation annotations (`@Min`, `@Max`, `@DecimalMin`). Users can submit invalid values (e.g. Systolic BP = 999 mmHg or Heart Rate = -50 bpm).
 - **Target State ("How it SHOULD be")**:
@@ -110,7 +110,7 @@ Contrary to partial quality reviews that focus exclusively on high-priority secu
 - **Remediation**: Add `@Min` and `@Max` validation annotations to `Vitals` model and `@Valid` to controller methods.
 
 #### Issue 2.3 [P2 - Data Integrity] Unenforced Encounter State Machine
-- **Affected Component**: `backend/src/main/java/com/medvault/encounters/entity/Encounter.java`
+- **Affected Component**: `backend/src/main/java/com/sentinel/encounters/entity/Encounter.java`
 - **Current State ("How it was NOT supposed to be")**:
   Encounter status is a free-form String allowing arbitrary updates (e.g. adding progress notes to a `COMPLETED` or `CANCELLED` visit).
 - **Target State ("How it SHOULD be")**:
@@ -118,13 +118,13 @@ Contrary to partial quality reviews that focus exclusively on high-priority secu
 - **Remediation**: Refactor `Encounter.status` to an Enum and guard state transitions.
 
 #### Issue 2.4 [P3 - Clinical UX] Unstandardized Free-Text Dosage Strings
-- **Affected Component**: `backend/src/main/java/com/medvault/prescriptions/entity/Prescription.java`
+- **Affected Component**: `backend/src/main/java/com/sentinel/prescriptions/entity/Prescription.java`
 - **Current State ("How it was NOT supposed to be")**: Dosage is stored as a free-form string ("take 2 pills whenever"), hindering automated pharmacy dispensing.
 - **Target State ("How it SHOULD be")**: Dosage should include structured dose quantity, unit (UCUM code), and frequency code.
 - **Remediation**: Introduce structured dosage DTO fields.
 
 #### Issue 2.5 [P3 - Clinical Workflow] Unlinked Progress Notes to Encounters
-- **Affected Component**: `backend/src/main/java/com/medvault/clinicalrecords/entity/MedicalRecord.java`
+- **Affected Component**: `backend/src/main/java/com/sentinel/clinicalrecords/entity/MedicalRecord.java`
 - **Current State ("How it was NOT supposed to be")**: Medical progress notes can be created without referencing a valid `encounter_id`.
 - **Target State ("How it SHOULD be")**: Every clinical progress note MUST be linked to an active or past encounter ID.
 - **Remediation**: Make `encounter` a mandatory `@ManyToOne` relationship on `MedicalRecord`.
@@ -150,7 +150,7 @@ Contrary to partial quality reviews that focus exclusively on high-priority secu
 - **Remediation**: Set `ddl-auto=validate` for non-dev environments and fail on SQL initialization errors.
 
 #### Issue 3.2 [P2 - Privacy Risk] Unencrypted PII/PHI Columns in Database Tables
-- **Affected Component**: `backend/src/main/java/com/medvault/patients/entity/Patient.java`
+- **Affected Component**: `backend/src/main/java/com/sentinel/patients/entity/Patient.java`
 - **Current State ("How it was NOT supposed to be")**:
   Sensitive identity attributes (`ssn`, `abhaId`) are stored as plain text VARCHAR columns in the database.
 - **Target State ("How it SHOULD be")**:
@@ -158,7 +158,7 @@ Contrary to partial quality reviews that focus exclusively on high-priority secu
 - **Remediation**: Implement a JPA `AttributeConverter` using AES-256-GCM.
 
 #### Issue 3.3 [P2 - Performance] N+1 Database Query Waterfall in Clinical History Endpoint
-- **Affected Component**: `backend/src/main/java/com/medvault/patients/controller/PatientController.java` (Lines 102-106)
+- **Affected Component**: `backend/src/main/java/com/sentinel/patients/controller/PatientController.java` (Lines 102-106)
 - **Current State ("How it was NOT supposed to be")**:
   ```java
   List<Diagnosis> pastIllnesses = diagnosisRepository.findByPatientId...;
@@ -173,7 +173,7 @@ Contrary to partial quality reviews that focus exclusively on high-priority secu
 - **Remediation**: Refactor `getPatientClinicalHistory` to use batch fetching.
 
 #### Issue 3.4 [P3 - DB Infrastructure] In-Memory H2 DB Preconfigured as Default Database
-- **Affected Component**: `application.properties` defaults to `jdbc:h2:mem:medvaultdb`.
+- **Affected Component**: `application.properties` defaults to `jdbc:h2:mem:sentineldb`.
 - **Target State ("How it SHOULD be")**: Production environment profile should enforce PostgreSQL datasource.
 - **Remediation**: Create dedicated `application-prod.properties`.
 
@@ -190,7 +190,7 @@ Contrary to partial quality reviews that focus exclusively on high-priority secu
 ### 4. Audit Trail & Compliance Subsystem (HIPAA § 164.312)
 
 #### Issue 4.1 [P2 - Forensic Defect] Inaccurate Client IP Address Logging Behind Reverse Proxies
-- **Affected Component**: `backend/src/main/java/com/medvault/audit/service/AuditTrailService.java`
+- **Affected Component**: `backend/src/main/java/com/sentinel/audit/service/AuditTrailService.java`
 - **Current State ("How it was NOT supposed to be")**:
   Extracts client IP using basic header checks, falling back to `127.0.0.1` without validating trusted proxy headers (`X-Forwarded-For`).
 - **Target State ("How it SHOULD be")**:
@@ -198,7 +198,7 @@ Contrary to partial quality reviews that focus exclusively on high-priority secu
 - **Remediation**: Implement trusted proxy IP extraction utility.
 
 #### Issue 4.2 [P2 - Compliance Risk] Primary Database Storage for Compliance Audit Ledger
-- **Affected Component**: `backend/src/main/java/com/medvault/audit/entity/AuditLog.java`
+- **Affected Component**: `backend/src/main/java/com/sentinel/audit/entity/AuditLog.java`
 - **Current State ("How it was NOT supposed to be")**:
   Audit records are stored in standard relational table `audit_logs` in the primary application database, where DB admins could alter entries.
 - **Target State ("How it SHOULD be")**:
@@ -218,7 +218,7 @@ Contrary to partial quality reviews that focus exclusively on high-priority secu
 ### 5. Interoperability & Synthetic Pipeline Subsystem
 
 #### Issue 5.1 [P2 - Interoperability] Manual DTO Construction for FHIR R4 Bundles
-- **Affected Component**: `backend/src/main/java/com/medvault/fhir/service/FhirService.java`
+- **Affected Component**: `backend/src/main/java/com/sentinel/fhir/service/FhirService.java`
 - **Current State ("How it was NOT supposed to be")**:
   Assembles FHIR JSON outputs manually using map representations rather than using official HAPI FHIR model parsers (`org.hl7.fhir.r4.model.Patient`).
 - **Target State ("How it SHOULD be")**:
@@ -232,7 +232,7 @@ Contrary to partial quality reviews that focus exclusively on high-priority secu
 - **Remediation**: Add error handling flags to `run_synthea_pipeline.sh`.
 
 #### Issue 5.3 [P3 - Pipeline Performance] Synchronous Ingestion of Large Synthea Datasets
-- **Affected Component**: `backend/src/main/java/com/medvault/synthetic/service/SyntheaPipelineService.java`
+- **Affected Component**: `backend/src/main/java/com/sentinel/synthetic/service/SyntheaPipelineService.java`
 - **Current State ("How it was NOT supposed to be")**: Ingests multi-megabyte synthetic bundles on main worker thread.
 - **Target State ("How it SHOULD be")**: Process ingestion asynchronously using `@Async` worker thread pool.
 - **Remediation**: Annotate ingestion pipeline methods with `@Async`.
@@ -248,7 +248,7 @@ Contrary to partial quality reviews that focus exclusively on high-priority secu
 #### Issue 6.1 [P2 - Frontend Security] Plaintext JWT Storage in Browser `localStorage`
 - **Affected Component**: `frontend/src/app/core/services/auth.service.ts`
 - **Current State ("How it was NOT supposed to be")**:
-  JWT token stored in `localStorage.setItem('medvault_token', token)`. Any Cross-Site Scripting (XSS) vulnerability can read token strings.
+  JWT token stored in `localStorage.setItem('sentinel_token', token)`. Any Cross-Site Scripting (XSS) vulnerability can read token strings.
 - **Target State ("How it SHOULD be")**:
   Tokens should be stored in memory via Angular Signals or delivered via `HttpOnly` secure cookies.
 - **Remediation**: Transition frontend auth service to in-memory Signal storage.
@@ -294,7 +294,7 @@ Contrary to partial quality reviews that focus exclusively on high-priority secu
 
 ```mermaid
 gantt
-    title MedVault Remediation Roadmap
+    title Sentinel Remediation Roadmap
     dateFormat  YYYY-MM-DD
     section Phase 1: Critical Safeguards
     Fix Frame-Options Clickjacking (Issue 1.1)       :p1_1, 2026-08-10, 1d
@@ -317,10 +317,10 @@ gantt
 
 ## 🔗 Related Documentation
 
-- [System Architecture](file:///mnt/workspace/MedVault/docs/architecture/system-architecture-spec.md)
-- [Clinical Workflows](file:///mnt/workspace/MedVault/docs/clinical/clinical-workflows-spec.md)
-- [EHR Database Schema](file:///mnt/workspace/MedVault/docs/clinical/relational-database-schema.md)
-- [Security & HIPAA Compliance](file:///mnt/workspace/MedVault/docs/security-compliance/security-hipaa-compliance-spec.md)
-- [RBAC & ABAC Matrix](file:///mnt/workspace/MedVault/docs/security-compliance/rbac-abac-security-matrix.md)
-- [REST API Specification](file:///mnt/workspace/MedVault/docs/interoperability/rest-api-specification.md)
-- [Synthea Pipeline Guide](file:///mnt/workspace/MedVault/docs/interoperability/synthea-pipeline-integration.md)
+- [System Architecture](file:///mnt/workspace/Sentinel/docs/architecture/system-architecture-spec.md)
+- [Clinical Workflows](file:///mnt/workspace/Sentinel/docs/clinical/clinical-workflows-spec.md)
+- [EHR Database Schema](file:///mnt/workspace/Sentinel/docs/clinical/relational-database-schema.md)
+- [Security & HIPAA Compliance](file:///mnt/workspace/Sentinel/docs/security-compliance/security-hipaa-compliance-spec.md)
+- [RBAC & ABAC Matrix](file:///mnt/workspace/Sentinel/docs/security-compliance/rbac-abac-security-matrix.md)
+- [REST API Specification](file:///mnt/workspace/Sentinel/docs/interoperability/rest-api-specification.md)
+- [Synthea Pipeline Guide](file:///mnt/workspace/Sentinel/docs/interoperability/synthea-pipeline-integration.md)

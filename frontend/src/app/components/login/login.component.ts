@@ -86,7 +86,7 @@ export class LoginComponent implements OnInit {
         this.loading.set(false);
         this.patientContext.loadContext();
         toast.success('Authenticated Successfully', {
-          description: 'Welcome back to your MedVault EHR Workspace.',
+          description: 'Welcome back to your Sentinel EHR Workspace.',
         });
         this.router.navigate(['/dashboard']);
       },

@@ -1,12 +1,12 @@
-# MedVault EHR Role-Based & Attribute-Based Access Control (RBAC + ABAC) Specification
+# Sentinel EHR Role-Based & Attribute-Based Access Control (RBAC + ABAC) Specification
 
-This document defines the production-grade **Role-Based Access Control (RBAC)** and **Attribute-Based Access Control (ABAC)** matrix and security architecture for the **MedVault EHR Platform**.
+This document defines the production-grade **Role-Based Access Control (RBAC)** and **Attribute-Based Access Control (ABAC)** matrix and security architecture for the **Sentinel EHR Platform**.
 
 ---
 
 ## 🎯 Architectural Overview
 
-In a modern enterprise Electronic Health Record (EHR) system, access control cannot rely solely on simple top-level roles (e.g., `Doctor = full access`). MedVault implements a **Hybrid RBAC + ABAC Security Model**:
+In a modern enterprise Electronic Health Record (EHR) system, access control cannot rely solely on simple top-level roles (e.g., `Doctor = full access`). Sentinel implements a **Hybrid RBAC + ABAC Security Model**:
 
 1. **Role-Based Access Control (RBAC)**: Defines **what coarse-grained actions** a role is generally authorized to perform (e.g., `Doctor` can `CREATE_PRESCRIPTION`, `Nurse` can `RECORD_VITALS`).
 2. **Attribute-Based Access Control (ABAC)**: Evaluates **runtime contextual attributes** (e.g., treatment relationship, care team assignment, department match, facility location, time of access, and Purpose of Use) before granting access to a specific patient's Protected Health Information (PHI).
@@ -15,7 +15,7 @@ In a modern enterprise Electronic Health Record (EHR) system, access control can
 
 ## 👥 The 10 Baseline System Roles
 
-MedVault categorizes operations across **10 production roles**:
+Sentinel categorizes operations across **10 production roles**:
 
 1. **System Administrator (`ROLE_SYS_ADMIN`)**: Platform-level infrastructure, tenant provisioning, system configurations, and cross-site audit monitoring. No direct clinical record edit access.
 2. **Organization / Clinic Administrator (`ROLE_ORG_ADMIN`)**: Hospital or clinic facility administrator. Manages clinic users, provider schedules, facility departments, and billing configurations.
@@ -101,7 +101,7 @@ public class AbacSecurityEvaluator implements PermissionEvaluator {
 
 ## 🔗 Related Documentation
 
-- [System Architecture](file:///mnt/workspace/MedVault/docs/architecture/system-architecture-spec.md)
-- [Clinical Workflows](file:///mnt/workspace/MedVault/docs/clinical/clinical-workflows-spec.md)
-- [Security & HIPAA Compliance](file:///mnt/workspace/MedVault/docs/security-compliance/security-hipaa-compliance-spec.md)
-- [Software Audit Report](file:///mnt/workspace/MedVault/docs/audit/software-audit-report.md)
+- [System Architecture](file:///mnt/workspace/Sentinel/docs/architecture/system-architecture-spec.md)
+- [Clinical Workflows](file:///mnt/workspace/Sentinel/docs/clinical/clinical-workflows-spec.md)
+- [Security & HIPAA Compliance](file:///mnt/workspace/Sentinel/docs/security-compliance/security-hipaa-compliance-spec.md)
+- [Software Audit Report](file:///mnt/workspace/Sentinel/docs/audit/software-audit-report.md)

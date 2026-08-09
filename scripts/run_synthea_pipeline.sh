@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# MedVault Enterprise EHR - Official Synthea Synthetic Patient Generation Pipeline
+# Sentinel Enterprise EHR - Official Synthea Synthetic Patient Generation Pipeline
 # ==============================================================================
 set -e
 
@@ -14,7 +14,7 @@ JAR_PATH="$TOOLS_DIR/synthea-with-dependencies.jar"
 OUTPUT_DIR="$TOOLS_DIR/output"
 
 echo "========================================================================"
-echo "🩺 MedVault Synthea Framework Synthetic Pipeline Engine"
+echo "🩺 Sentinel Synthea Framework Synthetic Pipeline Engine"
 echo "========================================================================"
 echo "Population Target : $COUNT Patients"
 echo "Demographic Region : $STATE"

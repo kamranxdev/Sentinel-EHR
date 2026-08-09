@@ -1,6 +1,6 @@
-# MedVault REST API & Interoperability Specification
+# Sentinel REST API & Interoperability Specification
 
-This document provides a reference for the **MedVault EHR REST APIs**, HL7 FHIR R4 interoperability endpoints, authentication headers, error codes, and JSON request/response formats.
+This document provides a reference for the **Sentinel EHR REST APIs**, HL7 FHIR R4 interoperability endpoints, authentication headers, error codes, and JSON request/response formats.
 
 ---
 
@@ -34,7 +34,7 @@ This document provides a reference for the **MedVault EHR REST APIs**, HL7 FHIR 
 
 ## 🔗 Related Documentation
 
-- [System Architecture](file:///mnt/workspace/MedVault/docs/architecture/system-architecture-spec.md)
-- [Clinical Workflows](file:///mnt/workspace/MedVault/docs/clinical/clinical-workflows-spec.md)
-- [Synthea Pipeline Guide](file:///mnt/workspace/MedVault/docs/interoperability/synthea-pipeline-integration.md)
-- [Software Audit Report](file:///mnt/workspace/MedVault/docs/audit/software-audit-report.md)
+- [System Architecture](file:///mnt/workspace/Sentinel/docs/architecture/system-architecture-spec.md)
+- [Clinical Workflows](file:///mnt/workspace/Sentinel/docs/clinical/clinical-workflows-spec.md)
+- [Synthea Pipeline Guide](file:///mnt/workspace/Sentinel/docs/interoperability/synthea-pipeline-integration.md)
+- [Software Audit Report](file:///mnt/workspace/Sentinel/docs/audit/software-audit-report.md)

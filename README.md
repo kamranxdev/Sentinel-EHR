@@ -1,8 +1,8 @@
-# MedVault Enterprise EHR Platform
+# Sentinel Enterprise EHR Platform
 
 > **HL7 FHIR R4, ABDM & DISHA Compliant Electronic Health Record (EHR) & Clinical Management System**
 
-MedVault is an enterprise-scale Electronic Health Record (EHR) platform tailored for healthcare ecosystems. It features multi-persona clinical workspaces, Ayushman Bharat Health Account (ABHA ID) integration, a Smart Allergy Safety Engine, immutable DISHA & ABDM WORM audit logging, HL7 FHIR R4 interoperability, and synthetic patient generation.
+Sentinel is an enterprise-scale Electronic Health Record (EHR) platform tailored for healthcare ecosystems. It features multi-persona clinical workspaces, Ayushman Bharat Health Account (ABHA ID) integration, a Smart Allergy Safety Engine, immutable DISHA & ABDM WORM audit logging, HL7 FHIR R4 interoperability, and synthetic patient generation.
 
 ---
 
@@ -84,7 +84,7 @@ All documentation is organized in domain subdirectories within [`docs/`](docs/):
 ## 📁 Repository Structure
 
 ```
-MedVault/
+Sentinel/
 ├── backend/                  # Spring Boot REST API & Security Engine
 │   ├── src/main/java/        # Controllers, Services, Models, Security
 │   ├── src/main/resources/   # schema.sql, seed.sql, application.properties

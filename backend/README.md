@@ -1,6 +1,6 @@
-# MedVault Backend - Spring Boot REST API & Security Engine
+# Sentinel Backend - Spring Boot REST API & Security Engine
 
-Java 17 / Spring Boot RESTful API service powering the MedVault Electronic Health Record (EHR) platform.
+Java 17 / Spring Boot RESTful API service powering the Sentinel Electronic Health Record (EHR) platform.
 
 ---
 
@@ -26,10 +26,10 @@ Java 17 / Spring Boot RESTful API service powering the MedVault Electronic Healt
    ```bash
    ./mvnw spring-boot:run
    ```
-   *Runs against an embedded in-memory H2 database (`jdbc:h2:mem:medvaultdb`) in PostgreSQL compatibility mode. Automatically executes `schema.sql` and `seed.sql` on startup.*
+   *Runs against an embedded in-memory H2 database (`jdbc:h2:mem:sentineldb`) in PostgreSQL compatibility mode. Automatically executes `schema.sql` and `seed.sql` on startup.*
    
    * **H2 Web Console**: `http://localhost:8080/h2-console`
-     - **JDBC URL**: `jdbc:h2:mem:medvaultdb`
+     - **JDBC URL**: `jdbc:h2:mem:sentineldb`
      - **Username**: `sa` | **Password**: *(leave blank)*
 
 2. **Local PostgreSQL Container (Docker Compose)**:
@@ -38,10 +38,10 @@ Java 17 / Spring Boot RESTful API service powering the MedVault Electronic Healt
    docker compose up -d
 
    # Run backend pointing to container
-   SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/medvault \
+   SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/sentinel \
    SPRING_DATASOURCE_DRIVER=org.postgresql.Driver \
-   SPRING_DATASOURCE_USERNAME=medvault \
-   SPRING_DATASOURCE_PASSWORD=MedVaultPass123! \
+   SPRING_DATASOURCE_USERNAME=sentinel \
+   SPRING_DATASOURCE_PASSWORD=SentinelPass123! \
    SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.PostgreSQLDialect \
    ./mvnw spring-boot:run
    ```
@@ -60,11 +60,11 @@ Java 17 / Spring Boot RESTful API service powering the MedVault Electronic Healt
 4. **Manual DDL/DML SQL Script Execution**:
    - **Docker CLI**:
      ```bash
-     docker exec -i medvault-postgres-db psql -U medvault -d medvault < src/main/resources/schema.sql
-     docker exec -i medvault-postgres-db psql -U medvault -d medvault < src/main/resources/seed.sql
+     docker exec -i sentinel-postgres-db psql -U sentinel -d sentinel < src/main/resources/schema.sql
+     docker exec -i sentinel-postgres-db psql -U sentinel -d sentinel < src/main/resources/seed.sql
      ```
    - **GUI SQL Editor** (DBeaver / pgAdmin / TablePlus / Supabase SQL Editor):
-     - Connect to `localhost:5432` (`medvault`) or Supabase URL.
+     - Connect to `localhost:5432` (`sentinel`) or Supabase URL.
      - Execute `src/main/resources/schema.sql` followed by `src/main/resources/seed.sql`.
 
 ---

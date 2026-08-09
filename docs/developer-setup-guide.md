@@ -1,6 +1,6 @@
-# MedVault Getting Started & Developer Setup Guide
+# Sentinel Getting Started & Developer Setup Guide
 
-This guide provides step-by-step instructions for setting up, executing, and testing the **MedVault EHR Platform** across local, containerized, and cloud execution environments.
+This guide provides step-by-step instructions for setting up, executing, and testing the **Sentinel EHR Platform** across local, containerized, and cloud execution environments.
 
 ---
 
@@ -16,7 +16,7 @@ Ensure your development workstation has the following tools installed:
 
 ## 🔑 Pre-Configured Demo Credentials Matrix
 
-MedVault provides pre-seeded accounts representing real-world healthcare roles:
+Sentinel provides pre-seeded accounts representing real-world healthcare roles:
 
 | Role | Username | Password | User Profile | Primary Workspace & Scope |
 | :--- | :--- | :--- | :--- | :--- |
@@ -33,7 +33,7 @@ MedVault provides pre-seeded accounts representing real-world healthcare roles:
 
 ## 🚀 Execution Environment Options
 
-MedVault supports 3 database execution options without requiring code changes:
+Sentinel supports 3 database execution options without requiring code changes:
 
 ### Option 1: Standalone In-Memory H2 DB (Zero Setup - Default)
 
@@ -44,7 +44,7 @@ cd backend
 ./mvnw spring-boot:run
 ```
 - **H2 Interactive Web Console**: `http://localhost:8080/h2-console`
-  - **JDBC URL**: `jdbc:h2:mem:medvaultdb`
+  - **JDBC URL**: `jdbc:h2:mem:sentineldb`
   - **User Name**: `sa`
   - **Password**: *(leave blank)*
 
@@ -66,10 +66,10 @@ npm start
 2. Start the backend connected to the local container:
    ```bash
    cd backend
-   SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/medvault \
+   SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/sentinel \
    SPRING_DATASOURCE_DRIVER=org.postgresql.Driver \
-   SPRING_DATASOURCE_USERNAME=medvault \
-   SPRING_DATASOURCE_PASSWORD=MedVaultPass123! \
+   SPRING_DATASOURCE_USERNAME=sentinel \
+   SPRING_DATASOURCE_PASSWORD=SentinelPass123! \
    SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.PostgreSQLDialect \
    ./mvnw spring-boot:run
    ```
@@ -112,12 +112,12 @@ npm run build
 
 ## 📚 Domain-Driven Documentation Suite
 
-- **[System Architecture](file:///mnt/workspace/MedVault/docs/architecture/system-architecture-spec.md)**
-- **[Clinical Workflows](file:///mnt/workspace/MedVault/docs/clinical/clinical-workflows-spec.md)**
-- **[EHR Database Schema](file:///mnt/workspace/MedVault/docs/clinical/relational-database-schema.md)**
-- **[Security & Compliance](file:///mnt/workspace/MedVault/docs/security-compliance/security-hipaa-compliance-spec.md)**
-- **[RBAC & ABAC Matrix](file:///mnt/workspace/MedVault/docs/security-compliance/rbac-abac-security-matrix.md)**
-- **[REST API Specification](file:///mnt/workspace/MedVault/docs/interoperability/rest-api-specification.md)**
-- **[Synthea Pipeline Guide](file:///mnt/workspace/MedVault/docs/interoperability/synthea-pipeline-integration.md)**
-- **[Workspaces Overview](file:///mnt/workspace/MedVault/docs/workspaces/README.md)**
-- **[Software Audit Report](file:///mnt/workspace/MedVault/docs/audit/software-audit-report.md)**
+- **[System Architecture](file:///mnt/workspace/Sentinel/docs/architecture/system-architecture-spec.md)**
+- **[Clinical Workflows](file:///mnt/workspace/Sentinel/docs/clinical/clinical-workflows-spec.md)**
+- **[EHR Database Schema](file:///mnt/workspace/Sentinel/docs/clinical/relational-database-schema.md)**
+- **[Security & Compliance](file:///mnt/workspace/Sentinel/docs/security-compliance/security-hipaa-compliance-spec.md)**
+- **[RBAC & ABAC Matrix](file:///mnt/workspace/Sentinel/docs/security-compliance/rbac-abac-security-matrix.md)**
+- **[REST API Specification](file:///mnt/workspace/Sentinel/docs/interoperability/rest-api-specification.md)**
+- **[Synthea Pipeline Guide](file:///mnt/workspace/Sentinel/docs/interoperability/synthea-pipeline-integration.md)**
+- **[Workspaces Overview](file:///mnt/workspace/Sentinel/docs/workspaces/README.md)**
+- **[Software Audit Report](file:///mnt/workspace/Sentinel/docs/audit/software-audit-report.md)**

@@ -1,12 +1,12 @@
-# MedVault EHR Platform - Architecture & System Design Specification
+# Sentinel EHR Platform - Architecture & System Design Specification
 
-This document provides a senior-engineer-level technical breakdown of the architecture, security patterns, hybrid RBAC+ABAC authorization engine, data flows, and database infrastructure of the **MedVault** Electronic Health Record (EHR) platform.
+This document provides a senior-engineer-level technical breakdown of the architecture, security patterns, hybrid RBAC+ABAC authorization engine, data flows, and database infrastructure of the **Sentinel** Electronic Health Record (EHR) platform.
 
 ---
 
 ## 🏛️ High-Level System Architecture
 
-MedVault is designed as a **Modular Monolith** application structured by business domain (Package-by-Feature / Bounded Contexts). It isolates presentation, security, authorization, domain business services, persistence abstraction, and storage layers.
+Sentinel is designed as a **Modular Monolith** application structured by business domain (Package-by-Feature / Bounded Contexts). It isolates presentation, security, authorization, domain business services, persistence abstraction, and storage layers.
 
 ```mermaid
 flowchart TD
@@ -70,12 +70,12 @@ In a traditional **Package-by-Layer** architecture (`controller/`, `service/`, `
 - Technical layers encourage implicit, uncontrolled coupling between unrelated features.
 - Enforcing domain boundaries and access control policies becomes difficult.
 
-By contrast, MedVault organizes code into self-contained business modules (`patients/`, `encounters/`, `prescriptions/`, `authorization/`, `fhir/`). Each module encapsulates its own controllers, services, entities, DTOs, and repositories.
+By contrast, Sentinel organizes code into self-contained business modules (`patients/`, `encounters/`, `prescriptions/`, `authorization/`, `fhir/`). Each module encapsulates its own controllers, services, entities, DTOs, and repositories.
 
 ```text
-src/main/java/com/medvault/
+src/main/java/com/sentinel/
 │
-├── MedVaultApplication.java
+├── SentinelApplication.java
 │
 ├── config/                         # Framework & Security Configuration
 ├── common/                         # Cross-Cutting Concerns & Exception Handlers
@@ -105,20 +105,20 @@ src/main/java/com/medvault/
 
 ## 💡 Real-World Architectural Analogies
 
-| MedVault Component | Real-World Analogy | Technical Function |
+| Sentinel Component | Real-World Analogy | Technical Function |
 | :--- | :--- | :--- |
 | **Spring Security & JWT Filter** | **Hospital Badge Scanner & Gatekeeper** | Intercepts every incoming HTTPS request, validates cryptographic token signatures, and verifies user credentials. |
 | **Hybrid RBAC + ABAC Engine** | **Department Door Badge Reader + Attending Roster Check** | Evaluates whether the user's role allows the action *AND* whether the user has a valid treatment relationship/department match for the target patient. |
 | **Smart Allergy Safety Engine** | **Pharmacist Double-Check Alert** | Cross-references new prescription orders against documented RxNorm patient allergies and flags contraindications before finalizing orders. |
 | **ABDM & DISHA Audit Ledger** | **Flight Recorder Black Box** | An immutable, append-only vault that logs every data action (who, what, when, IP address) for regulatory compliance under DISHA & ABDM. |
 | **Synthea Generator Pipeline** | **Medical Holodeck** | Runs the Synthea Java framework to simulate realistic patient cohorts and generate FHIR R4 bundles. |
-| **HL7 FHIR R4 Subsystem** | **Universal Interoperability Translator** | Converts internal MedVault entities into standard FHIR R4 JSON resources (`Patient`, `Encounter`, `Observation`, `MedicationRequest`) for exchange. |
+| **HL7 FHIR R4 Subsystem** | **Universal Interoperability Translator** | Converts internal Sentinel entities into standard FHIR R4 JSON resources (`Patient`, `Encounter`, `Observation`, `MedicationRequest`) for exchange. |
 
 ---
 
 ## 🔐 Hybrid RBAC + ABAC Authorization Architecture
 
-MedVault uses a 2-tier security model:
+Sentinel uses a 2-tier security model:
 
 ```mermaid
 sequenceDiagram
@@ -145,10 +145,10 @@ sequenceDiagram
 
 ## 🔗 Related Documentation
 
-- [Clinical Workflows](file:///mnt/workspace/MedVault/docs/clinical/clinical-workflows-spec.md)
-- [EHR Database Schema](file:///mnt/workspace/MedVault/docs/clinical/relational-database-schema.md)
-- [Security & HIPAA Compliance](file:///mnt/workspace/MedVault/docs/security-compliance/security-hipaa-compliance-spec.md)
-- [RBAC & ABAC Matrix](file:///mnt/workspace/MedVault/docs/security-compliance/rbac-abac-security-matrix.md)
-- [REST API Specification](file:///mnt/workspace/MedVault/docs/interoperability/rest-api-specification.md)
-- [Synthea Pipeline Guide](file:///mnt/workspace/MedVault/docs/interoperability/synthea-pipeline-integration.md)
-- [Software Audit Report](file:///mnt/workspace/MedVault/docs/audit/software-audit-report.md)
+- [Clinical Workflows](file:///mnt/workspace/Sentinel/docs/clinical/clinical-workflows-spec.md)
+- [EHR Database Schema](file:///mnt/workspace/Sentinel/docs/clinical/relational-database-schema.md)
+- [Security & HIPAA Compliance](file:///mnt/workspace/Sentinel/docs/security-compliance/security-hipaa-compliance-spec.md)
+- [RBAC & ABAC Matrix](file:///mnt/workspace/Sentinel/docs/security-compliance/rbac-abac-security-matrix.md)
+- [REST API Specification](file:///mnt/workspace/Sentinel/docs/interoperability/rest-api-specification.md)
+- [Synthea Pipeline Guide](file:///mnt/workspace/Sentinel/docs/interoperability/synthea-pipeline-integration.md)
+- [Software Audit Report](file:///mnt/workspace/Sentinel/docs/audit/software-audit-report.md)

@@ -1,12 +1,12 @@
-# MedVault Database Schema & Entity Relationship Guide
+# Sentinel Database Schema & Entity Relationship Guide
 
-This document provides a comprehensive reference for MedVault's relational database schema, entity relationships, security tables, and data model design decisions.
+This document provides a comprehensive reference for Sentinel's relational database schema, entity relationships, security tables, and data model design decisions.
 
 ---
 
 ## 💡 Hospital Analogy Mapping
 
-MedVault's database is organized like a large hospital's physical filing system:
+Sentinel's database is organized like a large hospital's physical filing system:
 
 - **`users` table** → Staff Directory — contains every employee (doctors, nurses, admins, auditors) and credentials.
 - **`roles` & `user_roles` tables** → Badge Access List — maps staff members to assigned role definitions.
@@ -192,7 +192,7 @@ erDiagram
 
 ## 🔗 Related Documentation
 
-- [System Architecture](file:///mnt/workspace/MedVault/docs/architecture/system-architecture-spec.md)
-- [Clinical Workflows](file:///mnt/workspace/MedVault/docs/clinical/clinical-workflows-spec.md)
-- [Security & HIPAA Compliance](file:///mnt/workspace/MedVault/docs/security-compliance/security-hipaa-compliance-spec.md)
-- [Software Audit Report](file:///mnt/workspace/MedVault/docs/audit/software-audit-report.md)
+- [System Architecture](file:///mnt/workspace/Sentinel/docs/architecture/system-architecture-spec.md)
+- [Clinical Workflows](file:///mnt/workspace/Sentinel/docs/clinical/clinical-workflows-spec.md)
+- [Security & HIPAA Compliance](file:///mnt/workspace/Sentinel/docs/security-compliance/security-hipaa-compliance-spec.md)
+- [Software Audit Report](file:///mnt/workspace/Sentinel/docs/audit/software-audit-report.md)

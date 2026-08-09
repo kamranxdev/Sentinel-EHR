@@ -136,7 +136,7 @@ type ProfileTab = 'demographics' | 'contact' | 'insurance' | 'allergies' | 'hist
               </span>
             </div>
             <p class="text-xs text-muted-foreground">
-              {{ getCompletenessScore() === 100 ? 'Your health profile is 100% complete and verified in MedVault EHR.' : 'Complete missing intake fields below to ensure clinical continuity and emergency readiness.' }}
+              {{ getCompletenessScore() === 100 ? 'Your health profile is 100% complete and verified in Sentinel EHR.' : 'Complete missing intake fields below to ensure clinical continuity and emergency readiness.' }}
             </p>
           </div>
 
@@ -243,7 +243,7 @@ type ProfileTab = 'demographics' | 'contact' | 'insurance' | 'allergies' | 'hist
                     <ng-icon name="lucideUserRound" size="18" class="text-primary" />
                     <span>Legal Patient Identity & Demographics</span>
                   </h2>
-                  <p class="text-xs text-muted-foreground mt-0.5">Government-issued identity and ABDM national health demographics registered in MedVault EHR.</p>
+                  <p class="text-xs text-muted-foreground mt-0.5">Government-issued identity and ABDM national health demographics registered in Sentinel EHR.</p>
                 </div>
                 <span *ngIf="isInitialSaveCompleted()" class="text-[10px] text-amber-600 dark:text-amber-400 font-semibold flex items-center gap-1 bg-amber-500/10 px-2.5 py-1 rounded-md border border-amber-500/30">
                   <ng-icon name="lucideLock" size="12" /> Protected Identity Record
@@ -668,7 +668,7 @@ type ProfileTab = 'demographics' | 'contact' | 'insurance' | 'allergies' | 'hist
                 <ng-icon name="lucideCheckCircle2" size="16" /> Health profile saved successfully!
               </span>
               <span *ngIf="!saveSuccess()" class="text-xs text-muted-foreground">
-                Saving updates your live MedVault EHR chart and verifies identity fields.
+                Saving updates your live Sentinel EHR chart and verifies identity fields.
               </span>
             </div>
 

@@ -1,4 +1,4 @@
-# MedVault Frontend - Angular Enterprise EHR Interface
+# Sentinel Frontend - Angular Enterprise EHR Interface
 
 Modern standalone Angular enterprise application featuring role-tailored clinical workspaces, a public landing page, a split-screen login interface, and global reactive patient context management.
 

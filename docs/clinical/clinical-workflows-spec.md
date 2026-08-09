@@ -1,12 +1,12 @@
-# MedVault EHR Platform - Clinical Workflows Specification
+# Sentinel EHR Platform - Clinical Workflows Specification
 
-This document details the core clinical workflows, care coordination flows, encounter lifecycles, and decision-support engines operating within the **MedVault** Electronic Health Record (EHR) platform.
+This document details the core clinical workflows, care coordination flows, encounter lifecycles, and decision-support engines operating within the **Sentinel** Electronic Health Record (EHR) platform.
 
 ---
 
 ## 🩺 Clinical Domain Overview
 
-MedVault supports comprehensive inpatient, outpatient, emergency, and telemetry clinical care workflows across 9 role-specific workspaces:
+Sentinel supports comprehensive inpatient, outpatient, emergency, and telemetry clinical care workflows across 9 role-specific workspaces:
 
 1. **Patient Intake & Registration**: Demographics, ABHA ID mapping, insurance verification, and Master Patient Index (MPI) search.
 2. **Clinical Encounter & Triage**: Nursing vitals flowsheet entry, chief complaint recording, and triage acuity scoring.
@@ -29,17 +29,17 @@ sequenceDiagram
     actor Nurse as Clinical Nurse
     actor Doctor as Physician / Attending
     actor Pharmacist as Clinical Pharmacist
-    participant MedVault as MedVault EHR Core
+    participant Sentinel as Sentinel EHR Core
     participant Safety as SmartSafetyService
 
-    Receptionist->>MedVault: 1. Check-In & MPI Intake (Assign MRN, Encounter Created)
-    Nurse->>MedVault: 2. Vital Signs Telemetry Entry (BP, Pulse, Temp, SpO2)
-    Doctor->>MedVault: 3. Consultation (SOAP Note, Diagnosis ICD-10 Coding)
+    Receptionist->>Sentinel: 1. Check-In & MPI Intake (Assign MRN, Encounter Created)
+    Nurse->>Sentinel: 2. Vital Signs Telemetry Entry (BP, Pulse, Temp, SpO2)
+    Doctor->>Sentinel: 3. Consultation (SOAP Note, Diagnosis ICD-10 Coding)
     Doctor->>Safety: 4. eRx Order Entry (Medication Name, Dosage, Frequency)
     Safety-->>Doctor: 5. RxNorm Contraindication & Allergy Safety Validation
-    Doctor->>MedVault: 6. Finalize Order / Override Alert with Clinical Justification
-    Pharmacist->>MedVault: 7. eRx Fulfillment & eMAR Dispense Verification
-    MedVault-->>Receptionist: 8. Encounter Discharge & Claim Generation
+    Doctor->>Sentinel: 6. Finalize Order / Override Alert with Clinical Justification
+    Pharmacist->>Sentinel: 7. eRx Fulfillment & eMAR Dispense Verification
+    Sentinel-->>Receptionist: 8. Encounter Discharge & Claim Generation
 ```
 
 ---
@@ -66,7 +66,7 @@ flowchart TD
 
 ## 📋 SOAP Progress Note Format
 
-MedVault structures clinical progress notes according to standard SOAP methodology:
+Sentinel structures clinical progress notes according to standard SOAP methodology:
 
 - **Subjective (S)**: Patient-reported symptoms, history of present illness (HPI), and chief complaints.
 - **Objective (O)**: Measurable telemetry data, physical examination findings, lab results, and vitals.
@@ -77,8 +77,8 @@ MedVault structures clinical progress notes according to standard SOAP methodolo
 
 ## 🔗 Related Documentation
 
-- [System Architecture](file:///mnt/workspace/MedVault/docs/architecture/system-architecture-spec.md)
-- [EHR Database Schema](file:///mnt/workspace/MedVault/docs/clinical/relational-database-schema.md)
-- [Security & HIPAA Compliance](file:///mnt/workspace/MedVault/docs/security-compliance/security-hipaa-compliance-spec.md)
-- [RBAC & ABAC Matrix](file:///mnt/workspace/MedVault/docs/security-compliance/rbac-abac-security-matrix.md)
-- [Software Audit Report](file:///mnt/workspace/MedVault/docs/audit/software-audit-report.md)
+- [System Architecture](file:///mnt/workspace/Sentinel/docs/architecture/system-architecture-spec.md)
+- [EHR Database Schema](file:///mnt/workspace/Sentinel/docs/clinical/relational-database-schema.md)
+- [Security & HIPAA Compliance](file:///mnt/workspace/Sentinel/docs/security-compliance/security-hipaa-compliance-spec.md)
+- [RBAC & ABAC Matrix](file:///mnt/workspace/Sentinel/docs/security-compliance/rbac-abac-security-matrix.md)
+- [Software Audit Report](file:///mnt/workspace/Sentinel/docs/audit/software-audit-report.md)

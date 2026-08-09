@@ -1,5 +1,5 @@
 -- ==============================================================================
--- MedVault EHR Database Schema Script (DDL)
+-- Sentinel EHR Database Schema Script (DDL)
 -- Compatible with Database SQL Editors (H2 Oracle Mode, Oracle DB, PostgreSQL, MySQL)
 -- ==============================================================================
 

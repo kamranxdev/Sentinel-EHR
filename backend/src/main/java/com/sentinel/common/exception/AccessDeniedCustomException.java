@@ -1,0 +1,7 @@
+package com.sentinel.common.exception;
+
+public class AccessDeniedCustomException extends RuntimeException {
+    public AccessDeniedCustomException(String message) {
+        super(message);
+    }
+}

@@ -2,7 +2,7 @@ import { Injectable, effect, signal } from '@angular/core';
 
 export type ThemeMode = 'light' | 'dark';
 
-const STORAGE_KEY = 'medvault-theme';
+const STORAGE_KEY = 'sentinel-theme';
 
 /**
  * Drives the spartan/ui `.dark` class on <html>.
