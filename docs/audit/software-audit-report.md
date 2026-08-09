@@ -114,7 +114,7 @@ Contrary to partial quality reviews that focus exclusively on high-priority secu
 - **Current State ("How it was NOT supposed to be")**:
   Encounter status is a free-form String allowing arbitrary updates (e.g. adding progress notes to a `COMPLETED` or `CANCELLED` visit).
 - **Target State ("How it SHOULD be")**:
-  Encounters must use an Enum state machine (`SCHEDULED -> IN_PROGRESS -> COMPLETED`) and reject updates to closed encounters.
+  Encounters must use an Enum state machine (`SCHEDULED -> IN_CONSULTATION -> COMPLETED`) and reject updates to closed encounters.
 - **Remediation**: Refactor `Encounter.status` to an Enum and guard state transitions.
 
 #### Issue 2.4 [P3 - Clinical UX] Unstandardized Free-Text Dosage Strings

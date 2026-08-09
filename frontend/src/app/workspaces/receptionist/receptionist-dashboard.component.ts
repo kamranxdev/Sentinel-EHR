@@ -271,8 +271,8 @@ import {
                   </div>
                 </td>
                 <td hlmTableCell>
-                  <span hlmBadge [variant]="getStageVariant(apt.stage || apt.status)" class="text-[10px] font-mono">
-                    {{ apt.stage || apt.status }}
+                  <span hlmBadge [variant]="getStageVariant(apt.stage || apt.status)" class="text-[10px] font-medium">
+                    {{ getStageLabel(apt.stage || apt.status) }}
                   </span>
                 </td>
                 <td hlmTableCell class="text-right">
@@ -280,7 +280,7 @@ import {
                     <!-- Arrived action button: displayed ONLY for today's scheduled appointments -->
                     <button *ngIf="(apt.stage === 'SCHEDULED' || apt.status === 'SCHEDULED') && isToday(apt.appointmentDate)" hlmBtn size="sm" variant="default" class="text-xs gap-1 bg-emerald-600 hover:bg-emerald-700 h-8" (click)="transitionStage(apt, 'ARRIVED')">
                       <ng-icon name="lucideClock" size="14" />
-                      <span>Arrived</span>
+                      <span>Mark Lobby Arrival</span>
                     </button>
                     <!-- Scheduled indicator for non-today appointments -->
                     <span *ngIf="(apt.stage === 'SCHEDULED' || apt.status === 'SCHEDULED') && !isToday(apt.appointmentDate)" hlmBadge variant="outline" class="text-[10px] text-muted-foreground">
@@ -288,7 +288,11 @@ import {
                     </span>
                     <button *ngIf="apt.stage === 'ARRIVED'" hlmBtn size="sm" variant="secondary" class="text-xs gap-1 bg-sky-600 text-white hover:bg-sky-700 h-8" (click)="transitionStage(apt, 'CHECKED_IN')">
                       <ng-icon name="lucideUserCheck" size="14" />
-                      <span>Check In</span>
+                      <span>Complete Desk Check-In</span>
+                    </button>
+                    <button *ngIf="apt.stage === 'CHECKED_IN'" hlmBtn size="sm" variant="outline" class="text-xs gap-1 text-purple-600 border-purple-500/30 hover:bg-purple-500/10 h-8" (click)="transitionStage(apt, 'IN_CONSULTATION')">
+                      <ng-icon name="lucideHeartPulse" size="14" />
+                      <span>Start Consultation</span>
                     </button>
                     <button (click)="openRteModal(apt.patient.id)" hlmBtn size="sm" variant="ghost" class="text-xs text-sky-600 hover:text-sky-700 h-8">
                       RTE Check
@@ -353,7 +357,7 @@ export class ReceptionistDashboardComponent implements OnInit {
     this.displayAppointments().filter((a) => (a.stage || a.status) === 'SCHEDULED').length
   );
   arrivedCount = computed(() =>
-    this.displayAppointments().filter((a) => ['ARRIVED', 'CHECKED_IN', 'IN_PROGRESS'].includes(a.stage || a.status)).length
+    this.displayAppointments().filter((a) => ['ARRIVED', 'CHECKED_IN', 'IN_CONSULTATION'].includes(a.stage || a.status)).length
   );
   pendingRteCount = computed(() =>
     this.displayAppointments().filter((a) => !a.insuranceVerified).length
@@ -362,7 +366,7 @@ export class ReceptionistDashboardComponent implements OnInit {
   constructor(
     public authService: AuthService,
     private apiService: ApiService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadData();
@@ -410,14 +414,27 @@ export class ReceptionistDashboardComponent implements OnInit {
     });
   }
 
+  getStageLabel(stage: string): string {
+    switch (stage) {
+      case 'SCHEDULED': return '1. Booked (Pre-Arrival)';
+      case 'ARRIVED': return '2. Lobby Arrival (In Queue)';
+      case 'CHECKED_IN': return '3. Intake & RTE Cleared (Ready for Triage)';
+      case 'IN_CONSULTATION': return '4. Clinical Consultation (In Room)';
+      case 'COMPLETED': return '5. Encounter Finalized & Discharged';
+      case 'CANCELLED': return 'Cancelled / No-Show';
+      default: return stage || 'Scheduled';
+    }
+  }
+
   getStageVariant(stage: string): 'outline' | 'secondary' | 'default' | 'destructive' {
     switch (stage) {
       case 'SCHEDULED': return 'outline';
       case 'ARRIVED': return 'secondary';
       case 'CHECKED_IN':
-      case 'IN_PROGRESS': return 'default';
+      case 'IN_CONSULTATION': return 'default';
+      case 'COMPLETED': return 'secondary';
       case 'CANCELLED': return 'destructive';
-      default: return 'secondary';
+      default: return 'outline';
     }
   }
 }

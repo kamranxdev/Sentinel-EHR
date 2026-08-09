@@ -188,7 +188,7 @@ import {
                     [variant]="
                       apt.status === 'SCHEDULED' ? 'default' :
                       apt.status === 'COMPLETED' ? 'secondary' :
-                      apt.status === 'IN_PROGRESS' ? 'outline' : 'outline'
+                      apt.status === 'IN_CONSULTATION' ? 'outline' : 'outline'
                     "
                     [class.bg-emerald-500\/15]="apt.status === 'COMPLETED'"
                     [class.text-emerald-700]="apt.status === 'COMPLETED'"
@@ -702,7 +702,7 @@ export class PatientAppointmentsComponent implements OnInit {
   constructor(
     private apiService: ApiService,
     public authService: AuthService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadPatientAndAppointments();

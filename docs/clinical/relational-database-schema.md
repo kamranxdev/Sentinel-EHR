@@ -107,7 +107,7 @@ erDiagram
         BIGINT patient_id FK
         BIGINT doctor_user_id FK
         VARCHAR encounter_type "OUTPATIENT, INPATIENT, EMERGENCY"
-        VARCHAR status "SCHEDULED, IN_PROGRESS, COMPLETED, CANCELLED"
+        VARCHAR status "SCHEDULED, ARRIVED, CHECKED_IN, IN_CONSULTATION, COMPLETED, CANCELLED"
         TIMESTAMP start_time
         TIMESTAMP end_time
         VARCHAR chief_complaint

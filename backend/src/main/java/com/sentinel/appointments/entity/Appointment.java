@@ -24,9 +24,9 @@ public class Appointment {
     @Column(nullable = false)
     private LocalDateTime appointmentDate;
 
-    private String status = "SCHEDULED"; // SCHEDULED, CHECKED_IN, TRIAGED, IN_CONSULTATION, COMPLETED, CANCELLED
+    private String status = "SCHEDULED"; // SCHEDULED, ARRIVED, CHECKED_IN, IN_CONSULTATION, COMPLETED, CANCELLED
 
-    private String stage = "SCHEDULED"; // SCHEDULED, CHECKED_IN, TRIAGED, IN_CONSULTATION, COMPLETED, CANCELLED
+    private String stage = "SCHEDULED"; // SCHEDULED, ARRIVED, CHECKED_IN, IN_CONSULTATION, COMPLETED, CANCELLED
 
     private String reason;
 
@@ -54,7 +54,8 @@ public class Appointment {
 
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    public Appointment() {}
+    public Appointment() {
+    }
 
     public Long getId() {
         return id;

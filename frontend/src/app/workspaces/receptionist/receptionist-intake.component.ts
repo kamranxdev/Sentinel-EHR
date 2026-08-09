@@ -271,11 +271,11 @@ import {
           </div>
         </div>
 
-        <!-- Step 5: Summary Review & Submission -->
+        <!-- Step 5: Summary Review & Submission + Same-Day Appointment Scheduling -->
         <div *ngIf="currentStep() === 5" hlmCard class="p-6 space-y-6 border border-border shadow-sm">
           <h2 class="text-sm font-bold text-foreground flex items-center gap-2 pb-2 border-b border-border">
             <ng-icon name="lucideShieldCheck" size="16" class="text-emerald-500" />
-            Step 5: Final Verification & Intake Registration Submission
+            Step 5: Verification & Same-Day Walk-in Appointment Scheduling
           </h2>
 
           <div *ngIf="successBanner()" class="p-3.5 rounded-lg bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/20 text-xs flex items-center gap-2 font-semibold shadow-sm">
@@ -283,6 +283,7 @@ import {
             <span>{{ successBanner() }}</span>
           </div>
 
+          <!-- Demographic Summary Grid -->
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs bg-muted/30 p-4 rounded-xl border border-border">
             <div>
               <span class="text-muted-foreground font-medium">Patient Name:</span>
@@ -310,6 +311,44 @@ import {
             </div>
           </div>
 
+          <!-- Same-Day Consultation Scheduling Section for First Visit -->
+          <div class="p-4 rounded-xl border border-sky-500/30 bg-sky-500/5 space-y-3 text-xs">
+            <div class="flex items-center justify-between">
+              <label class="flex items-center gap-2 font-bold text-foreground cursor-pointer">
+                <input type="checkbox" [(ngModel)]="scheduleTodayAppointment" class="size-4 text-sky-600 rounded border-border" />
+                <span class="text-sky-600 dark:text-sky-400">Schedule Today's Walk-in Consultation (First Visit)</span>
+              </label>
+              <span hlmBadge variant="outline" class="text-[10px] bg-sky-500/10 text-sky-600 border-sky-500/30 font-mono">Today's Date: {{ todayDateString }}</span>
+            </div>
+
+            <div *ngIf="scheduleTodayAppointment" class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+              <div class="space-y-1">
+                <label class="font-medium text-foreground">Attending Physician <span class="text-red-500">*</span></label>
+                <select [(ngModel)]="selectedDoctorId" class="w-full p-2 rounded-lg border border-border bg-background text-xs text-foreground">
+                  <option *ngFor="let doc of doctors()" [value]="doc.id">Dr. {{ doc.fullName }} ({{ doc.specialty || 'General' }})</option>
+                </select>
+              </div>
+
+              <div class="space-y-1">
+                <label class="font-medium text-foreground">Scheduled Time</label>
+                <input hlmInput type="time" [(ngModel)]="appointmentTime" class="w-full text-xs" />
+              </div>
+
+              <div class="space-y-1">
+                <label class="font-medium text-foreground">Desk Initial Stage</label>
+                <select [(ngModel)]="initialStage" class="w-full p-2 rounded-lg border border-border bg-background text-xs text-foreground font-mono">
+                  <option value="ARRIVED">ARRIVED (Waiting Room Queue)</option>
+                  <option value="SCHEDULED">SCHEDULED (Awaiting Check-in)</option>
+                </select>
+              </div>
+
+              <div class="sm:col-span-3 space-y-1">
+                <label class="font-medium text-foreground">Consultation Visit Reason</label>
+                <input hlmInput type="text" [(ngModel)]="consultationReason" placeholder="First Visit Consultation & General Assessment" class="w-full text-xs" />
+              </div>
+            </div>
+          </div>
+
           <div class="pt-2 flex justify-between">
             <button hlmBtn variant="ghost" size="sm" (click)="prevStep()" class="text-xs gap-1.5">
               <ng-icon name="lucideArrowLeft" size="14" />
@@ -317,7 +356,7 @@ import {
             </button>
             <button hlmBtn variant="default" size="sm" (click)="saveIntake()" [disabled]="saving()" class="text-xs gap-2 bg-emerald-600 hover:bg-emerald-700">
               <ng-icon name="lucideSave" size="14" />
-              <span>{{ saving() ? 'Registering Patient Chart...' : 'Complete Intake & Create MRN' }}</span>
+              <span>{{ saving() ? 'Registering & Scheduling...' : 'Complete Intake & Schedule Consultation' }}</span>
             </button>
           </div>
         </div>
@@ -356,6 +395,15 @@ export class ReceptionistIntakeComponent implements OnInit {
   treatmentConsentSigned = true;
   financialAgreementSigned = true;
 
+  // Today's Appointment Scheduling for First Visit
+  scheduleTodayAppointment = true;
+  doctors = signal<any[]>([]);
+  selectedDoctorId: number = 1;
+  appointmentTime: string = '10:30';
+  consultationReason: string = 'First Visit General Consultation & Clinical Assessment';
+  initialStage: string = 'ARRIVED';
+  todayDateString: string = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+
   saving = signal(false);
   successBanner = signal<string | null>(null);
 
@@ -365,7 +413,32 @@ export class ReceptionistIntakeComponent implements OnInit {
     private router: Router
   ) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.loadDoctors();
+  }
+
+  loadDoctors(): void {
+    this.apiService.getRecommendedDoctors().subscribe({
+      next: (docs) => {
+        if (docs && docs.length > 0) {
+          this.doctors.set(docs);
+          this.selectedDoctorId = docs[0].id;
+        } else {
+          this.setFallbackDoctors();
+        }
+      },
+      error: () => this.setFallbackDoctors(),
+    });
+  }
+
+  setFallbackDoctors(): void {
+    this.doctors.set([
+      { id: 1, fullName: 'Ananya Deshmukh', specialty: 'General Internal Medicine' },
+      { id: 2, fullName: 'Vikramaditya Verma', specialty: 'Cardiology' },
+      { id: 3, fullName: 'Meera Kulkarni', specialty: 'Pediatrics' },
+    ]);
+    this.selectedDoctorId = 1;
+  }
 
   dismissModal(): void {
     this.close.emit();
@@ -406,19 +479,47 @@ export class ReceptionistIntakeComponent implements OnInit {
       })
       .subscribe({
         next: (savedPatient) => {
-          this.saving.set(false);
-          this.successBanner.set(`Intake complete! Patient profile created for ${savedPatient.fullName} (MRN: ${savedPatient.patientCode}).`);
-          this.success.emit(savedPatient);
-          setTimeout(() => {
-            if (this.isModal) {
-              this.close.emit();
-            } else {
-              this.router.navigate(['/receptionist/dashboard']);
-            }
-          }, 1200);
+          if (this.scheduleTodayAppointment && this.selectedDoctorId && savedPatient.id) {
+            const dateStr = new Date().toISOString().split('T')[0];
+            const dateTimeIso = `${dateStr}T${this.appointmentTime}:00`;
+
+            this.apiService
+              .scheduleAppointment({
+                patient: { id: savedPatient.id } as any,
+                doctor: { id: this.selectedDoctorId } as any,
+                appointmentDate: dateTimeIso,
+                reason: this.consultationReason,
+                status: this.initialStage,
+                stage: this.initialStage,
+              })
+              .subscribe({
+                next: () => {
+                  this.finishSave(savedPatient, true);
+                },
+                error: () => {
+                  this.finishSave(savedPatient, false);
+                },
+              });
+          } else {
+            this.finishSave(savedPatient, false);
+          }
         },
         error: () => this.saving.set(false),
       });
+  }
+
+  finishSave(savedPatient: Patient, appointmentCreated: boolean): void {
+    this.saving.set(false);
+    const aptMsg = appointmentCreated ? ' & Same-Day Walk-in Consultation Scheduled!' : '.';
+    this.successBanner.set(`Intake complete! Account created for ${savedPatient.fullName} (MRN: ${savedPatient.patientCode})${aptMsg}`);
+    this.success.emit(savedPatient);
+    setTimeout(() => {
+      if (this.isModal) {
+        this.close.emit();
+      } else {
+        this.router.navigate(['/receptionist/dashboard']);
+      }
+    }, 1400);
   }
 }
 

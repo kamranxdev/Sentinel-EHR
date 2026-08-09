@@ -182,11 +182,12 @@ import { StatCardComponent } from '../../shared/ui/stat-card.component';
             </label>
             <select [(ngModel)]="selectedStage" class="w-full p-2 rounded-lg border border-border bg-background text-xs text-foreground">
               <option value="ALL">All Stages</option>
-              <option value="SCHEDULED">SCHEDULED</option>
-              <option value="ARRIVED">ARRIVED</option>
-              <option value="CHECKED_IN">CHECKED_IN</option>
-              <option value="IN_PROGRESS">IN_PROGRESS</option>
-              <option value="CANCELLED">CANCELLED</option>
+              <option value="SCHEDULED">1. Booked (Pre-Arrival)</option>
+              <option value="ARRIVED">2. Lobby Arrival (In Queue)</option>
+              <option value="CHECKED_IN">3. Intake & RTE Cleared</option>
+              <option value="IN_CONSULTATION">4. Clinical Consultation</option>
+              <option value="COMPLETED">5. Encounter Finalized</option>
+              <option value="CANCELLED">Cancelled / No-Show</option>
             </select>
           </div>
 
@@ -281,8 +282,8 @@ import { StatCardComponent } from '../../shared/ui/stat-card.component';
                   </div>
                 </td>
                 <td hlmTableCell>
-                  <span hlmBadge [variant]="getStageVariant(apt.stage || apt.status)" class="text-[10px] font-mono">
-                    {{ apt.stage || apt.status }}
+                  <span hlmBadge [variant]="getStageVariant(apt.stage || apt.status)" class="text-[10px] font-medium">
+                    {{ getStageLabel(apt.stage || apt.status) }}
                   </span>
                 </td>
                 <td hlmTableCell class="text-right">
@@ -294,7 +295,7 @@ import { StatCardComponent } from '../../shared/ui/stat-card.component';
                       class="text-xs gap-1 bg-emerald-600 hover:bg-emerald-700 h-8"
                       (click)="updateStage(apt, 'ARRIVED')">
                       <ng-icon name="lucideClock" size="14" />
-                      <span>Arrived</span>
+                      <span>Mark Lobby Arrival</span>
                     </button>
                     <!-- Indicator badge for scheduled appointments on future or past dates -->
                     <span
@@ -310,7 +311,15 @@ import { StatCardComponent } from '../../shared/ui/stat-card.component';
                       class="text-xs gap-1 bg-sky-600 text-white hover:bg-sky-700 h-8"
                       (click)="updateStage(apt, 'CHECKED_IN')">
                       <ng-icon name="lucideUserCheck" size="14" />
-                      <span>Check In</span>
+                      <span>Complete Desk Check-In</span>
+                    </button>
+                    <button
+                      *ngIf="apt.stage === 'CHECKED_IN'"
+                      hlmBtn size="sm" variant="outline"
+                      class="text-xs gap-1 text-purple-600 border-purple-500/30 hover:bg-purple-500/10 h-8"
+                      (click)="updateStage(apt, 'IN_CONSULTATION')">
+                      <ng-icon name="lucideStethoscope" size="14" />
+                      <span>Start Consultation</span>
                     </button>
                     <!-- Cancellation button -->
                     <button
@@ -458,7 +467,7 @@ export class ReceptionistAppointmentsComponent implements OnInit {
   );
 
   arrivedCount = computed(() =>
-    this.dateScopedAppointments().filter((a) => ['ARRIVED', 'CHECKED_IN', 'IN_PROGRESS'].includes(a.stage || a.status)).length
+    this.dateScopedAppointments().filter((a) => ['ARRIVED', 'CHECKED_IN', 'IN_CONSULTATION'].includes(a.stage || a.status)).length
   );
 
   cancelledCount = computed(() =>
@@ -468,7 +477,7 @@ export class ReceptionistAppointmentsComponent implements OnInit {
   constructor(
     public authService: AuthService,
     private apiService: ApiService
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadData();
@@ -556,14 +565,27 @@ export class ReceptionistAppointmentsComponent implements OnInit {
     }, 600);
   }
 
+  getStageLabel(stage: string): string {
+    switch (stage) {
+      case 'SCHEDULED': return '1. Booked (Pre-Arrival)';
+      case 'ARRIVED': return '2. Lobby Arrival (In Queue)';
+      case 'CHECKED_IN': return '3. Intake & RTE Cleared (Ready for Triage)';
+      case 'IN_CONSULTATION': return '4. Clinical Consultation (In Room)';
+      case 'COMPLETED': return '5. Encounter Finalized & Discharged';
+      case 'CANCELLED': return 'Cancelled / No-Show';
+      default: return stage || 'Scheduled';
+    }
+  }
+
   getStageVariant(stage: string): 'outline' | 'secondary' | 'default' | 'destructive' {
     switch (stage) {
       case 'SCHEDULED': return 'outline';
       case 'ARRIVED': return 'secondary';
       case 'CHECKED_IN':
-      case 'IN_PROGRESS': return 'default';
+      case 'IN_CONSULTATION': return 'default';
+      case 'COMPLETED': return 'secondary';
       case 'CANCELLED': return 'destructive';
-      default: return 'secondary';
+      default: return 'outline';
     }
   }
 }
