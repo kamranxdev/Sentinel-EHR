@@ -40,6 +40,12 @@ import { HlmSeparatorImports } from '@spartan-ng/helm/separator';
 import { HlmTooltipImports } from '@spartan-ng/helm/tooltip';
 import { HlmToasterImports } from '@spartan-ng/helm/sonner';
 
+export interface BreadcrumbSegment {
+  label: string;
+  url?: string;
+  icon?: string;
+}
+
 interface NavItem {
   icon: string;
   label: string;
@@ -111,47 +117,113 @@ export class App implements OnInit, OnDestroy {
     return this.authService.isLoggedIn() && !this.isStandalonePage();
   });
 
-  currentRouteInfo = computed(() => {
-    const url = this.currentUrl().split('?')[0];
-    switch (url) {
-      case '/dashboard':
-        return { title: 'Dashboard Command Center', icon: 'lucideLayoutDashboard' };
-      case '/receptionist/dashboard':
-        return { title: 'Front Desk & Patient Intake Hub', icon: 'lucideCalendarClock' };
-      case '/labtech/dashboard':
-        return { title: 'Laboratory & Pathology Center', icon: 'lucideMicroscope' };
-      case '/pharmacist/dashboard':
-        return { title: 'Clinical Pharmacy Center', icon: 'lucidePill' };
-      case '/billing/dashboard':
-        return { title: 'Revenue Cycle & Billing Operations', icon: 'lucideReceipt' };
-      case '/patients':
-        return { title: 'Master Patient Index (MPI)', icon: 'lucideHeartPulse' };
-      case '/profile':
-        return { title: 'My Health Profile & Settings', icon: 'lucideUserRound' };
-      case '/encounters':
-        return { title: 'Visits & Consultations', icon: 'lucideHospital' };
-      case '/allergies':
-        return { title: 'Allergies & Risk Register', icon: 'lucideTriangleAlert' };
-      case '/diagnoses':
-        return { title: 'Problem List (ICD-10)', icon: 'lucideListChecks' };
-      case '/records':
-        return { title: 'SOAP Progress Notes', icon: 'lucideFileText' };
-      case '/vitals':
-        return { title: 'Bedside Vitals Flowsheet', icon: 'lucideActivity' };
-      case '/prescriptions':
-        return { title: 'Pharmacy & eRx Orders', icon: 'lucidePill' };
-      case '/appointments':
-        return { title: 'Consultation Schedule', icon: 'lucideCalendarClock' };
-      case '/audit-ledger':
-        return { title: 'Compliance Audit Ledger', icon: 'lucideShieldCheck' };
-      case '/admin':
-        return { title: 'System Administration', icon: 'lucideSettings' };
-      case '/fhir-explorer':
-        return { title: 'FHIR R4 API Explorer', icon: 'lucideShieldCheck' };
-      default:
-        return { title: 'EHR Workspace', icon: 'lucideLayoutDashboard' };
+  breadcrumbs = computed<BreadcrumbSegment[]>(() => {
+    const rawUrl = this.currentUrl().split('?')[0];
+    const segments = rawUrl.split('/').filter((s) => s.length > 0);
+
+    if (segments.length === 0) {
+      return [{ label: 'Workspace', icon: 'lucideLayoutDashboard' }];
     }
+
+    const roleMap: Record<string, { label: string; url: string; icon: string }> = {
+      doctor: { label: 'Doctor Workspace', url: '/doctor/dashboard', icon: 'lucideHeartPulse' },
+      nurse: { label: 'Nurse Workspace', url: '/nurse/dashboard', icon: 'lucideActivity' },
+      admin: { label: 'Admin Center', url: '/admin/dashboard', icon: 'lucideSettings' },
+      patient: { label: 'Patient Portal', url: '/patient/dashboard', icon: 'lucideUserRound' },
+      receptionist: { label: 'Front Desk', url: '/receptionist/dashboard', icon: 'lucideCalendarClock' },
+      labtech: { label: 'Pathology Lab', url: '/labtech/dashboard', icon: 'lucideMicroscope' },
+      pharmacist: { label: 'Pharmacy Hub', url: '/pharmacist/dashboard', icon: 'lucidePill' },
+      billing: { label: 'Billing & RCM', url: '/billing/dashboard', icon: 'lucideReceipt' },
+      auditor: { label: 'Compliance & Audit', url: '/auditor/dashboard', icon: 'lucideShieldCheck' },
+    };
+
+    const pageMetaMap: Record<string, { label: string; icon: string }> = {
+      dashboard: { label: 'Dashboard', icon: 'lucideLayoutDashboard' },
+      patients: { label: 'Patient Roster', icon: 'lucideHeartPulse' },
+      appointments: { label: 'Consultation Schedule', icon: 'lucideCalendarClock' },
+      encounters: { label: 'Visits & Consultations', icon: 'lucideHospital' },
+      prescriptions: { label: 'Pharmacy & eRx', icon: 'lucidePill' },
+      diagnoses: { label: 'Problem List (ICD-10)', icon: 'lucideListChecks' },
+      allergies: { label: 'Allergies & Risk Register', icon: 'lucideTriangleAlert' },
+      vitals: { label: 'Bedside Vitals', icon: 'lucideActivity' },
+      users: { label: 'User Directory', icon: 'lucideUserRound' },
+      profile: { label: 'My Health Profile', icon: 'lucideUserRound' },
+      onboarding: { label: 'Profile Setup', icon: 'lucideUserRound' },
+      intake: { label: 'Patient Intake Hub', icon: 'lucideCalendarClock' },
+      worklist: { label: 'Lab Orders Worklist', icon: 'lucideMicroscope' },
+      results: { label: 'Test Results', icon: 'lucideMicroscope' },
+      erx: { label: 'e-Prescription Queue', icon: 'lucidePill' },
+      dispense: { label: 'Medication Dispensing', icon: 'lucidePill' },
+      invoices: { label: 'Invoices & Billing', icon: 'lucideReceipt' },
+      claims: { label: 'Insurance Claims', icon: 'lucideReceipt' },
+      ledger: { label: 'Audit Ledger', icon: 'lucideShieldCheck' },
+      records: { label: 'SOAP Progress Notes', icon: 'lucideFileText' },
+      'audit-ledger': { label: 'Compliance Audit Ledger', icon: 'lucideShieldCheck' },
+      'fhir-explorer': { label: 'FHIR R4 API Explorer', icon: 'lucideShieldCheck' },
+      admin: { label: 'System Administration', icon: 'lucideSettings' },
+    };
+
+    const result: BreadcrumbSegment[] = [];
+    const firstSegment = segments[0];
+
+    if (roleMap[firstSegment]) {
+      const roleMeta = roleMap[firstSegment];
+      result.push({
+        label: roleMeta.label,
+        icon: roleMeta.icon,
+        url: roleMeta.url,
+      });
+
+      let currentPath = `/${firstSegment}`;
+      for (let i = 1; i < segments.length; i++) {
+        const seg = segments[i];
+        currentPath += `/${seg}`;
+        const isLast = i === segments.length - 1;
+        const meta = pageMetaMap[seg] || {
+          label: this.formatSegmentName(seg),
+          icon: 'lucideFileText',
+        };
+
+        result.push({
+          label: meta.label,
+          icon: meta.icon,
+          url: isLast ? undefined : currentPath,
+        });
+      }
+    } else {
+      result.push({
+        label: 'Workspace',
+        icon: 'lucideLayoutDashboard',
+        url: '/dashboard',
+      });
+
+      let currentPath = '';
+      for (let i = 0; i < segments.length; i++) {
+        const seg = segments[i];
+        if (seg === 'dashboard' && segments.length === 1) continue;
+        currentPath += `/${seg}`;
+        const isLast = i === segments.length - 1;
+        const meta = pageMetaMap[seg] || {
+          label: this.formatSegmentName(seg),
+          icon: 'lucideFileText',
+        };
+
+        result.push({
+          label: meta.label,
+          icon: meta.icon,
+          url: isLast ? undefined : currentPath,
+        });
+      }
+    }
+
+    return result;
   });
+
+  private formatSegmentName(seg: string): string {
+    return seg
+      .replace(/-/g, ' ')
+      .replace(/\b\w/g, (c) => c.toUpperCase());
+  }
 
   private mql?: MediaQueryList;
   private mqlListener?: (e: MediaQueryListEvent) => void;

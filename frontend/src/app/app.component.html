@@ -1,4 +1,4 @@
-<div class="min-h-screen bg-background text-foreground flex flex-col lg:flex-row relative overflow-x-hidden"
+<div class="h-screen w-full bg-background text-foreground flex overflow-hidden relative"
   *ngIf="showDashboardLayout(); else standaloneLayout">
   <!-- Mobile sidebar backdrop -->
   <div *ngIf="isMobile() && sidebarOpen()" (click)="closeMobileSidebar()"
@@ -7,9 +7,9 @@
   <!-- Sidebar -->
   <aside [class.translate-x-0]="sidebarOpen()" [class.-translate-x-full]="isMobile() && !sidebarOpen()"
     [class.w-64]="sidebarOpen()" [class.w-[72px]]="!sidebarOpen() && !isMobile()"
-    class="fixed lg:sticky top-0 left-0 z-50 h-screen shrink-0 bg-card border-r border-border flex flex-col justify-between transition-all duration-200">
+    class="fixed lg:static top-0 left-0 z-50 h-screen shrink-0 bg-card border-r border-border flex flex-col justify-between transition-all duration-200">
     <!-- Brand -->
-    <div class="p-4 border-b border-border flex items-center justify-between">
+    <div class="p-4 border-b border-border flex items-center justify-between shrink-0">
       <div class="flex items-center gap-3 overflow-hidden">
         <div class="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
           <ng-icon name="lucideHeartPulse" size="18" />
@@ -48,7 +48,7 @@
     </nav>
 
     <!-- User footer -->
-    <div class="p-3 border-t border-border">
+    <div class="p-3 border-t border-border shrink-0">
       <div class="flex items-center justify-between gap-2 p-2 rounded-md bg-muted/40">
         <div class="flex items-center gap-2.5 overflow-hidden">
           <hlm-avatar class="size-8 shrink-0">
@@ -70,10 +70,10 @@
     </div>
   </aside>
 
-  <!-- Main -->
-  <main class="flex-1 flex flex-col min-w-0 min-h-screen bg-background">
+  <!-- Main layout pane with fixed header & scrollable main content -->
+  <div class="flex-1 flex flex-col min-w-0 h-screen overflow-hidden bg-background">
     <header
-      class="sticky top-0 z-30 bg-background/95 backdrop-blur border-b border-border flex items-center justify-between px-4 lg:px-6 py-3 gap-3 flex-wrap">
+      class="shrink-0 z-30 bg-background/95 backdrop-blur border-b border-border flex items-center justify-between px-4 lg:px-6 py-3 gap-3 flex-wrap">
       <div class="flex items-center gap-3 min-w-0">
         <button hlmBtn variant="outline" size="icon" class="lg:hidden size-9" (click)="toggleSidebar()">
           <ng-icon name="lucideMenu" size="18" />
@@ -82,16 +82,22 @@
         <span class="font-semibold text-sm hidden sm:inline-block">MedVault EHR</span>
 
         <!-- Sticky Top Bar Breadcrumb -->
-        <nav aria-label="Breadcrumb" class="flex items-center gap-2 text-xs text-muted-foreground min-w-0">
-          <a routerLink="/dashboard" class="flex items-center gap-1 font-medium hover:text-foreground transition-colors shrink-0">
-            <ng-icon name="lucideLayoutDashboard" size="13" class="text-primary" />
-            <span class="hidden md:inline">Workspace</span>
-          </a>
-          <ng-icon name="lucideChevronRight" size="12" class="text-muted-foreground/60 shrink-0" />
-          <span class="font-semibold text-foreground truncate flex items-center gap-1.5">
-            <ng-icon [name]="currentRouteInfo().icon" size="13" class="text-primary shrink-0" />
-            <span class="truncate">{{ currentRouteInfo().title }}</span>
-          </span>
+        <nav aria-label="Breadcrumb" class="flex items-center gap-1.5 text-xs text-muted-foreground min-w-0 flex-wrap">
+          <ng-container *ngFor="let item of breadcrumbs(); let last = last">
+            <ng-container *ngIf="item.url && !last; else activeBreadcrumb">
+              <a [routerLink]="item.url" class="flex items-center gap-1 font-medium hover:text-foreground transition-colors shrink-0">
+                <ng-icon *ngIf="item.icon" [name]="item.icon" size="13" class="text-primary" />
+                <span class="truncate max-w-[130px] sm:max-w-none">{{ item.label }}</span>
+              </a>
+            </ng-container>
+            <ng-template #activeBreadcrumb>
+              <span class="font-semibold text-foreground truncate flex items-center gap-1 shrink-0">
+                <ng-icon *ngIf="item.icon" [name]="item.icon" size="13" class="text-primary shrink-0" />
+                <span class="truncate max-w-[160px] sm:max-w-none">{{ item.label }}</span>
+              </span>
+            </ng-template>
+            <ng-icon *ngIf="!last" name="lucideChevronRight" size="12" class="text-muted-foreground/60 shrink-0" />
+          </ng-container>
         </nav>
 
         <!-- Patient self-service banner -->
@@ -121,10 +127,10 @@
       </div>
     </header>
 
-    <div class="p-4 lg:p-6 flex-1 min-w-0">
+    <main class="flex-1 overflow-y-auto p-4 lg:p-6 min-w-0">
       <router-outlet></router-outlet>
-    </div>
-  </main>
+    </main>
+  </div>
 </div>
 
 <ng-template #standaloneLayout>
