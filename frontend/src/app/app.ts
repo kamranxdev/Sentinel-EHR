@@ -402,6 +402,8 @@ export class App implements OnInit, OnDestroy {
           label: 'Reception Desk Workspace',
           items: [
             { icon: 'lucideLayoutDashboard', label: 'Front-Desk Command Center', routerLink: '/receptionist/dashboard' },
+            { icon: 'lucideCalendarClock', label: 'Appointments Roster', routerLink: '/receptionist/appointments' },
+            { icon: 'lucideHeartPulse', label: 'MPI Search', routerLink: '/receptionist/mpi' },
           ],
         },
       ];

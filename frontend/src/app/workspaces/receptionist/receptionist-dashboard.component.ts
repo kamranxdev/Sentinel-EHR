@@ -1,10 +1,13 @@
 import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
 import { StatCardComponent } from '../../shared/ui/stat-card.component';
 import { Appointment } from '../../core/models/models';
+import { ReceptionistIntakeComponent } from './receptionist-intake.component';
+import { ReceptionistEligibilityComponent } from './receptionist-eligibility.component';
 
 import { HlmCardImports } from '@spartan-ng/helm/card';
 import { HlmBadgeImports } from '@spartan-ng/helm/badge';
@@ -24,6 +27,7 @@ import {
   lucideArrowRight,
   lucideUserCheck,
   lucideAlertTriangle,
+  lucideCalendarClock,
 } from '@ng-icons/lucide';
 
 @Component({
@@ -31,6 +35,7 @@ import {
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     RouterModule,
     StatCardComponent,
     HlmCardImports,
@@ -38,6 +43,8 @@ import {
     HlmButtonImports,
     HlmTableImports,
     NgIcon,
+    ReceptionistIntakeComponent,
+    ReceptionistEligibilityComponent,
   ],
   providers: [
     provideIcons({
@@ -53,6 +60,7 @@ import {
       lucideArrowRight,
       lucideUserCheck,
       lucideAlertTriangle,
+      lucideCalendarClock,
     }),
   ],
   template: `
@@ -73,47 +81,23 @@ import {
         </div>
 
         <div class="flex items-center gap-2.5 flex-wrap">
+          <a routerLink="/receptionist/appointments" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-sky-500/30 bg-sky-500/10 text-sky-600 text-xs font-semibold hover:bg-sky-500/20 transition-colors">
+            <ng-icon name="lucideCalendarClock" size="14" />
+            <span>Appointments Roster</span>
+          </a>
           <a routerLink="/receptionist/mpi" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-card text-foreground text-xs font-semibold hover:bg-accent transition-colors">
             <ng-icon name="lucideHeartPulse" size="14" class="text-emerald-500" />
             <span>MPI Search</span>
           </a>
-          <a routerLink="/receptionist/eligibility" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-card text-foreground text-xs font-semibold hover:bg-accent transition-colors">
+          <button (click)="openRteModal()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-card text-foreground text-xs font-semibold hover:bg-accent transition-colors">
             <ng-icon name="lucideShieldCheck" size="14" class="text-sky-500" />
             <span>RTE Verification</span>
-          </a>
-          <a routerLink="/receptionist/intake" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition-colors shadow-sm">
+          </button>
+          <button (click)="openIntakeModal()" class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition-colors shadow-sm">
             <ng-icon name="lucideUserPlus" size="14" />
             <span>5-Step Patient Intake</span>
-          </a>
+          </button>
         </div>
-      </div>
-
-      <!-- Quick Metrics Grid -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <app-stat-card
-          title="Scheduled Arrivals"
-          [value]="scheduledCount()"
-          subtitle="Awaiting Front Desk Check-in"
-          icon="lucideCalendar"
-          iconBgClass="bg-sky-500/10 text-sky-600" />
-        <app-stat-card
-          title="Arrived & Checked In"
-          [value]="arrivedCount()"
-          subtitle="In Waiting Room Queue"
-          icon="lucideClock"
-          iconBgClass="bg-amber-500/10 text-amber-600" />
-        <app-stat-card
-          title="RTE Verification Alerts"
-          [value]="pendingRteCount()"
-          subtitle="Insurance Action Required"
-          icon="lucideAlertTriangle"
-          iconBgClass="bg-red-500/10 text-red-600" />
-        <app-stat-card
-          title="Total Registered Patients"
-          [value]="patientCount()"
-          subtitle="Master Patient Directory"
-          icon="lucideUsers"
-          iconBgClass="bg-emerald-500/10 text-emerald-600" />
       </div>
 
       <!-- Stage Workflows Navigation Cards -->
@@ -146,10 +130,10 @@ import {
             <h3 class="text-sm font-bold text-foreground">Patient Intake & Registration</h3>
             <p class="text-xs text-muted-foreground">Demographic wizard with PIN Code address validation & electronic ABDM/HIPAA consent.</p>
           </div>
-          <a routerLink="/receptionist/intake" class="text-xs font-semibold text-emerald-500 hover:text-emerald-600 flex items-center gap-1.5">
+          <button (click)="openIntakeModal()" class="text-xs font-semibold text-emerald-500 hover:text-emerald-600 flex items-center gap-1.5 text-left">
             <span>Start Registration</span>
             <ng-icon name="lucideArrowRight" size="14" />
-          </a>
+          </button>
         </div>
 
         <div hlmCard class="p-5 hover:border-purple-500/40 transition-all flex flex-col justify-between space-y-4">
@@ -163,33 +147,96 @@ import {
             <h3 class="text-sm font-bold text-foreground">Real-Time Eligibility (RTE)</h3>
             <p class="text-xs text-muted-foreground">Submit eligibility inquiries, parse response details, and collect front-desk co-pays with digital receipts.</p>
           </div>
-          <a routerLink="/receptionist/eligibility" class="text-xs font-semibold text-purple-500 hover:text-purple-600 flex items-center gap-1.5">
+          <button (click)="openRteModal()" class="text-xs font-semibold text-purple-500 hover:text-purple-600 flex items-center gap-1.5 text-left">
             <span>Run RTE Inquiry</span>
             <ng-icon name="lucideArrowRight" size="14" />
-          </a>
+          </button>
         </div>
       </div>
 
       <!-- Front Desk Intake & Stage Arrival Roster -->
       <div hlmCard class="p-6 space-y-4 border border-border shadow-sm">
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+        <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 pb-3 border-b border-border">
           <div>
             <h2 class="text-base font-bold text-foreground flex items-center gap-2">
               Front Desk Today's Patient Stage Board
-              <span class="text-xs font-normal text-muted-foreground">({{ appointments().length }} Consultations)</span>
+              <span class="text-xs font-normal text-muted-foreground">({{ displayAppointments().length }} Consultations)</span>
             </h2>
-            <p class="text-xs text-muted-foreground">Manage patient arrivals, stage transitions, queue wait times, and insurance verification.</p>
+            <p class="text-xs text-muted-foreground">Manage patient arrivals, stage transitions, queue wait times, and insurance verification for selected date.</p>
           </div>
-          <a routerLink="/receptionist/appointments" class="text-xs font-semibold text-primary hover:underline">
-            View Multi-Resource Calendar Grid &rarr;
-          </a>
+
+          <!-- Date Filter Controls -->
+          <div class="flex items-center gap-2 flex-wrap">
+            <div class="flex items-center bg-muted/60 p-1 rounded-lg border border-border text-xs">
+              <button
+                type="button"
+                class="px-2.5 py-1 rounded-md text-xs font-medium transition-all"
+                [ngClass]="viewMode() === 'TODAY' ? 'bg-background text-foreground shadow-sm font-semibold' : 'text-muted-foreground hover:text-foreground'"
+                (click)="setViewMode('TODAY')">
+                Today
+              </button>
+              <button
+                type="button"
+                class="px-2.5 py-1 rounded-md text-xs font-medium transition-all"
+                [ngClass]="viewMode() === 'DATE' ? 'bg-background text-foreground shadow-sm font-semibold' : 'text-muted-foreground hover:text-foreground'"
+                (click)="setViewMode('DATE')">
+                Select Date
+              </button>
+              <button
+                type="button"
+                class="px-2.5 py-1 rounded-md text-xs font-medium transition-all"
+                [ngClass]="viewMode() === 'ALL' ? 'bg-background text-foreground shadow-sm font-semibold' : 'text-muted-foreground hover:text-foreground'"
+                (click)="setViewMode('ALL')">
+                All Dates
+              </button>
+            </div>
+
+            <input
+              *ngIf="viewMode() === 'DATE'"
+              type="date"
+              [ngModel]="selectedDate()"
+              (ngModelChange)="selectedDate.set($event)"
+              class="px-2.5 py-1 rounded-lg border border-border bg-background text-xs font-medium text-foreground focus:outline-none focus:ring-1 focus:ring-primary" />
+
+            <a routerLink="/receptionist/appointments" class="text-xs font-semibold text-primary hover:underline ml-2">
+              View Full Appointments Roster &rarr;
+            </a>
+          </div>
+        </div>
+
+        <!-- Quick Metrics Grid for active view -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <app-stat-card
+            title="Scheduled Arrivals"
+            [value]="scheduledCount()"
+            subtitle="Awaiting Front Desk Check-in"
+            icon="lucideCalendar"
+            iconBgClass="bg-sky-500/10 text-sky-600" />
+          <app-stat-card
+            title="Arrived & Checked In"
+            [value]="arrivedCount()"
+            subtitle="In Waiting Room Queue"
+            icon="lucideClock"
+            iconBgClass="bg-amber-500/10 text-amber-600" />
+          <app-stat-card
+            title="RTE Verification Alerts"
+            [value]="pendingRteCount()"
+            subtitle="Insurance Action Required"
+            icon="lucideAlertTriangle"
+            iconBgClass="bg-red-500/10 text-red-600" />
+          <app-stat-card
+            title="Total Registered Patients"
+            [value]="patientCount()"
+            subtitle="Master Patient Directory"
+            icon="lucideUsers"
+            iconBgClass="bg-emerald-500/10 text-emerald-600" />
         </div>
 
         <div class="overflow-x-auto rounded-xl border border-border">
           <table hlmTable class="w-full">
             <thead hlmTableHeader class="bg-muted/40">
               <tr hlmTableRow>
-                <th hlmTableHead class="text-xs font-semibold">Time</th>
+                <th hlmTableHead class="text-xs font-semibold">Date & Time</th>
                 <th hlmTableHead class="text-xs font-semibold">Patient Name & MRN</th>
                 <th hlmTableHead class="text-xs font-semibold">Physician & Dept</th>
                 <th hlmTableHead class="text-xs font-semibold">RTE Insurance Status</th>
@@ -198,9 +245,12 @@ import {
               </tr>
             </thead>
             <tbody hlmTableBody>
-              <tr *ngFor="let apt of appointments()" hlmTableRow class="hover:bg-muted/30 transition-colors">
+              <tr *ngFor="let apt of displayAppointments()" hlmTableRow class="hover:bg-muted/30 transition-colors">
                 <td hlmTableCell class="font-mono text-xs text-foreground font-semibold">
-                  {{ apt.appointmentDate | date:'shortTime' }}
+                  <div>{{ apt.appointmentDate | date:'shortTime' }}</div>
+                  <div *ngIf="viewMode() === 'ALL' || !isToday(apt.appointmentDate)" class="text-[10px] text-muted-foreground font-normal">
+                    {{ apt.appointmentDate | date:'mediumDate' }}
+                  </div>
                 </td>
                 <td hlmTableCell>
                   <div class="font-medium text-foreground text-xs">{{ apt.patient.fullName || 'Patient Profile' }}</div>
@@ -227,23 +277,28 @@ import {
                 </td>
                 <td hlmTableCell class="text-right">
                   <div class="flex items-center justify-end gap-1.5">
-                    <button *ngIf="apt.stage === 'SCHEDULED' || apt.status === 'SCHEDULED'" hlmBtn size="sm" variant="default" class="text-xs gap-1 bg-emerald-600 hover:bg-emerald-700 h-8" (click)="transitionStage(apt, 'ARRIVED')">
+                    <!-- Arrived action button: displayed ONLY for today's scheduled appointments -->
+                    <button *ngIf="(apt.stage === 'SCHEDULED' || apt.status === 'SCHEDULED') && isToday(apt.appointmentDate)" hlmBtn size="sm" variant="default" class="text-xs gap-1 bg-emerald-600 hover:bg-emerald-700 h-8" (click)="transitionStage(apt, 'ARRIVED')">
                       <ng-icon name="lucideClock" size="14" />
                       <span>Arrived</span>
                     </button>
+                    <!-- Scheduled indicator for non-today appointments -->
+                    <span *ngIf="(apt.stage === 'SCHEDULED' || apt.status === 'SCHEDULED') && !isToday(apt.appointmentDate)" hlmBadge variant="outline" class="text-[10px] text-muted-foreground">
+                      Scheduled for {{ apt.appointmentDate | date:'shortDate' }}
+                    </span>
                     <button *ngIf="apt.stage === 'ARRIVED'" hlmBtn size="sm" variant="secondary" class="text-xs gap-1 bg-sky-600 text-white hover:bg-sky-700 h-8" (click)="transitionStage(apt, 'CHECKED_IN')">
                       <ng-icon name="lucideUserCheck" size="14" />
                       <span>Check In</span>
                     </button>
-                    <a [routerLink]="['/receptionist/eligibility']" [queryParams]="{ patientId: apt.patient.id }" hlmBtn size="sm" variant="ghost" class="text-xs text-sky-600 hover:text-sky-700 h-8">
+                    <button (click)="openRteModal(apt.patient.id)" hlmBtn size="sm" variant="ghost" class="text-xs text-sky-600 hover:text-sky-700 h-8">
                       RTE Check
-                    </a>
+                    </button>
                   </div>
                 </td>
               </tr>
-              <tr *ngIf="appointments().length === 0" hlmTableRow>
+              <tr *ngIf="displayAppointments().length === 0" hlmTableRow>
                 <td hlmTableCell colspan="6" class="text-center text-xs text-muted-foreground py-10">
-                  No appointments scheduled for front-desk reception check-in today.
+                  No appointments scheduled for front-desk reception check-in on this date.
                 </td>
               </tr>
             </tbody>
@@ -251,20 +306,57 @@ import {
         </div>
       </div>
     </div>
+
+    <!-- Modals for Intake & RTE Verification -->
+    <app-receptionist-intake
+      *ngIf="showIntakeModal()"
+      [isModal]="true"
+      (close)="showIntakeModal.set(false); loadData()">
+    </app-receptionist-intake>
+
+    <app-receptionist-eligibility
+      *ngIf="showRteModal()"
+      [isModal]="true"
+      [patientIdInput]="rtePatientId()"
+      (close)="showRteModal.set(false); loadData()">
+    </app-receptionist-eligibility>
   `,
 })
 export class ReceptionistDashboardComponent implements OnInit {
   appointments = signal<Appointment[]>([]);
   patientCount = signal(0);
 
+  showIntakeModal = signal(false);
+  showRteModal = signal(false);
+  rtePatientId = signal<number | null>(null);
+
+  todayDateStr = new Date();
+  selectedDate = signal<string>(this.getLocalDateString(new Date()));
+  viewMode = signal<'TODAY' | 'DATE' | 'ALL'>('TODAY');
+
+  displayAppointments = computed(() => {
+    const mode = this.viewMode();
+    const targetDate = this.selectedDate();
+    const todayStr = this.getLocalDateString(new Date());
+
+    return this.appointments().filter((apt) => {
+      if (mode === 'ALL') return true;
+      const aptDate = this.getLocalDateString(apt.appointmentDate);
+      if (mode === 'TODAY') {
+        return aptDate === todayStr;
+      }
+      return aptDate === targetDate;
+    });
+  });
+
   scheduledCount = computed(() =>
-    this.appointments().filter((a) => (a.stage || a.status) === 'SCHEDULED').length
+    this.displayAppointments().filter((a) => (a.stage || a.status) === 'SCHEDULED').length
   );
   arrivedCount = computed(() =>
-    this.appointments().filter((a) => ['ARRIVED', 'CHECKED_IN', 'IN_PROGRESS'].includes(a.stage || a.status)).length
+    this.displayAppointments().filter((a) => ['ARRIVED', 'CHECKED_IN', 'IN_PROGRESS'].includes(a.stage || a.status)).length
   );
   pendingRteCount = computed(() =>
-    this.appointments().filter((a) => !a.insuranceVerified).length
+    this.displayAppointments().filter((a) => !a.insuranceVerified).length
   );
 
   constructor(
@@ -279,6 +371,36 @@ export class ReceptionistDashboardComponent implements OnInit {
   loadData(): void {
     this.apiService.getAppointments().subscribe((apts) => this.appointments.set(apts));
     this.apiService.getPatients().subscribe((pts) => this.patientCount.set(pts.length));
+  }
+
+  openIntakeModal(): void {
+    this.showIntakeModal.set(true);
+  }
+
+  openRteModal(patientId?: number): void {
+    this.rtePatientId.set(patientId || null);
+    this.showRteModal.set(true);
+  }
+
+  setViewMode(mode: 'TODAY' | 'DATE' | 'ALL'): void {
+    this.viewMode.set(mode);
+    if (mode === 'TODAY') {
+      this.selectedDate.set(this.getLocalDateString(new Date()));
+    }
+  }
+
+  getLocalDateString(d: any): string {
+    if (!d) return '';
+    const date = new Date(d);
+    if (isNaN(date.getTime())) return '';
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  isToday(d: any): boolean {
+    return this.getLocalDateString(d) === this.getLocalDateString(new Date());
   }
 
   transitionStage(apt: Appointment, stage: string): void {
@@ -299,3 +421,5 @@ export class ReceptionistDashboardComponent implements OnInit {
     }
   }
 }
+
+
