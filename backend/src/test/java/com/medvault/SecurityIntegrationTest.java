@@ -245,4 +245,13 @@ public class SecurityIntegrationTest {
                 .header("Authorization", "Bearer " + token))
                 .andExpect(status().isForbidden());
     }
+
+    @Test
+    public void testPatientUser8GetPatientByUserIdSucceeds() throws Exception {
+        String token = loginAndGetToken("patient", "patient123");
+
+        mockMvc.perform(get("/api/patients/user/8")
+                .header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk());
+    }
 }

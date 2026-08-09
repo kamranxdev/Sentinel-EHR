@@ -14,6 +14,8 @@ import com.medvault.patients.repository.PatientRepository;
 import com.medvault.patients.service.PatientSecurityService;
 import com.medvault.prescriptions.entity.Prescription;
 import com.medvault.prescriptions.repository.PrescriptionRepository;
+import com.medvault.users.entity.User;
+import com.medvault.users.repository.UserRepository;
 import com.medvault.vitals.entity.Vitals;
 import com.medvault.vitals.repository.VitalsRepository;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -38,6 +41,7 @@ public class PatientController {
     private final MedicalRecordRepository medicalRecordRepository;
     private final AuditTrailService auditService;
     private final PatientSecurityService patientSecurityService;
+    private final UserRepository userRepository;
 
     public PatientController(PatientRepository patientRepository,
                              DiagnosisRepository diagnosisRepository,
@@ -46,7 +50,8 @@ public class PatientController {
                              VitalsRepository vitalsRepository,
                              MedicalRecordRepository medicalRecordRepository,
                              AuditTrailService auditService,
-                             PatientSecurityService patientSecurityService) {
+                             PatientSecurityService patientSecurityService,
+                             UserRepository userRepository) {
         this.patientRepository = patientRepository;
         this.diagnosisRepository = diagnosisRepository;
         this.allergyRepository = allergyRepository;
@@ -55,44 +60,17 @@ public class PatientController {
         this.medicalRecordRepository = medicalRecordRepository;
         this.auditService = auditService;
         this.patientSecurityService = patientSecurityService;
+        this.userRepository = userRepository;
     }
 
     @GetMapping
-    @PreAuthorize("hasAuthority('PATIENT_READ')")
-    public List<Patient> getAllPatients(Authentication auth) {
-        List<Patient> all = patientRepository.findAll();
-        if (auth == null) return Collections.emptyList();
-
-        boolean isFullAccess = auth.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .anyMatch(r -> r.equals("ROLE_SYS_ADMIN") || r.equals("ROLE_ADMIN") || r.equals("ROLE_AUDITOR") || r.equals("ROLE_RECEPTIONIST"));
-
-        if (isFullAccess) {
-            return all;
+    @PreAuthorize("hasAnyAuthority('PATIENT_READ', 'ROLE_SYS_ADMIN', 'ROLE_ORG_ADMIN', 'ROLE_DOCTOR', 'ROLE_NURSE', 'ROLE_RECEPTIONIST')")
+    public List<Patient> getAllPatients(@RequestParam(value = "search", required = false) String search, Authentication auth) {
+        auditService.logAction(auth, "READ_ALL", "PATIENT_LIST", "0", "Retrieved Master Patient Index roster");
+        if (search != null && !search.trim().isEmpty()) {
+            return patientRepository.searchPatients(search.trim());
         }
-
-        return all.stream()
-                .filter(p -> patientSecurityService.canAccessPatient(auth, p.getId()))
-                .collect(Collectors.toList());
-    }
-
-    @GetMapping("/search")
-    @PreAuthorize("hasAuthority('PATIENT_READ')")
-    public List<Patient> searchPatients(@RequestParam("query") String query, Authentication auth) {
-        auditService.logAction(auth, "READ", "PATIENT_MPI", null, "Executed Master Patient Index search for query: '" + query + "'");
-        List<Patient> matches = patientRepository.searchPatients(query);
-
-        boolean isFullAccess = auth != null && auth.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .anyMatch(r -> r.equals("ROLE_SYS_ADMIN") || r.equals("ROLE_ADMIN") || r.equals("ROLE_AUDITOR") || r.equals("ROLE_RECEPTIONIST"));
-
-        if (isFullAccess) {
-            return matches;
-        }
-
-        return matches.stream()
-                .filter(p -> patientSecurityService.canAccessPatient(auth, p.getId()))
-                .collect(Collectors.toList());
+        return patientRepository.findAll();
     }
 
     @GetMapping("/{id}")
@@ -101,7 +79,15 @@ public class PatientController {
         Patient patient = patientRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Patient record with ID " + id + " not found"));
 
-        auditService.logAction(auth, "READ", "PATIENT", String.valueOf(id), "Accessed patient demographic profile ID: " + id + " (" + patient.getFullName() + ")");
+        boolean isPatientSelf = auth != null && auth.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_PATIENT"));
+
+        if (isPatientSelf) {
+            auditService.logAction(auth, "READ_SELF", "PATIENT_PROFILE", String.valueOf(id), "Patient accessed their personal medical profile");
+        } else {
+            auditService.logAction(auth, "READ", "PATIENT", String.valueOf(id), "Viewed patient record for " + patient.getFullName() + " (MRN: " + patient.getPatientCode() + ")");
+        }
+
         return ResponseEntity.ok(patient);
     }
 
@@ -134,7 +120,26 @@ public class PatientController {
     @PreAuthorize("@patientSecurityService.canAccessUser(authentication, #userId)")
     public ResponseEntity<Patient> getPatientByUserId(@PathVariable Long userId, Authentication auth) {
         Patient patient = patientRepository.findByUserId(userId)
-                .orElseThrow(() -> new ResourceNotFoundException("No patient profile linked to user ID: " + userId));
+                .orElseGet(() -> {
+                    User user = userRepository.findById(userId).orElse(null);
+                    if (user != null && user.getEmail() != null) {
+                        Optional<Patient> byEmail = patientRepository.findFirstByEmailIgnoreCase(user.getEmail());
+                        if (byEmail.isPresent()) {
+                            Patient p = byEmail.get();
+                            p.setUser(user);
+                            return patientRepository.save(p);
+                        }
+                    }
+                    if (user != null) {
+                        Patient p = new Patient();
+                        p.setPatientCode("PAT-" + (1000 + (System.currentTimeMillis() % 9000)));
+                        p.setFullName(user.getFullName());
+                        p.setEmail(user.getEmail());
+                        p.setUser(user);
+                        return patientRepository.save(p);
+                    }
+                    throw new ResourceNotFoundException("No patient profile linked to user ID: " + userId);
+                });
 
         auditService.logAction(auth, "READ", "PATIENT_BY_USER", String.valueOf(userId), "Accessed patient profile linked to user ID: " + userId);
         return ResponseEntity.ok(patient);
@@ -159,47 +164,32 @@ public class PatientController {
         Patient patient = patientRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Patient record with ID " + id + " not found"));
 
-        boolean isPatientOnly = auth != null && auth.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_PATIENT"))
-                && auth.getAuthorities().stream()
-                .noneMatch(a -> a.getAuthority().equals("ROLE_ADMIN") || a.getAuthority().equals("ROLE_DOCTOR") || a.getAuthority().equals("ROLE_NURSE"));
-
-        if (updated.getFullName() != null) patient.setFullName(updated.getFullName());
-        if (updated.getPhone() != null) patient.setPhone(updated.getPhone());
-        if (updated.getEmail() != null) patient.setEmail(updated.getEmail());
-        if (updated.getAddress() != null) patient.setAddress(updated.getAddress());
-        if (updated.getEmergencyContact() != null) patient.setEmergencyContact(updated.getEmergencyContact());
-
-        if (updated.getDietaryHabits() != null) patient.setDietaryHabits(updated.getDietaryHabits());
-        if (updated.getSmokingStatus() != null) patient.setSmokingStatus(updated.getSmokingStatus());
-        if (updated.getAlcoholConsumption() != null) patient.setAlcoholConsumption(updated.getAlcoholConsumption());
-        if (updated.getExerciseRoutine() != null) patient.setExerciseRoutine(updated.getExerciseRoutine());
-        if (updated.getFoodAllergies() != null) patient.setFoodAllergies(updated.getFoodAllergies());
-
-        if (updated.getInsuranceProvider() != null) patient.setInsuranceProvider(updated.getInsuranceProvider());
-        if (updated.getInsurancePolicyNumber() != null) patient.setInsurancePolicyNumber(updated.getInsurancePolicyNumber());
-        if (updated.getInsuranceGroupNumber() != null) patient.setInsuranceGroupNumber(updated.getInsuranceGroupNumber());
-        if (updated.getCoveragePlan() != null) patient.setCoveragePlan(updated.getCoveragePlan());
-
-        if (!isPatientOnly) {
-            if (updated.getSsn() != null) patient.setSsn(updated.getSsn());
-            if (updated.getDateOfBirth() != null) patient.setDateOfBirth(updated.getDateOfBirth());
-            if (updated.getGender() != null) patient.setGender(updated.getGender());
-            if (updated.getBloodType() != null) patient.setBloodType(updated.getBloodType());
-            if (updated.getMedicalAlerts() != null) patient.setMedicalAlerts(updated.getMedicalAlerts());
-
-            if (updated.getPastMedicalHistory() != null) patient.setPastMedicalHistory(updated.getPastMedicalHistory());
-            if (updated.getSeriousConditions() != null) patient.setSeriousConditions(updated.getSeriousConditions());
-            if (updated.getSurgeriesAndProcedures() != null) patient.setSurgeriesAndProcedures(updated.getSurgeriesAndProcedures());
-            if (updated.getFamilyMedicalHistory() != null) patient.setFamilyMedicalHistory(updated.getFamilyMedicalHistory());
-        }
+        patient.setFullName(updated.getFullName());
+        patient.setPhone(updated.getPhone());
+        patient.setEmail(updated.getEmail());
+        patient.setAddress(updated.getAddress());
+        patient.setEmergencyContact(updated.getEmergencyContact());
+        patient.setInsuranceProvider(updated.getInsuranceProvider());
+        patient.setInsurancePolicyNumber(updated.getInsurancePolicyNumber());
+        patient.setInsuranceGroupNumber(updated.getInsuranceGroupNumber());
+        patient.setCoveragePlan(updated.getCoveragePlan());
+        patient.setMedicalAlerts(updated.getMedicalAlerts());
 
         Patient saved = patientRepository.save(patient);
-        String auditMsg = isPatientOnly
-                ? "Patient self-updated contact, insurance, & lifestyle details for patient ID: " + id
-                : "Updated demographic, habits, & clinical profile for patient ID: " + id;
-        auditService.logAction(auth, "UPDATE", "PATIENT", String.valueOf(id), auditMsg);
+        auditService.logAction(auth, "UPDATE", "PATIENT", String.valueOf(id), "Updated demographic profile for patient ID: " + id);
 
         return ResponseEntity.ok(saved);
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('ROLE_SYS_ADMIN')")
+    public ResponseEntity<Void> deletePatient(@PathVariable Long id, Authentication auth) {
+        Patient patient = patientRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Patient record with ID " + id + " not found"));
+
+        patientRepository.delete(patient);
+        auditService.logAction(auth, "DELETE", "PATIENT", String.valueOf(id), "Deleted patient record MRN: " + patient.getPatientCode());
+
+        return ResponseEntity.noContent().build();
     }
 }

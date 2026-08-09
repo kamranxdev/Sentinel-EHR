@@ -176,7 +176,7 @@ INSERT INTO user_roles (user_id, role_id) VALUES (16, 8);
 -- 7. PATIENTS
 -- ------------------------------------------------------------------------------
 INSERT INTO patients (id, patient_code, ssn, full_name, date_of_birth, gender, blood_type, phone, email, address, emergency_contact, insurance_provider, insurance_policy_number, insurance_group_number, coverage_plan, medical_alerts, user_id, created_at) 
-VALUES (1, 'PAT-1001', '459-00-1284', 'Kamran Khan', '1985-04-12', 'Male', 'O+', '+91 98765 43210', 'patient@medvault.org', '742 Marine Drive, Mumbai', 'Farah Khan (Wife) - +91 98765 98765', 'Star Health Insurance', 'STAR-9874102', 'GRP-55410', 'Premier Comprehensive Care', 'Type 2 Diabetes, Severe Penicillin Allergy, Mild Asthma', 9, CURRENT_TIMESTAMP);
+VALUES (1, 'PAT-1001', '459-00-1284', 'Kamran Khan', '1985-04-12', 'Male', 'O+', '+91 98765 43210', 'kamran.khan@example.com', '742 Marine Drive, Mumbai', 'Farah Khan (Wife) - +91 98765 98765', 'Star Health Insurance', 'STAR-9874102', 'GRP-55410', 'Premier Comprehensive Care', 'Type 2 Diabetes, Severe Penicillin Allergy, Mild Asthma', 9, CURRENT_TIMESTAMP);
 
 INSERT INTO patients (id, patient_code, ssn, full_name, date_of_birth, gender, blood_type, phone, email, address, emergency_contact, insurance_provider, insurance_policy_number, insurance_group_number, coverage_plan, medical_alerts, user_id, created_at) 
 VALUES (2, 'PAT-1002', '218-00-9831', 'Aarav Patel', '1972-09-28', 'Male', 'A+', '+91 98765 12345', 'aarav.patel@example.com', '1204 CG Road, Ahmedabad', 'Priya Patel (Wife) - +91 98765 87654', 'HDFC ERGO Health', 'HDFC-5510923', 'GRP-11092', 'Optima Secure', 'Essential Hypertension, Hyperlipidemia', 10, CURRENT_TIMESTAMP);
@@ -186,6 +186,9 @@ VALUES (3, 'PAT-1003', '781-00-4491', 'Ananya Sharma', '1996-11-05', 'Female', '
 
 INSERT INTO patients (id, patient_code, ssn, full_name, date_of_birth, gender, blood_type, phone, email, address, emergency_contact, insurance_provider, insurance_policy_number, insurance_group_number, coverage_plan, medical_alerts, user_id, created_at) 
 VALUES (4, 'PAT-1004', '312-00-5582', 'Rohan Mehta', '1990-07-22', 'Male', 'AB+', '+91 98765 88990', 'rohan.mehta@example.com', '88 Bandra Reclamation, Mumbai', 'Neha Mehta (Sister) - +91 98765 11223', 'Care Health Insurance', 'CARE-3341029', 'GRP-99401', 'Peanut Allergy', 12, CURRENT_TIMESTAMP);
+
+INSERT INTO patients (id, patient_code, ssn, full_name, date_of_birth, gender, blood_type, phone, email, address, emergency_contact, insurance_provider, insurance_policy_number, insurance_group_number, coverage_plan, medical_alerts, user_id, created_at) 
+VALUES (5, 'PAT-1005', '999-00-1111', 'Kamran Khan', '1985-04-12', 'Male', 'O+', '+91 98765 43210', 'patient@medvault.org', '742 Marine Drive, Mumbai', 'Farah Khan (Wife) - +91 98765 98765', 'Star Health Insurance', 'STAR-9874102', 'GRP-55410', 'Premier Comprehensive Care', 'Type 2 Diabetes, Severe Penicillin Allergy, Mild Asthma', 8, CURRENT_TIMESTAMP);
 
 -- ------------------------------------------------------------------------------
 -- 8. PATIENT CARE TEAM ASSIGNMENTS (ABAC)
