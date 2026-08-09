@@ -158,6 +158,8 @@ export class App implements OnInit, OnDestroy {
       claims: { label: 'Insurance Claims', icon: 'lucideReceipt' },
       ledger: { label: 'Audit Ledger', icon: 'lucideShieldCheck' },
       records: { label: 'SOAP Progress Notes', icon: 'lucideFileText' },
+      mpi: { label: 'Master Patient Index (MPI)', icon: 'lucideHeartPulse' },
+      eligibility: { label: 'Real-Time Eligibility (RTE)', icon: 'lucideShieldCheck' },
       'audit-ledger': { label: 'Compliance Audit Ledger', icon: 'lucideShieldCheck' },
       'fhir-explorer': { label: 'FHIR R4 API Explorer', icon: 'lucideShieldCheck' },
       admin: { label: 'System Administration', icon: 'lucideSettings' },
@@ -399,10 +401,7 @@ export class App implements OnInit, OnDestroy {
         {
           label: 'Reception Desk Workspace',
           items: [
-            { icon: 'lucideLayoutDashboard', label: 'Intake Hub Overview', routerLink: '/receptionist/dashboard' },
-            { icon: 'lucideCalendarClock', label: 'Appointment Desk & Check-in', routerLink: '/receptionist/appointments' },
-            { icon: 'lucideUserRound', label: 'Patient Demographic Intake', routerLink: '/receptionist/intake' },
-            { icon: 'lucideHeartPulse', label: 'Master Patient Index', routerLink: '/admin/patients' },
+            { icon: 'lucideLayoutDashboard', label: 'Front-Desk Command Center', routerLink: '/receptionist/dashboard' },
           ],
         },
       ];

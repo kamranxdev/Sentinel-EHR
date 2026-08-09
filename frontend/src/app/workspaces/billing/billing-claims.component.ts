@@ -60,7 +60,7 @@ import { lucideCreditCard, lucideSend, lucideShieldCheck } from '@ng-icons/lucid
                 <td hlmTableCell class="font-mono text-xs text-foreground">{{ claim.id }}</td>
                 <td hlmTableCell class="font-medium text-foreground text-xs">{{ claim.patientName }}</td>
                 <td hlmTableCell class="text-xs text-muted-foreground">{{ claim.carrier }}</td>
-                <td hlmTableCell class="text-xs font-semibold text-emerald-600">\${{ claim.amount }}</td>
+                <td hlmTableCell class="text-xs font-semibold text-emerald-600">₹{{ claim.amount | number:'1.2-2' }}</td>
                 <td hlmTableCell>
                   <span hlmBadge [variant]="claim.status === 'CLEARED' ? 'default' : 'outline'" class="text-[10px]">
                     {{ claim.status }}
@@ -82,10 +82,10 @@ import { lucideCreditCard, lucideSend, lucideShieldCheck } from '@ng-icons/lucid
 })
 export class BillingClaimsComponent implements OnInit {
   claims = signal([
-    { id: 'CLM-901', patientName: 'Kamran Khan', carrier: 'Star Health Insurance', amount: 450.0, status: 'CLEARED' },
-    { id: 'CLM-902', patientName: 'Aarav Patel', carrier: 'HDFC ERGO Health', amount: 820.0, status: 'PENDING' },
-    { id: 'CLM-903', patientName: 'Ananya Sharma', carrier: 'ICICI Lombard', amount: 310.0, status: 'CLEARED' },
-    { id: 'CLM-904', patientName: 'Rohan Mehta', carrier: 'Care Health Insurance', amount: 640.0, status: 'PENDING' },
+    { id: 'CLM-901', patientName: 'Kamran Khan', carrier: 'Star Health Insurance', amount: 4500.0, status: 'CLEARED' },
+    { id: 'CLM-902', patientName: 'Aarav Patel', carrier: 'HDFC ERGO Health', amount: 8200.0, status: 'PENDING' },
+    { id: 'CLM-903', patientName: 'Ananya Sharma', carrier: 'ICICI Lombard', amount: 3100.0, status: 'CLEARED' },
+    { id: 'CLM-904', patientName: 'Rohan Mehta', carrier: 'Care Health Insurance', amount: 6400.0, status: 'PENDING' },
   ]);
 
   constructor(

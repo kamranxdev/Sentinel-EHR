@@ -1,6 +1,6 @@
-# MedVault Security & HIPAA Compliance Guide
+# MedVault Security & Healthcare Compliance Guide
 
-This document details the security infrastructure, authentication model, access control policies, and HIPAA compliance mechanisms of the **MedVault EHR Platform**.
+This document details the security infrastructure, authentication model, access control policies, and compliance mechanisms of the **MedVault EHR Platform** under **ABDM (Ayushman Bharat Digital Mission)**, **DISHA**, **India DPDP Act 2023**, **GDPR**, and **ISO 27001** standards.
 
 ---
 
@@ -88,20 +88,21 @@ Imagine putting a document through a paper shredder with a unique pattern. You c
 
 ---
 
-## 📊 HIPAA § 164.312 Technical Safeguard Compliance Matrix
+## 📊 ABDM, DISHA & ISO 27001 Technical Safeguard Compliance Matrix
 
-MedVault's security design maps directly to specific HIPAA technical safeguard requirements:
+MedVault's security design maps directly to international and national healthcare data protection frameworks:
 
-| HIPAA Requirement | Regulation Reference | MedVault Implementation |
+| Compliance Requirement | Framework Reference | MedVault Implementation |
 | :--- | :--- | :--- |
-| **Unique User Identification** | § 164.312(a)(2)(i) | Every user has a unique `username` and `id`. JWT `sub` claim identifies every request. |
-| **Emergency Access Procedure** | § 164.312(a)(2)(ii) | Admin users (`ROLE_ADMIN`) can register and manage all accounts via `/api/auth/admin/create-user`. |
-| **Automatic Logoff** | § 164.312(a)(2)(iii) | JWT tokens expire after 24 hours (`exp` claim). Frontend clears token on explicit logout. |
-| **Encryption** | § 164.312(a)(2)(iv) | Passwords hashed with BCrypt. All API traffic transmitted over HTTPS (TLS). |
-| **Audit Controls** | § 164.312(b) | Immutable WORM (Write Once, Read Many) audit log records every data access with user, role, IP, timestamp. |
-| **Integrity Controls** | § 164.312(c)(1) | HMAC-SHA256 JWT signatures prevent token tampering. Database foreign key constraints enforce referential integrity. |
-| **Person Authentication** | § 164.312(d) | Multi-factor: unique credentials + role-based JWT + method-level `@PreAuthorize` authorization checks. |
-| **Transmission Security** | § 164.312(e)(1) | HTTPS/TLS encryption in transit. CORS policy restricts origins. |
+| **Unique User Identification** | ABDM HDMP / DISHA § 4 | Every user has a unique `username` and `id`. JWT `sub` claim identifies every request. |
+| **ABHA Health ID Integration** | ABDM Health ID Spec | Supports 14-digit ABHA Number (`12-3456-7890-1234`) and `@abdm` handles via FHIR identifiers. |
+| **Emergency Access Procedure** | ISO 27001 A.9.2 | Admin users (`ROLE_ADMIN`) can register and manage accounts via `/api/auth/admin/create-user`. |
+| **Automatic Logoff & Token Expiry** | DISHA § 7 / GDPR Art 32 | JWT tokens expire after 24 hours (`exp` claim). Frontend clears token on explicit logout. |
+| **Cryptographic Protection** | ISO 27001 A.10 / DPDP Act | Passwords hashed with BCrypt. All API traffic transmitted over HTTPS (TLS). |
+| **Immutable Audit Controls** | ABDM HDMP / DISHA WORM | Immutable WORM (Write Once, Read Many) audit log records every data access with user, role, IP, timestamp. |
+| **Integrity & Access Guard** | DISHA / ISO 27001 A.12 | HMAC-SHA256 JWT signatures prevent token tampering. Foreign key constraints enforce referential integrity. |
+| **Data Protection & Privacy** | India DPDP Act 2023 / GDPR | Multi-factor: unique credentials + role-based JWT + method-level `@PreAuthorize` authorization checks. |
+| **Transmission Security** | ISO 27001 A.13 | HTTPS/TLS encryption in transit. Strict CORS policy restricts unauthorized origins. |
 
 ---
 

@@ -226,9 +226,9 @@ export const routes: Routes = [
     data: { roles: ['ROLE_RECEPTIONIST'] },
   },
   {
-    path: 'receptionist/appointments',
+    path: 'receptionist/mpi',
     loadComponent: () =>
-      import('./workspaces/receptionist/receptionist-appointments.component').then((m) => m.ReceptionistAppointmentsComponent),
+      import('./workspaces/receptionist/receptionist-mpi.component').then((m) => m.ReceptionistMPIComponent),
     canActivate: [authGuard, roleGuard],
     data: { roles: ['ROLE_RECEPTIONIST'] },
   },
@@ -236,6 +236,20 @@ export const routes: Routes = [
     path: 'receptionist/intake',
     loadComponent: () =>
       import('./workspaces/receptionist/receptionist-intake.component').then((m) => m.ReceptionistIntakeComponent),
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['ROLE_RECEPTIONIST'] },
+  },
+  {
+    path: 'receptionist/eligibility',
+    loadComponent: () =>
+      import('./workspaces/receptionist/receptionist-eligibility.component').then((m) => m.ReceptionistEligibilityComponent),
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['ROLE_RECEPTIONIST'] },
+  },
+  {
+    path: 'receptionist/appointments',
+    loadComponent: () =>
+      import('./workspaces/receptionist/receptionist-appointments.component').then((m) => m.ReceptionistAppointmentsComponent),
     canActivate: [authGuard, roleGuard],
     data: { roles: ['ROLE_RECEPTIONIST'] },
   },

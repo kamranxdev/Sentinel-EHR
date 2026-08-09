@@ -9,7 +9,7 @@ import { HlmBadgeImports } from '@spartan-ng/helm/badge';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmTableImports } from '@spartan-ng/helm/table';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { lucideReceipt, lucideDollarSign, lucideFileText } from '@ng-icons/lucide';
+import { lucideReceipt, lucideIndianRupee, lucideFileText } from '@ng-icons/lucide';
 
 @Component({
   selector: 'app-billing-invoices',
@@ -25,7 +25,7 @@ import { lucideReceipt, lucideDollarSign, lucideFileText } from '@ng-icons/lucid
   providers: [
     provideIcons({
       lucideReceipt,
-      lucideDollarSign,
+      lucideIndianRupee,
       lucideFileText,
     }),
   ],
@@ -59,7 +59,7 @@ import { lucideReceipt, lucideDollarSign, lucideFileText } from '@ng-icons/lucid
                 <td hlmTableCell class="font-mono text-xs text-foreground">{{ invoice.id }}</td>
                 <td hlmTableCell class="font-medium text-foreground text-xs">{{ invoice.patientName }}</td>
                 <td hlmTableCell class="text-xs text-muted-foreground">{{ invoice.date }}</td>
-                <td hlmTableCell class="text-xs font-semibold text-emerald-600">\${{ invoice.amount }}</td>
+                <td hlmTableCell class="text-xs font-semibold text-emerald-600">₹{{ invoice.amount | number:'1.2-2' }}</td>
                 <td hlmTableCell>
                   <span hlmBadge [variant]="invoice.status === 'PAID' ? 'default' : 'outline'" class="text-[10px]">
                     {{ invoice.status }}
@@ -80,10 +80,10 @@ import { lucideReceipt, lucideDollarSign, lucideFileText } from '@ng-icons/lucid
 })
 export class BillingInvoicesComponent implements OnInit {
   invoices = signal([
-    { id: 'INV-1001', patientName: 'Kamran Khan', date: '2026-08-08', amount: 150.0, status: 'PAID' },
-    { id: 'INV-1002', patientName: 'Aarav Patel', date: '2026-08-07', amount: 280.0, status: 'PENDING' },
-    { id: 'INV-1003', patientName: 'Ananya Sharma', date: '2026-08-06', amount: 95.0, status: 'PAID' },
-    { id: 'INV-1004', patientName: 'Rohan Mehta', date: '2026-08-05', amount: 210.0, status: 'PENDING' },
+    { id: 'INV-1001', patientName: 'Kamran Khan', date: '2026-08-08', amount: 1500.0, status: 'PAID' },
+    { id: 'INV-1002', patientName: 'Aarav Patel', date: '2026-08-07', amount: 2800.0, status: 'PENDING' },
+    { id: 'INV-1003', patientName: 'Ananya Sharma', date: '2026-08-06', amount: 950.0, status: 'PAID' },
+    { id: 'INV-1004', patientName: 'Rohan Mehta', date: '2026-08-05', amount: 2100.0, status: 'PENDING' },
   ]);
 
   constructor(

@@ -71,26 +71,32 @@ public class SyntheticDataService {
             String lastName = LAST_NAMES[rand.nextInt(LAST_NAMES.length)];
             String fullName = firstName + " " + lastName;
             String mrn = "SYN-PAT-" + (1000 + rand.nextInt(9000));
+            String abhaId = String.format("%02d-%04d-%04d-%04d", 10 + rand.nextInt(89), 1000 + rand.nextInt(9000), 1000 + rand.nextInt(9000), 1000 + rand.nextInt(9000));
             String ssn = String.format("%03d-%02d-%04d", 100 + rand.nextInt(800), 10 + rand.nextInt(89), 1000 + rand.nextInt(8999));
+            String nationalId = "AADHAAR-" + (1000 + rand.nextInt(8999)) + "-" + (1000 + rand.nextInt(8999));
             String city = CITIES[rand.nextInt(CITIES.length)];
+            String pinCode = String.valueOf(110001 + rand.nextInt(800000));
             String insurer = INSURERS[rand.nextInt(INSURERS.length)];
 
             Patient p = new Patient();
             p.setPatientCode(mrn);
             p.setSsn(ssn);
+            p.setAbhaId(abhaId);
+            p.setNationalId(nationalId);
             p.setFullName(fullName);
             p.setDateOfBirth(LocalDate.of(1955 + rand.nextInt(45), 1 + rand.nextInt(12), 1 + rand.nextInt(28)));
             p.setGender(rand.nextBoolean() ? "Female" : "Male");
             p.setBloodType(List.of("A+", "O+", "B+", "AB+", "O-", "A-").get(rand.nextInt(6)));
-            p.setPhone("+1 (555) " + (100 + rand.nextInt(899)) + "-" + (1000 + rand.nextInt(8999)));
-            p.setEmail(firstName.toLowerCase() + "." + lastName.toLowerCase() + "@synthetic-health.org");
-            p.setAddress((100 + rand.nextInt(900)) + " Medical Park Way, " + city);
-            p.setEmergencyContact("Next of Kin - +1 (555) " + (100 + rand.nextInt(899)) + "-9999");
+            p.setPhone("+91 9" + (100000000 + rand.nextInt(899999999)));
+            p.setEmail(firstName.toLowerCase() + "." + lastName.toLowerCase() + "@medvault.in");
+            p.setAddress((10 + rand.nextInt(90)) + " Healthcare Boulevard, " + city);
+            p.setPinCode(pinCode);
+            p.setEmergencyContact("Family Kin - +91 98" + (10000000 + rand.nextInt(89999999)));
             p.setInsuranceProvider(insurer);
             p.setInsurancePolicyNumber("POL-" + (100000 + rand.nextInt(899999)));
             p.setInsuranceGroupNumber("GRP-" + (1000 + rand.nextInt(8999)));
-            p.setCoveragePlan("Comprehensive Gold Choice");
-            p.setMedicalAlerts("Synthetic Cohort Profile - High statistical fidelity");
+            p.setCoveragePlan("Comprehensive PM-JAY & Health Shield");
+            p.setMedicalAlerts("Synthetic Cohort Profile - ABDM / DISHA High Fidelity");
 
             Patient saved = patientRepository.save(p);
             generated.add(saved);

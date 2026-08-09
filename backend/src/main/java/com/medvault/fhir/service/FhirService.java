@@ -114,12 +114,28 @@ public class FhirService {
                 "type", Map.of("text", "Medical Record Number (MRN)")
             ));
         }
+        if (p.getAbhaId() != null && !p.getAbhaId().isEmpty()) {
+            identifiers.add(Map.of(
+                "use", "official",
+                "system", "https://healthid.ndhm.gov.in",
+                "value", p.getAbhaId(),
+                "type", Map.of("text", "ABHA Health Account ID")
+            ));
+        }
+        if (p.getNationalId() != null && !p.getNationalId().isEmpty()) {
+            identifiers.add(Map.of(
+                "use", "secondary",
+                "system", "urn:oid:2.16.356.1.1",
+                "value", p.getNationalId(),
+                "type", Map.of("text", "National Identifier / Aadhaar Ref")
+            ));
+        }
         if (p.getSsn() != null && !p.getSsn().isEmpty()) {
             identifiers.add(Map.of(
                 "use", "secondary",
                 "system", "urn:oid:2.16.840.1.113883.4.1.ssn",
                 "value", p.getSsn(),
-                "type", Map.of("text", "Social Security Number")
+                "type", Map.of("text", "National Identity Number")
             ));
         }
         r.put("identifier", identifiers);
@@ -521,7 +537,11 @@ public class FhirService {
             for (Map<String, Object> idMap : identifiers) {
                 String val = (String) idMap.get("value");
                 String sys = (String) idMap.get("system");
-                if ("urn:oid:2.16.840.1.113883.4.1.ssn".equalsIgnoreCase(sys)) {
+                if ("https://healthid.ndhm.gov.in".equalsIgnoreCase(sys)) {
+                    p.setAbhaId(val);
+                } else if ("urn:oid:2.16.356.1.1".equalsIgnoreCase(sys)) {
+                    p.setNationalId(val);
+                } else if ("urn:oid:2.16.840.1.113883.4.1.ssn".equalsIgnoreCase(sys)) {
                     p.setSsn(val);
                 } else if (val != null && !val.isEmpty()) {
                     p.setPatientCode(val);

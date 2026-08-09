@@ -19,6 +19,8 @@ public interface PatientRepository extends JpaRepository<Patient, Long> {
     @Query("SELECT p FROM Patient p WHERE " +
            "LOWER(p.fullName) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
            "LOWER(p.patientCode) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+           "LOWER(p.abhaId) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
+           "LOWER(p.nationalId) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
            "LOWER(p.ssn) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
            "LOWER(p.phone) LIKE LOWER(CONCAT('%', :query, '%')) OR " +
            "LOWER(p.email) LIKE LOWER(CONCAT('%', :query, '%'))")

@@ -18,6 +18,8 @@ public class Patient {
     private String patientCode; // MRN
 
     private String ssn;
+    private String abhaId;
+    private String nationalId;
 
     @Column(nullable = false)
     private String fullName;
@@ -28,6 +30,7 @@ public class Patient {
     private String phone;
     private String email;
     private String address;
+    private String pinCode;
     private String emergencyContact;
 
     private String insuranceProvider;
@@ -90,6 +93,22 @@ public class Patient {
         this.ssn = ssn;
     }
 
+    public String getAbhaId() {
+        return abhaId;
+    }
+
+    public void setAbhaId(String abhaId) {
+        this.abhaId = abhaId;
+    }
+
+    public String getNationalId() {
+        return nationalId;
+    }
+
+    public void setNationalId(String nationalId) {
+        this.nationalId = nationalId;
+    }
+
     public String getFullName() {
         return fullName;
     }
@@ -144,6 +163,14 @@ public class Patient {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public String getPinCode() {
+        return pinCode;
+    }
+
+    public void setPinCode(String pinCode) {
+        this.pinCode = pinCode;
     }
 
     public String getEmergencyContact() {

@@ -32,7 +32,7 @@ flowchart TD
         ClinicalSvc["ClinicalServices (Vitals, Encounters, eRx, Labs)"]
         SafetyEngine["SmartSafetyService (RxNorm Allergy Checking)"]
         BillingSvc["Billing & RCM Subsystem"]
-        AuditSvc["AuditTrailService (HIPAA § 164.312 WORM Ledger)"]
+        AuditSvc["AuditTrailService (ABDM & DISHA WORM Ledger)"]
         SyntheaSvc["SyntheaPipelineService (Synthea Generator Engine)"]
         FhirSvc["FhirService (HL7 FHIR R4 Interoperability)"]
     end
@@ -74,7 +74,7 @@ To make MedVault's design intuitive across clinical and engineering teams, consi
 | **Spring Security & JWT Filter** | **Hospital Badge Scanner & Gatekeeper** | Intercepts every incoming HTTPS request, validates cryptographic token signatures, and verifies user credentials. |
 | **Hybrid RBAC + ABAC Engine** | **Department Door Badge Reader + Attending Roster Check** | Evaluates whether the user's role allows the action *AND* whether the user has a valid treatment relationship/department match for the target patient. |
 | **Smart Allergy Safety Engine** | **Pharmacist Double-Check Alert** | Cross-references new prescription orders against documented RxNorm patient allergies and flags contraindications before finalizing orders. |
-| **HIPAA WORM Audit Ledger** | **Flight Recorder Black Box** | An immutable, append-only vault that logs every data action (who, what, when, IP address) for regulatory compliance under HIPAA § 164.312(b). |
+| **ABDM & DISHA Audit Ledger** | **Flight Recorder Black Box** | An immutable, append-only vault that logs every data action (who, what, when, IP address) for regulatory compliance under DISHA & ABDM. |
 | **Synthea Generator Pipeline** | **Medical Holodeck** | Runs the Synthea Java framework to simulate realistic patient cohorts and generate FHIR R4 bundles. |
 | **HL7 FHIR R4 Subsystem** | **Universal Interoperability Translator** | Converts internal MedVault entities into standard FHIR R4 JSON resources (`Patient`, `Encounter`, `Observation`, `MedicationRequest`) for exchange. |
 

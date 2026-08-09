@@ -20,6 +20,11 @@ public class GlobalExceptionHandler {
         return buildErrorResponse(HttpStatus.NOT_FOUND, "Resource Not Found", ex.getMessage(), request.getRequestURI());
     }
 
+    @ExceptionHandler(org.springframework.web.servlet.resource.NoResourceFoundException.class)
+    public ResponseEntity<Map<String, Object>> handleNoResourceFound(org.springframework.web.servlet.resource.NoResourceFoundException ex, HttpServletRequest request) {
+        return buildErrorResponse(HttpStatus.NOT_FOUND, "Resource Not Found", "The requested static resource or API endpoint was not found: " + ex.getResourcePath(), request.getRequestURI());
+    }
+
     @ExceptionHandler({AccessDeniedException.class, AccessDeniedCustomException.class})
     public ResponseEntity<Map<String, Object>> handleAccessDenied(Exception ex, HttpServletRequest request) {
         return buildErrorResponse(HttpStatus.FORBIDDEN, "Access Denied", "You are not authorized to access this clinical resource.", request.getRequestURI());

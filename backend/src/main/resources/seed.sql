@@ -13,7 +13,7 @@ INSERT INTO departments (id, name, code, description) VALUES (4, 'Clinical Patho
 INSERT INTO departments (id, name, code, description) VALUES (5, 'Clinical Pharmacy Services', 'PHARM', 'Medication Reconciliation, eRx Verification, Dispensing');
 INSERT INTO departments (id, name, code, description) VALUES (6, 'Revenue Cycle & Patient Billing', 'BILL', 'Invoicing, Insurance Claims, Financial Audits');
 INSERT INTO departments (id, name, code, description) VALUES (7, 'Platform Administration & Security', 'ADM', 'System Infrastructure & Security Governance');
-INSERT INTO departments (id, name, code, description) VALUES (8, 'Regulatory Compliance & Forensics', 'AUD', 'HIPAA § 164.312 Compliance & WORM Audits');
+INSERT INTO departments (id, name, code, description) VALUES (8, 'Regulatory Compliance & Forensics', 'AUD', 'ABDM / DISHA & ISO 27001 WORM Audits');
 
 -- ------------------------------------------------------------------------------
 -- 2. ROLES (10 Baseline Production Roles + Legacy Alias)
@@ -54,7 +54,7 @@ INSERT INTO permissions (id, code, category, description) VALUES (18, 'LAB_RESUL
 INSERT INTO permissions (id, code, category, description) VALUES (19, 'LAB_RESULT_READ', 'LABORATORY', 'View lab result reports');
 INSERT INTO permissions (id, code, category, description) VALUES (20, 'INVOICE_CREATE', 'BILLING', 'Generate patient invoice');
 INSERT INTO permissions (id, code, category, description) VALUES (21, 'INVOICE_READ', 'BILLING', 'View financial billing invoices');
-INSERT INTO permissions (id, code, category, description) VALUES (22, 'AUDIT_LOG_READ', 'SYSTEM', 'Read HIPAA WORM audit log');
+INSERT INTO permissions (id, code, category, description) VALUES (22, 'AUDIT_LOG_READ', 'SYSTEM', 'Read ABDM / DISHA WORM audit log');
 INSERT INTO permissions (id, code, category, description) VALUES (23, 'USER_CREATE', 'SYSTEM', 'Provision new staff user');
 
 -- ------------------------------------------------------------------------------
@@ -175,20 +175,20 @@ INSERT INTO user_roles (user_id, role_id) VALUES (16, 8);
 -- ------------------------------------------------------------------------------
 -- 7. PATIENTS
 -- ------------------------------------------------------------------------------
-INSERT INTO patients (id, patient_code, ssn, full_name, date_of_birth, gender, blood_type, phone, email, address, emergency_contact, insurance_provider, insurance_policy_number, insurance_group_number, coverage_plan, medical_alerts, user_id, created_at) 
-VALUES (1, 'PAT-1001', '459-00-1284', 'Kamran Khan', '1985-04-12', 'Male', 'O+', '+91 98765 43210', 'kamran.khan@example.com', '742 Marine Drive, Mumbai', 'Farah Khan (Wife) - +91 98765 98765', 'Star Health Insurance', 'STAR-9874102', 'GRP-55410', 'Premier Comprehensive Care', 'Type 2 Diabetes, Severe Penicillin Allergy, Mild Asthma', 9, CURRENT_TIMESTAMP);
+INSERT INTO patients (id, patient_code, ssn, abha_id, national_id, full_name, date_of_birth, gender, blood_type, phone, email, address, pin_code, emergency_contact, insurance_provider, insurance_policy_number, insurance_group_number, coverage_plan, medical_alerts, user_id, created_at) 
+VALUES (1, 'PAT-1001', '459-00-1284', '91-4590-1284-9001', 'AADHAAR-4590-1284', 'Kamran Khan', '1985-04-12', 'Male', 'O+', '+91 98765 43210', 'kamran.khan@example.com', '742 Marine Drive, Mumbai', '400001', 'Farah Khan (Wife) - +91 98765 98765', 'Star Health Insurance', 'STAR-9874102', 'GRP-55410', 'Premier Comprehensive Care', 'Type 2 Diabetes, Severe Penicillin Allergy, Mild Asthma', 9, CURRENT_TIMESTAMP);
 
-INSERT INTO patients (id, patient_code, ssn, full_name, date_of_birth, gender, blood_type, phone, email, address, emergency_contact, insurance_provider, insurance_policy_number, insurance_group_number, coverage_plan, medical_alerts, user_id, created_at) 
-VALUES (2, 'PAT-1002', '218-00-9831', 'Aarav Patel', '1972-09-28', 'Male', 'A+', '+91 98765 12345', 'aarav.patel@example.com', '1204 CG Road, Ahmedabad', 'Priya Patel (Wife) - +91 98765 87654', 'HDFC ERGO Health', 'HDFC-5510923', 'GRP-11092', 'Optima Secure', 'Essential Hypertension, Hyperlipidemia', 10, CURRENT_TIMESTAMP);
+INSERT INTO patients (id, patient_code, ssn, abha_id, national_id, full_name, date_of_birth, gender, blood_type, phone, email, address, pin_code, emergency_contact, insurance_provider, insurance_policy_number, insurance_group_number, coverage_plan, medical_alerts, user_id, created_at) 
+VALUES (2, 'PAT-1002', '218-00-9831', '91-2180-0983-1002', 'AADHAAR-2180-9831', 'Aarav Patel', '1972-09-28', 'Male', 'A+', '+91 98765 12345', 'aarav.patel@example.com', '1204 CG Road, Ahmedabad', '380009', 'Priya Patel (Wife) - +91 98765 87654', 'HDFC ERGO Health', 'HDFC-5510923', 'GRP-11092', 'Optima Secure', 'Essential Hypertension, Hyperlipidemia', 10, CURRENT_TIMESTAMP);
 
-INSERT INTO patients (id, patient_code, ssn, full_name, date_of_birth, gender, blood_type, phone, email, address, emergency_contact, insurance_provider, insurance_policy_number, insurance_group_number, coverage_plan, medical_alerts, user_id, created_at) 
-VALUES (3, 'PAT-1003', '781-00-4491', 'Ananya Sharma', '1996-11-05', 'Female', 'B-', '+91 98765 67890', 'ananya.sharma@example.com', '45 Park Street, Kolkata', 'Rajesh Sharma (Father) - +91 98765 76543', 'ICICI Lombard', 'ICI-7740192', 'GRP-88102', 'Health Shield Gold', 'Latex Allergy', 11, CURRENT_TIMESTAMP);
+INSERT INTO patients (id, patient_code, ssn, abha_id, national_id, full_name, date_of_birth, gender, blood_type, phone, email, address, pin_code, emergency_contact, insurance_provider, insurance_policy_number, insurance_group_number, coverage_plan, medical_alerts, user_id, created_at) 
+VALUES (3, 'PAT-1003', '781-00-4491', '91-7810-0449-1003', 'AADHAAR-7810-4491', 'Ananya Sharma', '1996-11-05', 'Female', 'B-', '+91 98765 67890', 'ananya.sharma@example.com', '45 Park Street, Kolkata', '700016', 'Rajesh Sharma (Father) - +91 98765 76543', 'ICICI Lombard', 'ICI-7740192', 'GRP-88102', 'Health Shield Gold', 'Latex Allergy', 11, CURRENT_TIMESTAMP);
 
-INSERT INTO patients (id, patient_code, ssn, full_name, date_of_birth, gender, blood_type, phone, email, address, emergency_contact, insurance_provider, insurance_policy_number, insurance_group_number, coverage_plan, medical_alerts, user_id, created_at) 
-VALUES (4, 'PAT-1004', '312-00-5582', 'Rohan Mehta', '1990-07-22', 'Male', 'AB+', '+91 98765 88990', 'rohan.mehta@example.com', '88 Bandra Reclamation, Mumbai', 'Neha Mehta (Sister) - +91 98765 11223', 'Care Health Insurance', 'CARE-3341029', 'GRP-99401', 'Peanut Allergy', 12, CURRENT_TIMESTAMP);
+INSERT INTO patients (id, patient_code, ssn, abha_id, national_id, full_name, date_of_birth, gender, blood_type, phone, email, address, pin_code, emergency_contact, insurance_provider, insurance_policy_number, insurance_group_number, coverage_plan, medical_alerts, user_id, created_at) 
+VALUES (4, 'PAT-1004', '312-00-5582', '91-3120-0558-2004', 'AADHAAR-3120-5582', 'Rohan Mehta', '1990-07-22', 'Male', 'AB+', '+91 98765 88990', 'rohan.mehta@example.com', '88 Bandra Reclamation, Mumbai', '400050', 'Neha Mehta (Sister) - +91 98765 11223', 'Care Health Insurance', 'CARE-3341029', 'GRP-99401', 'Peanut Allergy', 12, CURRENT_TIMESTAMP);
 
-INSERT INTO patients (id, patient_code, ssn, full_name, date_of_birth, gender, blood_type, phone, email, address, emergency_contact, insurance_provider, insurance_policy_number, insurance_group_number, coverage_plan, medical_alerts, user_id, created_at) 
-VALUES (5, 'PAT-1005', '999-00-1111', 'Kamran Khan', '1985-04-12', 'Male', 'O+', '+91 98765 43210', 'patient@medvault.org', '742 Marine Drive, Mumbai', 'Farah Khan (Wife) - +91 98765 98765', 'Star Health Insurance', 'STAR-9874102', 'GRP-55410', 'Premier Comprehensive Care', 'Type 2 Diabetes, Severe Penicillin Allergy, Mild Asthma', 8, CURRENT_TIMESTAMP);
+INSERT INTO patients (id, patient_code, ssn, abha_id, national_id, full_name, date_of_birth, gender, blood_type, phone, email, address, pin_code, emergency_contact, insurance_provider, insurance_policy_number, insurance_group_number, coverage_plan, medical_alerts, user_id, created_at) 
+VALUES (5, 'PAT-1005', '999-00-1111', '91-9990-0111-1005', 'AADHAAR-9990-1111', 'Kamran Khan', '1985-04-12', 'Male', 'O+', '+91 98765 43210', 'patient@medvault.org', '742 Marine Drive, Mumbai', '400001', 'Farah Khan (Wife) - +91 98765 98765', 'Star Health Insurance', 'STAR-9874102', 'GRP-55410', 'Premier Comprehensive Care', 'Type 2 Diabetes, Severe Penicillin Allergy, Mild Asthma', 8, CURRENT_TIMESTAMP);
 
 -- ------------------------------------------------------------------------------
 -- 8. PATIENT CARE TEAM ASSIGNMENTS (ABAC)

@@ -40,7 +40,7 @@ import { lucideShieldCheck, lucideFileText, lucideUserCheck, lucideSearch } from
             <h1 class="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
               Compliance & Audit Workspace
               <span hlmBadge variant="outline" class="text-[10px] bg-emerald-500/10 text-emerald-600 border-emerald-500/30">
-                HIPAA WORM Vault
+                ABDM / DISHA WORM Vault
               </span>
             </h1>
             <p class="text-xs text-muted-foreground mt-0.5">
@@ -55,7 +55,7 @@ import { lucideShieldCheck, lucideFileText, lucideUserCheck, lucideSearch } from
         <app-stat-card
           title="Total Audit Events"
           [value]="auditLogs().length"
-          subtitle="HIPAA Compliance Ledger"
+          subtitle="ABDM / DISHA Compliance Ledger"
           icon="lucideShieldCheck"
           iconBgClass="bg-emerald-500/10 text-emerald-600" />
         <app-stat-card

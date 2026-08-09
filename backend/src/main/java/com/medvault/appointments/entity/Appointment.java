@@ -45,6 +45,9 @@ public class Appointment {
     @Column(name = "follow_up_date")
     private LocalDateTime followUpDate;
 
+    @Column(name = "arrived_at")
+    private LocalDateTime arrivedAt;
+
     @ManyToOne
     @JoinColumn(name = "vitals_id")
     private Vitals vitals;
@@ -150,6 +153,14 @@ public class Appointment {
 
     public void setFollowUpDate(LocalDateTime followUpDate) {
         this.followUpDate = followUpDate;
+    }
+
+    public LocalDateTime getArrivedAt() {
+        return arrivedAt;
+    }
+
+    public void setArrivedAt(LocalDateTime arrivedAt) {
+        this.arrivedAt = arrivedAt;
     }
 
     public Vitals getVitals() {

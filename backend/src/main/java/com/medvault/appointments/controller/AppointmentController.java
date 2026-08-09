@@ -137,6 +137,52 @@ public class AppointmentController {
         return ResponseEntity.ok(saved);
     }
 
+    @PutMapping("/{id}/stage")
+    @PreAuthorize("hasAnyAuthority('APPOINTMENT_UPDATE', 'ROLE_RECEPTIONIST', 'ROLE_NURSE', 'ROLE_DOCTOR', 'ROLE_ADMIN')")
+    public ResponseEntity<Appointment> updateAppointmentStage(@PathVariable Long id,
+                                                                @RequestParam String stage,
+                                                                Authentication auth) {
+        Appointment apt = appointmentRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Appointment #" + id + " not found"));
+
+        String oldStage = apt.getStage() != null ? apt.getStage() : "SCHEDULED";
+        apt.setStage(stage);
+        apt.setStatus(stage);
+
+        if ("ARRIVED".equalsIgnoreCase(stage) || "CHECKED_IN".equalsIgnoreCase(stage)) {
+            if (apt.getArrivedAt() == null) {
+                apt.setArrivedAt(LocalDateTime.now());
+            }
+        }
+
+        Appointment saved = appointmentRepository.save(apt);
+        auditService.logAction(auth, "APPOINTMENT_STAGE_TRANSITION", "APPOINTMENT", String.valueOf(id),
+                String.format("Transitioned appointment #%d stage: %s -> %s (Patient MRN: %s)",
+                        id, oldStage, stage, apt.getPatient() != null ? apt.getPatient().getPatientCode() : "N/A"));
+
+        return ResponseEntity.ok(saved);
+    }
+
+    @GetMapping("/resources")
+    @PreAuthorize("hasAnyAuthority('APPOINTMENT_READ', 'ROLE_RECEPTIONIST', 'ROLE_DOCTOR', 'ROLE_NURSE', 'ROLE_ADMIN')")
+    public ResponseEntity<Map<String, Object>> getMultiResourceGrid(Authentication auth) {
+        List<Appointment> allApts = appointmentRepository.findAll();
+        
+        List<Map<String, String>> rooms = List.of(
+            Map.of("id", "ROOM-101", "name", "Exam Room 1 - General Clinic", "type", "Consultation"),
+            Map.of("id", "ROOM-102", "name", "Exam Room 2 - Cardiology", "type", "Echocardiography"),
+            Map.of("id", "ROOM-103", "name", "Exam Room 3 - Urgent Care & Triage", "type", "Triage"),
+            Map.of("id", "ROOM-104", "name", "Procedure Suite A", "type", "Minor Surgery")
+        );
+
+        Map<String, Object> grid = new HashMap<>();
+        grid.put("appointments", allApts);
+        grid.put("rooms", rooms);
+        grid.put("facility", "Central Healthcare Medical Center - Main Clinic");
+        
+        return ResponseEntity.ok(grid);
+    }
+
     @PostMapping("/{id}/check-in")
     @PreAuthorize("hasAuthority('APPOINTMENT_UPDATE') and @patientSecurityService.canAccessAppointment(authentication, #id)")
     public ResponseEntity<Appointment> checkInPatient(@PathVariable Long id,

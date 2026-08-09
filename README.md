@@ -1,8 +1,8 @@
 # MedVault Enterprise EHR Platform
 
-> **HL7 FHIR R4 & HIPAA § 164.312 Compliant Electronic Health Record (EHR) & Clinical Management System**
+> **HL7 FHIR R4, ABDM & DISHA Compliant Electronic Health Record (EHR) & Clinical Management System**
 
-MedVault is an enterprise-scale Electronic Health Record (EHR) platform featuring multi-persona clinical workspaces, a Smart Allergy Safety Engine, immutable HIPAA WORM audit logging, HL7 FHIR R4 interoperability, and integrated Synthea synthetic patient generation.
+MedVault is an enterprise-scale Electronic Health Record (EHR) platform tailored for **India and International healthcare ecosystems**. It features multi-persona clinical workspaces, Ayushman Bharat Health Account (ABHA ID) integration, a Smart Allergy Safety Engine, immutable DISHA & ABDM WORM audit logging, HL7 FHIR R4 interoperability, and synthetic patient generation.
 
 ---
 
@@ -10,14 +10,14 @@ MedVault is an enterprise-scale Electronic Health Record (EHR) platform featurin
 
 | Feature | Description |
 | :--- | :--- |
-| **🔒 Scoped Patient Portal** | Patients see strictly their own health summary — vitals, conditions, prescriptions, allergies |
+| **🔒 Scoped Patient Portal** | Patients see strictly their own health summary — vitals, conditions, prescriptions, allergies, and ABHA ID details |
 | **🩺 Physician Desk** | SOAP progress notes, ICD-10 & SNOMED-CT problem lists, eRx orders with smart allergy safety checks |
 | **💉 Bedside Nurse Flowsheet** | Longitudinal vitals tracking (BP, HR, Temp, SpO2, Glucose, BMI) with trend visualization |
-| **⚙️ Admin Command Center** | Master Patient Index (MPI), staff directory, Synthea synthetic patient generation pipeline |
-| **🛡️ HIPAA WORM Audit Vault** | Immutable append-only audit ledger for full regulatory compliance under HIPAA § 164.312(b) |
-| **⚠️ Smart Allergy Safety Engine** | Real-time RxNorm contraindication cross-checking before prescription issuance |
-| **🌐 HL7 FHIR R4 API** | Standard FHIR endpoints (`Patient`, `Encounter`, `Observation`, `$everything` bundles) |
-| **🧬 Synthea Pipeline** | Generate realistic synthetic patient cohorts via the official Synthea framework |
+| **⚙️ Admin Command Center** | Master Patient Index (MPI) probabilistic identity matching, staff directory, synthetic patient generation pipeline |
+| **🛡️ ABDM & DISHA WORM Audit Vault** | Immutable append-only audit ledger for regulatory compliance under DISHA, DPDP Act 2023, and ISO 27001 |
+| **⚠️ Smart Allergy Safety Engine** | Real-time RxNorm & SNOMED contraindication cross-checking before prescription issuance |
+| **🌐 HL7 FHIR R4 & ABDM API** | Standard FHIR endpoints (`Patient`, `Encounter`, `Observation`, `$everything` bundles) with ABHA profile support |
+| **🧬 Cohort Pipeline** | Generate realistic synthetic patient cohorts with Indian and international demographic fidelity |
 
 ---
 
@@ -71,10 +71,10 @@ All detailed documentation is organized in the [`docs/`](docs/) directory:
 | **[Getting Started](docs/getting-started.md)** | Prerequisites, full credentials matrix, all 3 database execution modes, build & test commands |
 | **[Architecture](docs/architecture.md)** | High-level system architecture, real-world analogies, multi-tier diagrams, hybrid RBAC+ABAC evaluation |
 | **[Backend Modular Architecture Guide](docs/backend-modular-architecture-implementation-guide.md)** | Modular Monolith specification, 21 domain modules, Spring Boot package layout, encounter-centric model, FHIR isolation |
-| **[RBAC & ABAC Matrix](docs/rbac-abac-matrix.md)** | 10 baseline roles, resource permission matrices (Clinical, Vitals, Labs, Medication, Billing), ABAC policies, HIPAA integrity rules |
+| **[RBAC & ABAC Matrix](docs/rbac-abac-matrix.md)** | 10 baseline roles, resource permission matrices (Clinical, Vitals, Labs, Medication, Billing), ABAC policies, ABDM/DISHA integrity rules |
 | **[RBAC & ABAC Implementation Guide](docs/rbac-abac-implementation-guide.md)** | Step-by-step developer guide for implementing Spring Boot SpEL evaluators and Angular 19 guards/directives |
-| **[Clinical Workflows](docs/workflows.md)** | End-to-end workflow guides for Patient Portal, Physician eRx, Nurse Vitals, Audit Vault, Synthea Pipeline, and FHIR Interop |
-| **[Security & HIPAA](docs/security.md)** | JWT authentication deep dive, Spring Security filter chain, password hashing, HIPAA § 164.312 compliance mapping, WORM audit log |
+| **[Clinical Workflows](docs/workflows.md)** | End-to-end workflow guides for Patient Portal, Physician eRx, Nurse Vitals, Audit Vault, Cohort Pipeline, and FHIR Interop |
+| **[Security & Compliance](docs/security.md)** | JWT authentication deep dive, Spring Security filter chain, password hashing, ABDM, DISHA & ISO 27001 compliance mapping, WORM audit log |
 | **[Database Schema](docs/database.md)** | Full entity-relationship diagram, security tables (`permissions`, `departments`, `patient_assignments`), table reference, foreign key map, coding standards |
 | **[API Reference](docs/api-guide.md)** | Complete REST endpoint catalog, request/response examples, FHIR R4 resource API specification |
 | **[Synthea Pipeline](docs/synthea-pipeline.md)** | Synthea framework integration, FHIR-to-entity mapping matrix, LOINC vitals mapping, CLI & web UI usage |

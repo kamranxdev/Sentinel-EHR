@@ -7,6 +7,8 @@ public class PatientDTO {
     private Long id;
     private String patientCode;
     private String ssn;
+    private String abhaId;
+    private String nationalId;
     private String fullName;
     private LocalDate dateOfBirth;
     private String gender;
@@ -14,6 +16,7 @@ public class PatientDTO {
     private String phone;
     private String email;
     private String address;
+    private String pinCode;
     private String emergencyContact;
     private String insuranceProvider;
     private String insurancePolicyNumber;
@@ -51,6 +54,22 @@ public class PatientDTO {
 
     public void setSsn(String ssn) {
         this.ssn = ssn;
+    }
+
+    public String getAbhaId() {
+        return abhaId;
+    }
+
+    public void setAbhaId(String abhaId) {
+        this.abhaId = abhaId;
+    }
+
+    public String getNationalId() {
+        return nationalId;
+    }
+
+    public void setNationalId(String nationalId) {
+        this.nationalId = nationalId;
     }
 
     public String getFullName() {
@@ -107,6 +126,14 @@ public class PatientDTO {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public String getPinCode() {
+        return pinCode;
+    }
+
+    public void setPinCode(String pinCode) {
+        this.pinCode = pinCode;
     }
 
     public String getEmergencyContact() {

@@ -28,6 +28,8 @@ export interface Patient {
   id: number;
   patientCode: string;
   ssn?: string;
+  abhaId?: string;
+  nationalId?: string;
   fullName: string;
   dateOfBirth: string;
   gender: string;
@@ -35,6 +37,7 @@ export interface Patient {
   phone: string;
   email: string;
   address: string;
+  pinCode?: string;
   emergencyContact: string;
   insuranceProvider?: string;
   insurancePolicyNumber?: string;

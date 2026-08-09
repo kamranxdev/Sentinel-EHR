@@ -13,7 +13,7 @@ import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   lucideReceipt,
   lucideCreditCard,
-  lucideDollarSign,
+  lucideIndianRupee,
   lucideTrendingUp,
   lucideFileCheck,
 } from '@ng-icons/lucide';
@@ -35,7 +35,7 @@ import {
     provideIcons({
       lucideReceipt,
       lucideCreditCard,
-      lucideDollarSign,
+      lucideIndianRupee,
       lucideTrendingUp,
       lucideFileCheck,
     }),
@@ -62,9 +62,9 @@ import {
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <app-stat-card
           title="Total Monthly Revenue"
-          value="$42,850"
-          subtitle="Processed Patient Billing"
-          icon="lucideDollarSign"
+          value="₹3,42,850"
+          subtitle="Processed Patient Billing (INR)"
+          icon="lucideIndianRupee"
           iconBgClass="bg-emerald-500/10 text-emerald-600" />
         <app-stat-card
           title="Pending Claims"
@@ -106,7 +106,7 @@ import {
                 <td hlmTableCell class="font-mono text-xs text-foreground">{{ invoice.id }}</td>
                 <td hlmTableCell class="font-medium text-foreground text-xs">{{ invoice.patientName }}</td>
                 <td hlmTableCell class="text-xs text-muted-foreground">{{ invoice.carrier }}</td>
-                <td hlmTableCell class="text-xs font-semibold text-emerald-600">\${{ invoice.amount }}</td>
+                <td hlmTableCell class="text-xs font-semibold text-emerald-600">₹{{ invoice.amount | number:'1.2-2' }}</td>
                 <td hlmTableCell>
                   <span hlmBadge [variant]="invoice.status === 'PAID' ? 'default' : 'outline'" class="text-[10px]">
                     {{ invoice.status }}
@@ -127,10 +127,10 @@ import {
 })
 export class BillingDashboardComponent implements OnInit {
   invoices = signal([
-    { id: 'INV-1001', patientName: 'Kamran Khan', carrier: 'Star Health Insurance', amount: 150.0, status: 'PAID' },
-    { id: 'INV-1002', patientName: 'Aarav Patel', carrier: 'HDFC ERGO Health', amount: 280.0, status: 'PENDING' },
-    { id: 'INV-1003', patientName: 'Ananya Sharma', carrier: 'ICICI Lombard', amount: 95.0, status: 'PAID' },
-    { id: 'INV-1004', patientName: 'Rohan Mehta', carrier: 'Care Health Insurance', amount: 210.0, status: 'PENDING' },
+    { id: 'INV-1001', patientName: 'Kamran Khan', carrier: 'Star Health Insurance', amount: 1500.0, status: 'PAID' },
+    { id: 'INV-1002', patientName: 'Aarav Patel', carrier: 'HDFC ERGO Health', amount: 2800.0, status: 'PENDING' },
+    { id: 'INV-1003', patientName: 'Ananya Sharma', carrier: 'ICICI Lombard', amount: 950.0, status: 'PAID' },
+    { id: 'INV-1004', patientName: 'Rohan Mehta', carrier: 'Care Health Insurance', amount: 2100.0, status: 'PENDING' },
   ]);
 
   constructor(

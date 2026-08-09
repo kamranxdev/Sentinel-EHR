@@ -708,7 +708,7 @@ type ProfileTab = 'demographics' | 'contact' | 'insurance' | 'allergies' | 'hist
             <div class="p-3.5 rounded-xl bg-muted/40 border border-border space-y-2 text-xs">
               <div class="flex justify-between items-center">
                 <span class="text-muted-foreground">ABHA Health ID:</span>
-                <span class="font-mono text-foreground font-semibold text-[11px]">{{ profileForm.ssn || 'N/A' }}</span>
+                <span class="font-mono text-foreground font-semibold text-[11px]">{{ profileForm.abhaId || profileForm.ssn || 'N/A' }}</span>
               </div>
               <div class="flex justify-between items-center">
                 <span class="text-muted-foreground">Date of Birth:</span>

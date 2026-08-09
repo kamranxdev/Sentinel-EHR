@@ -94,7 +94,7 @@ public class PatientController {
     }
 
     @GetMapping("/{id}/clinical-history")
-    @PreAuthorize("@patientSecurityService.canAccessPatient(authentication, #id)")
+    @PreAuthorize("hasAuthority('CLINICAL_NOTE_READ') and @patientSecurityService.canAccessPatient(authentication, #id)")
     public ResponseEntity<PatientClinicalHistoryDTO> getPatientClinicalHistory(@PathVariable Long id, Authentication auth) {
         Patient patient = patientRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Patient record with ID " + id + " not found"));
@@ -116,6 +116,21 @@ public class PatientController {
 
         auditService.logAction(auth, "READ", "CLINICAL_HISTORY", String.valueOf(id), "Accessed longitudinal clinical history for patient ID: " + id);
         return ResponseEntity.ok(historyDTO);
+    }
+
+    @PostMapping("/intake")
+    @PreAuthorize("hasAnyAuthority('PATIENT_CREATE', 'ROLE_RECEPTIONIST', 'ROLE_INTAKE_SPEC', 'ROLE_ADMIN', 'ROLE_SYS_ADMIN')")
+    public ResponseEntity<Patient> registerIntakePatient(@RequestBody Patient patient, Authentication auth) {
+        if (patient.getPatientCode() == null || patient.getPatientCode().isEmpty()) {
+            patient.setPatientCode("MRN-" + (100000 + (System.currentTimeMillis() % 900000)));
+        }
+
+        Patient saved = patientRepository.save(patient);
+        auditService.logAction(auth, "PATIENT_INTAKE_REGISTER", "PATIENT_DEMOGRAPHICS", String.valueOf(saved.getId()),
+                String.format("Completed Reception Desk Intake Registration for %s (MRN: %s, Carrier: %s)",
+                        saved.getFullName(), saved.getPatientCode(), saved.getInsuranceProvider() != null ? saved.getInsuranceProvider() : "Self-Pay"));
+
+        return ResponseEntity.ok(saved);
     }
 
     @GetMapping("/me")
@@ -179,6 +194,9 @@ public class PatientController {
                 .orElseThrow(() -> new ResourceNotFoundException("Patient record with ID " + id + " not found"));
 
         if (updated.getSsn() != null) patient.setSsn(updated.getSsn());
+        if (updated.getAbhaId() != null) patient.setAbhaId(updated.getAbhaId());
+        if (updated.getNationalId() != null) patient.setNationalId(updated.getNationalId());
+        if (updated.getPinCode() != null) patient.setPinCode(updated.getPinCode());
         if (updated.getFullName() != null) patient.setFullName(updated.getFullName());
         if (updated.getDateOfBirth() != null) patient.setDateOfBirth(updated.getDateOfBirth());
         if (updated.getGender() != null) patient.setGender(updated.getGender());

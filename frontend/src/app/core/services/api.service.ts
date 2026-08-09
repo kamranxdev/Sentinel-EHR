@@ -62,6 +62,47 @@ export class ApiService {
     return this.http.post<Patient>(`${this.baseUrl}/patients`, patient);
   }
 
+  submitIntake(patient: Partial<Patient>): Observable<Patient> {
+    return this.http.post<Patient>(`${this.baseUrl}/patients/intake`, patient);
+  }
+
+  // Master Patient Index (MPI) Search & Merge
+  searchMPI(params: any): Observable<any[]> {
+    let queryParams = new URLSearchParams();
+    if (params.fullName) queryParams.set('fullName', params.fullName);
+    if (params.dateOfBirth) queryParams.set('dateOfBirth', params.dateOfBirth);
+    if (params.ssn) queryParams.set('ssn', params.ssn);
+    if (params.abhaId) queryParams.set('abhaId', params.abhaId);
+    if (params.nationalId) queryParams.set('nationalId', params.nationalId);
+    if (params.mrn) queryParams.set('mrn', params.mrn);
+    if (params.phone) queryParams.set('phone', params.phone);
+    if (params.email) queryParams.set('email', params.email);
+    if (params.gender) queryParams.set('gender', params.gender);
+    return this.http.get<any[]>(`${this.baseUrl}/v1/mpi/search?${queryParams.toString()}`);
+  }
+
+  requestMPIMerge(payload: { primaryPatientId: number; duplicatePatientId: number; mergeReason: string }): Observable<string> {
+    return this.http.post(`${this.baseUrl}/v1/mpi/merge-request`, payload, { responseType: 'text' });
+  }
+
+  // Real-Time Insurance Eligibility (ANSI X12 270/271 RTE)
+  checkEligibility(inquiry: any): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/v1/insurance/rte`, inquiry);
+  }
+
+  collectCopay(copayPayload: any): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/v1/insurance/copay/collect`, copayPayload);
+  }
+
+  // Appointment Stage Transitions & Resource Grid
+  updateAppointmentStage(id: number, stage: string): Observable<Appointment> {
+    return this.http.put<Appointment>(`${this.baseUrl}/v1/appointments/${id}/stage?stage=${encodeURIComponent(stage)}`, {});
+  }
+
+  getMultiResourceGrid(): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}/v1/appointments/resources`);
+  }
+
   updatePatient(id: number, patient: Partial<Patient>): Observable<Patient> {
     return this.http.put<Patient>(`${this.baseUrl}/patients/${id}`, patient);
   }

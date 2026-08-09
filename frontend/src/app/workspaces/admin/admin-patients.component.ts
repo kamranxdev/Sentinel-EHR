@@ -65,7 +65,7 @@ import { lucidePlus, lucideSearch, lucideHeartPulse, lucideSparkles } from '@ng-
             type="text"
             [(ngModel)]="searchQuery"
             (input)="onSearchChange()"
-            placeholder="Search patient registry by name, MRN code, or SSN..."
+            placeholder="Search patient registry by name, MRN code, or ABHA Health ID..."
             class="pl-9 h-10 w-full text-xs bg-background" />
         </div>
       </div>
