@@ -79,7 +79,7 @@ INSERT INTO role_permissions (role_id, permission_id) VALUES (7, 2), (7, 15), (7
 INSERT INTO role_permissions (role_id, permission_id) VALUES (8, 2), (8, 20), (8, 21);
 
 -- Patient (ROLE_PATIENT): Personal Self-Service
-INSERT INTO role_permissions (role_id, permission_id) VALUES (9, 2), (9, 5), (9, 9), (9, 11), (9, 13), (9, 15), (9, 19), (9, 21);
+INSERT INTO role_permissions (role_id, permission_id) VALUES (9, 2), (9, 4), (9, 5), (9, 7), (9, 9), (9, 11), (9, 13), (9, 15), (9, 19), (9, 21);
 
 -- Auditor (ROLE_AUDITOR): Read-only Compliance
 INSERT INTO role_permissions (role_id, permission_id) VALUES (10, 2), (10, 5), (10, 9), (10, 11), (10, 13), (10, 15), (10, 19), (10, 21), (10, 22);

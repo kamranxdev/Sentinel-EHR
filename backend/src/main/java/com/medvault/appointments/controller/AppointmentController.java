@@ -97,7 +97,7 @@ public class AppointmentController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('APPOINTMENT_CREATE')")
+    @PreAuthorize("hasAuthority('APPOINTMENT_CREATE') or hasRole('PATIENT')")
     public ResponseEntity<?> scheduleAppointment(@RequestBody Appointment appointment, Authentication auth) {
         if (appointment.getPatient() == null || appointment.getPatient().getId() == null) {
             throw new IllegalArgumentException("Patient ID must be provided");
@@ -259,7 +259,7 @@ public class AppointmentController {
     }
 
     @PostMapping("/{id}/cancel")
-    @PreAuthorize("hasAuthority('APPOINTMENT_CANCEL') and @patientSecurityService.canAccessAppointment(authentication, #id)")
+    @PreAuthorize("(hasAuthority('APPOINTMENT_CANCEL') or hasRole('PATIENT')) and @patientSecurityService.canAccessAppointment(authentication, #id)")
     public ResponseEntity<AppointmentCancellation> cancelAppointment(@PathVariable Long id,
                                                                       @RequestBody Map<String, String> payload,
                                                                       Authentication auth) {
