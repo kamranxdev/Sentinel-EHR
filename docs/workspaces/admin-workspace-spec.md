@@ -79,13 +79,18 @@ flowchart TD
     Engine --> CLI[Execute java -jar synthea-with-dependencies.jar -p N State]
     CLI --> Bundles[Output HL7 FHIR R4 JSON Bundles]
     
-    loop Process FHIR Bundles
-        Bundles --> Jackson[Jackson Tree Analysis & Resource Extraction]
-        Jackson --> Mapper[Map FHIR Resources: Patient, Encounter, AllergyIntolerance, Condition, MedicationRequest, Observation]
-        Mapper --> DB[(Persist to PostgreSQL Database)]
-        DB --> Audit[Append SHA-256 Block Entry: SYNTHEA_POPULATION_INGESTED]
+    subgraph Process_Bundles ["🔄 Process FHIR Bundles Loop"]
+        Jackson[Jackson Tree Analysis & Resource Extraction]
+        Mapper[Map FHIR Resources: Patient, Encounter, AllergyIntolerance, Condition, MedicationRequest, Observation]
+        DB[(Persist to PostgreSQL Database)]
+        Audit[Append SHA-256 Block Entry: SYNTHEA_POPULATION_INGESTED]
+
+        Jackson --> Mapper
+        Mapper --> DB
+        DB --> Audit
     end
 
+    Bundles --> Jackson
     Audit --> Response[Return Ingestion Metrics to Admin Dashboard]
 ```
 
