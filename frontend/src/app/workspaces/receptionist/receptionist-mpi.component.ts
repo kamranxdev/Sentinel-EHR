@@ -18,7 +18,6 @@ import {
   lucideCheckCircle2,
   lucideAlertTriangle,
   lucideUserCheck,
-  lucideArrowLeft,
   lucideInfo,
   lucideShieldAlert,
   lucideRefreshCw,
@@ -46,7 +45,6 @@ import {
       lucideCheckCircle2,
       lucideAlertTriangle,
       lucideUserCheck,
-      lucideArrowLeft,
       lucideInfo,
       lucideShieldAlert,
       lucideRefreshCw,
@@ -56,17 +54,12 @@ import {
     <div class="space-y-6">
       <!-- Header -->
       <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-border">
-        <div class="flex items-center gap-3">
-          <a routerLink="/receptionist/dashboard" class="p-2 rounded-lg bg-muted text-muted-foreground hover:text-foreground transition-colors">
-            <ng-icon name="lucideArrowLeft" size="18" />
-          </a>
-          <div>
-            <h1 class="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
-              Master Patient Index (MPI) Probabilistic Search & De-duplication
-              <span hlmBadge variant="secondary" class="text-[11px] bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">Fellegi-Sunter</span>
-            </h1>
-            <p class="text-xs text-muted-foreground mt-0.5">Chart de-duplication engine & identity match verification to prevent duplicate medical charts.</p>
-          </div>
+        <div>
+          <h1 class="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
+            Master Patient Index (MPI) Probabilistic Search & De-duplication
+            <span hlmBadge variant="secondary" class="text-[11px] bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">Fellegi-Sunter</span>
+          </h1>
+          <p class="text-xs text-muted-foreground mt-0.5">Chart de-duplication engine & identity match verification to prevent duplicate medical charts.</p>
         </div>
         
         <div class="flex items-center gap-2">

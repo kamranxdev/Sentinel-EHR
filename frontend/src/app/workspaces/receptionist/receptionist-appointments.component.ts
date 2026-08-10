@@ -20,7 +20,6 @@ import {
   lucideCheckCircle2,
   lucideClock,
   lucideUserCheck,
-  lucideArrowLeft,
   lucideUser,
   lucideXCircle,
   lucideBellRing,
@@ -57,7 +56,6 @@ import { StatCardComponent } from '../../shared/ui/stat-card.component';
       lucideCheckCircle2,
       lucideClock,
       lucideUserCheck,
-      lucideArrowLeft,
       lucideUser,
       lucideXCircle,
       lucideBellRing,
@@ -73,17 +71,12 @@ import { StatCardComponent } from '../../shared/ui/stat-card.component';
     <div class="space-y-6">
       <!-- Header -->
       <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-border">
-        <div class="flex items-center gap-3">
-          <a routerLink="/receptionist/dashboard" class="p-2 rounded-lg bg-muted text-muted-foreground hover:text-foreground transition-colors">
-            <ng-icon name="lucideArrowLeft" size="18" />
-          </a>
-          <div>
-            <h1 class="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
-              Appointments Roster & Front Desk Check-in
-              <span hlmBadge variant="secondary" class="text-[11px] bg-sky-500/10 text-sky-600 border border-sky-500/20 font-mono">Daily Schedule</span>
-            </h1>
-            <p class="text-xs text-muted-foreground mt-0.5">Filter by date, physician, and stage status. Execute front desk arrival check-ins, cancellations, and SMS/Email reminders.</p>
-          </div>
+        <div>
+          <h1 class="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
+            Appointments Roster & Front Desk Check-in
+            <span hlmBadge variant="secondary" class="text-[11px] bg-sky-500/10 text-sky-600 border border-sky-500/20 font-mono">Daily Schedule</span>
+          </h1>
+          <p class="text-xs text-muted-foreground mt-0.5">Filter by date, physician, and stage status. Execute front desk arrival check-ins, cancellations, and SMS/Email reminders.</p>
         </div>
 
         <div class="flex items-center gap-2">
