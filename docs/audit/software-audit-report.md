@@ -152,7 +152,7 @@ Contrary to partial quality reviews that focus exclusively on high-priority secu
 #### Issue 3.2 [P2 - Privacy Risk] Unencrypted PII/PHI Columns in Database Tables
 - **Affected Component**: `backend/src/main/java/com/sentinel/patients/entity/Patient.java`
 - **Current State ("How it was NOT supposed to be")**:
-  Sensitive identity attributes (`ssn`, `abhaId`) are stored as plain text VARCHAR columns in the database.
+  Sensitive identity attributes (`nationalId`, `abhaId`) are stored as plain text VARCHAR columns in the database.
 - **Target State ("How it SHOULD be")**:
   Sensitive PII/PHI columns must use JPA Attribute Converters (`@Convert(converter = AttributeEncryptor.class)`) for AES-256 field encryption.
 - **Remediation**: Implement a JPA `AttributeConverter` using AES-256-GCM.

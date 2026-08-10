@@ -54,7 +54,7 @@ Sentinel categorizes operations across **10 production roles**:
 | View Demographics | — | R | R | R | **R** | R | R | R | **R** | R |
 | Update Demographics | — | U | L | L | **U** | — | — | L | U* | — |
 | Delete Patient | — | — | — | — | — | — | — | — | — | — |
-| Patient Identifier (MRN/SSN) | — | R | R | R | R | R | R | R | R | R |
+| Patient Identifier (MRN/ABHA/National ID) | — | R | R | R | R | R | R | R | R | R |
 | Emergency Contact | — | R | R | R | R | L | L | L | U | R |
 | Insurance Information | — | R | R | R | **CRU** | — | — | **CRU** | R | R |
 | Patient Consent Directives | — | R | R | R | CRU | R | R | R | **CRU** | R |

@@ -17,7 +17,6 @@ public class Patient {
     @Column(nullable = false, unique = true)
     private String patientCode; // MRN
 
-    private String ssn;
     private String abhaId;
     private String nationalId;
 
@@ -83,14 +82,6 @@ public class Patient {
 
     public void setPatientCode(String patientCode) {
         this.patientCode = patientCode;
-    }
-
-    public String getSsn() {
-        return ssn;
-    }
-
-    public void setSsn(String ssn) {
-        this.ssn = ssn;
     }
 
     public String getAbhaId() {

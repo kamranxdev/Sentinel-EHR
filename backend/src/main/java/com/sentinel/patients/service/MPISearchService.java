@@ -71,7 +71,8 @@ public class MPISearchService {
      */
     public List<MPIMatchCandidateDTO> searchMPI(String fullName,
                                                 LocalDate dateOfBirth,
-                                                String ssn,
+                                                String abhaId,
+                                                String nationalId,
                                                 String mrn,
                                                 String phone,
                                                 String email,
@@ -79,22 +80,23 @@ public class MPISearchService {
                                                 String gender,
                                                 Authentication auth) {
         String cleanSearchName = fullName != null ? fullName.trim().toLowerCase() : "";
-        String cleanSearchSsn = ssn != null ? ssn.replaceAll("[^0-9]", "") : "";
+        String cleanSearchAbha = abhaId != null ? abhaId.replaceAll("[^0-9a-zA-Z]", "").toLowerCase() : "";
+        String cleanSearchNational = nationalId != null ? nationalId.replaceAll("[^0-9a-zA-Z]", "").toLowerCase() : "";
         String cleanSearchMrn = mrn != null ? mrn.trim().toUpperCase() : "";
         String cleanSearchPhone = phone != null ? phone.replaceAll("[^0-9]", "") : "";
         String cleanSearchEmail = email != null ? email.trim().toLowerCase() : "";
 
-        boolean isAllEmpty = cleanSearchName.isEmpty() && dateOfBirth == null && cleanSearchSsn.isEmpty()
-                && cleanSearchMrn.isEmpty() && cleanSearchPhone.isEmpty() && cleanSearchEmail.isEmpty()
-                && (gender == null || gender.trim().isEmpty());
+        boolean isAllEmpty = cleanSearchName.isEmpty() && dateOfBirth == null && cleanSearchAbha.isEmpty()
+                && cleanSearchNational.isEmpty() && cleanSearchMrn.isEmpty() && cleanSearchPhone.isEmpty()
+                && cleanSearchEmail.isEmpty() && (gender == null || gender.trim().isEmpty());
 
         if (isAllEmpty) {
             return scanDuplicateCandidates(auth);
         }
 
         auditService.logAction(auth, "MPI_SEARCH", "PATIENT_MPI", "0",
-                String.format("MPI Search query: Name='%s', DOB='%s', SSN='%s', MRN='%s'",
-                        fullName, dateOfBirth, ssn != null ? "***" : null, mrn));
+                String.format("MPI Search query: Name='%s', DOB='%s', ABHA='%s', NationalID='%s', MRN='%s'",
+                        fullName, dateOfBirth, abhaId, nationalId, mrn));
 
         List<Patient> allPatients = patientRepository.findAll();
         List<MPIMatchCandidateDTO> candidates = new ArrayList<>();
@@ -111,25 +113,22 @@ public class MPISearchService {
                 continue;
             }
 
-            // 2. ABHA ID / National ID / SSN Match (Deterministic / High Confidence 40%)
-            if (p.getAbhaId() != null && !p.getAbhaId().isEmpty()) {
+            // 2. ABHA ID / National ID Match (Deterministic / High Confidence 40%-45%)
+            if (!cleanSearchAbha.isEmpty() && p.getAbhaId() != null) {
                 String patientAbha = p.getAbhaId().replaceAll("[^0-9a-zA-Z]", "").toLowerCase();
-                String searchSsnOrAbha = (ssn != null ? ssn : "").replaceAll("[^0-9a-zA-Z]", "").toLowerCase();
-                if (!searchSsnOrAbha.isEmpty() && patientAbha.contains(searchSsnOrAbha)) {
+                if (patientAbha.equalsIgnoreCase(cleanSearchAbha)) {
                     totalScore += 45.0;
                     matchingFields.add("ABHA Health ID");
+                } else {
+                    conflictingFields.add("ABHA Health ID");
                 }
             }
 
-            if (!cleanSearchSsn.isEmpty() && p.getSsn() != null) {
-                String patientSsn = p.getSsn().replaceAll("[^0-9]", "");
-                if (patientSsn.equals(cleanSearchSsn)) {
+            if (!cleanSearchNational.isEmpty() && p.getNationalId() != null) {
+                String patientNational = p.getNationalId().replaceAll("[^0-9a-zA-Z]", "").toLowerCase();
+                if (patientNational.equalsIgnoreCase(cleanSearchNational)) {
                     totalScore += 40.0;
-                    matchingFields.add("National ID / SSN");
-                } else if (patientSsn.length() >= 4 && cleanSearchSsn.length() >= 4 &&
-                        patientSsn.substring(patientSsn.length() - 4).equals(cleanSearchSsn.substring(cleanSearchSsn.length() - 4))) {
-                    totalScore += 25.0;
-                    matchingFields.add("National ID (Last 4)");
+                    matchingFields.add("National ID");
                 } else {
                     conflictingFields.add("National ID");
                 }
@@ -330,7 +329,6 @@ public class MPISearchService {
     }
 
     private void consolidateDemographicsAndMedicalHistory(Patient primary, Patient duplicate) {
-        if (isStringEmpty(primary.getSsn()) && !isStringEmpty(duplicate.getSsn())) primary.setSsn(duplicate.getSsn());
         if (isStringEmpty(primary.getAbhaId()) && !isStringEmpty(duplicate.getAbhaId())) primary.setAbhaId(duplicate.getAbhaId());
         if (isStringEmpty(primary.getNationalId()) && !isStringEmpty(duplicate.getNationalId())) primary.setNationalId(duplicate.getNationalId());
         if (isStringEmpty(primary.getPhone()) && !isStringEmpty(duplicate.getPhone())) primary.setPhone(duplicate.getPhone());
@@ -386,10 +384,16 @@ public class MPISearchService {
             if (!ph1.isEmpty() && ph1.equals(ph2)) score += 15.0;
         }
 
-        if (!isStringEmpty(p1.getSsn()) && !isStringEmpty(p2.getSsn())) {
-            String s1 = p1.getSsn().replaceAll("[^0-9]", "");
-            String s2 = p2.getSsn().replaceAll("[^0-9]", "");
-            if (!s1.isEmpty() && s1.equals(s2)) score += 40.0;
+        if (!isStringEmpty(p1.getAbhaId()) && !isStringEmpty(p2.getAbhaId())) {
+            String a1 = p1.getAbhaId().replaceAll("[^0-9a-zA-Z]", "").toLowerCase();
+            String a2 = p2.getAbhaId().replaceAll("[^0-9a-zA-Z]", "").toLowerCase();
+            if (!a1.isEmpty() && a1.equals(a2)) score += 45.0;
+        }
+
+        if (!isStringEmpty(p1.getNationalId()) && !isStringEmpty(p2.getNationalId())) {
+            String n1 = p1.getNationalId().replaceAll("[^0-9a-zA-Z]", "").toLowerCase();
+            String n2 = p2.getNationalId().replaceAll("[^0-9a-zA-Z]", "").toLowerCase();
+            if (!n1.isEmpty() && n1.equals(n2)) score += 40.0;
         }
 
         if (!isStringEmpty(p1.getEmail()) && !isStringEmpty(p2.getEmail()) && p1.getEmail().equalsIgnoreCase(p2.getEmail())) {
@@ -415,8 +419,11 @@ public class MPISearchService {
         if (!isStringEmpty(p1.getPhone()) && !isStringEmpty(p2.getPhone()) && p1.getPhone().replaceAll("[^0-9]", "").equals(p2.getPhone().replaceAll("[^0-9]", ""))) {
             list.add("Phone Number");
         }
-        if (!isStringEmpty(p1.getSsn()) && !isStringEmpty(p2.getSsn()) && p1.getSsn().replaceAll("[^0-9]", "").equals(p2.getSsn().replaceAll("[^0-9]", ""))) {
-            list.add("National ID / SSN");
+        if (!isStringEmpty(p1.getAbhaId()) && !isStringEmpty(p2.getAbhaId()) && p1.getAbhaId().equalsIgnoreCase(p2.getAbhaId())) {
+            list.add("ABHA Health ID");
+        }
+        if (!isStringEmpty(p1.getNationalId()) && !isStringEmpty(p2.getNationalId()) && p1.getNationalId().equalsIgnoreCase(p2.getNationalId())) {
+            list.add("National ID");
         }
         if (!isStringEmpty(p1.getEmail()) && !isStringEmpty(p2.getEmail()) && p1.getEmail().equalsIgnoreCase(p2.getEmail())) {
             list.add("Email Address");
@@ -429,8 +436,11 @@ public class MPISearchService {
         if (p1.getDateOfBirth() != null && p2.getDateOfBirth() != null && !p1.getDateOfBirth().equals(p2.getDateOfBirth())) {
             list.add("Date of Birth");
         }
-        if (!isStringEmpty(p1.getSsn()) && !isStringEmpty(p2.getSsn()) && !p1.getSsn().replaceAll("[^0-9]", "").equals(p2.getSsn().replaceAll("[^0-9]", ""))) {
-            list.add("National ID / SSN");
+        if (!isStringEmpty(p1.getAbhaId()) && !isStringEmpty(p2.getAbhaId()) && !p1.getAbhaId().equalsIgnoreCase(p2.getAbhaId())) {
+            list.add("ABHA Health ID");
+        }
+        if (!isStringEmpty(p1.getNationalId()) && !isStringEmpty(p2.getNationalId()) && !p1.getNationalId().equalsIgnoreCase(p2.getNationalId())) {
+            list.add("National ID");
         }
         return list;
     }

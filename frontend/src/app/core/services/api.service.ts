@@ -71,7 +71,6 @@ export class ApiService {
     let queryParams = new URLSearchParams();
     if (params.fullName) queryParams.set('fullName', params.fullName);
     if (params.dateOfBirth) queryParams.set('dateOfBirth', params.dateOfBirth);
-    if (params.ssn) queryParams.set('ssn', params.ssn);
     if (params.abhaId) queryParams.set('abhaId', params.abhaId);
     if (params.nationalId) queryParams.set('nationalId', params.nationalId);
     if (params.mrn) queryParams.set('mrn', params.mrn);

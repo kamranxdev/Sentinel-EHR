@@ -87,7 +87,8 @@ public class FhirController {
         if (identifier != null && !identifier.isEmpty()) {
             patients = patients.stream()
                     .filter(p -> (p.getPatientCode() != null && p.getPatientCode().equalsIgnoreCase(identifier)) ||
-                                 (p.getSsn() != null && p.getSsn().equalsIgnoreCase(identifier)))
+                                 (p.getAbhaId() != null && p.getAbhaId().equalsIgnoreCase(identifier)) ||
+                                 (p.getNationalId() != null && p.getNationalId().equalsIgnoreCase(identifier)))
                     .collect(Collectors.toList());
         }
 

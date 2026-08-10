@@ -78,7 +78,7 @@ Java 17 / Spring Boot RESTful API service powering the Sentinel Electronic Healt
 
 ### 👤 Master Patient Index (MPI)
 - `GET /api/patients`: Master Patient Index (`ADMIN`, `DOCTOR`, `NURSE`, `AUDITOR`).
-- `GET /api/patients/search?query={q}`: Search by name, SSN, MRN, phone.
+- `GET /api/patients/search?query={q}`: Search by name, ABHA ID, National ID, MRN, phone.
 - `GET /api/patients/{id}`: Fetch patient by ID.
 - `GET /api/patients/user/{userId}`: Retrieve patient linked to user account (`PATIENT`).
 - `POST /api/patients`: Create patient profile (`ADMIN`).

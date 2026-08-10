@@ -71,8 +71,7 @@ public class SyntheticDataService {
             String lastName = LAST_NAMES[rand.nextInt(LAST_NAMES.length)];
             String fullName = firstName + " " + lastName;
             String mrn = "SYN-PAT-" + (1000 + rand.nextInt(9000));
-            String abhaId = String.format("%02d-%04d-%04d-%04d", 10 + rand.nextInt(89), 1000 + rand.nextInt(9000), 1000 + rand.nextInt(9000), 1000 + rand.nextInt(9000));
-            String ssn = String.format("%03d-%02d-%04d", 100 + rand.nextInt(800), 10 + rand.nextInt(89), 1000 + rand.nextInt(8999));
+            String abhaId = String.format("%02d-%04d-%04d-%04d", 91, 1000 + rand.nextInt(9000), 1000 + rand.nextInt(9000), 1000 + rand.nextInt(9000));
             String nationalId = "AADHAAR-" + (1000 + rand.nextInt(8999)) + "-" + (1000 + rand.nextInt(8999));
             String city = CITIES[rand.nextInt(CITIES.length)];
             String pinCode = String.valueOf(110001 + rand.nextInt(800000));
@@ -80,7 +79,6 @@ public class SyntheticDataService {
 
             Patient p = new Patient();
             p.setPatientCode(mrn);
-            p.setSsn(ssn);
             p.setAbhaId(abhaId);
             p.setNationalId(nationalId);
             p.setFullName(fullName);

@@ -6,7 +6,6 @@ public class PatientSearchQuery {
     private String query;
     private String name;
     private String mrn;
-    private String ssn;
     private String abhaId;
     private String nationalId;
     private String phone;
@@ -37,14 +36,6 @@ public class PatientSearchQuery {
 
     public void setMrn(String mrn) {
         this.mrn = mrn;
-    }
-
-    public String getSsn() {
-        return ssn;
-    }
-
-    public void setSsn(String ssn) {
-        this.ssn = ssn;
     }
 
     public String getAbhaId() {

@@ -33,7 +33,7 @@ flowchart TD
 | Component Name | Route Path | Ideal Feature Scope & Specifications |
 | :--- | :--- | :--- |
 | `ReceptionistDashboardComponent` | `/receptionist/dashboard` | Front-Desk Command Center: Today's appointment roster by stage (`SCHEDULED`, `ARRIVED`, `WAITING`, `TRIAGED`, `IN_ROOM`), queue wait times, insurance verification alerts. |
-| `ReceptionistMPIComponent` | `/receptionist/mpi` | Master Patient Index (MPI) Search: Deterministic & probabilistic algorithms (Fellegi-Sunter methodology) matching patient identity by Name, DOB, SSN, MRN, Address, and Phone to prevent duplicate medical charts. |
+| `ReceptionistMPIComponent` | `/receptionist/mpi` | Master Patient Index (MPI) Search: Deterministic & probabilistic algorithms (Fellegi-Sunter methodology) matching patient identity by Name, DOB, ABHA ID, National ID, MRN, Address, and Phone to prevent duplicate medical charts. |
 | `ReceptionistIntakeComponent` | `/receptionist/intake` | Intake Registration Wizard: Capture identity markers, USPS address standardization, emergency contact details, primary/secondary insurance coverage, and electronic HIPAA consent directives. |
 | `ReceptionistEligibilityComponent` | `/receptionist/eligibility` | Real-Time Eligibility (RTE): Direct ANSI X12 270 inquiry submission to clearinghouse/payer; parses X12 271 response displaying co-pay, deductible, co-insurance, and coverage status. |
 | `ReceptionistAppointmentsComponent` | `/receptionist/appointments` | Multi-Resource Calendar Grid: Schedule consultations across providers, rooms, and equipment; handles re-scheduling, cancellations, no-show tracking, and automated SMS/Email reminders. |
@@ -81,7 +81,7 @@ sequenceDiagram
     participant Audit as WORM Audit Ledger
 
     Patient->>Recep: Arrive at Clinic Front Desk
-    Recep->>MPI: Probabilistic Search (Name + DOB + SSN Last 4)
+    Recep->>MPI: Probabilistic Search (Name + DOB + ABHA / National ID)
     MPI-->>Recep: Return Matching MPI Patient Profile
     
     Recep->>RTE: Trigger X12 270 Insurance Eligibility Inquiry

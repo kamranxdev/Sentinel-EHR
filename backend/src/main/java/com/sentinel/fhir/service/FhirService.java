@@ -125,17 +125,9 @@ public class FhirService {
         if (p.getNationalId() != null && !p.getNationalId().isEmpty()) {
             identifiers.add(Map.of(
                 "use", "secondary",
-                "system", "urn:oid:2.16.356.1.1",
+                "system", "https://uidai.gov.in",
                 "value", p.getNationalId(),
                 "type", Map.of("text", "National Identifier / Aadhaar Ref")
-            ));
-        }
-        if (p.getSsn() != null && !p.getSsn().isEmpty()) {
-            identifiers.add(Map.of(
-                "use", "secondary",
-                "system", "urn:oid:2.16.840.1.113883.4.1.ssn",
-                "value", p.getSsn(),
-                "type", Map.of("text", "National Identity Number")
             ));
         }
         r.put("identifier", identifiers);
@@ -539,10 +531,8 @@ public class FhirService {
                 String sys = (String) idMap.get("system");
                 if ("https://healthid.ndhm.gov.in".equalsIgnoreCase(sys)) {
                     p.setAbhaId(val);
-                } else if ("urn:oid:2.16.356.1.1".equalsIgnoreCase(sys)) {
+                } else if ("https://uidai.gov.in".equalsIgnoreCase(sys) || "urn:oid:2.16.356.1.1".equalsIgnoreCase(sys)) {
                     p.setNationalId(val);
-                } else if ("urn:oid:2.16.840.1.113883.4.1.ssn".equalsIgnoreCase(sys)) {
-                    p.setSsn(val);
                 } else if (val != null && !val.isEmpty()) {
                     p.setPatientCode(val);
                 }

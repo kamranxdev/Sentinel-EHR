@@ -27,7 +27,6 @@ export interface JwtAuthResponse {
 export interface Patient {
   id: number;
   patientCode: string;
-  ssn?: string;
   abhaId?: string;
   nationalId?: string;
   fullName: string;

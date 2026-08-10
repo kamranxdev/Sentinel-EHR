@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 public class PatientDemographicDTO {
     private Long id;
     private String patientCode;
-    private String ssn;
     private String abhaId;
     private String nationalId;
     private String fullName;
@@ -36,9 +35,6 @@ public class PatientDemographicDTO {
 
     public String getPatientCode() { return patientCode; }
     public void setPatientCode(String patientCode) { this.patientCode = patientCode; }
-
-    public String getSsn() { return ssn; }
-    public void setSsn(String ssn) { this.ssn = ssn; }
 
     public String getAbhaId() { return abhaId; }
     public void setAbhaId(String abhaId) { this.abhaId = abhaId; }

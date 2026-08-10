@@ -240,7 +240,7 @@ interface ToastAlert {
               <input
                 hlmInput
                 type="text"
-                placeholder="Search Name, MRN, ABHA, SSN, Phone..."
+                placeholder="Search Name, MRN, ABHA, National ID, Phone..."
                 [ngModel]="searchQuery()"
                 (ngModelChange)="searchQuery.set($event)"
                 class="pl-8 h-8 text-xs bg-background w-full" />
@@ -284,7 +284,7 @@ interface ToastAlert {
                 <th hlmTableHead class="py-3 px-4 text-left">Patient Identity</th>
                 <th hlmTableHead class="py-3 px-4 text-left">MRN Code</th>
                 <th hlmTableHead class="py-3 px-4 text-left">DOB / Gender</th>
-                <th hlmTableHead class="py-3 px-4 text-left">ABHA ID / SSN</th>
+                <th hlmTableHead class="py-3 px-4 text-left">ABHA ID / National ID</th>
                 <th hlmTableHead class="py-3 px-4 text-left">Contact Info</th>
                 <th hlmTableHead class="py-3 px-4 text-left">Payer / Medical Alerts</th>
                 <th hlmTableHead class="py-3 px-4 text-right">HIPAA Governance</th>
@@ -318,13 +318,13 @@ interface ToastAlert {
                   <div class="text-[10px] text-foreground/70 font-medium">{{ p.gender }} • {{ getAge(p.dateOfBirth) }} yrs</div>
                 </td>
 
-                <!-- ABHA ID & SSN -->
+                <!-- ABHA ID & National ID -->
                 <td hlmTableCell class="py-3 px-4 whitespace-nowrap font-mono">
                   <div *ngIf="p.abhaId" class="text-xs text-sky-600 font-semibold flex items-center gap-1">
                     <ng-icon name="lucideUserCheck" size="12" /> {{ p.abhaId }}
                   </div>
                   <div *ngIf="!p.abhaId" class="text-[10px] text-muted-foreground italic">No ABHA Linked</div>
-                  <div class="text-[10px] text-muted-foreground">SSN: {{ maskSSN(p.ssn) }}</div>
+                  <div class="text-[10px] text-muted-foreground">National ID: {{ maskNationalId(p.nationalId) }}</div>
                 </td>
 
                 <!-- Contact Info -->
@@ -413,7 +413,7 @@ interface ToastAlert {
               <div class="text-[10px] uppercase font-semibold text-muted-foreground">National Identifiers</div>
               <div class="font-mono text-sky-600 font-semibold">ABHA ID: {{ selectedPatient()!.abhaId || 'Not Linked' }}</div>
               <div class="font-mono flex items-center justify-between">
-                <span>SSN: {{ revealPHI() ? selectedPatient()!.ssn : maskSSN(selectedPatient()!.ssn) }}</span>
+                <span>National ID: {{ revealPHI() ? (selectedPatient()!.nationalId || 'Not Provided') : maskNationalId(selectedPatient()!.nationalId) }}</span>
                 <button (click)="toggleRevealPHI()" class="text-[10px] text-primary underline ml-2">
                   {{ revealPHI() ? 'Mask PHI' : 'Unmask (Audit Logged)' }}
                 </button>
@@ -621,14 +621,14 @@ export class AdminPatientsComponent implements OnInit {
         const abha = (p.abhaId || '').toLowerCase();
         const phone = (p.phone || '').toLowerCase();
         const email = (p.email || '').toLowerCase();
-        const ssn = (p.ssn || '').toLowerCase();
+        const national = (p.nationalId || '').toLowerCase();
         matchesQuery =
           name.includes(q) ||
           code.includes(q) ||
           abha.includes(q) ||
           phone.includes(q) ||
           email.includes(q) ||
-          ssn.includes(q);
+          national.includes(q);
       }
 
       return matchesGender && matchesInsurance && matchesQuery;
@@ -776,12 +776,12 @@ export class AdminPatientsComponent implements OnInit {
     return Math.max(0, age);
   }
 
-  maskSSN(ssn?: string): string {
-    if (!ssn) return '***-**-****';
-    const clean = ssn.replace(/\D/g, '');
+  maskNationalId(id?: string): string {
+    if (!id) return 'XXXX-XXXX-XXXX';
+    const clean = id.replace(/\D/g, '');
     if (clean.length >= 4) {
-      return `***-**-${clean.substring(clean.length - 4)}`;
+      return `XXXX-XXXX-${clean.substring(clean.length - 4)}`;
     }
-    return '***-**-****';
+    return 'XXXX-XXXX-XXXX';
   }
 }

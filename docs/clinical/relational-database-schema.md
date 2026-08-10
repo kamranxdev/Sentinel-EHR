@@ -88,8 +88,8 @@ erDiagram
     PATIENTS {
         BIGINT id PK
         VARCHAR patient_code UK "PAT-1001"
-        VARCHAR ssn
         VARCHAR abha_id
+        VARCHAR national_id
         VARCHAR full_name
         DATE date_of_birth
         VARCHAR gender

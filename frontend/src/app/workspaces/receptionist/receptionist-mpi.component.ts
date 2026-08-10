@@ -91,7 +91,7 @@ import {
           </div>
           <div class="space-y-1.5">
             <label class="text-xs font-medium text-foreground">ABHA Health ID / National ID</label>
-            <input hlmInput type="text" [(ngModel)]="ssn" name="ssn" placeholder="12-3456-7890-1234" class="w-full text-xs" />
+            <input hlmInput type="text" [(ngModel)]="abhaId" name="abhaId" placeholder="91-4590-1284-9001" class="w-full text-xs" />
           </div>
           <div class="space-y-1.5">
             <label class="text-xs font-medium text-foreground">MRN / Patient Code</label>
@@ -252,7 +252,8 @@ import {
 export class ReceptionistMPIComponent implements OnInit {
   fullName = 'Kamran Khan';
   dateOfBirth = '';
-  ssn = '';
+  abhaId = '';
+  nationalId = '';
   mrn = '';
   phone = '';
   email = '';
@@ -265,7 +266,7 @@ export class ReceptionistMPIComponent implements OnInit {
 
   selectedMergePatient = signal<any>(null);
   primaryPatientId: number | null = 1;
-  mergeReason = 'Duplicate patient identity confirmed via DOB and phone/SSN matching.';
+  mergeReason = 'Duplicate patient identity confirmed via DOB and phone/ABHA matching.';
 
   constructor(
     public authService: AuthService,
@@ -279,7 +280,8 @@ export class ReceptionistMPIComponent implements OnInit {
   clearSearch(): void {
     this.fullName = '';
     this.dateOfBirth = '';
-    this.ssn = '';
+    this.abhaId = '';
+    this.nationalId = '';
     this.mrn = '';
     this.phone = '';
     this.email = '';
@@ -293,7 +295,8 @@ export class ReceptionistMPIComponent implements OnInit {
       .searchMPI({
         fullName: this.fullName,
         dateOfBirth: this.dateOfBirth,
-        ssn: this.ssn,
+        abhaId: this.abhaId,
+        nationalId: this.nationalId,
         mrn: this.mrn,
         phone: this.phone,
         email: this.email,

@@ -295,7 +295,7 @@ import {
             </div>
             <div>
               <span class="text-muted-foreground font-medium">ABHA ID / Aadhaar / National ID:</span>
-              <div class="font-mono text-foreground">{{ abhaId || ssn || 'Not Provided' }}</div>
+              <div class="font-mono text-foreground">{{ abhaId || nationalId || 'Not Provided' }}</div>
             </div>
             <div>
               <span class="text-muted-foreground font-medium">Contact Phone:</span>
@@ -374,7 +374,7 @@ export class ReceptionistIntakeComponent implements OnInit {
 
   fullName = 'Sunita Sharma';
   dob = '1988-04-12';
-  ssn = '987-65-4321';
+  nationalId = 'AADHAAR-9876-5432';
   abhaId = '91-4590-1284-9001';
   gender = 'Female';
   bloodType = 'B+';
@@ -464,7 +464,7 @@ export class ReceptionistIntakeComponent implements OnInit {
       .submitIntake({
         fullName: this.fullName,
         dateOfBirth: this.dob,
-        ssn: this.ssn,
+        nationalId: this.nationalId,
         abhaId: this.abhaId,
         gender: this.gender,
         bloodType: this.bloodType,

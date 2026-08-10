@@ -193,7 +193,6 @@ public class PatientController {
         Patient patient = patientRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Patient record with ID " + id + " not found"));
 
-        if (updated.getSsn() != null) patient.setSsn(updated.getSsn());
         if (updated.getAbhaId() != null) patient.setAbhaId(updated.getAbhaId());
         if (updated.getNationalId() != null) patient.setNationalId(updated.getNationalId());
         if (updated.getPinCode() != null) patient.setPinCode(updated.getPinCode());

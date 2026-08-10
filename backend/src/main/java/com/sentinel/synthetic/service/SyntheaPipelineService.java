@@ -459,17 +459,14 @@ public class SyntheaPipelineService {
     private Patient extractPatientFromNode(JsonNode pNode) {
         Patient p = new Patient();
         String mrn = "SYN-PAT-" + (10000 + new Random().nextInt(90000));
-        String ssn = String.format("%03d-%02d-%04d", 100 + new Random().nextInt(800), 10 + new Random().nextInt(89), 1000 + new Random().nextInt(8999));
-        String abhaId = String.format("%02d-%04d-%04d-%04d", 10 + new Random().nextInt(89), 1000 + new Random().nextInt(9000), 1000 + new Random().nextInt(9000), 1000 + new Random().nextInt(9000));
+        String abhaId = String.format("%02d-%04d-%04d-%04d", 91, 1000 + new Random().nextInt(9000), 1000 + new Random().nextInt(9000), 1000 + new Random().nextInt(9000));
         String nationalId = "AADHAAR-" + (1000 + new Random().nextInt(8999)) + "-" + (1000 + new Random().nextInt(8999));
 
         if (pNode.has("identifier")) {
             for (JsonNode idNode : pNode.get("identifier")) {
                 String val = idNode.path("value").asText();
                 String sys = idNode.path("system").asText();
-                if (sys.contains("ssn") && !val.isEmpty()) {
-                    ssn = val;
-                } else if (sys.contains("healthid") && !val.isEmpty()) {
+                if (sys.contains("healthid") && !val.isEmpty()) {
                     abhaId = val;
                 } else if (!val.isEmpty()) {
                     mrn = val;
@@ -477,7 +474,6 @@ public class SyntheaPipelineService {
             }
         }
         p.setPatientCode(mrn);
-        p.setSsn(ssn);
         p.setAbhaId(abhaId);
         p.setNationalId(nationalId);
 

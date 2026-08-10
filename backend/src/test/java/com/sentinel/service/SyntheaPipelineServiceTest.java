@@ -67,7 +67,7 @@ public class SyntheaPipelineServiceTest {
                 "id": "pat-12345",
                 "identifier": [
                   { "system": "urn:oid:2.16.840.1.113883.4.1", "value": "SYN-PAT-998877" },
-                  { "system": "urn:oid:2.16.840.1.113883.4.1.ssn", "value": "999-00-1234" }
+                  { "system": "https://healthid.ndhm.gov.in", "value": "91-9990-0123-4567" }
                 ],
                 "name": [ { "family": "SyntheaTest", "given": ["Jane"] } ],
                 "gender": "female",
@@ -138,6 +138,6 @@ public class SyntheaPipelineServiceTest {
         assertNotNull(p);
         assertEquals("Jane SyntheaTest", p.getFullName());
         assertEquals("SYN-PAT-998877", p.getPatientCode());
-        assertEquals("999-00-1234", p.getSsn());
+        assertEquals("91-9990-0123-4567", p.getAbhaId());
     }
 }

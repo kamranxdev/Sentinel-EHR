@@ -28,7 +28,8 @@ public class MPIController {
     public List<MPIMatchCandidateDTO> searchMPI(
             @RequestParam(value = "fullName", required = false) String fullName,
             @RequestParam(value = "dateOfBirth", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateOfBirth,
-            @RequestParam(value = "ssn", required = false) String ssn,
+            @RequestParam(value = "abhaId", required = false) String abhaId,
+            @RequestParam(value = "nationalId", required = false) String nationalId,
             @RequestParam(value = "mrn", required = false) String mrn,
             @RequestParam(value = "phone", required = false) String phone,
             @RequestParam(value = "email", required = false) String email,
@@ -36,7 +37,7 @@ public class MPIController {
             @RequestParam(value = "gender", required = false) String gender,
             Authentication auth) {
         
-        return mpiSearchService.searchMPI(fullName, dateOfBirth, ssn, mrn, phone, email, address, gender, auth);
+        return mpiSearchService.searchMPI(fullName, dateOfBirth, abhaId, nationalId, mrn, phone, email, address, gender, auth);
     }
 
     @GetMapping({"/scan", "/scan/", "/duplicate-candidates", "/duplicate-candidates/"})
