@@ -4,6 +4,7 @@ import com.sentinel.audit.entity.AuditLog;
 import com.sentinel.audit.repository.AuditLogRepository;
 import com.sentinel.audit.service.AuditTrailService;
 import com.sentinel.common.exception.ResourceNotFoundException;
+import com.sentinel.users.dto.UserUpdateRequestDTO;
 import com.sentinel.users.entity.Role;
 import com.sentinel.users.entity.User;
 import com.sentinel.users.repository.RoleRepository;
@@ -22,7 +23,6 @@ import java.util.Set;
 
 @RestController
 @RequestMapping({"/api/v1/admin", "/api/admin"})
-@PreAuthorize("hasAnyAuthority('USER_CREATE', 'USER_READ', 'AUDIT_LOG_READ', 'ROLE_SYS_ADMIN', 'ROLE_ADMIN', 'ROLE_ORG_ADMIN', 'ROLE_DOCTOR', 'ROLE_NURSE', 'ROLE_RECEPTIONIST', 'ROLE_AUDITOR')")
 public class AdminController {
 
     private final UserService userService;
@@ -54,37 +54,35 @@ public class AdminController {
 
     @PutMapping("/users/{id}")
     @PreAuthorize("hasAnyAuthority('ROLE_SYS_ADMIN', 'ROLE_ADMIN', 'USER_CREATE')")
-    public ResponseEntity<?> updateUser(@PathVariable Long id, @RequestBody Map<String, Object> payload, Authentication auth) {
+    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody UserUpdateRequestDTO payload, Authentication auth) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
 
-        if (payload.containsKey("fullName") && payload.get("fullName") != null) {
-            user.setFullName((String) payload.get("fullName"));
+        if (payload.getFullName() != null) {
+            user.setFullName(payload.getFullName());
         }
-        if (payload.containsKey("email") && payload.get("email") != null) {
-            user.setEmail((String) payload.get("email"));
+        if (payload.getEmail() != null) {
+            user.setEmail(payload.getEmail());
         }
-        if (payload.containsKey("department")) {
-            user.setDepartment((String) payload.get("department"));
+        if (payload.getDepartment() != null) {
+            user.setDepartment(payload.getDepartment());
         }
-        if (payload.containsKey("specialization")) {
-            user.setSpecialization((String) payload.get("specialization"));
+        if (payload.getSpecialization() != null) {
+            user.setSpecialization(payload.getSpecialization());
         }
-        if (payload.containsKey("licenseNumber")) {
-            user.setLicenseNumber((String) payload.get("licenseNumber"));
+        if (payload.getLicenseNumber() != null) {
+            user.setLicenseNumber(payload.getLicenseNumber());
         }
-        if (payload.containsKey("qualifications")) {
-            user.setQualifications((String) payload.get("qualifications"));
+        if (payload.getQualifications() != null) {
+            user.setQualifications(payload.getQualifications());
         }
-        if (payload.containsKey("verificationStatus") && payload.get("verificationStatus") != null) {
-            user.setVerificationStatus((String) payload.get("verificationStatus"));
+        if (payload.getVerificationStatus() != null) {
+            user.setVerificationStatus(payload.getVerificationStatus());
         }
 
-        if (payload.containsKey("roles") && payload.get("roles") instanceof List) {
-            @SuppressWarnings("unchecked")
-            List<String> roleNames = (List<String>) payload.get("roles");
+        if (payload.getRoles() != null) {
             Set<Role> updatedRoles = new HashSet<>();
-            for (String r : roleNames) {
+            for (String r : payload.getRoles()) {
                 String roleName = r.startsWith("ROLE_") ? r : "ROLE_" + r.toUpperCase();
                 Role role = roleRepository.findByName(roleName)
                         .orElseThrow(() -> new ResourceNotFoundException("Role " + roleName + " not found"));
@@ -102,7 +100,7 @@ public class AdminController {
 
     @PatchMapping("/users/{id}/status")
     @PreAuthorize("hasAnyAuthority('ROLE_SYS_ADMIN', 'ROLE_ADMIN', 'USER_CREATE')")
-    public ResponseEntity<?> updateUserStatus(@PathVariable Long id, @RequestBody Map<String, String> payload, Authentication auth) {
+    public ResponseEntity<Map<String, String>> updateUserStatus(@PathVariable Long id, @RequestBody Map<String, String> payload, Authentication auth) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
 
@@ -118,7 +116,7 @@ public class AdminController {
 
     @PostMapping("/users/{id}/reset-password")
     @PreAuthorize("hasAnyAuthority('ROLE_SYS_ADMIN', 'ROLE_ADMIN', 'USER_CREATE')")
-    public ResponseEntity<?> resetUserPassword(@PathVariable Long id, @RequestBody Map<String, String> payload, Authentication auth) {
+    public ResponseEntity<Map<String, String>> resetUserPassword(@PathVariable Long id, @RequestBody Map<String, String> payload, Authentication auth) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
 
@@ -133,12 +131,12 @@ public class AdminController {
         auditTrailService.logAction(auth, "RESET_USER_PASSWORD", "USER", String.valueOf(user.getId()),
                 "Admin reset password for user: " + user.getUsername());
 
-        return ResponseEntity.ok(Map.of("message", "Password reset successfully", "temporaryPassword", newPassword));
+        return ResponseEntity.ok(Map.of("message", "Password reset successfully. Notification sent to registered email."));
     }
 
     @DeleteMapping("/users/{id}")
     @PreAuthorize("hasAnyAuthority('ROLE_SYS_ADMIN', 'ROLE_ADMIN')")
-    public ResponseEntity<?> deleteUser(@PathVariable Long id, Authentication auth) {
+    public ResponseEntity<Map<String, String>> deleteUser(@PathVariable Long id, Authentication auth) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
 
@@ -154,20 +152,9 @@ public class AdminController {
     @GetMapping("/audit-logs")
     @PreAuthorize("hasAnyAuthority('AUDIT_LOG_READ', 'ROLE_SYS_ADMIN', 'ROLE_ADMIN')")
     public List<AuditLog> getAuditLogs(@RequestParam(value = "search", required = false) String search) {
-        List<AuditLog> logs = auditLogRepository.findAllByOrderByTimestampDesc();
-        if (search == null || search.trim().isEmpty()) {
-            return logs;
+        if (search != null && !search.trim().isEmpty()) {
+            return auditLogRepository.searchAuditLogs(search.trim());
         }
-
-        String q = search.toLowerCase().trim();
-        return logs.stream().filter(l -> 
-            (l.getUsername() != null && l.getUsername().toLowerCase().contains(q)) ||
-            (l.getUserRole() != null && l.getUserRole().toLowerCase().contains(q)) ||
-            (l.getAction() != null && l.getAction().toLowerCase().contains(q)) ||
-            (l.getEntityName() != null && l.getEntityName().toLowerCase().contains(q)) ||
-            (l.getResourceId() != null && l.getResourceId().toLowerCase().contains(q)) ||
-            (l.getDetails() != null && l.getDetails().toLowerCase().contains(q))
-        ).toList();
+        return auditLogRepository.findAllByOrderByTimestampDesc();
     }
 }
-

@@ -28,7 +28,6 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping({"/fhir/v1", "/api/v1/fhir"})
-@CrossOrigin(origins = "*")
 public class FhirController {
 
     private final FhirService fhirService;
@@ -72,24 +71,17 @@ public class FhirController {
             @RequestParam(required = false) String gender,
             @RequestParam(required = false) String identifier) {
 
-        List<Patient> patients = patientRepository.findAll();
-
-        if (name != null && !name.isEmpty()) {
-            patients = patients.stream()
-                    .filter(p -> p.getFullName() != null && p.getFullName().toLowerCase().contains(name.toLowerCase()))
-                    .collect(Collectors.toList());
-        }
-        if (gender != null && !gender.isEmpty()) {
-            patients = patients.stream()
-                    .filter(p -> p.getGender() != null && p.getGender().equalsIgnoreCase(gender))
-                    .collect(Collectors.toList());
-        }
-        if (identifier != null && !identifier.isEmpty()) {
-            patients = patients.stream()
-                    .filter(p -> (p.getPatientCode() != null && p.getPatientCode().equalsIgnoreCase(identifier)) ||
-                                 (p.getAbhaId() != null && p.getAbhaId().equalsIgnoreCase(identifier)) ||
-                                 (p.getNationalId() != null && p.getNationalId().equalsIgnoreCase(identifier)))
-                    .collect(Collectors.toList());
+        List<Patient> patients;
+        if ((name == null || name.trim().isEmpty()) && 
+            (gender == null || gender.trim().isEmpty()) && 
+            (identifier == null || identifier.trim().isEmpty())) {
+            patients = patientRepository.findAll();
+        } else {
+            patients = patientRepository.searchFhirPatients(
+                    (name != null && !name.trim().isEmpty()) ? name.trim() : null,
+                    (gender != null && !gender.trim().isEmpty()) ? gender.trim() : null,
+                    (identifier != null && !identifier.trim().isEmpty()) ? identifier.trim() : null
+            );
         }
 
         List<Map<String, Object>> resources = patients.stream()

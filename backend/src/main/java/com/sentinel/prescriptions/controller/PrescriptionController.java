@@ -1,21 +1,16 @@
 package com.sentinel.prescriptions.controller;
 
 import com.sentinel.audit.service.AuditTrailService;
-import com.sentinel.common.exception.ResourceNotFoundException;
-import com.sentinel.patients.entity.Patient;
-import com.sentinel.patients.repository.PatientRepository;
 import com.sentinel.patients.service.PatientSecurityService;
 import com.sentinel.prescriptions.dto.PrescriptionSafetyCheckRequest;
 import com.sentinel.prescriptions.entity.Prescription;
-import com.sentinel.prescriptions.repository.PrescriptionRepository;
-import com.sentinel.prescriptions.service.SmartSafetyService;
+import com.sentinel.prescriptions.service.PrescriptionService;
 import com.sentinel.prescriptions.service.SmartSafetyService.SafetyCheckResult;
-import com.sentinel.users.entity.User;
-import com.sentinel.users.repository.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,24 +20,15 @@ import java.util.Map;
 @RequestMapping({"/api/v1/prescriptions", "/api/prescriptions"})
 public class PrescriptionController {
 
-    private final PrescriptionRepository prescriptionRepository;
-    private final PatientRepository patientRepository;
-    private final UserRepository userRepository;
+    private final PrescriptionService prescriptionService;
     private final AuditTrailService auditService;
-    private final SmartSafetyService safetyService;
     private final PatientSecurityService patientSecurityService;
 
-    public PrescriptionController(PrescriptionRepository prescriptionRepository,
-                                   PatientRepository patientRepository,
-                                   UserRepository userRepository,
+    public PrescriptionController(PrescriptionService prescriptionService,
                                    AuditTrailService auditService,
-                                   SmartSafetyService safetyService,
                                    PatientSecurityService patientSecurityService) {
-        this.prescriptionRepository = prescriptionRepository;
-        this.patientRepository = patientRepository;
-        this.userRepository = userRepository;
+        this.prescriptionService = prescriptionService;
         this.auditService = auditService;
-        this.safetyService = safetyService;
         this.patientSecurityService = patientSecurityService;
     }
 
@@ -50,27 +36,26 @@ public class PrescriptionController {
     @PreAuthorize("hasAuthority('PRESCRIPTION_READ') and @abacEvaluator.hasTreatmentRelationship(authentication, #patientId)")
     public List<Prescription> getPrescriptionsByPatient(@PathVariable Long patientId, Authentication auth) {
         auditService.logAction(auth, "READ", "PRESCRIPTION", String.valueOf(patientId), "Accessed eRx prescription history for patient ID: " + patientId);
-        return prescriptionRepository.findByPatientIdOrderByPrescribedAtDesc(patientId);
+        return prescriptionService.getPrescriptionsByPatientId(patientId);
     }
 
     @PostMapping("/safety-check")
     @PreAuthorize("hasAuthority('PRESCRIPTION_CREATE')")
-    public ResponseEntity<SafetyCheckResult> checkSafety(@RequestBody Map<String, Object> body, Authentication auth) {
-        if (!body.containsKey("patientId") || !body.containsKey("medicationName")) {
+    public ResponseEntity<SafetyCheckResult> checkSafety(@RequestBody PrescriptionSafetyCheckRequest request, Authentication auth) {
+        if (request.getPatientId() == null || request.getMedicationName() == null) {
             throw new IllegalArgumentException("patientId and medicationName are required fields");
         }
 
-        Long patientId = Long.parseLong(body.get("patientId").toString());
-        if (!patientSecurityService.canAccessPatient(auth, patientId)) {
+        if (!patientSecurityService.canAccessPatient(auth, request.getPatientId())) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
-        String medicationName = body.get("medicationName").toString();
 
-        SafetyCheckResult result = safetyService.checkPrescriptionSafety(
-                patientId, 
-                medicationName, 
+        String primaryRole = getPrimaryRole(auth);
+        SafetyCheckResult result = prescriptionService.validateSafety(
+                request.getPatientId(), 
+                request.getMedicationName(), 
                 auth.getName(), 
-                "ROLE_DOCTOR"
+                primaryRole
         );
         return ResponseEntity.ok(result);
     }
@@ -86,11 +71,12 @@ public class PrescriptionController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        SafetyCheckResult result = safetyService.checkPrescriptionSafety(
+        String primaryRole = getPrimaryRole(auth);
+        SafetyCheckResult result = prescriptionService.validateSafety(
                 request.getPatientId(),
                 request.getMedicationName(),
                 auth.getName(),
-                "ROLE_DOCTOR"
+                primaryRole
         );
         return ResponseEntity.ok(result);
     }
@@ -104,16 +90,12 @@ public class PrescriptionController {
             throw new IllegalArgumentException("Patient ID is required for prescription creation");
         }
 
-        User doctor = userRepository.findByUsername(auth.getName())
-                .orElseThrow(() -> new ResourceNotFoundException("Prescribing doctor user not found"));
-        Patient patient = patientRepository.findById(prescription.getPatient().getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Patient with ID " + prescription.getPatient().getId() + " not found"));
-
-        SafetyCheckResult safetyResult = safetyService.checkPrescriptionSafety(
-                patient.getId(), 
+        String primaryRole = getPrimaryRole(auth);
+        SafetyCheckResult safetyResult = prescriptionService.validateSafety(
+                prescription.getPatient().getId(), 
                 prescription.getMedicationName(), 
                 auth.getName(), 
-                "ROLE_DOCTOR"
+                primaryRole
         );
 
         if (!safetyResult.isSafe() && !overrideWarning) {
@@ -124,31 +106,35 @@ public class PrescriptionController {
             ));
         }
 
-        prescription.setDoctor(doctor);
-        prescription.setPatient(patient);
-
-        Prescription saved = prescriptionRepository.save(prescription);
+        Prescription saved = prescriptionService.createPrescription(prescription, auth.getName());
         
-        String auditDetail = "Prescribed " + saved.getMedicationName() + " (" + saved.getDosage() + ") to patient ID: " + patient.getId();
+        String auditDetail = "Prescribed " + saved.getMedicationName() + " (" + saved.getDosage() + ") to patient ID: " + saved.getPatient().getId();
         if (!safetyResult.isSafe() && overrideWarning) {
             auditDetail += " [CLINICIAN OVERRIDE OF ALLERGY WARNING: " + safetyResult.getConflictingAllergen() + "]";
         }
 
         auditService.logAction(auth, "CREATE", "PRESCRIPTION", String.valueOf(saved.getId()), auditDetail);
 
-        return ResponseEntity.ok(saved);
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
     @PutMapping("/{id}/status")
     @PreAuthorize("hasAuthority('PRESCRIPTION_READ') and @patientSecurityService.canAccessPrescription(authentication, #id)")
-    public ResponseEntity<?> updateStatus(@PathVariable Long id, @RequestParam String status, Authentication auth) {
-        Prescription rx = prescriptionRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Prescription with ID " + id + " not found"));
-
-        rx.setStatus(status);
-        Prescription saved = prescriptionRepository.save(rx);
+    public ResponseEntity<Prescription> updateStatus(@PathVariable Long id, @RequestParam String status, Authentication auth) {
+        Prescription saved = prescriptionService.updateStatus(id, status);
         auditService.logAction(auth, "UPDATE", "PRESCRIPTION", String.valueOf(id), "Updated prescription ID: " + id + " status to " + status);
 
         return ResponseEntity.ok(saved);
+    }
+
+    private String getPrimaryRole(Authentication auth) {
+        if (auth != null && auth.getAuthorities() != null) {
+            return auth.getAuthorities().stream()
+                    .map(GrantedAuthority::getAuthority)
+                    .filter(a -> a.startsWith("ROLE_"))
+                    .findFirst()
+                    .orElse("ROLE_DOCTOR");
+        }
+        return "ROLE_DOCTOR";
     }
 }

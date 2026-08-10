@@ -34,7 +34,7 @@ public class AuditServiceTest {
 
         when(auditLogRepository.save(any(AuditLog.class))).thenAnswer(i -> i.getArgument(0));
 
-        AuditLog log = auditService.logAction(auth, "READ", "PATIENT", "101", "Accessed patient file");
+        AuditLog log = auditService.logAction(auth, "READ", "PATIENT", "101", "Accessed patient file").join();
 
         assertNotNull(log);
         assertEquals("doctor_jane", log.getUsername());
@@ -48,7 +48,7 @@ public class AuditServiceTest {
     public void testLogActionWithNullAuthentication_FallbackToSystem() {
         when(auditLogRepository.save(any(AuditLog.class))).thenAnswer(i -> i.getArgument(0));
 
-        AuditLog log = auditService.logAction((Authentication) null, "SYSTEM_BATCH", "DATABASE", "0", "Automated cleanup");
+        AuditLog log = auditService.logAction((Authentication) null, "SYSTEM_BATCH", "DATABASE", "0", "Automated cleanup").join();
 
         assertNotNull(log);
         assertEquals("SYSTEM", log.getUsername());
@@ -59,7 +59,7 @@ public class AuditServiceTest {
     public void testLogActionRepositoryException_SwallowsAndReturnsNull() {
         when(auditLogRepository.save(any(AuditLog.class))).thenThrow(new RuntimeException("Database error"));
 
-        AuditLog log = auditService.logAction("user1", "ROLE_USER", "READ", "DATA", "1", "Test details");
+        AuditLog log = auditService.logAction("user1", "ROLE_USER", "READ", "DATA", "1", "Test details").join();
 
         assertNull(log, "Should swallow exception gracefully and return null");
     }

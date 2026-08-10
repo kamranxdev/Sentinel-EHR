@@ -13,7 +13,6 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@CrossOrigin(origins = "*")
 @RequestMapping({"/api/v1/mpi", "/api/mpi", "/v1/mpi", "/mpi"})
 public class MPIController {
 

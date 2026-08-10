@@ -6,6 +6,7 @@ import com.sentinel.allergies.entity.Allergy;
 import com.sentinel.allergies.repository.AllergyRepository;
 import com.sentinel.audit.entity.AuditLog;
 import com.sentinel.audit.repository.AuditLogRepository;
+import com.sentinel.audit.service.AuditTrailService;
 import com.sentinel.diagnoses.entity.Diagnosis;
 import com.sentinel.diagnoses.repository.DiagnosisRepository;
 import com.sentinel.encounters.entity.Encounter;
@@ -53,7 +54,7 @@ public class SyntheaPipelineService {
     private final PrescriptionRepository prescriptionRepository;
     private final VitalsRepository vitalsRepository;
     private final UserRepository userRepository;
-    private final AuditLogRepository auditLogRepository;
+    private final AuditTrailService auditService;
     private final ObjectMapper objectMapper;
 
     public SyntheaPipelineService(PatientRepository patientRepository,
@@ -63,7 +64,7 @@ public class SyntheaPipelineService {
                                   PrescriptionRepository prescriptionRepository,
                                   VitalsRepository vitalsRepository,
                                   UserRepository userRepository,
-                                  AuditLogRepository auditLogRepository,
+                                  AuditTrailService auditService,
                                   ObjectMapper objectMapper) {
         this.patientRepository = patientRepository;
         this.encounterRepository = encounterRepository;
@@ -72,7 +73,7 @@ public class SyntheaPipelineService {
         this.prescriptionRepository = prescriptionRepository;
         this.vitalsRepository = vitalsRepository;
         this.userRepository = userRepository;
-        this.auditLogRepository = auditLogRepository;
+        this.auditService = auditService;
         this.objectMapper = objectMapper;
     }
 
@@ -439,14 +440,14 @@ public class SyntheaPipelineService {
             metrics.put("prescriptionsCount", prescriptionsCount);
             metrics.put("vitalsCount", vitalsCount);
 
-            auditLogRepository.save(new AuditLog(
+            auditService.logAction(
                     createdByUsername != null ? createdByUsername : "SYSTEM",
                     "ROLE_ADMIN",
                     "INGEST_SYNTHEA_BUNDLE",
                     "PATIENT",
                     String.valueOf(savedPatient.getId()),
                     "Successfully ingested official Synthea FHIR R4 Bundle for: " + savedPatient.getFullName() + " (" + savedPatient.getPatientCode() + ")"
-            ));
+            );
 
         } catch (Exception e) {
             log.error("Error parsing Synthea FHIR bundle: {}", e.getMessage(), e);

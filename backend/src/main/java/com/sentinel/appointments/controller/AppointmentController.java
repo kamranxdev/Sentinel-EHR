@@ -1,5 +1,6 @@
 package com.sentinel.appointments.controller;
 
+import com.sentinel.appointments.dto.*;
 import com.sentinel.appointments.entity.*;
 import com.sentinel.appointments.repository.AppointmentRepository;
 import com.sentinel.appointments.service.AppointmentWorkflowService;
@@ -14,6 +15,7 @@ import com.sentinel.users.entity.User;
 import com.sentinel.users.repository.UserRepository;
 import com.sentinel.users.service.DoctorMatchingService;
 import com.sentinel.vitals.entity.Vitals;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -98,7 +100,7 @@ public class AppointmentController {
 
     @PostMapping
     @PreAuthorize("hasAuthority('APPOINTMENT_CREATE') or hasRole('PATIENT')")
-    public ResponseEntity<?> scheduleAppointment(@RequestBody Appointment appointment, Authentication auth) {
+    public ResponseEntity<Appointment> scheduleAppointment(@RequestBody Appointment appointment, Authentication auth) {
         if (appointment.getPatient() == null || appointment.getPatient().getId() == null) {
             throw new IllegalArgumentException("Patient ID must be provided");
         }
@@ -120,12 +122,12 @@ public class AppointmentController {
         Appointment saved = appointmentRepository.save(appointment);
         auditService.logAction(auth, "CREATE", "APPOINTMENT", String.valueOf(saved.getId()), "Scheduled appointment for patient ID: " + patient.getId() + " on " + saved.getAppointmentDate());
 
-        return ResponseEntity.ok(saved);
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
     }
 
     @PutMapping("/{id}/status")
     @PreAuthorize("hasAuthority('APPOINTMENT_UPDATE') and @patientSecurityService.canAccessAppointment(authentication, #id)")
-    public ResponseEntity<?> updateStatus(@PathVariable Long id, @RequestParam String status, Authentication auth) {
+    public ResponseEntity<Appointment> updateStatus(@PathVariable Long id, @RequestParam String status, Authentication auth) {
         Appointment apt = appointmentRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Appointment with ID " + id + " not found"));
 
@@ -186,94 +188,61 @@ public class AppointmentController {
     @PostMapping("/{id}/check-in")
     @PreAuthorize("hasAuthority('APPOINTMENT_UPDATE') and @patientSecurityService.canAccessAppointment(authentication, #id)")
     public ResponseEntity<Appointment> checkInPatient(@PathVariable Long id,
-                                                        @RequestBody Map<String, Object> payload,
+                                                        @RequestBody CheckInRequestDTO payload,
                                                         Authentication auth) {
-        Boolean insuranceVerified = (Boolean) payload.get("insuranceVerified");
-        String insuranceDetails = (String) payload.get("insuranceDetails");
-        String reportsUploaded = (String) payload.get("reportsUploaded");
-        String note = (String) payload.get("note");
-
-        Appointment checkedIn = workflowService.checkInPatient(id, insuranceVerified, insuranceDetails, reportsUploaded, note, auth);
+        Appointment checkedIn = workflowService.checkInPatient(
+                id, 
+                payload.getInsuranceVerified(), 
+                payload.getInsuranceDetails(), 
+                payload.getReportsUploaded(), 
+                payload.getNote(), 
+                auth
+        );
         return ResponseEntity.ok(checkedIn);
     }
 
     @PostMapping("/{id}/triage-vitals")
     @PreAuthorize("hasAuthority('VITALS_CREATE') and @patientSecurityService.canAccessAppointment(authentication, #id)")
     public ResponseEntity<Appointment> recordTriageVitals(@PathVariable Long id,
-                                                           @RequestBody Map<String, Object> payload,
+                                                           @RequestBody TriageVitalsRequestDTO payload,
                                                            Authentication auth) {
         Vitals vitals = new Vitals();
-        if (payload.get("bloodPressure") != null) vitals.setBloodPressure((String) payload.get("bloodPressure"));
-        if (payload.get("heartRate") != null) vitals.setHeartRate(Integer.parseInt(payload.get("heartRate").toString()));
-        if (payload.get("temperature") != null) vitals.setTemperature(Double.parseDouble(payload.get("temperature").toString()));
-        if (payload.get("oxygenSaturation") != null) vitals.setOxygenSaturation(Integer.parseInt(payload.get("oxygenSaturation").toString()));
-        if (payload.get("respiratoryRate") != null) vitals.setRespiratoryRate(Integer.parseInt(payload.get("respiratoryRate").toString()));
-        if (payload.get("weightKg") != null) vitals.setWeightKg(Double.parseDouble(payload.get("weightKg").toString()));
-        if (payload.get("heightCm") != null) vitals.setHeightCm(Double.parseDouble(payload.get("heightCm").toString()));
-        if (payload.get("bloodGlucose") != null) vitals.setBloodGlucose(Integer.parseInt(payload.get("bloodGlucose").toString()));
+        if (payload.getBloodPressure() != null) vitals.setBloodPressure(payload.getBloodPressure());
+        if (payload.getHeartRate() != null) vitals.setHeartRate(payload.getHeartRate());
+        if (payload.getTemperature() != null) vitals.setTemperature(payload.getTemperature());
+        if (payload.getOxygenSaturation() != null) vitals.setOxygenSaturation(payload.getOxygenSaturation());
+        if (payload.getRespiratoryRate() != null) vitals.setRespiratoryRate(payload.getRespiratoryRate());
+        if (payload.getWeightKg() != null) vitals.setWeightKg(payload.getWeightKg());
+        if (payload.getHeightCm() != null) vitals.setHeightCm(payload.getHeightCm());
+        if (payload.getBloodGlucose() != null) vitals.setBloodGlucose(payload.getBloodGlucose());
 
-        String nursingNotes = (String) payload.get("nursingNotes");
-
-        Appointment triaged = workflowService.recordTriageVitals(id, vitals, nursingNotes, auth);
+        Appointment triaged = workflowService.recordTriageVitals(id, vitals, payload.getNursingNotes(), auth);
         return ResponseEntity.ok(triaged);
     }
 
     @PostMapping("/{id}/doctor-consultation")
     @PreAuthorize("hasAuthority('CLINICAL_NOTE_CREATE') and @patientSecurityService.canAccessAppointment(authentication, #id)")
     public ResponseEntity<Appointment> recordDoctorConsultation(@PathVariable Long id,
-                                                                 @RequestBody Map<String, Object> payload,
+                                                                 @RequestBody DoctorConsultationRequestDTO payload,
                                                                  Authentication auth) {
-        String doctorNotes = (String) payload.get("doctorNotes");
-        String followUpStr = (String) payload.get("followUpDate");
         LocalDateTime followUpDate = null;
-        if (followUpStr != null && !followUpStr.isEmpty()) {
-            followUpDate = LocalDateTime.parse(followUpStr);
+        if (payload.getFollowUpDate() != null && !payload.getFollowUpDate().isEmpty()) {
+            followUpDate = LocalDateTime.parse(payload.getFollowUpDate());
         }
 
-        List<Diagnosis> diagnoses = new ArrayList<>();
-        if (payload.get("diagnoses") instanceof List<?> list) {
-            for (Object item : list) {
-                if (item instanceof Map<?, ?> m) {
-                    Diagnosis d = new Diagnosis();
-                    if (m.get("conditionName") != null) d.setConditionName(m.get("conditionName").toString());
-                    if (m.get("icdCode") != null) d.setIcdCode(m.get("icdCode").toString());
-                    if (m.get("snomedCode") != null) d.setSnomedCode(m.get("snomedCode").toString());
-                    if (m.get("notes") != null) d.setNotes(m.get("notes").toString());
-                    diagnoses.add(d);
-                }
-            }
-        }
+        List<Diagnosis> diagnoses = payload.getDiagnoses() != null ? payload.getDiagnoses() : new ArrayList<>();
+        List<Prescription> prescriptions = payload.getPrescriptions() != null ? payload.getPrescriptions() : new ArrayList<>();
+        List<AppointmentLabOrder> labOrders = payload.getLabOrders() != null ? payload.getLabOrders() : new ArrayList<>();
 
-        List<Prescription> prescriptions = new ArrayList<>();
-        if (payload.get("prescriptions") instanceof List<?> list) {
-            for (Object item : list) {
-                if (item instanceof Map<?, ?> m) {
-                    Prescription p = new Prescription();
-                    if (m.get("medicationName") != null) p.setMedicationName(m.get("medicationName").toString());
-                    if (m.get("rxNormCode") != null) p.setRxNormCode(m.get("rxNormCode").toString());
-                    if (m.get("dosage") != null) p.setDosage(m.get("dosage").toString());
-                    if (m.get("frequency") != null) p.setFrequency(m.get("frequency").toString());
-                    if (m.get("durationDays") != null) p.setDurationDays(Integer.parseInt(m.get("durationDays").toString()));
-                    if (m.get("instructions") != null) p.setInstructions(m.get("instructions").toString());
-                    prescriptions.add(p);
-                }
-            }
-        }
-
-        List<AppointmentLabOrder> labOrders = new ArrayList<>();
-        if (payload.get("labOrders") instanceof List<?> list) {
-            for (Object item : list) {
-                if (item instanceof Map<?, ?> m) {
-                    AppointmentLabOrder lo = new AppointmentLabOrder();
-                    if (m.get("testName") != null) lo.setTestName(m.get("testName").toString());
-                    if (m.get("priority") != null) lo.setPriority(m.get("priority").toString());
-                    if (m.get("clinicalIndications") != null) lo.setClinicalIndications(m.get("clinicalIndications").toString());
-                    labOrders.add(lo);
-                }
-            }
-        }
-
-        Appointment updated = workflowService.recordDoctorConsultation(id, diagnoses, prescriptions, labOrders, doctorNotes, followUpDate, auth);
+        Appointment updated = workflowService.recordDoctorConsultation(
+                id, 
+                diagnoses, 
+                prescriptions, 
+                labOrders, 
+                payload.getDoctorNotes(), 
+                followUpDate, 
+                auth
+        );
         return ResponseEntity.ok(updated);
     }
 
@@ -286,68 +255,59 @@ public class AppointmentController {
     @PostMapping("/{id}/notes")
     @PreAuthorize("hasAuthority('APPOINTMENT_READ') and @patientSecurityService.canAccessAppointment(authentication, #id)")
     public ResponseEntity<AppointmentNote> addNote(@PathVariable Long id,
-                                                    @RequestBody Map<String, String> payload,
+                                                    @RequestBody AppointmentNoteRequestDTO payload,
                                                     Authentication auth) {
-        String noteType = payload.get("noteType");
-        String content = payload.get("content");
-        AppointmentNote note = workflowService.addAppointmentNote(id, noteType, content, auth);
-        return ResponseEntity.ok(note);
+        AppointmentNote note = workflowService.addAppointmentNote(id, payload.getNoteType(), payload.getContent(), auth);
+        return ResponseEntity.status(HttpStatus.CREATED).body(note);
     }
 
     @PutMapping("/notes/{noteId}")
     @PreAuthorize("hasAuthority('APPOINTMENT_READ')")
     public ResponseEntity<AppointmentNote> editNote(@PathVariable Long noteId,
-                                                     @RequestBody Map<String, String> payload,
+                                                     @RequestBody AppointmentNoteRequestDTO payload,
                                                      Authentication auth) {
-        String content = payload.get("content");
-        AppointmentNote updated = workflowService.editAppointmentNote(noteId, content, auth);
+        AppointmentNote updated = workflowService.editAppointmentNote(noteId, payload.getContent(), auth);
         return ResponseEntity.ok(updated);
     }
 
     @PostMapping("/{id}/cancel")
     @PreAuthorize("(hasAuthority('APPOINTMENT_CANCEL') or hasRole('PATIENT')) and @patientSecurityService.canAccessAppointment(authentication, #id)")
     public ResponseEntity<AppointmentCancellation> cancelAppointment(@PathVariable Long id,
-                                                                      @RequestBody Map<String, String> payload,
+                                                                      @RequestBody AppointmentCancellationRequestDTO payload,
                                                                       Authentication auth) {
-        String reason = payload.get("reason");
-        String comment = payload.get("comment");
-        AppointmentCancellation cancellation = workflowService.cancelAppointment(id, reason, comment, auth);
+        AppointmentCancellation cancellation = workflowService.cancelAppointment(id, payload.getReason(), payload.getComment(), auth);
         return ResponseEntity.ok(cancellation);
     }
 
     @GetMapping("/{id}/cancellation")
     @PreAuthorize("hasAuthority('APPOINTMENT_READ') and @patientSecurityService.canAccessAppointment(authentication, #id)")
-    public ResponseEntity<?> getCancellationDetails(@PathVariable Long id) {
+    public ResponseEntity<AppointmentCancellation> getCancellationDetails(@PathVariable Long id) {
         Optional<AppointmentCancellation> opt = workflowService.getCancellationForAppointment(id);
-        if (opt.isPresent()) {
-            return ResponseEntity.ok(opt.get());
-        }
-        return ResponseEntity.notFound().build();
+        return opt.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @PostMapping("/{id}/billing")
     @PreAuthorize("hasAuthority('INVOICE_CREATE') and @patientSecurityService.canAccessAppointment(authentication, #id)")
     public ResponseEntity<AppointmentBilling> generateBilling(@PathVariable Long id,
-                                                               @RequestBody Map<String, Object> payload,
+                                                               @RequestBody BillingGenerationRequestDTO payload,
                                                                Authentication auth) {
-        Double consultationFee = payload.get("consultationFee") != null ? Double.parseDouble(payload.get("consultationFee").toString()) : 100.0;
-        Double triageFee = payload.get("triageFee") != null ? Double.parseDouble(payload.get("triageFee").toString()) : 25.0;
-        Double labFee = payload.get("labFee") != null ? Double.parseDouble(payload.get("labFee").toString()) : 0.0;
-        Double pharmacyFee = payload.get("pharmacyFee") != null ? Double.parseDouble(payload.get("pharmacyFee").toString()) : 0.0;
-        Double insuranceCoverage = payload.get("insuranceCoverage") != null ? Double.parseDouble(payload.get("insuranceCoverage").toString()) : 0.0;
-
-        AppointmentBilling billing = workflowService.generateBilling(id, consultationFee, triageFee, labFee, pharmacyFee, insuranceCoverage, auth);
-        return ResponseEntity.ok(billing);
+        AppointmentBilling billing = workflowService.generateBilling(
+                id, 
+                payload.getConsultationFee(), 
+                payload.getTriageFee(), 
+                payload.getLabFee(), 
+                payload.getPharmacyFee(), 
+                payload.getInsuranceCoverage(), 
+                auth
+        );
+        return ResponseEntity.status(HttpStatus.CREATED).body(billing);
     }
 
     @GetMapping("/{id}/billing")
     @PreAuthorize("hasAuthority('INVOICE_READ') and @patientSecurityService.canAccessAppointment(authentication, #id)")
-    public ResponseEntity<?> getBilling(@PathVariable Long id) {
+    public ResponseEntity<AppointmentBilling> getBilling(@PathVariable Long id) {
         Optional<AppointmentBilling> opt = workflowService.getBillingForAppointment(id);
-        if (opt.isPresent()) {
-            return ResponseEntity.ok(opt.get());
-        }
-        return ResponseEntity.notFound().build();
+        return opt.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @GetMapping("/{id}/lab-orders")
