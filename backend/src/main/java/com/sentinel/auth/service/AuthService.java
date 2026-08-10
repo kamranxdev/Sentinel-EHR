@@ -18,8 +18,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -47,6 +49,7 @@ public class AuthService {
         this.tokenProvider = tokenProvider;
     }
 
+    @Transactional
     public JwtAuthResponse login(LoginRequest loginRequest) {
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -82,7 +85,8 @@ public class AuthService {
         );
     }
 
-    public User registerPatient(RegisterRequest registerRequest) {
+    @Transactional
+    public Map<String, Object> registerPatient(RegisterRequest registerRequest) {
         if (userRepository.existsByUsername(registerRequest.getUsername())) {
             throw new IllegalArgumentException("Username is already taken!");
         }
@@ -118,8 +122,89 @@ public class AuthService {
         patient.setFullName(saved.getFullName());
         patient.setEmail(saved.getEmail());
         patient.setUser(saved);
-        patientRepository.save(patient);
+        Patient savedPatient = patientRepository.save(patient);
 
-        return saved;
+        return Map.of("message", "User registered successfully!", "userId", saved.getId(), "patientId", savedPatient.getId(), "username", saved.getUsername(), "patientCode", savedPatient.getPatientCode());
+    }
+
+    @Transactional
+    public User createUserByAdmin(RegisterRequest registerRequest) {
+        if (userRepository.existsByUsername(registerRequest.getUsername())) {
+            throw new IllegalArgumentException("Username is already taken!");
+        }
+        if (userRepository.existsByEmail(registerRequest.getEmail())) {
+            throw new IllegalArgumentException("Email is already in use!");
+        }
+
+        Set<String> strRoles = registerRequest.getRoles();
+        boolean isDoctor = strRoles != null && strRoles.stream().anyMatch(r -> r.equalsIgnoreCase("DOCTOR") || r.equalsIgnoreCase("ROLE_DOCTOR"));
+
+        if (isDoctor) {
+            if (registerRequest.getLicenseNumber() == null || registerRequest.getLicenseNumber().trim().isEmpty()) {
+                throw new IllegalArgumentException("Doctor registration requires a valid Medical Practice License Number!");
+            }
+            if (registerRequest.getQualifications() == null || registerRequest.getQualifications().trim().isEmpty()) {
+                throw new IllegalArgumentException("Doctor registration requires documented Qualifications (e.g. MD, MBBS)!");
+            }
+        }
+
+        User user = new User(
+                registerRequest.getUsername(),
+                passwordEncoder.encode(registerRequest.getPassword()),
+                registerRequest.getEmail(),
+                registerRequest.getFullName()
+        );
+
+        user.setSpecialization(registerRequest.getSpecialization());
+        user.setDepartment(registerRequest.getDepartment());
+        user.setLicenseNumber(registerRequest.getLicenseNumber());
+        user.setQualifications(registerRequest.getQualifications());
+        user.setYearsOfExperience(registerRequest.getYearsOfExperience() != null ? registerRequest.getYearsOfExperience() : 5);
+        user.setMedicalBoardState(registerRequest.getMedicalBoardState() != null ? registerRequest.getMedicalBoardState() : "State Licensing Board");
+        user.setVerificationStatus("VERIFIED");
+
+        Set<Role> roles = new HashSet<>();
+
+        if (strRoles == null || strRoles.isEmpty()) {
+            Role defaultRole = roleRepository.findByName("ROLE_PATIENT").orElseThrow();
+            roles.add(defaultRole);
+        } else {
+            for (String r : strRoles) {
+                String roleName = r.startsWith("ROLE_") ? r : "ROLE_" + r.toUpperCase();
+                Role userRole = roleRepository.findByName(roleName)
+                        .orElseThrow(() -> new ResourceNotFoundException("Role " + roleName + " not found."));
+                roles.add(userRole);
+            }
+        }
+
+        user.setRoles(roles);
+        return userRepository.save(user);
+    }
+
+    @Transactional(readOnly = true)
+    public JwtAuthResponse getCurrentUserResponse(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("Authenticated user not found"));
+
+        Set<String> roles = user.getRoles().stream().map(Role::getName).collect(Collectors.toSet());
+        Set<String> permissions = new HashSet<>();
+        for (Role role : user.getRoles()) {
+            if (role.getPermissions() != null) {
+                for (Permission perm : role.getPermissions()) {
+                    permissions.add(perm.getCode());
+                }
+            }
+        }
+
+        return new JwtAuthResponse(
+                null,
+                user.getUsername(),
+                user.getFullName(),
+                roles,
+                permissions,
+                user.getDepartment(),
+                user.getId()
+        );
     }
 }
+

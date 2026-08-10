@@ -1,13 +1,10 @@
 package com.sentinel.patients.controller;
 
 import com.sentinel.audit.service.AuditTrailService;
-import com.sentinel.common.exception.ResourceNotFoundException;
 import com.sentinel.patients.dto.PatientClinicalHistoryDTO;
 import com.sentinel.patients.entity.Patient;
 import com.sentinel.patients.service.PatientSecurityService;
 import com.sentinel.patients.service.PatientService;
-import com.sentinel.users.entity.User;
-import com.sentinel.users.repository.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -23,16 +20,13 @@ public class PatientController {
     private final PatientService patientService;
     private final AuditTrailService auditService;
     private final PatientSecurityService patientSecurityService;
-    private final UserRepository userRepository;
 
     public PatientController(PatientService patientService,
                              AuditTrailService auditService,
-                             PatientSecurityService patientSecurityService,
-                             UserRepository userRepository) {
+                             PatientSecurityService patientSecurityService) {
         this.patientService = patientService;
         this.auditService = auditService;
         this.patientSecurityService = patientSecurityService;
-        this.userRepository = userRepository;
     }
 
     @GetMapping
@@ -83,9 +77,8 @@ public class PatientController {
         if (auth == null || !auth.isAuthenticated()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        User user = userRepository.findByUsernameOrEmail(auth.getName(), auth.getName())
-                .orElseThrow(() -> new ResourceNotFoundException("Authenticated user record not found: " + auth.getName()));
-        return getPatientByUserId(user.getId(), auth);
+        Patient patient = patientService.getPatientByUsernameOrEmail(auth.getName());
+        return ResponseEntity.ok(patient);
     }
 
     @GetMapping("/user/{userId}")
@@ -124,3 +117,4 @@ public class PatientController {
         return ResponseEntity.noContent().build();
     }
 }
+

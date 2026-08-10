@@ -2,12 +2,7 @@ package com.sentinel.clinicalrecords.controller;
 
 import com.sentinel.audit.service.AuditTrailService;
 import com.sentinel.clinicalrecords.entity.MedicalRecord;
-import com.sentinel.clinicalrecords.repository.MedicalRecordRepository;
-import com.sentinel.common.exception.ResourceNotFoundException;
-import com.sentinel.patients.entity.Patient;
-import com.sentinel.patients.repository.PatientRepository;
-import com.sentinel.users.entity.User;
-import com.sentinel.users.repository.UserRepository;
+import com.sentinel.clinicalrecords.service.MedicalRecordService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -19,18 +14,12 @@ import java.util.List;
 @RequestMapping({"/api/v1/clinical-records", "/api/records"})
 public class MedicalRecordController {
 
-    private final MedicalRecordRepository recordRepository;
-    private final PatientRepository patientRepository;
-    private final UserRepository userRepository;
+    private final MedicalRecordService medicalRecordService;
     private final AuditTrailService auditService;
 
-    public MedicalRecordController(MedicalRecordRepository recordRepository,
-                                  PatientRepository patientRepository,
-                                  UserRepository userRepository,
-                                  AuditTrailService auditService) {
-        this.recordRepository = recordRepository;
-        this.patientRepository = patientRepository;
-        this.userRepository = userRepository;
+    public MedicalRecordController(MedicalRecordService medicalRecordService,
+                                   AuditTrailService auditService) {
+        this.medicalRecordService = medicalRecordService;
         this.auditService = auditService;
     }
 
@@ -38,27 +27,15 @@ public class MedicalRecordController {
     @PreAuthorize("hasAuthority('CLINICAL_NOTE_READ') and @abacEvaluator.hasTreatmentRelationship(authentication, #patientId)")
     public List<MedicalRecord> getRecordsByPatient(@PathVariable Long patientId, Authentication auth) {
         auditService.logAction(auth, "READ", "MEDICAL_RECORD", String.valueOf(patientId), "Fetched medical history for patient ID: " + patientId);
-        return recordRepository.findByPatientIdOrderByCreatedAtDesc(patientId);
+        return medicalRecordService.getRecordsByPatientId(patientId);
     }
 
     @PostMapping
     @PreAuthorize("hasAuthority('CLINICAL_NOTE_CREATE') and (#record != null and #record.patient != null and #record.patient.id != null and @abacEvaluator.hasTreatmentRelationship(authentication, #record.patient.id))")
     public ResponseEntity<?> createRecord(@RequestBody MedicalRecord record, Authentication auth) {
-        if (record.getPatient() == null || record.getPatient().getId() == null) {
-            throw new IllegalArgumentException("Patient ID is required");
-        }
-
-        User doctor = userRepository.findByUsername(auth.getName())
-                .orElseThrow(() -> new ResourceNotFoundException("Doctor user profile not found"));
-        Patient patient = patientRepository.findById(record.getPatient().getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Patient record with ID " + record.getPatient().getId() + " not found"));
-
-        record.setDoctor(doctor);
-        record.setPatient(patient);
-
-        MedicalRecord saved = recordRepository.save(record);
-        auditService.logAction(auth, "CREATE", "MEDICAL_RECORD", String.valueOf(saved.getId()), "Created clinical encounter note for patient ID: " + patient.getId());
-
+        MedicalRecord saved = medicalRecordService.createRecord(record, auth.getName());
+        auditService.logAction(auth, "CREATE", "MEDICAL_RECORD", String.valueOf(saved.getId()), "Created clinical encounter note for patient ID: " + saved.getPatient().getId());
         return ResponseEntity.ok(saved);
     }
 }
+

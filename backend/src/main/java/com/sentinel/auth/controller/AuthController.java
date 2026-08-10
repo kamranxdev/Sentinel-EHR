@@ -4,98 +4,36 @@ import com.sentinel.audit.service.AuditTrailService;
 import com.sentinel.auth.dto.JwtAuthResponse;
 import com.sentinel.auth.dto.LoginRequest;
 import com.sentinel.auth.dto.RegisterRequest;
-import com.sentinel.auth.security.JwtTokenProvider;
-import com.sentinel.common.exception.ResourceNotFoundException;
-import com.sentinel.patients.entity.Patient;
-import com.sentinel.patients.repository.PatientRepository;
-import com.sentinel.users.entity.Permission;
-import com.sentinel.users.entity.Role;
+import com.sentinel.auth.service.AuthService;
 import com.sentinel.users.entity.User;
-import com.sentinel.users.repository.RoleRepository;
-import com.sentinel.users.repository.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping({"/api/v1/auth", "/api/auth"})
 public class AuthController {
 
-    private final AuthenticationManager authenticationManager;
-    private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
-    private final PatientRepository patientRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final JwtTokenProvider tokenProvider;
+    private final AuthService authService;
     private final AuditTrailService auditService;
 
-    public AuthController(AuthenticationManager authenticationManager,
-                          UserRepository userRepository,
-                          RoleRepository roleRepository,
-                          PatientRepository patientRepository,
-                          PasswordEncoder passwordEncoder,
-                          JwtTokenProvider tokenProvider,
+    public AuthController(AuthService authService,
                           AuditTrailService auditService) {
-        this.authenticationManager = authenticationManager;
-        this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
-        this.patientRepository = patientRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.tokenProvider = tokenProvider;
+        this.authService = authService;
         this.auditService = auditService;
     }
 
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
         try {
-            String usernameOrEmail = loginRequest.getUsernameOrEmail();
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            usernameOrEmail,
-                            loginRequest.getPassword()
-                    )
-            );
-
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-            String jwt = tokenProvider.generateToken(authentication);
-
-            User user = userRepository.findByUsernameOrEmail(usernameOrEmail, usernameOrEmail)
-                    .orElseThrow(() -> new ResourceNotFoundException("User record not found"));
-
-            Set<String> roles = user.getRoles().stream().map(Role::getName).collect(Collectors.toSet());
-
-            Set<String> permissions = new HashSet<>();
-            for (Role role : user.getRoles()) {
-                if (role.getPermissions() != null) {
-                    for (Permission perm : role.getPermissions()) {
-                        permissions.add(perm.getCode());
-                    }
-                }
-            }
-
-            String primaryRole = roles.isEmpty() ? "ROLE_USER" : roles.iterator().next();
-            auditService.logAction(user.getUsername(), primaryRole, "LOGIN", "AUTH", String.valueOf(user.getId()), "User authenticated successfully");
-
-            return ResponseEntity.ok(new JwtAuthResponse(
-                    jwt,
-                    user.getUsername(),
-                    user.getFullName(),
-                    roles,
-                    permissions,
-                    user.getDepartment(),
-                    user.getId()
-            ));
+            JwtAuthResponse response = authService.login(loginRequest);
+            String primaryRole = response.getRoles().isEmpty() ? "ROLE_USER" : response.getRoles().iterator().next();
+            auditService.logAction(response.getUsername(), primaryRole, "LOGIN", "AUTH", String.valueOf(response.getId()), "User authenticated successfully");
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "UNAUTHORIZED", "message", "Invalid username or password"));
         }
@@ -103,107 +41,31 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody RegisterRequest registerRequest) {
-        if (userRepository.existsByUsername(registerRequest.getUsername())) {
-            return ResponseEntity.badRequest().body(Map.of("error", "BAD_REQUEST", "message", "Username is already taken!"));
+        try {
+            Map<String, Object> result = authService.registerPatient(registerRequest);
+            String username = (String) result.get("username");
+            String patientCode = (String) result.get("patientCode");
+            Long userId = (Long) result.get("userId");
+
+            auditService.logAction(username, "ROLE_PATIENT", "REGISTER", "USER", String.valueOf(userId), "Public user self-registered as ROLE_PATIENT with linked patient profile MRN: " + patientCode);
+
+            return ResponseEntity.ok(result);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", "BAD_REQUEST", "message", e.getMessage()));
         }
-
-        if (userRepository.existsByEmail(registerRequest.getEmail())) {
-            return ResponseEntity.badRequest().body(Map.of("error", "BAD_REQUEST", "message", "Email is already in use!"));
-        }
-
-        User user = new User(
-                registerRequest.getUsername(),
-                passwordEncoder.encode(registerRequest.getPassword()),
-                registerRequest.getEmail(),
-                registerRequest.getFullName()
-        );
-
-        user.setSpecialization(registerRequest.getSpecialization());
-        user.setDepartment(registerRequest.getDepartment());
-        user.setLicenseNumber(registerRequest.getLicenseNumber());
-        user.setQualifications(registerRequest.getQualifications());
-        user.setYearsOfExperience(registerRequest.getYearsOfExperience() != null ? registerRequest.getYearsOfExperience() : 5);
-        user.setMedicalBoardState(registerRequest.getMedicalBoardState() != null ? registerRequest.getMedicalBoardState() : "State Medical Board");
-        user.setVerificationStatus("VERIFIED");
-
-        Role patientRole = roleRepository.findByName("ROLE_PATIENT")
-                .orElseThrow(() -> new ResourceNotFoundException("Default ROLE_PATIENT standard role not found."));
-        Set<Role> roles = new HashSet<>();
-        roles.add(patientRole);
-
-        user.setRoles(roles);
-        User saved = userRepository.save(user);
-
-        Patient patient = new Patient();
-        patient.setPatientCode("PAT-" + (1000 + (System.currentTimeMillis() % 9000)));
-        patient.setFullName(saved.getFullName());
-        patient.setEmail(saved.getEmail());
-        patient.setUser(saved);
-        patientRepository.save(patient);
-
-        auditService.logAction(saved.getUsername(), "ROLE_PATIENT", "REGISTER", "USER", String.valueOf(saved.getId()), "Public user self-registered as ROLE_PATIENT with linked patient profile MRN: " + patient.getPatientCode());
-
-        return ResponseEntity.ok(Map.of("message", "User registered successfully!", "userId", saved.getId(), "patientId", patient.getId()));
     }
 
     @PostMapping("/admin/create-user")
     @PreAuthorize("hasAnyAuthority('ROLE_SYS_ADMIN', 'ROLE_ORG_ADMIN', 'ROLE_ADMIN', 'USER_CREATE')")
     public ResponseEntity<?> createUserByAdmin(@RequestBody RegisterRequest registerRequest, Authentication auth) {
-        if (userRepository.existsByUsername(registerRequest.getUsername())) {
-            return ResponseEntity.badRequest().body(Map.of("error", "BAD_REQUEST", "message", "Username is already taken!"));
+        try {
+            User saved = authService.createUserByAdmin(registerRequest);
+            auditService.logAction(auth, "CREATE_STAFF", "USER", String.valueOf(saved.getId()), "Admin created account for " + saved.getUsername() + " with roles: " + registerRequest.getRoles());
+
+            return ResponseEntity.ok(Map.of("message", "Staff account created successfully!", "userId", saved.getId()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(Map.of("error", "BAD_REQUEST", "message", e.getMessage()));
         }
-
-        if (userRepository.existsByEmail(registerRequest.getEmail())) {
-            return ResponseEntity.badRequest().body(Map.of("error", "BAD_REQUEST", "message", "Email is already in use!"));
-        }
-
-        Set<String> strRoles = registerRequest.getRoles();
-        boolean isDoctor = strRoles != null && strRoles.stream().anyMatch(r -> r.equalsIgnoreCase("DOCTOR") || r.equalsIgnoreCase("ROLE_DOCTOR"));
-
-        if (isDoctor) {
-            if (registerRequest.getLicenseNumber() == null || registerRequest.getLicenseNumber().trim().isEmpty()) {
-                return ResponseEntity.badRequest().body(Map.of("error", "BAD_REQUEST", "message", "Doctor registration requires a valid Medical Practice License Number!"));
-            }
-            if (registerRequest.getQualifications() == null || registerRequest.getQualifications().trim().isEmpty()) {
-                return ResponseEntity.badRequest().body(Map.of("error", "BAD_REQUEST", "message", "Doctor registration requires documented Qualifications (e.g. MD, MBBS)!"));
-            }
-        }
-
-        User user = new User(
-                registerRequest.getUsername(),
-                passwordEncoder.encode(registerRequest.getPassword()),
-                registerRequest.getEmail(),
-                registerRequest.getFullName()
-        );
-
-        user.setSpecialization(registerRequest.getSpecialization());
-        user.setDepartment(registerRequest.getDepartment());
-        user.setLicenseNumber(registerRequest.getLicenseNumber());
-        user.setQualifications(registerRequest.getQualifications());
-        user.setYearsOfExperience(registerRequest.getYearsOfExperience() != null ? registerRequest.getYearsOfExperience() : 5);
-        user.setMedicalBoardState(registerRequest.getMedicalBoardState() != null ? registerRequest.getMedicalBoardState() : "State Licensing Board");
-        user.setVerificationStatus("VERIFIED");
-
-        Set<Role> roles = new HashSet<>();
-
-        if (strRoles == null || strRoles.isEmpty()) {
-            Role defaultRole = roleRepository.findByName("ROLE_PATIENT").orElseThrow();
-            roles.add(defaultRole);
-        } else {
-            for (String r : strRoles) {
-                String roleName = r.startsWith("ROLE_") ? r : "ROLE_" + r.toUpperCase();
-                Role userRole = roleRepository.findByName(roleName)
-                        .orElseThrow(() -> new ResourceNotFoundException("Role " + roleName + " not found."));
-                roles.add(userRole);
-            }
-        }
-
-        user.setRoles(roles);
-        User saved = userRepository.save(user);
-
-        auditService.logAction(auth, "CREATE_STAFF", "USER", String.valueOf(saved.getId()), "Admin created account for " + saved.getUsername() + " with roles: " + strRoles);
-
-        return ResponseEntity.ok(Map.of("message", "Staff account created successfully!", "userId", saved.getId()));
     }
 
     @GetMapping("/me")
@@ -212,27 +74,8 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        User user = userRepository.findByUsername(authentication.getName())
-                .orElseThrow(() -> new ResourceNotFoundException("Authenticated user not found"));
-
-        Set<String> roles = user.getRoles().stream().map(Role::getName).collect(Collectors.toSet());
-        Set<String> permissions = new HashSet<>();
-        for (Role role : user.getRoles()) {
-            if (role.getPermissions() != null) {
-                for (Permission perm : role.getPermissions()) {
-                    permissions.add(perm.getCode());
-                }
-            }
-        }
-
-        return ResponseEntity.ok(new JwtAuthResponse(
-                null,
-                user.getUsername(),
-                user.getFullName(),
-                roles,
-                permissions,
-                user.getDepartment(),
-                user.getId()
-        ));
+        JwtAuthResponse response = authService.getCurrentUserResponse(authentication.getName());
+        return ResponseEntity.ok(response);
     }
 }
+

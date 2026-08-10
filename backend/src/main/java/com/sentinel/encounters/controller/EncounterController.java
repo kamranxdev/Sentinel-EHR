@@ -1,13 +1,8 @@
 package com.sentinel.encounters.controller;
 
 import com.sentinel.audit.service.AuditTrailService;
-import com.sentinel.common.exception.ResourceNotFoundException;
 import com.sentinel.encounters.entity.Encounter;
-import com.sentinel.encounters.repository.EncounterRepository;
-import com.sentinel.patients.entity.Patient;
-import com.sentinel.patients.repository.PatientRepository;
-import com.sentinel.users.entity.User;
-import com.sentinel.users.repository.UserRepository;
+import com.sentinel.encounters.service.EncounterService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -19,18 +14,12 @@ import java.util.List;
 @RequestMapping({"/api/v1/encounters", "/api/encounters"})
 public class EncounterController {
 
-    private final EncounterRepository encounterRepository;
-    private final PatientRepository patientRepository;
-    private final UserRepository userRepository;
+    private final EncounterService encounterService;
     private final AuditTrailService auditService;
 
-    public EncounterController(EncounterRepository encounterRepository,
-                                PatientRepository patientRepository,
-                                UserRepository userRepository,
-                                AuditTrailService auditService) {
-        this.encounterRepository = encounterRepository;
-        this.patientRepository = patientRepository;
-        this.userRepository = userRepository;
+    public EncounterController(EncounterService encounterService,
+                               AuditTrailService auditService) {
+        this.encounterService = encounterService;
         this.auditService = auditService;
     }
 
@@ -38,47 +27,23 @@ public class EncounterController {
     @PreAuthorize("hasAuthority('CLINICAL_NOTE_READ') and @abacEvaluator.hasTreatmentRelationship(authentication, #patientId)")
     public List<Encounter> getEncountersByPatient(@PathVariable Long patientId, Authentication auth) {
         auditService.logAction(auth, "READ", "ENCOUNTER", String.valueOf(patientId), "Accessed encounter & visit log history for patient ID: " + patientId);
-        return encounterRepository.findByPatientIdOrderByEncounterDateDesc(patientId);
+        return encounterService.getEncountersByPatientId(patientId);
     }
 
     @PostMapping
     @PreAuthorize("hasAuthority('CLINICAL_NOTE_CREATE') and (#encounter != null and #encounter.patient != null and #encounter.patient.id != null and @abacEvaluator.hasTreatmentRelationship(authentication, #encounter.patient.id))")
     public ResponseEntity<?> createEncounter(@RequestBody Encounter encounter, Authentication auth) {
-        if (encounter.getPatient() == null || encounter.getPatient().getId() == null) {
-            throw new IllegalArgumentException("Patient ID is required");
-        }
-
-        User provider = userRepository.findByUsername(auth.getName()).orElse(null);
-        Patient patient = patientRepository.findById(encounter.getPatient().getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Patient with ID " + encounter.getPatient().getId() + " not found"));
-
-        if (encounter.getAttendingProvider() == null || encounter.getAttendingProvider().getId() == null) {
-            encounter.setAttendingProvider(provider);
-        } else {
-            User assigned = userRepository.findById(encounter.getAttendingProvider().getId()).orElse(provider);
-            encounter.setAttendingProvider(assigned);
-        }
-        encounter.setPatient(patient);
-
-        Encounter saved = encounterRepository.save(encounter);
-        auditService.logAction(auth, "CREATE", "ENCOUNTER", String.valueOf(saved.getId()), "Logged new " + saved.getEncounterType() + " encounter for patient ID: " + patient.getId());
-
+        Encounter saved = encounterService.createEncounter(encounter, auth.getName());
+        auditService.logAction(auth, "CREATE", "ENCOUNTER", String.valueOf(saved.getId()), "Logged new " + saved.getEncounterType() + " encounter for patient ID: " + saved.getPatient().getId());
         return ResponseEntity.ok(saved);
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAuthority('CLINICAL_NOTE_CREATE') and @patientSecurityService.canAccessEncounter(authentication, #id)")
     public ResponseEntity<?> updateEncounter(@PathVariable Long id, @RequestBody Encounter updated, Authentication auth) {
-        Encounter enc = encounterRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Encounter record with ID " + id + " not found"));
-
-        if (updated.getClinicalNotes() != null) enc.setClinicalNotes(updated.getClinicalNotes());
-        if (updated.getDischargeSummary() != null) enc.setDischargeSummary(updated.getDischargeSummary());
-        if (updated.getStatus() != null) enc.setStatus(updated.getStatus());
-
-        Encounter saved = encounterRepository.save(enc);
+        Encounter saved = encounterService.updateEncounter(id, updated);
         auditService.logAction(auth, "UPDATE", "ENCOUNTER", String.valueOf(id), "Updated encounter details / clinical notes for ID: " + id);
-
         return ResponseEntity.ok(saved);
     }
 }
+

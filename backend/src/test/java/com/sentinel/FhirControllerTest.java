@@ -52,9 +52,10 @@ public class FhirControllerTest {
         fhirService = new FhirService(patientRepository, encounterRepository, allergyRepository,
                 diagnosisRepository, prescriptionRepository, vitalsRepository, userRepository);
 
-        fhirController = new FhirController(fhirService, patientRepository, encounterRepository,
-                allergyRepository, diagnosisRepository, prescriptionRepository, vitalsRepository, patientSecurityService);
+        // FhirController now only depends on FhirService and PatientSecurityService
+        fhirController = new FhirController(fhirService, patientSecurityService);
     }
+
 
     @Test
     public void testGetMetadata_CapabilityStatement() {

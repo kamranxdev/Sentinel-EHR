@@ -2,13 +2,8 @@ package com.sentinel.vitals.controller;
 
 import com.sentinel.audit.service.AuditTrailService;
 import com.sentinel.authorization.evaluator.ABACEvaluator;
-import com.sentinel.common.exception.ResourceNotFoundException;
-import com.sentinel.patients.entity.Patient;
-import com.sentinel.patients.repository.PatientRepository;
-import com.sentinel.users.entity.User;
-import com.sentinel.users.repository.UserRepository;
 import com.sentinel.vitals.entity.Vitals;
-import com.sentinel.vitals.repository.VitalsRepository;
+import com.sentinel.vitals.service.VitalSignService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -20,20 +15,14 @@ import java.util.List;
 @RequestMapping({"/api/v1/vitals", "/api/vitals"})
 public class VitalsController {
 
-    private final VitalsRepository vitalsRepository;
-    private final PatientRepository patientRepository;
-    private final UserRepository userRepository;
+    private final VitalSignService vitalSignService;
     private final AuditTrailService auditService;
     private final ABACEvaluator abacEvaluator;
 
-    public VitalsController(VitalsRepository vitalsRepository,
-                            PatientRepository patientRepository,
-                            UserRepository userRepository,
+    public VitalsController(VitalSignService vitalSignService,
                             AuditTrailService auditService,
                             ABACEvaluator abacEvaluator) {
-        this.vitalsRepository = vitalsRepository;
-        this.patientRepository = patientRepository;
-        this.userRepository = userRepository;
+        this.vitalSignService = vitalSignService;
         this.auditService = auditService;
         this.abacEvaluator = abacEvaluator;
     }
@@ -46,29 +35,17 @@ public class VitalsController {
         }
 
         auditService.logAction(auth, "READ", "VITALS", String.valueOf(patientId), "Accessed physiological vitals for patient ID: " + patientId);
-        return vitalsRepository.findByPatientIdOrderByRecordedAtDesc(patientId);
+        return vitalSignService.getVitalsEntityByPatientId(patientId);
     }
 
     @PostMapping
     @PreAuthorize("hasAuthority('VITALS_CREATE') and (#vitals != null and #vitals.patient != null and #vitals.patient.id != null and @abacEvaluator.hasTreatmentRelationship(authentication, #vitals.patient.id))")
     public ResponseEntity<?> recordVitals(@RequestBody Vitals vitals, Authentication auth) {
-        if (vitals.getPatient() == null || vitals.getPatient().getId() == null) {
-            throw new IllegalArgumentException("Patient ID is required");
-        }
-
-        User staff = userRepository.findByUsername(auth.getName())
-                .orElseThrow(() -> new ResourceNotFoundException("Staff user profile not found"));
-        Patient patient = patientRepository.findById(vitals.getPatient().getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Patient record with ID " + vitals.getPatient().getId() + " not found"));
-
-        vitals.setRecordedBy(staff);
-        vitals.setPatient(patient);
-
-        Vitals saved = vitalsRepository.save(vitals);
+        Vitals saved = vitalSignService.recordVitals(vitals, auth.getName());
         auditService.logAction(auth, "CREATE", "VITALS", String.valueOf(saved.getId()), 
                 "Recorded vital signs (BP: " + saved.getBloodPressure() + ", Pulse: " + saved.getHeartRate() 
                 + " bpm, Glucose: " + (saved.getBloodGlucose() != null ? saved.getBloodGlucose() + " mg/dL" : "N/A") 
-                + ", BMI: " + (saved.getBmi() != null ? saved.getBmi() : "N/A") + ") for patient ID: " + patient.getId());
+                + ", BMI: " + (saved.getBmi() != null ? saved.getBmi() : "N/A") + ") for patient ID: " + saved.getPatient().getId());
 
         return ResponseEntity.ok(saved);
     }
@@ -76,26 +53,15 @@ public class VitalsController {
     @PostMapping("/telemetry")
     @PreAuthorize("hasAuthority('VITALS_CREATE') and (#vitals != null and #vitals.patient != null and #vitals.patient.id != null and @abacEvaluator.hasTreatmentRelationship(authentication, #vitals.patient.id))")
     public ResponseEntity<?> recordTelemetry(@RequestBody Vitals vitals, Authentication auth) {
-        if (vitals.getPatient() == null || vitals.getPatient().getId() == null) {
-            throw new IllegalArgumentException("Patient ID is required");
-        }
-
-        User staff = userRepository.findByUsername(auth.getName())
-                .orElseThrow(() -> new ResourceNotFoundException("Staff user profile not found"));
-        Patient patient = patientRepository.findById(vitals.getPatient().getId())
-                .orElseThrow(() -> new ResourceNotFoundException("Patient record with ID " + vitals.getPatient().getId() + " not found"));
-
-        vitals.setRecordedBy(staff);
-        vitals.setPatient(patient);
-
-        Vitals saved = vitalsRepository.save(vitals);
+        Vitals saved = vitalSignService.recordTelemetry(vitals, auth.getName());
         auditService.logAction(auth, "CREATE", "TELEMETRY_VITALS", String.valueOf(saved.getId()), 
                 "Recorded telemetry flowsheet (BP: " + saved.getBloodPressure() + ", HR: " + saved.getHeartRate() 
                 + ", SpO2: " + saved.getOxygenSaturation() + "%, Pain Score: " + (saved.getPainScore() != null ? saved.getPainScore() : "N/A") 
                 + ", Intake: " + (saved.getFluidIntakeMl() != null ? saved.getFluidIntakeMl() + "mL" : "N/A") 
                 + ", Output: " + (saved.getFluidOutputMl() != null ? saved.getFluidOutputMl() + "mL" : "N/A") 
-                + ") for patient ID: " + patient.getId());
+                + ") for patient ID: " + saved.getPatient().getId());
 
         return ResponseEntity.ok(saved);
     }
 }
+

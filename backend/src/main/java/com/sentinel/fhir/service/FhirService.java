@@ -521,6 +521,102 @@ public class FhirService {
         return bundle;
     }
 
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public List<Patient> searchPatients(String name, String gender, String identifier) {
+        if ((name == null || name.trim().isEmpty()) && 
+            (gender == null || gender.trim().isEmpty()) && 
+            (identifier == null || identifier.trim().isEmpty())) {
+            return patientRepository.findAll();
+        } else {
+            return patientRepository.searchFhirPatients(
+                    (name != null && !name.trim().isEmpty()) ? name.trim() : null,
+                    (gender != null && !gender.trim().isEmpty()) ? gender.trim() : null,
+                    (identifier != null && !identifier.trim().isEmpty()) ? identifier.trim() : null
+            );
+        }
+    }
+
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public Optional<Patient> getPatientEntityById(Long id) {
+        return patientRepository.findById(id);
+    }
+
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public boolean patientExists(Long id) {
+        return patientRepository.existsById(id);
+    }
+
+    @org.springframework.transaction.annotation.Transactional
+    public void deletePatientById(Long id) {
+        patientRepository.deleteById(id);
+    }
+
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public List<Encounter> searchEncounters(Long patientId) {
+        if (patientId != null) {
+            return encounterRepository.findByPatientIdOrderByEncounterDateDesc(patientId);
+        }
+        return encounterRepository.findAll();
+    }
+
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public Optional<Encounter> getEncounterById(Long id) {
+        return encounterRepository.findById(id);
+    }
+
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public List<Allergy> searchAllergies(Long patientId) {
+        if (patientId != null) {
+            return allergyRepository.findByPatientIdOrderByRecordedAtDesc(patientId);
+        }
+        return allergyRepository.findAll();
+    }
+
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public Optional<Allergy> getAllergyEntityById(Long id) {
+        return allergyRepository.findById(id);
+    }
+
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public List<Diagnosis> searchConditions(Long patientId) {
+        if (patientId != null) {
+            return diagnosisRepository.findByPatientIdOrderByRecordedAtDesc(patientId);
+        }
+        return diagnosisRepository.findAll();
+    }
+
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public Optional<Diagnosis> getConditionById(Long id) {
+        return diagnosisRepository.findById(id);
+    }
+
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public List<Prescription> searchMedications(Long patientId) {
+        if (patientId != null) {
+            return prescriptionRepository.findByPatientIdOrderByPrescribedAtDesc(patientId);
+        }
+        return prescriptionRepository.findAll();
+    }
+
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public Optional<Prescription> getMedicationById(Long id) {
+        return prescriptionRepository.findById(id);
+    }
+
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public List<Vitals> searchObservations(Long patientId) {
+        if (patientId != null) {
+            return vitalsRepository.findByPatientIdOrderByRecordedAtDesc(patientId);
+        }
+        return vitalsRepository.findAll();
+    }
+
+    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public Optional<Vitals> getObservationById(Long id) {
+        return vitalsRepository.findById(id);
+    }
+
+    @org.springframework.transaction.annotation.Transactional
     public Patient createPatientFromFhir(Map<String, Object> fhirJson) {
         Patient p = new Patient();
 
@@ -586,3 +682,4 @@ public class FhirService {
         return patientRepository.save(p);
     }
 }
+

@@ -1,19 +1,13 @@
 package com.sentinel.fhir.controller;
 
 import com.sentinel.allergies.entity.Allergy;
-import com.sentinel.allergies.repository.AllergyRepository;
 import com.sentinel.diagnoses.entity.Diagnosis;
-import com.sentinel.diagnoses.repository.DiagnosisRepository;
 import com.sentinel.encounters.entity.Encounter;
-import com.sentinel.encounters.repository.EncounterRepository;
 import com.sentinel.fhir.service.FhirService;
 import com.sentinel.patients.entity.Patient;
-import com.sentinel.patients.repository.PatientRepository;
 import com.sentinel.patients.service.PatientSecurityService;
 import com.sentinel.prescriptions.entity.Prescription;
-import com.sentinel.prescriptions.repository.PrescriptionRepository;
 import com.sentinel.vitals.entity.Vitals;
-import com.sentinel.vitals.repository.VitalsRepository;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -31,29 +25,11 @@ import java.util.stream.Collectors;
 public class FhirController {
 
     private final FhirService fhirService;
-    private final PatientRepository patientRepository;
-    private final EncounterRepository encounterRepository;
-    private final AllergyRepository allergyRepository;
-    private final DiagnosisRepository diagnosisRepository;
-    private final PrescriptionRepository prescriptionRepository;
-    private final VitalsRepository vitalsRepository;
     private final PatientSecurityService patientSecurityService;
 
     public FhirController(FhirService fhirService,
-                          PatientRepository patientRepository,
-                          EncounterRepository encounterRepository,
-                          AllergyRepository allergyRepository,
-                          DiagnosisRepository diagnosisRepository,
-                          PrescriptionRepository prescriptionRepository,
-                          VitalsRepository vitalsRepository,
                           PatientSecurityService patientSecurityService) {
         this.fhirService = fhirService;
-        this.patientRepository = patientRepository;
-        this.encounterRepository = encounterRepository;
-        this.allergyRepository = allergyRepository;
-        this.diagnosisRepository = diagnosisRepository;
-        this.prescriptionRepository = prescriptionRepository;
-        this.vitalsRepository = vitalsRepository;
         this.patientSecurityService = patientSecurityService;
     }
 
@@ -71,18 +47,7 @@ public class FhirController {
             @RequestParam(required = false) String gender,
             @RequestParam(required = false) String identifier) {
 
-        List<Patient> patients;
-        if ((name == null || name.trim().isEmpty()) && 
-            (gender == null || gender.trim().isEmpty()) && 
-            (identifier == null || identifier.trim().isEmpty())) {
-            patients = patientRepository.findAll();
-        } else {
-            patients = patientRepository.searchFhirPatients(
-                    (name != null && !name.trim().isEmpty()) ? name.trim() : null,
-                    (gender != null && !gender.trim().isEmpty()) ? gender.trim() : null,
-                    (identifier != null && !identifier.trim().isEmpty()) ? identifier.trim() : null
-            );
-        }
+        List<Patient> patients = fhirService.searchPatients(name, gender, identifier);
 
         List<Map<String, Object>> resources = patients.stream()
                 .map(fhirService::toPatientResource)
@@ -96,7 +61,7 @@ public class FhirController {
     @GetMapping(value = "/Patient/{id}", produces = {"application/fhir+json", MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("@patientSecurityService.canAccessPatient(authentication, #id)")
     public ResponseEntity<Map<String, Object>> getPatientById(@PathVariable Long id) {
-        Optional<Patient> patientOpt = patientRepository.findById(id);
+        Optional<Patient> patientOpt = fhirService.getPatientEntityById(id);
         if (patientOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .header(HttpHeaders.CONTENT_TYPE, "application/fhir+json;charset=UTF-8")
@@ -121,12 +86,12 @@ public class FhirController {
     @DeleteMapping(value = "/Patient/{id}", produces = {"application/fhir+json", MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Map<String, Object>> deletePatient(@PathVariable Long id) {
-        if (!patientRepository.existsById(id)) {
+        if (!fhirService.patientExists(id)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .header(HttpHeaders.CONTENT_TYPE, "application/fhir+json;charset=UTF-8")
                     .body(fhirService.buildOperationOutcome("error", "not-found", "Patient/" + id + " does not exist."));
         }
-        patientRepository.deleteById(id);
+        fhirService.deletePatientById(id);
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_TYPE, "application/fhir+json;charset=UTF-8")
                 .body(fhirService.buildOperationOutcome("information", "informational", "Patient/" + id + " deleted successfully."));
@@ -151,11 +116,9 @@ public class FhirController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        List<Encounter> encounters = (patientId != null) ?
-                encounterRepository.findByPatientIdOrderByEncounterDateDesc(patientId) :
-                encounterRepository.findAll().stream()
-                        .filter(e -> e.getPatient() != null && patientSecurityService.canAccessPatient(auth, e.getPatient().getId()))
-                        .collect(Collectors.toList());
+        List<Encounter> encounters = fhirService.searchEncounters(patientId).stream()
+                .filter(e -> e.getPatient() != null && patientSecurityService.canAccessPatient(auth, e.getPatient().getId()))
+                .collect(Collectors.toList());
 
         List<Map<String, Object>> resources = encounters.stream()
                 .map(fhirService::toEncounterResource)
@@ -169,7 +132,7 @@ public class FhirController {
     @GetMapping(value = "/Encounter/{id}", produces = {"application/fhir+json", MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("@patientSecurityService.canAccessEncounter(authentication, #id)")
     public ResponseEntity<Map<String, Object>> getEncounterById(@PathVariable Long id) {
-        Optional<Encounter> encounterOpt = encounterRepository.findById(id);
+        Optional<Encounter> encounterOpt = fhirService.getEncounterById(id);
         if (encounterOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .header(HttpHeaders.CONTENT_TYPE, "application/fhir+json;charset=UTF-8")
@@ -187,11 +150,9 @@ public class FhirController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        List<Allergy> allergies = (patientId != null) ?
-                allergyRepository.findByPatientIdOrderByRecordedAtDesc(patientId) :
-                allergyRepository.findAll().stream()
-                        .filter(a -> a.getPatient() != null && patientSecurityService.canAccessPatient(auth, a.getPatient().getId()))
-                        .collect(Collectors.toList());
+        List<Allergy> allergies = fhirService.searchAllergies(patientId).stream()
+                .filter(a -> a.getPatient() != null && patientSecurityService.canAccessPatient(auth, a.getPatient().getId()))
+                .collect(Collectors.toList());
 
         List<Map<String, Object>> resources = allergies.stream()
                 .map(fhirService::toAllergyResource)
@@ -205,7 +166,7 @@ public class FhirController {
     @GetMapping(value = "/AllergyIntolerance/{id}", produces = {"application/fhir+json", MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("@patientSecurityService.canAccessAllergy(authentication, #id)")
     public ResponseEntity<Map<String, Object>> getAllergyById(@PathVariable Long id) {
-        Optional<Allergy> allergyOpt = allergyRepository.findById(id);
+        Optional<Allergy> allergyOpt = fhirService.getAllergyEntityById(id);
         if (allergyOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .header(HttpHeaders.CONTENT_TYPE, "application/fhir+json;charset=UTF-8")
@@ -223,11 +184,9 @@ public class FhirController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        List<Diagnosis> diagnoses = (patientId != null) ?
-                diagnosisRepository.findByPatientIdOrderByRecordedAtDesc(patientId) :
-                diagnosisRepository.findAll().stream()
-                        .filter(d -> d.getPatient() != null && patientSecurityService.canAccessPatient(auth, d.getPatient().getId()))
-                        .collect(Collectors.toList());
+        List<Diagnosis> diagnoses = fhirService.searchConditions(patientId).stream()
+                .filter(d -> d.getPatient() != null && patientSecurityService.canAccessPatient(auth, d.getPatient().getId()))
+                .collect(Collectors.toList());
 
         List<Map<String, Object>> resources = diagnoses.stream()
                 .map(fhirService::toConditionResource)
@@ -241,7 +200,7 @@ public class FhirController {
     @GetMapping(value = "/Condition/{id}", produces = {"application/fhir+json", MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("@patientSecurityService.canAccessDiagnosis(authentication, #id)")
     public ResponseEntity<Map<String, Object>> getConditionById(@PathVariable Long id) {
-        Optional<Diagnosis> diagnosisOpt = diagnosisRepository.findById(id);
+        Optional<Diagnosis> diagnosisOpt = fhirService.getConditionById(id);
         if (diagnosisOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .header(HttpHeaders.CONTENT_TYPE, "application/fhir+json;charset=UTF-8")
@@ -259,11 +218,9 @@ public class FhirController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        List<Prescription> prescriptions = (patientId != null) ?
-                prescriptionRepository.findByPatientIdOrderByPrescribedAtDesc(patientId) :
-                prescriptionRepository.findAll().stream()
-                        .filter(p -> p.getPatient() != null && patientSecurityService.canAccessPatient(auth, p.getPatient().getId()))
-                        .collect(Collectors.toList());
+        List<Prescription> prescriptions = fhirService.searchMedications(patientId).stream()
+                .filter(p -> p.getPatient() != null && patientSecurityService.canAccessPatient(auth, p.getPatient().getId()))
+                .collect(Collectors.toList());
 
         List<Map<String, Object>> resources = prescriptions.stream()
                 .map(fhirService::toMedicationRequestResource)
@@ -277,7 +234,7 @@ public class FhirController {
     @GetMapping(value = "/MedicationRequest/{id}", produces = {"application/fhir+json", MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("@patientSecurityService.canAccessPrescription(authentication, #id)")
     public ResponseEntity<Map<String, Object>> getMedicationById(@PathVariable Long id) {
-        Optional<Prescription> prescriptionOpt = prescriptionRepository.findById(id);
+        Optional<Prescription> prescriptionOpt = fhirService.getMedicationById(id);
         if (prescriptionOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .header(HttpHeaders.CONTENT_TYPE, "application/fhir+json;charset=UTF-8")
@@ -295,11 +252,9 @@ public class FhirController {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        List<Vitals> vitals = (patientId != null) ?
-                vitalsRepository.findByPatientIdOrderByRecordedAtDesc(patientId) :
-                vitalsRepository.findAll().stream()
-                        .filter(v -> v.getPatient() != null && patientSecurityService.canAccessPatient(auth, v.getPatient().getId()))
-                        .collect(Collectors.toList());
+        List<Vitals> vitals = fhirService.searchObservations(patientId).stream()
+                .filter(v -> v.getPatient() != null && patientSecurityService.canAccessPatient(auth, v.getPatient().getId()))
+                .collect(Collectors.toList());
 
         List<Map<String, Object>> resources = vitals.stream()
                 .map(fhirService::toObservationResource)
@@ -313,7 +268,7 @@ public class FhirController {
     @GetMapping(value = "/Observation/{id}", produces = {"application/fhir+json", MediaType.APPLICATION_JSON_VALUE})
     @PreAuthorize("@patientSecurityService.canAccessVitals(authentication, #id)")
     public ResponseEntity<Map<String, Object>> getObservationById(@PathVariable Long id) {
-        Optional<Vitals> vitalsOpt = vitalsRepository.findById(id);
+        Optional<Vitals> vitalsOpt = fhirService.getObservationById(id);
         if (vitalsOpt.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .header(HttpHeaders.CONTENT_TYPE, "application/fhir+json;charset=UTF-8")
@@ -324,3 +279,4 @@ public class FhirController {
                 .body(fhirService.toObservationResource(vitalsOpt.get()));
     }
 }
+

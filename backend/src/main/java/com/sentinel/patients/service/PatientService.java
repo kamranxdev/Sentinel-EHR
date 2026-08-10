@@ -151,9 +151,17 @@ public class PatientService {
         return patientRepository.save(patient);
     }
 
+    @Transactional(readOnly = true)
+    public Patient getPatientByUsernameOrEmail(String usernameOrEmail) {
+        User user = userRepository.findByUsernameOrEmail(usernameOrEmail, usernameOrEmail)
+                .orElseThrow(() -> new ResourceNotFoundException("Authenticated user record not found: " + usernameOrEmail));
+        return getPatientByUserId(user.getId());
+    }
+
     @Transactional
     public void deletePatient(Long id) {
         Patient patient = getPatientById(id);
         patientRepository.delete(patient);
     }
 }
+
