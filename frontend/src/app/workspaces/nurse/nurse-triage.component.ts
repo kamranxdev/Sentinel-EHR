@@ -245,6 +245,13 @@ export class NurseTriageComponent implements OnInit {
 
     this.apiService.submitTriage(record).subscribe({
       next: () => {
+        // Also update any active CHECKED_IN appointment for patient to TRIAGED
+        this.apiService.getAppointmentsByPatient(patient.id).subscribe((apts) => {
+          const activeCheckIn = apts.find(a => (a.stage === 'CHECKED_IN' || a.status === 'CHECKED_IN'));
+          if (activeCheckIn && activeCheckIn.id) {
+            this.apiService.recordTriageVitals(activeCheckIn.id, { nursingNotes: this.notes }).subscribe();
+          }
+        });
         this.saving.set(false);
         this.loadHistory();
       },

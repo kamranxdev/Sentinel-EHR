@@ -277,14 +277,16 @@ import {
                 </td>
                 <td hlmTableCell class="text-right">
                   <div class="flex items-center justify-end gap-1.5">
-                    <button *ngIf="apt.stage === 'SCHEDULED' || !apt.stage" hlmBtn size="sm" variant="default" class="text-xs gap-1 bg-emerald-600 hover:bg-emerald-700 text-white h-8" (click)="transitionStage(apt, 'CHECKED_IN')">
+                    <button *ngIf="apt.stage === 'SCHEDULED' || !apt.stage || apt.stage === 'ARRIVED'" hlmBtn size="sm" variant="default" class="text-xs gap-1 bg-emerald-600 hover:bg-emerald-700 text-white h-8" (click)="transitionStage(apt, 'CHECKED_IN')">
                       <ng-icon name="lucideUserCheck" size="14" />
                       <span>Complete Desk Check-In</span>
                     </button>
-                    <button *ngIf="apt.stage === 'CHECKED_IN'" hlmBtn size="sm" variant="outline" class="text-xs gap-1 text-purple-600 border-purple-500/30 hover:bg-purple-500/10 h-8" (click)="transitionStage(apt, 'IN_CONSULTATION')">
-                      <ng-icon name="lucideHeartPulse" size="14" />
-                      <span>Start Consultation</span>
-                    </button>
+                    <span *ngIf="apt.stage === 'CHECKED_IN'" class="text-xs font-semibold text-amber-600 px-2 py-1 rounded bg-amber-500/10 border border-amber-500/20">
+                      Awaiting Nurse Triage
+                    </span>
+                    <span *ngIf="apt.stage === 'TRIAGED'" class="text-xs font-semibold text-sky-600 px-2 py-1 rounded bg-sky-500/10 border border-sky-500/20">
+                      Ready for Doctor
+                    </span>
                     <button *ngIf="apt.patientId || apt.patient?.id" (click)="openRteModal(apt.patientId || apt.patient!.id)" hlmBtn size="sm" variant="ghost" class="text-xs text-sky-600 hover:text-sky-700 h-8">
                       RTE Check
                     </button>
@@ -408,10 +410,11 @@ export class ReceptionistDashboardComponent implements OnInit {
   getStageLabel(stage: string): string {
     switch (stage) {
       case 'SCHEDULED': return '1. Booked (Pre-Arrival)';
-      case 'ARRIVED': return '2. Lobby Arrival (In Queue)';
-      case 'CHECKED_IN': return '3. Intake & RTE Cleared (Ready for Triage)';
-      case 'IN_CONSULTATION': return '4. Clinical Consultation (In Room)';
-      case 'COMPLETED': return '5. Encounter Finalized & Discharged';
+      case 'ARRIVED': return '2. Lobby Arrival';
+      case 'CHECKED_IN': return '3. Desk Checked In (Awaiting Triage)';
+      case 'TRIAGED': return '4. Triaged (Ready for Physician)';
+      case 'IN_CONSULTATION': return '5. Clinical Consultation';
+      case 'COMPLETED': return '6. Discharged & Completed';
       case 'CANCELLED': return 'Cancelled / No-Show';
       default: return stage || 'Scheduled';
     }
@@ -421,7 +424,8 @@ export class ReceptionistDashboardComponent implements OnInit {
     switch (stage) {
       case 'SCHEDULED': return 'outline';
       case 'ARRIVED': return 'secondary';
-      case 'CHECKED_IN':
+      case 'CHECKED_IN': return 'outline';
+      case 'TRIAGED': return 'secondary';
       case 'IN_CONSULTATION': return 'default';
       case 'COMPLETED': return 'secondary';
       case 'CANCELLED': return 'destructive';

@@ -140,6 +140,15 @@ public class AppointmentWorkflowServiceTest {
     }
 
     @Test
+    public void testStartConsultation_Success() {
+        Appointment started = workflowService.startConsultation(100L, authMock);
+
+        assertNotNull(started);
+        assertEquals("IN_CONSULTATION", started.getStage());
+        assertEquals("IN_CONSULTATION", started.getStatus());
+    }
+
+    @Test
     public void testRecordDoctorConsultation_Success() {
         Diagnosis diag = new Diagnosis();
         diag.setConditionName("Hypertension");

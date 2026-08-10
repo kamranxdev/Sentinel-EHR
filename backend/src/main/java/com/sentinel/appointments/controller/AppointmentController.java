@@ -150,7 +150,7 @@ public class AppointmentController {
     }
 
     @PostMapping("/{id}/triage-vitals")
-    @PreAuthorize("hasAuthority('VITALS_CREATE') and @patientSecurityService.canAccessAppointment(authentication, #id)")
+    @PreAuthorize("(hasAuthority('VITALS_CREATE') or hasRole('NURSE') or hasRole('DOCTOR') or hasRole('ADMIN')) and @patientSecurityService.canAccessAppointment(authentication, #id)")
     public ResponseEntity<AppointmentResponseDTO> recordTriageVitals(@PathVariable Long id,
                                                            @Valid @RequestBody TriageVitalsRequestDTO payload,
                                                            Authentication auth) {
@@ -168,8 +168,15 @@ public class AppointmentController {
         return ResponseEntity.ok(appointmentMapper.toResponseDTO(triaged));
     }
 
+    @PostMapping("/{id}/start-consultation")
+    @PreAuthorize("(hasAuthority('APPOINTMENT_UPDATE') or hasAuthority('CLINICAL_NOTE_CREATE')) and @patientSecurityService.canAccessAppointment(authentication, #id)")
+    public ResponseEntity<AppointmentResponseDTO> startConsultation(@PathVariable Long id, Authentication auth) {
+        Appointment updated = workflowService.startConsultation(id, auth);
+        return ResponseEntity.ok(appointmentMapper.toResponseDTO(updated));
+    }
+
     @PostMapping("/{id}/doctor-consultation")
-    @PreAuthorize("hasAuthority('CLINICAL_NOTE_CREATE') and @patientSecurityService.canAccessAppointment(authentication, #id)")
+    @PreAuthorize("(hasAuthority('CLINICAL_NOTE_CREATE') or hasRole('DOCTOR') or hasRole('ADMIN')) and @patientSecurityService.canAccessAppointment(authentication, #id)")
     public ResponseEntity<AppointmentResponseDTO> recordDoctorConsultation(@PathVariable Long id,
                                                                  @Valid @RequestBody DoctorConsultationRequestDTO payload,
                                                                  Authentication auth) {
@@ -195,7 +202,7 @@ public class AppointmentController {
     }
 
     @GetMapping("/{id}/notes")
-    @PreAuthorize("hasAuthority('APPOINTMENT_READ') and @patientSecurityService.canAccessAppointment(authentication, #id)")
+    @PreAuthorize("(hasAuthority('APPOINTMENT_READ') or hasRole('DOCTOR') or hasRole('NURSE') or hasRole('RECEPTIONIST') or hasRole('ADMIN')) and @patientSecurityService.canAccessAppointment(authentication, #id)")
     public List<AppointmentNoteResponseDTO> getNotesForAppointment(@PathVariable Long id) {
         return workflowService.getNotesForAppointment(id).stream()
                 .map(appointmentMapper::toNoteResponseDTO)
@@ -203,7 +210,7 @@ public class AppointmentController {
     }
 
     @PostMapping("/{id}/notes")
-    @PreAuthorize("hasAuthority('APPOINTMENT_READ') and @patientSecurityService.canAccessAppointment(authentication, #id)")
+    @PreAuthorize("(hasAuthority('APPOINTMENT_READ') or hasRole('DOCTOR') or hasRole('NURSE') or hasRole('RECEPTIONIST') or hasRole('ADMIN')) and @patientSecurityService.canAccessAppointment(authentication, #id)")
     public ResponseEntity<AppointmentNoteResponseDTO> addNote(@PathVariable Long id,
                                                     @Valid @RequestBody AppointmentNoteRequestDTO payload,
                                                     Authentication auth) {
@@ -238,7 +245,7 @@ public class AppointmentController {
     }
 
     @PostMapping("/{id}/billing")
-    @PreAuthorize("hasAuthority('INVOICE_CREATE') and @patientSecurityService.canAccessAppointment(authentication, #id)")
+    @PreAuthorize("(hasAuthority('INVOICE_CREATE') or hasRole('DOCTOR') or hasRole('ADMIN') or hasRole('BILLING')) and @patientSecurityService.canAccessAppointment(authentication, #id)")
     public ResponseEntity<AppointmentBillingResponseDTO> generateBilling(@PathVariable Long id,
                                                                @Valid @RequestBody BillingGenerationRequestDTO payload,
                                                                Authentication auth) {

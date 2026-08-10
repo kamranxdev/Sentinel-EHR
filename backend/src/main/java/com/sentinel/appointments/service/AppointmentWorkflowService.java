@@ -150,6 +150,22 @@ public class AppointmentWorkflowService {
     }
 
     @Transactional
+    public Appointment startConsultation(Long appointmentId, Authentication auth) {
+        Appointment apt = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Appointment #" + appointmentId + " not found"));
+
+        apt.setStage("IN_CONSULTATION");
+        apt.setStatus("IN_CONSULTATION");
+        Appointment saved = appointmentRepository.save(apt);
+
+        User doctor = getAuthenticatedUser(auth);
+        auditService.logAction(auth, "UPDATE", "START_CONSULTATION", String.valueOf(appointmentId),
+                "Consultation started for appointment #" + appointmentId + " by Doctor " + doctor.getFullName());
+
+        return saved;
+    }
+
+    @Transactional
     public Appointment recordDoctorConsultation(Long appointmentId,
                                                 List<Diagnosis> diagnoses,
                                                 List<Prescription> prescriptions,

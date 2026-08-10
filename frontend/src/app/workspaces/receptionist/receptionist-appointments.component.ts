@@ -306,14 +306,16 @@ import { StatCardComponent } from '../../shared/ui/stat-card.component';
                       <ng-icon name="lucideUserCheck" size="14" />
                       <span>Complete Desk Check-In</span>
                     </button>
-                    <button
+                    <span
                       *ngIf="apt.stage === 'CHECKED_IN'"
-                      hlmBtn size="sm" variant="outline"
-                      class="text-xs gap-1 text-purple-600 border-purple-500/30 hover:bg-purple-500/10 h-8"
-                      (click)="updateStage(apt, 'IN_CONSULTATION')">
-                      <ng-icon name="lucideStethoscope" size="14" />
-                      <span>Start Consultation</span>
-                    </button>
+                      class="text-xs font-semibold text-amber-600 px-2 py-1 rounded bg-amber-500/10 border border-amber-500/20">
+                      Awaiting Nurse Triage
+                    </span>
+                    <span
+                      *ngIf="apt.stage === 'TRIAGED'"
+                      class="text-xs font-semibold text-sky-600 px-2 py-1 rounded bg-sky-500/10 border border-sky-500/20">
+                      Ready for Doctor
+                    </span>
                     <!-- Cancellation button -->
                     <button
                       *ngIf="apt.stage !== 'CANCELLED' && apt.status !== 'CANCELLED'"
@@ -565,10 +567,11 @@ export class ReceptionistAppointmentsComponent implements OnInit {
   getStageLabel(stage: string): string {
     switch (stage) {
       case 'SCHEDULED': return '1. Booked (Pre-Arrival)';
-      case 'ARRIVED': return '2. Lobby Arrival (In Queue)';
-      case 'CHECKED_IN': return '3. Intake & RTE Cleared (Ready for Triage)';
-      case 'IN_CONSULTATION': return '4. Clinical Consultation (In Room)';
-      case 'COMPLETED': return '5. Encounter Finalized & Discharged';
+      case 'ARRIVED': return '2. Lobby Arrival';
+      case 'CHECKED_IN': return '3. Desk Checked In (Awaiting Triage)';
+      case 'TRIAGED': return '4. Triaged (Ready for Physician)';
+      case 'IN_CONSULTATION': return '5. Clinical Consultation';
+      case 'COMPLETED': return '6. Discharged & Completed';
       case 'CANCELLED': return 'Cancelled / No-Show';
       default: return stage || 'Scheduled';
     }
@@ -578,7 +581,8 @@ export class ReceptionistAppointmentsComponent implements OnInit {
     switch (stage) {
       case 'SCHEDULED': return 'outline';
       case 'ARRIVED': return 'secondary';
-      case 'CHECKED_IN':
+      case 'CHECKED_IN': return 'outline';
+      case 'TRIAGED': return 'secondary';
       case 'IN_CONSULTATION': return 'default';
       case 'COMPLETED': return 'secondary';
       case 'CANCELLED': return 'destructive';

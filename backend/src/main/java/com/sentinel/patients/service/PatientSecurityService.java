@@ -130,9 +130,27 @@ public class PatientSecurityService {
     }
 
     public boolean canAccessAppointment(Authentication authentication, Long appointmentId) {
-        if (appointmentId == null) return false;
+        if (authentication == null || !authentication.isAuthenticated() || appointmentId == null) return false;
         Optional<Appointment> opt = appointmentRepository.findById(appointmentId);
-        return opt.isPresent() && opt.get().getPatient() != null && canAccessPatient(authentication, opt.get().getPatient().getId());
+        if (opt.isEmpty() || opt.get().getPatient() == null) return false;
+
+        Appointment apt = opt.get();
+        if (apt.getDoctor() != null && apt.getDoctor().getUsername() != null &&
+            apt.getDoctor().getUsername().equalsIgnoreCase(authentication.getName())) {
+            return true;
+        }
+
+        Set<String> authorities = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toSet());
+
+        if (authorities.contains("ROLE_SYS_ADMIN") || authorities.contains("ROLE_ORG_ADMIN") ||
+            authorities.contains("ROLE_ADMIN") || authorities.contains("ROLE_NURSE") ||
+            authorities.contains("ROLE_RECEPTIONIST") || authorities.contains("ROLE_AUDITOR")) {
+            return true;
+        }
+
+        return canAccessPatient(authentication, opt.get().getPatient().getId());
     }
 
     public boolean canAccessPrescription(Authentication authentication, Long prescriptionId) {

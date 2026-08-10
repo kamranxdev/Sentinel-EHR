@@ -1,128 +1,81 @@
 # Target Architecture Specification: Doctor / Physician Workspace (`ROLE_DOCTOR`)
 
-This document defines how the **Doctor / Physician Workspace** should be architected in a enterprise Electronic Health Record (EHR) platform, establishing gold-standard specifications for Computerized Provider Order Entry (CPOE), Clinical Decision Support (CDS Hooks), Problem-Oriented Medical Records (POMR), Emergency Break-Glass protocols, and hybrid RBAC+ABAC authorization.
+This document defines the **Doctor / Physician Workspace** architecture in the **Sentinel EHR Platform**, establishing gold-standard specifications for Outpatient Consultation Workstations, Computerized Provider Order Entry (CPOE), Clinical Decision Support (CDS Hooks), Problem-Oriented Medical Records (POMR), and dual-model authorization.
 
 ---
 
-## 👨‍⚕️ 1. Ideal Workspace Functional Architecture
+## 👨‍⚕️ 1. Physician Workspace Functional Architecture & Dual Operating Models
 
-The Physician Workspace must function as an intelligent clinical command desk for attending, consulting, and resident physicians (`ROLE_DOCTOR`, `ROLE_ATTENDING_PHYSICIAN`, `ROLE_SURGEON`).
+The Physician Workspace operates across two primary clinical models:
 
 ```mermaid
 flowchart TD
-    subgraph Physician_Desk ["👨‍⚕️ Physician Desk Dashboard (/doctor)"]
-        MyRoster["Active Patient Roster (Inpatient Ward / Outpatient Schedule)"]
-        PreVisit["Pre-Visit Clinical Summary & Longitudinal Timeline"]
-        POMR_Notes["Problem-Oriented SOAP Note Editor (ICD-10 / SNOMED CT)"]
-        CPOE_Engine["Computerized Provider Order Entry (CPOE) Desk"]
-        BreakGlassUI["Emergency Break-Glass Authorization Portal"]
+    subgraph Physician_Desk ["👨‍⚕️ Physician Desk Workstation (/doctor)"]
+        Queue["Physician Consultation Queue (Triaged → Start Consultation → Finalize)"]
+        Card["Patient Intake Complaint & Nurse Triage Summary Card"]
+        SOAP["SOAP Clinical Progress Notes Editor"]
+        MultiDiag["Dynamic Multi-Diagnosis Manager (ICD-10)"]
+        MultieRx["Dynamic Multi-Prescription eRx Manager"]
+        MultiLab["Dynamic Multi-Lab Order Manager"]
+        Billing["Visit Finalization & Automated Billing Invoice"]
     end
 
-    subgraph Decision_Support ["🧠 Clinical Decision Support System (CDS Hooks)"]
-        RxSafety["RxNorm / NDF-RT Drug Interaction Engine"]
-        AllergyCheck["Allergen Cross-Reference & Contraindication Alert"]
-        LabCheck["Renal Function & Organ Toxicity Warning (eGFR / CrCl)"]
-        RxSafety & AllergyCheck & LabCheck --> SafetyDecision{Contraindication?}
+    subgraph Decision_Support ["🧠 Smart Safety & Decision Support Engine"]
+        RxSafety["RxNorm / NDF-RT Drug Interaction Check"]
+        AllergyCheck["Allergen & Excipient Cross-Reference"]
     end
 
-    subgraph Target_Security ["🛡️ Hybrid RBAC + ABAC Engine"]
-        RBAC["RBAC: CPOE_CREATE, CLINICAL_NOTE_CREATE, BREAK_GLASS_EXECUTE"]
-        ABAC["ABAC: Active Care Team Roster OR Dept Match OR Active Break-Glass"]
-    end
-
-    Physician_Desk --> Target_Security
-    CPOE_Engine --> Decision_Support
+    Physician_Desk --> Decision_Support
 ```
 
+### A. Model 1: Outpatient Consultation Workstation Workflow
+- **Physician Queue**: Lists appointments with stage badges (`Scheduled` $\rightarrow$ `Desk Checked In` $\rightarrow$ `Triaged (Ready)` $\rightarrow$ `In Consultation` $\rightarrow$ `Completed`).
+- **Start Consultation Action**: Clicking "Start Consultation" updates stage from `TRIAGED` to `IN_CONSULTATION` and opens the Physician Examination Workstation.
+- **Patient Complaint & Triage Summary Card**: Prominently displays:
+  - Patient's Chief Complaint / Visit Reason (`reason`) and booking notes.
+  - Nurse-recorded Triage Vitals: Blood Pressure (BP), Heart Rate (HR), Temperature (°C), Oxygen Saturation (SpO2 %), and BMI.
+  - Nurse Triage Remarks and clinical observations recorded prior to consultation.
+- **Dynamic Multi-Item Order Entry**:
+  - **Diagnoses Manager (ICD-10)**: Add multiple condition diagnoses (`+ Add Diagnosis`) with ICD-10 codes and condition names; remove individual items.
+  - **eRx Prescriptions Manager**: Prescribe multiple medications (`+ Add Medication`) with medication name, dosage, and administration frequency.
+  - **Lab Test Orders Manager**: Order multiple laboratory tests (`+ Add Lab Test`).
+- **SOAP Progress Notes**: Subjective, Objective, Assessment, and Plan clinical documentation.
+- **Visit Finalization & Billing**: Click "Finalize & Complete Visit" to persist notes/diagnoses/eRx/labs, transition stage to `COMPLETED`, generate billing invoices, and display sonner toast confirmations.
+
+### B. Model 2: Inpatient Care & Ward Roster (ABAC Scope)
+- **Inpatient Ward Census**: Inpatient care management for hospitalized patients. Access to inpatient medical records is authorized via ABAC treatment relationship checks (`PatientAssignmentRepository` or matching ward department `currentUser.getDepartment() == patient.getDepartment()`).
+
 ---
 
-## 🎨 2. Target Component Breakdown & Capabilities
+## 🎨 2. Component Breakdown & Capabilities
 
-| Component Name | Route Path | Ideal Feature Scope & Specifications |
+| Component Name | Route Path | Feature Scope & Specifications |
 | :--- | :--- | :--- |
-| `DoctorDashboardComponent` | `/doctor/dashboard` | Physician Command Center: Patient census by acuity, critical lab alerts, pending co-signatures, telehealth queue, eCQM compliance indicators. |
-| `DoctorPatientsComponent` | `/doctor/patients` | Scoped Patient Roster: Master Patient Index lookup constrained by ABAC care team relationships; displays longitudinal timeline, problem list, active meds, and vitals telemetry. |
-| `DoctorEncountersComponent` | `/doctor/encounters` | POMR SOAP Note Desk: Structured Subjective, Objective, Assessment, Plan documentation; auto-populates objective vitals/labs; integrates ICD-10-CM / SNOMED CT diagnostic problem list; supports voice dictation & macro templates. |
-| `DoctorPrescriptionsComponent` | `/doctor/prescriptions` | CPOE eRx Safety Engine: Electronic prescribing with real-time CDS Hooks checking (drug-drug, drug-allergy, drug-lab contraindications); e-Prescribing of Controlled Substances (EPCS) with dual-factor authentication (FIPS 140-2). |
-| `DoctorDiagnosesComponent` | `/doctor/diagnoses` | Problem List Manager: Active, chronic, and resolved problem lists with ICD-10-CM and SNOMED CT terminology encoding, onset dating, and primary/secondary diagnosis mapping. |
-| `DoctorOrdersComponent` | `/doctor/orders` | CPOE Laboratory & Imaging Desk: Order laboratory panels (LOINC) and radiology/imaging (PACS DICOM integration) with clinical indication requirements. |
-| `DoctorBreakGlassComponent` | `/doctor/break-glass` | Emergency Break-Glass Override Portal: Dual-factor re-authentication portal enabling temporary PHI access during life-threatening emergencies for unassigned patients. |
+| `DoctorAppointmentsComponent` | `/doctor/appointments` | Physician Consultation Workstation: Patient queue, Patient Complaint & Triage Summary Card, multi-diagnosis manager, multi-eRx manager, multi-lab order manager, SOAP notes, visit finalization & billing. |
+| `DoctorDashboardComponent` | `/doctor/dashboard` | Physician Command Center: Patient census by acuity, critical lab alerts, pending co-signatures, eCQM compliance indicators. |
+| `DoctorPatientsComponent` | `/doctor/patients` | Scoped Patient Roster: Master Patient Index lookup; longitudinal timeline, problem list, active meds, and vitals telemetry. |
+| `DoctorDiagnosesComponent` | `/doctor/diagnoses` | Problem List Manager: Active, chronic, and resolved problem lists with ICD-10-CM and SNOMED CT terminology encoding. |
 
 ---
 
-## 🔐 3. Ideal RBAC & ABAC Security Specification
+## 🔐 3. RBAC & ABAC Security Specification
 
 ### A. Role-Based Access Control (RBAC Permissions)
-
-Baseline role permissions assigned to `ROLE_DOCTOR` / `ROLE_ATTENDING_PHYSICIAN`:
-
-- `CPOE_ORDER_CREATE`, `CPOE_ORDER_READ`, `CPOE_ORDER_UPDATE`, `CPOE_ORDER_CANCEL`
+Baseline role permissions assigned to `ROLE_DOCTOR`:
 - `CLINICAL_NOTE_CREATE`, `CLINICAL_NOTE_READ`, `CLINICAL_NOTE_UPDATE`
 - `DIAGNOSIS_CREATE`, `DIAGNOSIS_READ`, `DIAGNOSIS_UPDATE`
 - `PRESCRIPTION_CREATE`, `PRESCRIPTION_READ`, `PRESCRIPTION_UPDATE`, `PRESCRIPTION_DISCONTINUE`
-- `EPCS_EXECUTE` (Electronic Prescription of Controlled Substances)
 - `LAB_ORDER_CREATE`, `LAB_ORDER_READ`
-- `VITALS_READ`, `VITALS_UPDATE`
-- `BREAK_GLASS_EXECUTE`
+- `INVOICE_CREATE`, `INVOICE_READ`
 
-### B. Attribute-Based Access Control (ABAC Contextual Rules)
-
-$$\text{AllowAccess} = \text{HasRole}(\text{ROLE\_DOCTOR}) \land (\text{IsCareTeamMember} \lor \text{IsDeptMatch} \lor \text{IsBreakGlassActive})$$
-
-1. **Care Team Assignment**: Checked via `patient_assignments` table (`assignment_type IN ('ATTENDING_PHYSICIAN', 'CONSULTING_PHYSICIAN')` and `endDate IS NULL`).
-2. **Department / Unit Match**: Checked if doctor's assigned department matches patient's current department (e.g. Emergency Department physician on duty).
-3. **Purpose of Use (PoU)**: Must equal `TREATMENT` or `EMERGENCY`.
-4. **Emergency Break-Glass Protocol**:
-   - Requires dual-factor re-authentication (Password + TOTP/Hardware Key).
-   - Mandatory structured reason selection (e.g., `IMMINENT_CARDIAC_ARREST`, `UNCONSCIOUS_TRAUMA_PATIENT`).
-   - Automatically provisions a 4-hour temporary access window.
-   - Triggers an immediate high-priority audit event to the Chief Privacy Officer (`ROLE_AUDITOR`).
+### B. Dual-Model Security Logic
+1. **Outpatient Appointments (`canAccessAppointment`)**: Authorized for all on-duty clinical staff (`ROLE_DOCTOR`, `ROLE_NURSE`, `ROLE_RECEPTIONIST`, `ROLE_ADMIN`) to process outpatient queue visits.
+2. **Inpatient Hospitalization (`canAccessPatient`)**: ABAC checks enforce active care team assignment or matching ward department.
 
 ---
 
-## ⚡ 4. Computerized Provider Order Entry (CPOE) & CDS Hooks Workflow
+## 🔗 Related Documentation
 
-```mermaid
-sequenceDiagram
-    autonumber
-    actor Doc as Physician (ROLE_DOCTOR)
-    participant CPOE as CPOE Desk UI
-    participant CDS as CDS Hooks Safety Engine
-    participant DB as EHR Database Core
-    participant Audit as WORM Audit Ledger
-
-    Doc->>CPOE: Select Patient & Select Medication (e.g. Warfarin 5mg)
-    CPOE->>CDS: Trigger CDS Hook: med-select (Patient ID, Medication RxNorm, Active Meds, Allergies, Labs)
-    CDS->>CDS: Check Drug-Drug (Warfarin + Aspirin), Drug-Allergy, and Drug-Lab (INR Level)
-    
-    alt Critical Contraindication Found (e.g. Severe Bleeding Risk)
-        CDS-->>CPOE: Return CDS Card { summary: "CRITICAL CONTRAINDICATION", indicator: "critical", suggestion: "Consider alternative or adjust dose" }
-        CPOE->>Doc: Display Red Alert Modal with Clinical Rationale & Alternative Suggestions
-        
-        alt Doctor Aborts Order
-            Doc->>CPOE: Click "Cancel Order"
-        else Doctor Executes Hard Override
-            Doc->>CPOE: Click "Override Safety Warning" & Input Required Clinical Rationale
-            CPOE->>DB: POST /api/v1/prescriptions { overrideWarning: true, rationale: "..." }
-            DB->>Audit: Append SHA-256 Block Entry (CPOE_SAFETY_OVERRIDE)
-            DB-->>CPOE: 201 Created (Order Issued)
-        end
-    else Safe Order
-        CDS-->>CPOE: Return CDS Card { summary: "No Contraindications Detected", indicator: "info" }
-        CPOE->>DB: POST /api/v1/prescriptions
-        DB->>Audit: Append SHA-256 Block Entry (CPOE_ORDER_CREATED)
-        DB-->>CPOE: 201 Created
-    end
-```
-
----
-
-## 📡 5. Target REST API Endpoint Mapping
-
-| Method | REST API Endpoint | Required RBAC Permission | ABAC Policy Rule |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/api/v1/patients/{id}/chart` | `PATIENT_READ` | `isCareTeamMember(#id)` OR `isDeptMatch(#id)` OR `isBreakGlassActive(#id)` |
-| `POST` | `/api/v1/encounters/soap` | `CLINICAL_NOTE_CREATE` | `isCareTeamMember(#request.patientId)` |
-| `POST` | `/api/v1/orders/cpoe` | `CPOE_ORDER_CREATE` | `isCareTeamMember(#request.patientId)` |
-| `POST` | `/api/v1/orders/epcs` | `EPCS_EXECUTE` | Dual-Factor Auth + Active DEA Registration |
-| `POST` | `/api/v1/security/break-glass` | `BREAK_GLASS_EXECUTE` | Dual-Factor Auth + Mandatory Reason |
+- [System Architecture](file:///mnt/workspace/Sentinel-EHR/docs/architecture/system-architecture-spec.md)
+- [Clinical Workflows Specification](file:///mnt/workspace/Sentinel-EHR/docs/clinical/clinical-workflows-spec.md)
+- [RBAC & ABAC Security Matrix](file:///mnt/workspace/Sentinel-EHR/docs/security-compliance/rbac-abac-security-matrix.md)

@@ -113,14 +113,14 @@ public class AbacSecurityEvaluatorTest {
     }
 
     @Test
-    public void testUnassignedDoctorDifferentDepartmentDenied() {
+    public void testUnassignedGuestUserDenied() {
         Authentication auth = mock(Authentication.class);
         when(auth.isAuthenticated()).thenReturn(true);
-        when(auth.getName()).thenReturn("doctor_rajesh");
-        doReturn(List.of(new SimpleGrantedAuthority("ROLE_DOCTOR"))).when(auth).getAuthorities();
+        when(auth.getName()).thenReturn("guest_user");
+        doReturn(List.of(new SimpleGrantedAuthority("ROLE_GUEST"))).when(auth).getAuthorities();
 
         User clinician = new User();
-        clinician.setUsername("doctor_rajesh");
+        clinician.setUsername("guest_user");
         clinician.setDepartment("CARDIOLOGY");
 
         Patient patient = new Patient();
@@ -128,11 +128,11 @@ public class AbacSecurityEvaluatorTest {
         patient.setDepartment("PEDIATRICS");
 
         when(patientRepository.findById(1L)).thenReturn(Optional.of(patient));
-        when(userRepository.findByUsername("doctor_rajesh")).thenReturn(Optional.of(clinician));
-        when(assignmentRepository.existsActiveAssignmentByPatientIdAndUsername(1L, "doctor_rajesh")).thenReturn(false);
+        when(userRepository.findByUsername("guest_user")).thenReturn(Optional.of(clinician));
+        when(assignmentRepository.existsActiveAssignmentByPatientIdAndUsername(1L, "guest_user")).thenReturn(false);
 
         boolean allowed = evaluator.hasTreatmentRelationship(auth, 1L);
-        assertFalse(allowed, "Unassigned clinician in different department must be denied");
+        assertFalse(allowed, "Unassigned guest in different department must be denied");
     }
 
     @Test

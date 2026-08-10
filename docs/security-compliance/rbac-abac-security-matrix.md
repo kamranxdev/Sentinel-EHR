@@ -1,29 +1,42 @@
 # Sentinel EHR Role-Based & Attribute-Based Access Control (RBAC + ABAC) Specification
 
-This document defines the production-grade **Role-Based Access Control (RBAC)** and **Attribute-Based Access Control (ABAC)** matrix and security architecture for the **Sentinel EHR Platform**.
+This document defines the production-grade **Role-Based Access Control (RBAC)** and **Attribute-Based Access Control (ABAC)** matrix and security architecture operating across the **Sentinel EHR Platform**.
 
 ---
 
-## 🎯 Architectural Overview
+## 🎯 Dual-Model Security Architecture Overview
 
-In a modern enterprise Electronic Health Record (EHR) system, access control cannot rely solely on simple top-level roles (e.g., `Doctor = full access`). Sentinel implements a **Hybrid RBAC + ABAC Security Model**:
+Sentinel implements a **Dual-Scope Security Architecture** designed for two distinct operational models:
 
-1. **Role-Based Access Control (RBAC)**: Defines **what coarse-grained actions** a role is generally authorized to perform (e.g., `Doctor` can `CREATE_PRESCRIPTION`, `Nurse` can `RECORD_VITALS`).
-2. **Attribute-Based Access Control (ABAC)**: Evaluates **runtime contextual attributes** (e.g., treatment relationship, care team assignment, department match, facility location, time of access, and Purpose of Use) before granting access to a specific patient's Protected Health Information (PHI).
+```
+┌────────────────────────────────────────────────────────────────────────────────────────┐
+│                              SENTINEL SECURITY ENGINE                                  │
+├───────────────────────────────────────────┬────────────────────────────────────────────┤
+│   MODEL 1: OUTPATIENT APPOINTMENT SCOPE   │     MODEL 2: INPATIENT HOSPITALCARE SCOPE  │
+├───────────────────────────────────────────┼────────────────────────────────────────────┤
+│ • Applies to Appointment Queue & OPD      │ • Applies to Inpatient Wards & ICUs        │
+│ • Role-Based Clinic Staff Authorization   │ • Strict Attribute-Based Access Control    │
+│ • Allows on-duty Doctors, Nurses, &      │ • Requires Care Team Assignment OR         │
+│   Receptionists to process queue visits   │   Matching Ward Department OR Break-Glass  │
+└───────────────────────────────────────────┴────────────────────────────────────────────┘
+```
+
+1. **Model 1: Outpatient Clinic Appointment Scope**:
+   - Authorized on-duty clinical staff (`ROLE_DOCTOR`, `ROLE_NURSE`, `ROLE_RECEPTIONIST`, `ROLE_ADMIN`, `ROLE_SYS_ADMIN`) are granted access to process outpatient appointment queues, conduct desk check-ins, record triage vitals, document consultation progress notes, order eRx/labs, and finalize billing.
+2. **Model 2: Inpatient Hospitalization Care Scope (ABAC)**:
+   - Evaluates **runtime contextual attributes** (care team assignment in `PatientAssignmentRepository`, ward department matching `currentUser.getDepartment() == patient.getDepartment()`, or emergency break-glass override) before granting access to inpatient Protected Health Information (PHI) and FHIR resources.
 
 ---
 
 ## 👥 The 10 Baseline System Roles
 
-Sentinel categorizes operations across **10 production roles**:
-
-1. **System Administrator (`ROLE_SYS_ADMIN`)**: Platform-level infrastructure, tenant provisioning, system configurations, and cross-site audit monitoring. No direct clinical record edit access.
+1. **System Administrator (`ROLE_SYS_ADMIN`)**: Platform-level infrastructure, tenant provisioning, system configurations, and cross-site audit monitoring.
 2. **Organization / Clinic Administrator (`ROLE_ORG_ADMIN`)**: Hospital or clinic facility administrator. Manages clinic users, provider schedules, facility departments, and billing configurations.
-3. **Doctor / Physician (`ROLE_DOCTOR`)**: Attending/consulting physician. Full clinical authority over diagnosis, clinical notes, order entry (eRx, labs), care plans, and medical history.
-4. **Nurse (`ROLE_NURSE`)**: Registered nurse or clinical care provider. Responsible for patient triage, vitals flowsheets, nursing progress notes, medication administration, and care plan updates.
-5. **Receptionist (`ROLE_RECEPTIONIST`)**: Patient intake and front-desk coordinator. Manages demographics, check-in, appointment scheduling, insurance verification, and basic invoicing.
-6. **Lab Technician (`ROLE_LAB_TECH`)**: Laboratory specialist. Processes diagnostic specimens, enters lab test results, manages lab equipment orders, and uploads clinical diagnostic documents.
-7. **Pharmacist (`ROLE_PHARMACIST`)**: Clinical pharmacist. Reviews eRx orders, performs drug-allergy & drug-drug reconciliation, dispenses medications, and logs administration history.
+3. **Doctor / Physician (`ROLE_DOCTOR`)**: Attending/consulting physician. Full clinical authority over diagnoses, clinical notes, order entry (multi-eRx, multi-lab orders), care plans, and medical history.
+4. **Nurse (`ROLE_NURSE`)**: Registered nurse or clinical care provider. Responsible for desk check-in intake, triage vitals flowsheets (`CHECKED_IN` $\rightarrow$ `TRIAGED`), nursing progress notes, eMAR medication administration, and care plans.
+5. **Receptionist (`ROLE_RECEPTIONIST`)**: Patient intake and front-desk coordinator. Manages demographics, desk check-in (`SCHEDULED` $\rightarrow$ `CHECKED_IN`), appointment scheduling, insurance verification, and billing.
+6. **Lab Technician (`ROLE_LAB_TECH`)**: Laboratory specialist. Processes diagnostic specimens, enters lab test results, and manages lab equipment orders.
+7. **Pharmacist (`ROLE_PHARMACIST`)**: Clinical pharmacist. Reviews eRx orders, performs drug-allergy & drug-drug reconciliation, and dispenses medications.
 8. **Billing Officer (`ROLE_BILLING`)**: Financial and revenue cycle specialist. Creates invoices, processes insurance claims, records patient payments, and generates financial compliance reports.
 9. **Patient (`ROLE_PATIENT`)**: Individual health recipient. Accesses self-service portal to view personal medical history, vitals, lab reports, eRx history, and manage appointments/consent.
 10. **Auditor / Compliance Officer (`ROLE_AUDITOR`)**: Independent HIPAA compliance auditor. Read-only inspection access to immutable WORM audit logs, security reports, and access logs.
@@ -41,58 +54,64 @@ Sentinel categorizes operations across **10 production roles**:
 | **CRU** | Create + Read + Update | Standard workflow authority without permanent hard delete privileges. |
 | **CRUD** | Full CRUD | Complete CRUD privileges (reserved for non-clinical setup metadata). |
 | **—** | No Access | Explicitly forbidden / blocked. |
-| **L** | Limited Access | Access restricted to specific fields, departmental bounds, or self-service boundaries. |
-| **A** | Approve / Authorize | Special authority to verify, countersign, or authorize pending actions. |
 
 ---
 
-## 2. Patient & Demographic Matrix
+## 2. Appointment & Consultation Matrix (Model 1)
 
-| Resource / Action | Sys Admin | Org Admin | Doctor | Nurse | Receptionist | Lab Tech | Pharmacist | Billing | Patient | Auditor |
+| Action / Endpoint | Sys Admin | Org Admin | Doctor | Nurse | Receptionist | Lab Tech | Pharmacist | Billing | Patient | Auditor |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| Create Patient | — | CRU | C | C | **CRU** | — | — | — | — | — |
-| View Demographics | — | R | R | R | **R** | R | R | R | **R** | R |
-| Update Demographics | — | U | L | L | **U** | — | — | L | U* | — |
-| Delete Patient | — | — | — | — | — | — | — | — | — | — |
-| Patient Identifier (MRN/ABHA/National ID) | — | R | R | R | R | R | R | R | R | R |
-| Emergency Contact | — | R | R | R | R | L | L | L | U | R |
-| Insurance Information | — | R | R | R | **CRU** | — | — | **CRU** | R | R |
-| Patient Consent Directives | — | R | R | R | CRU | R | R | R | **CRU** | R |
+| Schedule Appointment | CRU | CRU | CRU | CRU | **CRU** | — | — | — | **C (Self)** | R |
+| Desk Check-In (`CHECKED_IN`) | U | U | U | U | **U** | — | — | — | — | R |
+| Nurse Triage Vitals (`TRIAGED`) | U | U | U | **CRU** | — | — | — | — | — | R |
+| Start Consultation (`IN_CONSULTATION`) | U | U | **U** | — | — | — | — | — | — | R |
+| Record Doctor Consultation (Notes, eRx, Labs) | U | U | **CRU** | — | — | — | — | — | — | R |
+| Generate Visit Billing Invoice | CRU | CRU | **CRU** | — | CRU | — | — | **CRU** | — | R |
 
 ---
 
-## 3. Clinical Record Matrix
+## 3. Inpatient Clinical Record Matrix (Model 2 ABAC)
 
 | Clinical Resource | Sys Admin | Org Admin | Doctor | Nurse | Receptionist | Lab Tech | Pharmacist | Billing | Patient | Auditor |
 | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| Medical History | — | L | **CRU** | R | — | L | L | — | R | R |
-| Documented Allergies | — | L | **CRU** | R/U | — | L | R | — | R/U | R |
-| Active Diagnoses | — | — | **CRU** | R | — | L | R | — | R | R |
-| Physician Notes (SOAP) | — | — | **CRU** | CRU | — | — | — | — | R | R |
-| Nursing Notes | — | — | R | **CRU** | — | — | — | — | R | R |
-| Vital Signs | — | — | R/U | **CRU** | — | — | — | — | R | R |
-| Prescriptions (eRx) | — | — | **CRU** | R | — | — | **CRU** | — | R | R |
+| Medical History | — | L | **CRU (ABAC)** | R | — | L | L | — | R | R |
+| Documented Allergies | — | L | **CRU (ABAC)** | R/U | — | L | R | — | R/U | R |
+| Active Diagnoses | — | — | **CRU (ABAC)** | R | — | L | R | — | R | R |
+| Physician Notes (SOAP) | — | — | **CRU (ABAC)** | CRU | — | — | — | — | R | R |
+| Nursing Flowsheets | — | — | R | **CRU (ABAC)** | — | — | — | — | R | R |
+| Prescriptions (eRx) | — | — | **CRU (ABAC)** | R | — | — | **CRU** | — | R | R |
 
 ---
 
-## 4. Contextual ABAC SpEL Evaluator Logic
+## 4. Security Evaluator Implementation (Spring Security SpEL)
 
 ```java
-@Component("abacSecurityEvaluator")
-public class AbacSecurityEvaluator implements PermissionEvaluator {
+@Component("patientSecurityService")
+public class PatientSecurityService {
 
-    // Evaluates whether staff user has active treatment relationship or break-glass override
-    public boolean hasTreatmentRelationship(Authentication authentication, Long patientId) {
-        if (authentication == null || !authentication.isAuthenticated()) return false;
-        
-        // System Admin and Compliance Auditors bypass relationship check for non-clinical audit
-        if (hasRole(authentication, "ROLE_SYS_ADMIN") || hasRole(authentication, "ROLE_AUDITOR")) {
+    // Model 1: Outpatient Clinic Appointment Evaluator
+    public boolean canAccessAppointment(Authentication authentication, Long appointmentId) {
+        if (authentication == null || !authentication.isAuthenticated() || appointmentId == null) return false;
+
+        Set<String> authorities = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toSet());
+
+        // On-duty clinical and administrative staff access outpatient clinic appointment queue
+        if (authorities.contains("ROLE_SYS_ADMIN") || authorities.contains("ROLE_ORG_ADMIN") ||
+            authorities.contains("ROLE_ADMIN") || authorities.contains("ROLE_DOCTOR") ||
+            authorities.contains("ROLE_NURSE") || authorities.contains("ROLE_RECEPTIONIST") ||
+            authorities.contains("ROLE_AUDITOR")) {
             return true;
         }
 
-        String username = authentication.getName();
-        return assignmentRepository.existsActiveAssignmentByPatientIdAndUsername(patientId, username)
-               || isEmergencyBreakGlassActive(authentication, patientId);
+        return canAccessPatient(authentication, patientId);
+    }
+
+    // Model 2: Inpatient Hospitalization Care ABAC Evaluator
+    public boolean canAccessPatient(Authentication authentication, Long patientId) {
+        if (authentication == null || !authentication.isAuthenticated() || patientId == null) return false;
+        return abacEvaluator.hasTreatmentRelationship(authentication, patientId);
     }
 }
 ```
@@ -101,7 +120,7 @@ public class AbacSecurityEvaluator implements PermissionEvaluator {
 
 ## 🔗 Related Documentation
 
-- [System Architecture](file:///mnt/workspace/Sentinel/docs/architecture/system-architecture-spec.md)
-- [Clinical Workflows](file:///mnt/workspace/Sentinel/docs/clinical/clinical-workflows-spec.md)
-- [Security & HIPAA Compliance](file:///mnt/workspace/Sentinel/docs/security-compliance/security-hipaa-compliance-spec.md)
-- [Software Audit Report](file:///mnt/workspace/Sentinel/docs/audit/software-audit-report.md)
+- [System Architecture](file:///mnt/workspace/Sentinel-EHR/docs/architecture/system-architecture-spec.md)
+- [Clinical Workflows Specification](file:///mnt/workspace/Sentinel-EHR/docs/clinical/clinical-workflows-spec.md)
+- [Security & HIPAA Compliance](file:///mnt/workspace/Sentinel-EHR/docs/security-compliance/security-hipaa-compliance-spec.md)
+- [Doctor Workspace Specification](file:///mnt/workspace/Sentinel-EHR/docs/workspaces/doctor-workspace-spec.md)

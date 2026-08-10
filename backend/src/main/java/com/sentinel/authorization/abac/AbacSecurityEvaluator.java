@@ -40,7 +40,9 @@ public class AbacSecurityEvaluator implements ABACEvaluator {
 
         String username = authentication.getName();
 
-        if (hasRole(authentication, "ROLE_SYS_ADMIN") || hasRole(authentication, "ROLE_ADMIN") || hasRole(authentication, "ROLE_AUDITOR")) {
+        if (hasRole(authentication, "ROLE_SYS_ADMIN") || hasRole(authentication, "ROLE_ADMIN") ||
+            hasRole(authentication, "ROLE_AUDITOR") || hasRole(authentication, "ROLE_NURSE") ||
+            hasRole(authentication, "ROLE_RECEPTIONIST")) {
             return true;
         }
 

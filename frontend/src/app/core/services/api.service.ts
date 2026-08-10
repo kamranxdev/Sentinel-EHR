@@ -263,6 +263,10 @@ export class ApiService {
     return this.http.post<Appointment>(`${this.baseUrl}/appointments/${id}/triage-vitals`, payload);
   }
 
+  startConsultation(id: number): Observable<Appointment> {
+    return this.http.post<Appointment>(`${this.baseUrl}/appointments/${id}/start-consultation`, {});
+  }
+
   recordDoctorConsultation(id: number, payload: any): Observable<Appointment> {
     return this.http.post<Appointment>(
       `${this.baseUrl}/appointments/${id}/doctor-consultation`,

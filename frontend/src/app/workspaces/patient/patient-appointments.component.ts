@@ -186,19 +186,24 @@ import {
                   <span
                     hlmBadge
                     [variant]="
-                      apt.status === 'SCHEDULED' ? 'default' :
-                      apt.status === 'COMPLETED' ? 'secondary' :
-                      apt.status === 'IN_CONSULTATION' ? 'outline' : 'outline'
+                      (apt.stage || apt.status) === 'SCHEDULED' ? 'default' :
+                      (apt.stage || apt.status) === 'COMPLETED' ? 'secondary' :
+                      (apt.stage || apt.status) === 'IN_CONSULTATION' ? 'default' : 'outline'
                     "
-                    [class.bg-emerald-500\/15]="apt.status === 'COMPLETED'"
-                    [class.text-emerald-700]="apt.status === 'COMPLETED'"
-                    [class.dark:text-emerald-400]="apt.status === 'COMPLETED'"
-                    [class.bg-rose-500\/15]="apt.status === 'CANCELLED'"
-                    [class.text-rose-700]="apt.status === 'CANCELLED'"
-                    [class.dark:text-rose-400]="apt.status === 'CANCELLED'"
-                    class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5"
+                    [class.bg-emerald-500\/15]="(apt.stage || apt.status) === 'COMPLETED'"
+                    [class.text-emerald-700]="(apt.stage || apt.status) === 'COMPLETED'"
+                    [class.dark:text-emerald-400]="(apt.stage || apt.status) === 'COMPLETED'"
+                    [class.bg-rose-500\/15]="(apt.stage || apt.status) === 'CANCELLED'"
+                    [class.text-rose-700]="(apt.stage || apt.status) === 'CANCELLED'"
+                    [class.dark:text-rose-400]="(apt.stage || apt.status) === 'CANCELLED'"
+                    class="text-[10px] font-bold tracking-wider px-2 py-0.5"
                   >
-                    {{ apt.status }}
+                    {{
+                      (apt.stage || apt.status) === 'CHECKED_IN' ? 'Checked In (Desk)' :
+                      (apt.stage || apt.status) === 'TRIAGED' ? 'Triaged (Nurse)' :
+                      (apt.stage || apt.status) === 'IN_CONSULTATION' ? 'In Consultation' :
+                      (apt.stage || apt.status)
+                    }}
                   </span>
                 </td>
 
