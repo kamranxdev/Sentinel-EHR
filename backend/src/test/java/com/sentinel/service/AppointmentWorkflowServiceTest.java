@@ -152,7 +152,7 @@ public class AppointmentWorkflowServiceTest {
         labOrder.setTestName("Complete Blood Count");
 
         when(smartSafetyService.checkPrescriptionSafety(eq(1L), eq("Lisinopril"), eq("doctor_test"), anyString()))
-                .thenReturn(new SmartSafetyService.SafetyCheckResult(true, "NONE", null, "Safe"));
+                .thenReturn(new com.sentinel.prescriptions.dto.SafetyCheckResultDTO(true, "NONE", null, "Safe"));
 
         Appointment completed = workflowService.recordDoctorConsultation(
                 100L, List.of(diag), List.of(rx), List.of(labOrder), "Patient in good condition", LocalDateTime.now().plusDays(14), authMock

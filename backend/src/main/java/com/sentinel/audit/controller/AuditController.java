@@ -1,6 +1,7 @@
 package com.sentinel.audit.controller;
 
-import com.sentinel.audit.entity.AuditLog;
+import com.sentinel.audit.dto.AuditLogResponseDTO;
+import com.sentinel.audit.mapper.AuditLogMapper;
 import com.sentinel.audit.service.AuditTrailService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -15,14 +16,19 @@ import java.util.List;
 public class AuditController {
 
     private final AuditTrailService auditTrailService;
+    private final AuditLogMapper auditLogMapper;
 
-    public AuditController(AuditTrailService auditTrailService) {
+    public AuditController(AuditTrailService auditTrailService, AuditLogMapper auditLogMapper) {
         this.auditTrailService = auditTrailService;
+        this.auditLogMapper = auditLogMapper;
     }
 
     @GetMapping
     @PreAuthorize("hasAnyAuthority('ROLE_SYS_ADMIN', 'ROLE_ORG_ADMIN', 'ROLE_ADMIN', 'ROLE_AUDITOR', 'AUDIT_READ')")
-    public ResponseEntity<List<AuditLog>> getAuditLogs() {
-        return ResponseEntity.ok(auditTrailService.getRecentAuditLogs());
+    public ResponseEntity<List<AuditLogResponseDTO>> getAuditLogs() {
+        List<AuditLogResponseDTO> logs = auditTrailService.getRecentAuditLogs().stream()
+                .map(auditLogMapper::toResponseDTO)
+                .toList();
+        return ResponseEntity.ok(logs);
     }
 }

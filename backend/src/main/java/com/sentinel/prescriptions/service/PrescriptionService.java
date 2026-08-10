@@ -5,7 +5,7 @@ import com.sentinel.patients.entity.Patient;
 import com.sentinel.patients.repository.PatientRepository;
 import com.sentinel.prescriptions.entity.Prescription;
 import com.sentinel.prescriptions.repository.PrescriptionRepository;
-import com.sentinel.prescriptions.service.SmartSafetyService.SafetyCheckResult;
+import com.sentinel.prescriptions.dto.SafetyCheckResultDTO;
 import com.sentinel.users.entity.User;
 import com.sentinel.users.repository.UserRepository;
 import org.springframework.stereotype.Service;
@@ -43,7 +43,7 @@ public class PrescriptionService {
     }
 
     @Transactional(readOnly = true)
-    public SafetyCheckResult validateSafety(Long patientId, String medicationName, String username, String userRole) {
+    public SafetyCheckResultDTO validateSafety(Long patientId, String medicationName, String username, String userRole) {
         return safetyService.checkPrescriptionSafety(patientId, medicationName, username, userRole);
     }
 

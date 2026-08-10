@@ -9,6 +9,7 @@ import com.sentinel.patients.entity.Patient;
 import com.sentinel.patients.repository.PatientRepository;
 import com.sentinel.prescriptions.entity.Prescription;
 import com.sentinel.prescriptions.repository.PrescriptionRepository;
+import com.sentinel.prescriptions.dto.SafetyCheckResultDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -61,9 +62,9 @@ public class SmartSafetyService {
         this.auditService = auditService;
     }
 
-    public SafetyCheckResult checkPrescriptionSafety(Long patientId, String medicationName, String actorUsername, String actorRole) {
+    public SafetyCheckResultDTO checkPrescriptionSafety(Long patientId, String medicationName, String actorUsername, String actorRole) {
         if (patientId == null || medicationName == null || medicationName.trim().isEmpty()) {
-            return new SafetyCheckResult(true, "NONE", null, "No medication specified for check.");
+            return new SafetyCheckResultDTO(true, "NONE", null, "No medication specified for check.");
         }
 
         String medClean = medicationName.trim().toUpperCase();
@@ -78,7 +79,7 @@ public class SmartSafetyService {
                 String details = "CONTRAINDICATION WARNING: Patient has documented active allergy to '" 
                         + allergy.getAllergenName() + "' (Severity: " + allergy.getSeverity() + "). Requested Rx: " + medicationName;
                 logAlert(actorUsername, actorRole, patientId, details);
-                return new SafetyCheckResult(false, allergy.getSeverity(), allergy.getAllergenName(), details, "ALLERGY_DIRECT");
+                return new SafetyCheckResultDTO(false, allergy.getSeverity(), allergy.getAllergenName(), details, "ALLERGY_DIRECT");
             }
 
             String allergenClass = findDrugClass(allergenClean);
@@ -89,7 +90,7 @@ public class SmartSafetyService {
                         + " class allergy ('" + allergy.getAllergenName() + "', Severity: " + allergy.getSeverity() 
                         + "). High risk for prescribed medication: " + medicationName;
                 logAlert(actorUsername, actorRole, patientId, details);
-                return new SafetyCheckResult(false, "HIGH_RISK_" + allergy.getSeverity(), allergy.getAllergenName(), details, "ALLERGY_CLASS");
+                return new SafetyCheckResultDTO(false, "HIGH_RISK_" + allergy.getSeverity(), allergy.getAllergenName(), details, "ALLERGY_CLASS");
             }
 
             if (allergenClass != null && medClass != null) {
@@ -99,7 +100,7 @@ public class SmartSafetyService {
                             + allergenClass + " allergy ('" + allergy.getAllergenName() 
                             + "') has potential cross-reactivity with " + medClass + " drug class (" + medicationName + ").";
                     logAlert(actorUsername, actorRole, patientId, details);
-                    return new SafetyCheckResult(false, "CROSS_REACTIVITY_WARNING", allergy.getAllergenName(), details, "ALLERGY_CROSS");
+                    return new SafetyCheckResultDTO(false, "CROSS_REACTIVITY_WARNING", allergy.getAllergenName(), details, "ALLERGY_CROSS");
                 }
             }
         }
@@ -112,7 +113,7 @@ public class SmartSafetyService {
                     String details = "FOOD/EXCIPIENT ALLERGY WARNING: Patient profile lists Peanut/Soy allergy. Medication '" 
                             + medicationName + "' contains soy/egg phospholipid emulsion.";
                     logAlert(actorUsername, actorRole, patientId, details);
-                    return new SafetyCheckResult(false, "SEVERE", "Peanut/Soy Excipient", details, "ALLERGY_FOOD");
+                    return new SafetyCheckResultDTO(false, "SEVERE", "Peanut/Soy Excipient", details, "ALLERGY_FOOD");
                 }
             }
             if (foodAllergiesUpper.contains("EGG")) {
@@ -120,14 +121,14 @@ public class SmartSafetyService {
                     String details = "FOOD/EXCIPIENT ALLERGY WARNING: Patient profile lists Egg allergy. Medication '" 
                             + medicationName + "' contains egg-derived protein formulation.";
                     logAlert(actorUsername, actorRole, patientId, details);
-                    return new SafetyCheckResult(false, "SEVERE", "Egg Excipient", details, "ALLERGY_FOOD");
+                    return new SafetyCheckResultDTO(false, "SEVERE", "Egg Excipient", details, "ALLERGY_FOOD");
                 }
             }
             if (foodAllergiesUpper.contains("SULFI")) {
                 if (medClean.contains("EPINEPHRINE") || medClean.contains("DEXAMETHASONE")) {
                     String details = "EXCIPIENT SENSITIVITY WARNING: Patient profile lists Sulfite sensitivity. Formulations may contain sodium metabisulfite.";
                     logAlert(actorUsername, actorRole, patientId, details);
-                    return new SafetyCheckResult(false, "MODERATE", "Sulfite Excipient", details, "ALLERGY_FOOD");
+                    return new SafetyCheckResultDTO(false, "MODERATE", "Sulfite Excipient", details, "ALLERGY_FOOD");
                 }
             }
         }
@@ -143,7 +144,7 @@ public class SmartSafetyService {
                 String details = "DUPLICATE THERAPY WARNING: Patient already has an active prescription for '" 
                         + activeRx.getMedicationName() + "' (Dosage: " + activeRx.getDosage() + ").";
                 logAlert(actorUsername, actorRole, patientId, details);
-                return new SafetyCheckResult(false, "WARNING", activeRx.getMedicationName(), details, "DUPLICATE_THERAPY");
+                return new SafetyCheckResultDTO(false, "WARNING", activeRx.getMedicationName(), details, "DUPLICATE_THERAPY");
             }
 
             if ((isClass(newMedClass, activeMedClean, "ANTICOAGULANT") && isClass(activeMedClass, activeMedClean, "NSAID")) ||
@@ -151,7 +152,7 @@ public class SmartSafetyService {
                 String details = "CRITICAL DRUG-DRUG INTERACTION: Combining Anticoagulant (" + activeRx.getMedicationName() 
                         + ") with NSAID (" + medicationName + ") significantly increases risk of major internal / GI hemorrhage.";
                 logAlert(actorUsername, actorRole, patientId, details);
-                return new SafetyCheckResult(false, "CRITICAL", activeRx.getMedicationName(), details, "DDI_BLEED_RISK");
+                return new SafetyCheckResultDTO(false, "CRITICAL", activeRx.getMedicationName(), details, "DDI_BLEED_RISK");
             }
 
             if ((isClass(newMedClass, medClean, "OPIOID") && isClass(activeMedClass, activeMedClean, "BENZODIAZEPINE")) ||
@@ -159,7 +160,7 @@ public class SmartSafetyService {
                 String details = "CRITICAL DRUG-DRUG INTERACTION: Concurrent prescribing of Opioids (" + medicationName 
                         + ") and Benzodiazepines (" + activeRx.getMedicationName() + ") results in severe CNS/respiratory depression & overdose risk.";
                 logAlert(actorUsername, actorRole, patientId, details);
-                return new SafetyCheckResult(false, "CRITICAL", activeRx.getMedicationName(), details, "DDI_RESPIRATORY_DEPRESSION");
+                return new SafetyCheckResultDTO(false, "CRITICAL", activeRx.getMedicationName(), details, "DDI_RESPIRATORY_DEPRESSION");
             }
 
             if ((isClass(newMedClass, medClean, "ACE_INHIBITOR") && (activeMedClean.contains("SPIRONOLACTONE") || activeMedClean.contains("POTASSIUM"))) ||
@@ -167,7 +168,7 @@ public class SmartSafetyService {
                 String details = "DRUG-DRUG INTERACTION WARNING: ACE Inhibitor (" + medicationName 
                         + ") combined with Potassium-sparing agent (" + activeRx.getMedicationName() + ") elevates risk of severe hyperkalemia.";
                 logAlert(actorUsername, actorRole, patientId, details);
-                return new SafetyCheckResult(false, "HIGH", activeRx.getMedicationName(), details, "DDI_HYPERKALEMIA");
+                return new SafetyCheckResultDTO(false, "HIGH", activeRx.getMedicationName(), details, "DDI_HYPERKALEMIA");
             }
         }
 
@@ -181,123 +182,60 @@ public class SmartSafetyService {
                 String details = "DRUG-DISEASE CONTRAINDICATION: Non-selective Beta Blockers (" + medicationName 
                         + ") are contraindicated in active Asthma/COPD ('" + diag.getConditionName() + "') due to fatal bronchospasm risk.";
                 logAlert(actorUsername, actorRole, patientId, details);
-                return new SafetyCheckResult(false, "CRITICAL", diag.getConditionName(), details, "CONTRAINDICATION_ASTHMA");
+                return new SafetyCheckResultDTO(false, "CRITICAL", diag.getConditionName(), details, "CONTRAINDICATION_ASTHMA");
             }
 
             if (isClass(newMedClass, medClean, "NSAID") && (condUpper.contains("KIDNEY") || condUpper.contains("RENAL") || condUpper.contains("ULCER") || condUpper.contains("CKD"))) {
                 String details = "DRUG-DISEASE CONTRAINDICATION: NSAID (" + medicationName 
                         + ") is contraindicated in patient with Renal Impairment / GI Ulcer disease ('" + diag.getConditionName() + "').";
                 logAlert(actorUsername, actorRole, patientId, details);
-                return new SafetyCheckResult(false, "HIGH", diag.getConditionName(), details, "CONTRAINDICATION_RENAL");
+                return new SafetyCheckResultDTO(false, "HIGH", diag.getConditionName(), details, "CONTRAINDICATION_RENAL");
             }
 
             if (medClean.contains("METFORMIN") && (condUpper.contains("RENAL FAILURE") || condUpper.contains("STAGE 4") || condUpper.contains("STAGE 5"))) {
                 String details = "DRUG-DISEASE CONTRAINDICATION: Metformin is contraindicated in severe Renal Failure ('" 
                         + diag.getConditionName() + "') due to lactic acidosis risk.";
                 logAlert(actorUsername, actorRole, patientId, details);
-                return new SafetyCheckResult(false, "CRITICAL", diag.getConditionName(), details, "CONTRAINDICATION_METFORMIN");
+                return new SafetyCheckResultDTO(false, "CRITICAL", diag.getConditionName(), details, "CONTRAINDICATION_METFORMIN");
             }
         }
 
         if (isClass(newMedClass, medClean, "BETA_BLOCKER") && seriousCondSummary.contains("ASTHMA")) {
             String details = "DRUG-DISEASE CONTRAINDICATION: Patient serious condition history lists Asthma. Beta Blocker (" + medicationName + ") triggered warning.";
             logAlert(actorUsername, actorRole, patientId, details);
-            return new SafetyCheckResult(false, "CRITICAL", "Asthma", details, "CONTRAINDICATION_ASTHMA");
+            return new SafetyCheckResultDTO(false, "CRITICAL", "Asthma", details, "CONTRAINDICATION_ASTHMA");
         }
 
-        return new SafetyCheckResult(true, "NONE", null, "No allergy, DDI, or disease contraindications detected. Prescription safe to proceed.", "SAFE");
+        return new SafetyCheckResultDTO(true, "NONE", null, "No allergy, DDI, or disease contraindications detected. Prescription safe to proceed.", "SAFE");
     }
 
-    private boolean isClass(String classFound, String medNameUpper, String targetClass) {
-        if (targetClass.equalsIgnoreCase(classFound)) return true;
-        List<String> list = DRUG_CLASS_MAPPING.get(targetClass);
-        if (list != null) {
-            for (String item : list) {
-                if (medNameUpper.contains(item)) return true;
-            }
-        }
-        return false;
+    private boolean isDirectMatch(String med, String allergen) {
+        String m = med.toUpperCase();
+        String a = allergen.toUpperCase();
+        return m.contains(a) || a.contains(m);
     }
 
-    private void logAlert(String actorUsername, String actorRole, Long patientId, String details) {
-        auditService.logAction(
-                actorUsername != null ? actorUsername : "SYSTEM",
-                actorRole != null ? actorRole : "ROLE_DOCTOR",
-                "ERX_SAFETY_ALERT",
-                "PRESCRIPTION",
-                String.valueOf(patientId),
-                details
-        );
-    }
-
-    private boolean isDirectMatch(String medName, String allergenName) {
-        String medUpper = medName.toUpperCase();
-        String allergenUpper = allergenName.toUpperCase();
-
-        if (medUpper.equals(allergenUpper)) return true;
-
-        Set<String> medTokens = extractTokens(medUpper);
-        Set<String> allergenTokens = extractTokens(allergenUpper);
-
-        for (String aToken : allergenTokens) {
-            if (aToken.length() < 3) continue;
-            for (String mToken : medTokens) {
-                if (mToken.length() < 3) continue;
-                if (mToken.equals(aToken)) return true;
-            }
-        }
-
-        return false;
-    }
-
-    private Set<String> extractTokens(String input) {
-        Set<String> tokens = new HashSet<>();
-        String[] parts = input.split("[^A-Z0-9]+");
-        for (String p : parts) {
-            if (!p.trim().isEmpty()) {
-                tokens.add(p.trim());
-            }
-        }
-        return tokens;
-    }
-
-    private String findDrugClass(String name) {
-        Set<String> tokens = extractTokens(name.toUpperCase());
+    private String findDrugClass(String med) {
+        String m = med.toUpperCase();
         for (Map.Entry<String, List<String>> entry : DRUG_CLASS_MAPPING.entrySet()) {
-            for (String classMed : entry.getValue()) {
-                for (String t : tokens) {
-                    if (t.length() >= 3 && t.equals(classMed)) {
-                        return entry.getKey();
-                    }
+            for (String kw : entry.getValue()) {
+                if (m.contains(kw)) {
+                    return entry.getKey();
                 }
             }
         }
         return null;
     }
 
-    public static class SafetyCheckResult {
-        private final boolean safe;
-        private final String severity;
-        private final String conflictingAllergen;
-        private final String message;
-        private final String alertType;
+    private boolean isClass(String detectedClass, String medName, String targetClass) {
+        if (targetClass.equalsIgnoreCase(detectedClass)) return true;
+        String cls = findDrugClass(medName);
+        return targetClass.equalsIgnoreCase(cls);
+    }
 
-        public SafetyCheckResult(boolean safe, String severity, String conflictingAllergen, String message) {
-            this(safe, severity, conflictingAllergen, message, "NONE");
+    private void logAlert(String username, String role, Long patientId, String details) {
+        if (auditService != null) {
+            auditService.logAction(username, role, "ERX_ALERT", "SAFETY_CHECK", String.valueOf(patientId), details);
         }
-
-        public SafetyCheckResult(boolean safe, String severity, String conflictingAllergen, String message, String alertType) {
-            this.safe = safe;
-            this.severity = severity;
-            this.conflictingAllergen = conflictingAllergen;
-            this.message = message;
-            this.alertType = alertType;
-        }
-
-        public boolean isSafe() { return safe; }
-        public String getSeverity() { return severity; }
-        public String getConflictingAllergen() { return conflictingAllergen; }
-        public String getMessage() { return message; }
-        public String getAlertType() { return alertType; }
     }
 }

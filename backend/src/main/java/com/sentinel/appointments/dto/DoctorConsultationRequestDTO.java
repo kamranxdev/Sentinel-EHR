@@ -1,17 +1,16 @@
 package com.sentinel.appointments.dto;
 
-import com.sentinel.appointments.entity.AppointmentLabOrder;
-import com.sentinel.diagnoses.entity.Diagnosis;
-import com.sentinel.prescriptions.entity.Prescription;
+import com.sentinel.diagnoses.dto.DiagnosisRequestDTO;
+import com.sentinel.prescriptions.dto.PrescriptionRequestDTO;
 
 import java.util.List;
 
 public class DoctorConsultationRequestDTO {
     private String doctorNotes;
     private String followUpDate;
-    private List<Diagnosis> diagnoses;
-    private List<Prescription> prescriptions;
-    private List<AppointmentLabOrder> labOrders;
+    private List<DiagnosisRequestDTO> diagnoses;
+    private List<PrescriptionRequestDTO> prescriptions;
+    private List<AppointmentLabOrderDTO> labOrders;
 
     public DoctorConsultationRequestDTO() {}
 
@@ -31,27 +30,27 @@ public class DoctorConsultationRequestDTO {
         this.followUpDate = followUpDate;
     }
 
-    public List<Diagnosis> getDiagnoses() {
+    public List<DiagnosisRequestDTO> getDiagnoses() {
         return diagnoses;
     }
 
-    public void setDiagnoses(List<Diagnosis> diagnoses) {
+    public void setDiagnoses(List<DiagnosisRequestDTO> diagnoses) {
         this.diagnoses = diagnoses;
     }
 
-    public List<Prescription> getPrescriptions() {
+    public List<PrescriptionRequestDTO> getPrescriptions() {
         return prescriptions;
     }
 
-    public void setPrescriptions(List<Prescription> prescriptions) {
+    public void setPrescriptions(List<PrescriptionRequestDTO> prescriptions) {
         this.prescriptions = prescriptions;
     }
 
-    public List<AppointmentLabOrder> getLabOrders() {
+    public List<AppointmentLabOrderDTO> getLabOrders() {
         return labOrders;
     }
 
-    public void setLabOrders(List<AppointmentLabOrder> labOrders) {
+    public void setLabOrders(List<AppointmentLabOrderDTO> labOrders) {
         this.labOrders = labOrders;
     }
 }

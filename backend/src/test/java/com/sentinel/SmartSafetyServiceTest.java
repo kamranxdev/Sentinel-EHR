@@ -9,8 +9,8 @@ import com.sentinel.patients.entity.Patient;
 import com.sentinel.patients.repository.PatientRepository;
 import com.sentinel.prescriptions.entity.Prescription;
 import com.sentinel.prescriptions.repository.PrescriptionRepository;
+import com.sentinel.prescriptions.dto.SafetyCheckResultDTO;
 import com.sentinel.prescriptions.service.SmartSafetyService;
-import com.sentinel.prescriptions.service.SmartSafetyService.SafetyCheckResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -50,7 +50,7 @@ public class SmartSafetyServiceTest {
 
         when(allergyRepository.findByPatientIdAndStatus(1L, "ACTIVE")).thenReturn(List.of(penicillinAllergy));
 
-        SafetyCheckResult result = safetyService.checkPrescriptionSafety(1L, "Penicillin G 500mg", "dr_smith", "ROLE_DOCTOR");
+        SafetyCheckResultDTO result = safetyService.checkPrescriptionSafety(1L, "Penicillin G 500mg", "dr_smith", "ROLE_DOCTOR");
 
         assertFalse(result.isSafe(), "Should detect direct allergen match for Penicillin G");
         assertEquals("Penicillin", result.getConflictingAllergen());
@@ -66,7 +66,7 @@ public class SmartSafetyServiceTest {
 
         when(allergyRepository.findByPatientIdAndStatus(1L, "ACTIVE")).thenReturn(List.of(catAllergy));
 
-        SafetyCheckResult result = safetyService.checkPrescriptionSafety(1L, "Catapres 0.1mg", "dr_smith", "ROLE_DOCTOR");
+        SafetyCheckResultDTO result = safetyService.checkPrescriptionSafety(1L, "Catapres 0.1mg", "dr_smith", "ROLE_DOCTOR");
 
         assertTrue(result.isSafe(), "Should NOT trigger false positive for Cat Dander vs Catapres");
     }
@@ -80,7 +80,7 @@ public class SmartSafetyServiceTest {
 
         when(allergyRepository.findByPatientIdAndStatus(1L, "ACTIVE")).thenReturn(List.of(ibuprofenAllergy));
 
-        SafetyCheckResult result = safetyService.checkPrescriptionSafety(1L, "Naproxen 500mg", "dr_smith", "ROLE_DOCTOR");
+        SafetyCheckResultDTO result = safetyService.checkPrescriptionSafety(1L, "Naproxen 500mg", "dr_smith", "ROLE_DOCTOR");
 
         assertFalse(result.isSafe(), "Should detect NSAID drug class contraindication between Ibuprofen and Naproxen");
         assertTrue(result.getMessage().contains("DRUG-CLASS CONTRAINDICATION WARNING"));
@@ -95,7 +95,7 @@ public class SmartSafetyServiceTest {
 
         when(allergyRepository.findByPatientIdAndStatus(1L, "ACTIVE")).thenReturn(List.of(amoxicillinAllergy));
 
-        SafetyCheckResult result = safetyService.checkPrescriptionSafety(1L, "Ceftriaxone 1g", "dr_smith", "ROLE_DOCTOR");
+        SafetyCheckResultDTO result = safetyService.checkPrescriptionSafety(1L, "Ceftriaxone 1g", "dr_smith", "ROLE_DOCTOR");
 
         assertFalse(result.isSafe(), "Should detect Beta-lactam cross-reactivity between Penicillins and Cephalosporins");
         assertTrue(result.getMessage().contains("CROSS-CLASS BETA-LACTAM SENSITIVITY WARNING"));
@@ -109,7 +109,7 @@ public class SmartSafetyServiceTest {
 
         when(patientRepository.findById(1L)).thenReturn(Optional.of(patient));
 
-        SafetyCheckResult result = safetyService.checkPrescriptionSafety(1L, "Propofol 1%", "dr_smith", "ROLE_DOCTOR");
+        SafetyCheckResultDTO result = safetyService.checkPrescriptionSafety(1L, "Propofol 1%", "dr_smith", "ROLE_DOCTOR");
 
         assertFalse(result.isSafe(), "Should detect Propofol excipient allergy warning for Peanut/Soy");
         assertTrue(result.getMessage().contains("FOOD/EXCIPIENT ALLERGY WARNING"));
@@ -123,7 +123,7 @@ public class SmartSafetyServiceTest {
 
         when(prescriptionRepository.findByPatientIdAndStatus(1L, "ACTIVE")).thenReturn(List.of(activeRx));
 
-        SafetyCheckResult result = safetyService.checkPrescriptionSafety(1L, "Ibuprofen 400mg", "dr_smith", "ROLE_DOCTOR");
+        SafetyCheckResultDTO result = safetyService.checkPrescriptionSafety(1L, "Ibuprofen 400mg", "dr_smith", "ROLE_DOCTOR");
 
         assertFalse(result.isSafe(), "Should detect DDI hemorrhage risk between Warfarin and NSAIDs");
         assertEquals("DDI_BLEED_RISK", result.getAlertType());
@@ -137,7 +137,7 @@ public class SmartSafetyServiceTest {
 
         when(diagnosisRepository.findByPatientIdAndStatus(1L, "ACTIVE")).thenReturn(List.of(asthma));
 
-        SafetyCheckResult result = safetyService.checkPrescriptionSafety(1L, "Propranolol 40mg", "dr_smith", "ROLE_DOCTOR");
+        SafetyCheckResultDTO result = safetyService.checkPrescriptionSafety(1L, "Propranolol 40mg", "dr_smith", "ROLE_DOCTOR");
 
         assertFalse(result.isSafe(), "Should detect Beta-blocker contraindication in Asthma");
         assertEquals("CONTRAINDICATION_ASTHMA", result.getAlertType());
@@ -145,10 +145,10 @@ public class SmartSafetyServiceTest {
 
     @Test
     public void testNullOrEmptyInputsHandledSafely() {
-        SafetyCheckResult resultNullMed = safetyService.checkPrescriptionSafety(1L, null, "dr_smith", "ROLE_DOCTOR");
+        SafetyCheckResultDTO resultNullMed = safetyService.checkPrescriptionSafety(1L, null, "dr_smith", "ROLE_DOCTOR");
         assertTrue(resultNullMed.isSafe());
 
-        SafetyCheckResult resultNullPatient = safetyService.checkPrescriptionSafety(null, "Aspirin", "dr_smith", "ROLE_DOCTOR");
+        SafetyCheckResultDTO resultNullPatient = safetyService.checkPrescriptionSafety(null, "Aspirin", "dr_smith", "ROLE_DOCTOR");
         assertTrue(resultNullPatient.isSafe());
     }
 }

@@ -1,10 +1,16 @@
 package com.sentinel.users.controller;
 
-import com.sentinel.audit.entity.AuditLog;
+import com.sentinel.audit.dto.AuditLogResponseDTO;
+import com.sentinel.audit.mapper.AuditLogMapper;
 import com.sentinel.audit.service.AuditTrailService;
+import com.sentinel.users.dto.UserPasswordResetRequestDTO;
+import com.sentinel.users.dto.UserResponseDTO;
+import com.sentinel.users.dto.UserStatusUpdateRequestDTO;
 import com.sentinel.users.dto.UserUpdateRequestDTO;
 import com.sentinel.users.entity.User;
+import com.sentinel.users.mapper.UserMapper;
 import com.sentinel.users.service.UserService;
+import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -19,33 +25,41 @@ public class AdminController {
 
     private final UserService userService;
     private final AuditTrailService auditTrailService;
+    private final UserMapper userMapper;
+    private final AuditLogMapper auditLogMapper;
 
     public AdminController(UserService userService,
-                           AuditTrailService auditTrailService) {
+                           AuditTrailService auditTrailService,
+                           UserMapper userMapper,
+                           AuditLogMapper auditLogMapper) {
         this.userService = userService;
         this.auditTrailService = auditTrailService;
+        this.userMapper = userMapper;
+        this.auditLogMapper = auditLogMapper;
     }
 
     @GetMapping("/users")
     @PreAuthorize("hasAnyAuthority('USER_CREATE', 'USER_READ', 'ROLE_SYS_ADMIN', 'ROLE_ADMIN', 'ROLE_ORG_ADMIN', 'ROLE_DOCTOR', 'ROLE_NURSE', 'ROLE_RECEPTIONIST', 'ROLE_AUDITOR')")
-    public List<User> getAllUsers() {
-        return userService.getAllUsers();
+    public List<UserResponseDTO> getAllUsers() {
+        return userService.getAllUsers().stream()
+                .map(userMapper::toResponseDTO)
+                .toList();
     }
 
     @PutMapping("/users/{id}")
     @PreAuthorize("hasAnyAuthority('ROLE_SYS_ADMIN', 'ROLE_ADMIN', 'USER_CREATE')")
-    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody UserUpdateRequestDTO payload, Authentication auth) {
+    public ResponseEntity<UserResponseDTO> updateUser(@PathVariable Long id, @Valid @RequestBody UserUpdateRequestDTO payload, Authentication auth) {
         User saved = userService.updateUser(id, payload);
         auditTrailService.logAction(auth, "UPDATE_USER", "USER", String.valueOf(saved.getId()),
                 "Admin updated details for user: " + saved.getUsername());
 
-        return ResponseEntity.ok(saved);
+        return ResponseEntity.ok(userMapper.toResponseDTO(saved));
     }
 
     @PatchMapping("/users/{id}/status")
     @PreAuthorize("hasAnyAuthority('ROLE_SYS_ADMIN', 'ROLE_ADMIN', 'USER_CREATE')")
-    public ResponseEntity<Map<String, String>> updateUserStatus(@PathVariable Long id, @RequestBody Map<String, String> payload, Authentication auth) {
-        String newStatus = payload.getOrDefault("status", "VERIFIED");
+    public ResponseEntity<Map<String, String>> updateUserStatus(@PathVariable Long id, @Valid @RequestBody UserStatusUpdateRequestDTO payload, Authentication auth) {
+        String newStatus = payload.getStatus() != null ? payload.getStatus() : "VERIFIED";
         User saved = userService.updateUserStatus(id, newStatus);
 
         auditTrailService.logAction(auth, "UPDATE_USER_STATUS", "USER", String.valueOf(saved.getId()),
@@ -56,9 +70,8 @@ public class AdminController {
 
     @PostMapping("/users/{id}/reset-password")
     @PreAuthorize("hasAnyAuthority('ROLE_SYS_ADMIN', 'ROLE_ADMIN', 'USER_CREATE')")
-    public ResponseEntity<Map<String, String>> resetUserPassword(@PathVariable Long id, @RequestBody Map<String, String> payload, Authentication auth) {
-        String newPassword = payload.get("newPassword");
-        User user = userService.resetUserPassword(id, newPassword);
+    public ResponseEntity<Map<String, String>> resetUserPassword(@PathVariable Long id, @Valid @RequestBody UserPasswordResetRequestDTO payload, Authentication auth) {
+        User user = userService.resetUserPassword(id, payload.getNewPassword());
 
         auditTrailService.logAction(auth, "RESET_USER_PASSWORD", "USER", String.valueOf(user.getId()),
                 "Admin reset password for user: " + user.getUsername());
@@ -79,8 +92,9 @@ public class AdminController {
 
     @GetMapping("/audit-logs")
     @PreAuthorize("hasAnyAuthority('AUDIT_LOG_READ', 'ROLE_SYS_ADMIN', 'ROLE_ADMIN')")
-    public List<AuditLog> getAuditLogs(@RequestParam(value = "search", required = false) String search) {
-        return userService.getAuditLogs(search);
+    public List<AuditLogResponseDTO> getAuditLogs(@RequestParam(value = "search", required = false) String search) {
+        return userService.getAuditLogs(search).stream()
+                .map(auditLogMapper::toResponseDTO)
+                .toList();
     }
 }
-

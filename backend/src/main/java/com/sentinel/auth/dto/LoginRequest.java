@@ -1,8 +1,13 @@
 package com.sentinel.auth.dto;
 
+import jakarta.validation.constraints.NotBlank;
+
 public class LoginRequest {
+
     private String username;
     private String usernameOrEmail;
+
+    @NotBlank(message = "Password is required")
     private String password;
 
     public LoginRequest() {}

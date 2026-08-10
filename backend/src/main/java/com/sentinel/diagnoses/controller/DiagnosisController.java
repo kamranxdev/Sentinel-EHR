@@ -1,8 +1,13 @@
 package com.sentinel.diagnoses.controller;
 
 import com.sentinel.audit.service.AuditTrailService;
+import com.sentinel.diagnoses.dto.DiagnosisRequestDTO;
+import com.sentinel.diagnoses.dto.DiagnosisResponseDTO;
 import com.sentinel.diagnoses.entity.Diagnosis;
+import com.sentinel.diagnoses.mapper.DiagnosisMapper;
 import com.sentinel.diagnoses.service.DiagnosisService;
+import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -16,34 +21,43 @@ public class DiagnosisController {
 
     private final DiagnosisService diagnosisService;
     private final AuditTrailService auditService;
+    private final DiagnosisMapper diagnosisMapper;
 
     public DiagnosisController(DiagnosisService diagnosisService,
-                                AuditTrailService auditService) {
+                                AuditTrailService auditService,
+                                DiagnosisMapper diagnosisMapper) {
         this.diagnosisService = diagnosisService;
         this.auditService = auditService;
+        this.diagnosisMapper = diagnosisMapper;
     }
 
     @GetMapping("/patient/{patientId}")
     @PreAuthorize("hasAuthority('DIAGNOSIS_READ') and @abacEvaluator.hasTreatmentRelationship(authentication, #patientId)")
-    public List<Diagnosis> getDiagnosesByPatient(@PathVariable Long patientId, Authentication auth) {
+    public List<DiagnosisResponseDTO> getDiagnosesByPatient(@PathVariable Long patientId, Authentication auth) {
         auditService.logAction(auth, "READ", "DIAGNOSIS", String.valueOf(patientId), "Accessed coded problem list & diagnoses for patient ID: " + patientId);
-        return diagnosisService.getDiagnosesByPatientId(patientId);
+        return diagnosisService.getDiagnosesByPatientId(patientId).stream()
+                .map(diagnosisMapper::toResponseDTO)
+                .toList();
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('DIAGNOSIS_CREATE') and (#diagnosis != null and #diagnosis.patient != null and #diagnosis.patient.id != null and @abacEvaluator.hasTreatmentRelationship(authentication, #diagnosis.patient.id))")
-    public ResponseEntity<?> createDiagnosis(@RequestBody Diagnosis diagnosis, Authentication auth) {
-        Diagnosis saved = diagnosisService.createDiagnosis(diagnosis, auth.getName());
+    @PreAuthorize("hasAuthority('DIAGNOSIS_CREATE') and (#payload != null and #payload.patientId != null and @abacEvaluator.hasTreatmentRelationship(authentication, #payload.patientId))")
+    public ResponseEntity<DiagnosisResponseDTO> createDiagnosis(@Valid @RequestBody DiagnosisRequestDTO payload, Authentication auth) {
+        Diagnosis entity = diagnosisMapper.toEntity(payload);
+        com.sentinel.patients.entity.Patient p = new com.sentinel.patients.entity.Patient();
+        p.setId(payload.getPatientId());
+        entity.setPatient(p);
+
+        Diagnosis saved = diagnosisService.createDiagnosis(entity, auth.getName());
         auditService.logAction(auth, "CREATE", "DIAGNOSIS", String.valueOf(saved.getId()), "Logged ICD-10 diagnosis (" + saved.getConditionName() + " - " + saved.getIcdCode() + ") for patient ID: " + saved.getPatient().getId());
-        return ResponseEntity.ok(saved);
+        return ResponseEntity.status(HttpStatus.CREATED).body(diagnosisMapper.toResponseDTO(saved));
     }
 
     @PutMapping("/{id}/status")
     @PreAuthorize("hasAuthority('DIAGNOSIS_CREATE') and @patientSecurityService.canAccessDiagnosis(authentication, #id)")
-    public ResponseEntity<?> updateDiagnosisStatus(@PathVariable Long id, @RequestParam String status, Authentication auth) {
+    public ResponseEntity<DiagnosisResponseDTO> updateDiagnosisStatus(@PathVariable Long id, @RequestParam String status, Authentication auth) {
         Diagnosis saved = diagnosisService.updateDiagnosisStatus(id, status);
         auditService.logAction(auth, "UPDATE", "DIAGNOSIS", String.valueOf(id), "Updated diagnosis lifecycle status to " + status + " for ID: " + id);
-        return ResponseEntity.ok(saved);
+        return ResponseEntity.ok(diagnosisMapper.toResponseDTO(saved));
     }
 }
-
