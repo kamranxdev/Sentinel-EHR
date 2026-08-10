@@ -4,6 +4,7 @@ import { Observable, throwError, catchError, of } from 'rxjs';
 import {
   Allergy,
   Appointment,
+  AppointmentRequestDTO,
   AppointmentBilling,
   AppointmentCancellation,
   AppointmentLabOrder,
@@ -235,7 +236,7 @@ export class ApiService {
     return this.http.get<any[]>(`${this.baseUrl}/appointments/recommended-doctors${query}`);
   }
 
-  scheduleAppointment(appointment: Partial<Appointment>): Observable<Appointment> {
+  scheduleAppointment(appointment: AppointmentRequestDTO | Partial<Appointment>): Observable<Appointment> {
     return this.http.post<Appointment>(`${this.baseUrl}/appointments`, appointment);
   }
 

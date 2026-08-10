@@ -253,11 +253,11 @@ import {
                   </div>
                 </td>
                 <td hlmTableCell>
-                  <div class="font-medium text-foreground text-xs">{{ apt.patient.fullName || 'Patient Profile' }}</div>
-                  <div class="text-[10px] font-mono text-muted-foreground">MRN: {{ apt.patient.patientCode }}</div>
+                  <div class="font-medium text-foreground text-xs">{{ apt.patientName || apt.patient?.fullName || 'Patient Profile' }}</div>
+                  <div class="text-[10px] font-mono text-muted-foreground">MRN: {{ apt.patientCode || apt.patient?.patientCode || 'N/A' }}</div>
                 </td>
                 <td hlmTableCell>
-                  <div class="text-xs text-foreground font-medium">Dr. {{ apt.doctor.fullName || 'Assigned Staff' }}</div>
+                  <div class="text-xs text-foreground font-medium">{{ apt.doctorName || (apt.doctor?.fullName ? 'Dr. ' + apt.doctor?.fullName : 'Assigned Staff') }}</div>
                   <div class="text-[10px] text-muted-foreground">{{ apt.reason || 'General Consultation' }}</div>
                 </td>
                 <td hlmTableCell>
@@ -266,7 +266,7 @@ import {
                       <ng-icon name="lucideCheckCircle2" size="12" /> Verified
                     </span>
                     <span *ngIf="!apt.insuranceVerified" hlmBadge variant="outline" class="text-[10px] bg-amber-500/10 text-amber-600 border-amber-500/30 gap-1">
-                      <ng-icon name="lucideAlertTriangle" size="12" /> RTE Pending
+                      <ng-icon name="lucideAlertTriangle" size="12" /> Pending
                     </span>
                   </div>
                 </td>
@@ -277,16 +277,7 @@ import {
                 </td>
                 <td hlmTableCell class="text-right">
                   <div class="flex items-center justify-end gap-1.5">
-                    <!-- Arrived action button: displayed ONLY for today's scheduled appointments -->
-                    <button *ngIf="(apt.stage === 'SCHEDULED' || apt.status === 'SCHEDULED') && isToday(apt.appointmentDate)" hlmBtn size="sm" variant="default" class="text-xs gap-1 bg-emerald-600 hover:bg-emerald-700 h-8" (click)="transitionStage(apt, 'ARRIVED')">
-                      <ng-icon name="lucideClock" size="14" />
-                      <span>Mark Lobby Arrival</span>
-                    </button>
-                    <!-- Scheduled indicator for non-today appointments -->
-                    <span *ngIf="(apt.stage === 'SCHEDULED' || apt.status === 'SCHEDULED') && !isToday(apt.appointmentDate)" hlmBadge variant="outline" class="text-[10px] text-muted-foreground">
-                      Scheduled for {{ apt.appointmentDate | date:'shortDate' }}
-                    </span>
-                    <button *ngIf="apt.stage === 'ARRIVED'" hlmBtn size="sm" variant="secondary" class="text-xs gap-1 bg-sky-600 text-white hover:bg-sky-700 h-8" (click)="transitionStage(apt, 'CHECKED_IN')">
+                    <button *ngIf="apt.stage === 'SCHEDULED' || !apt.stage" hlmBtn size="sm" variant="default" class="text-xs gap-1 bg-emerald-600 hover:bg-emerald-700 text-white h-8" (click)="transitionStage(apt, 'CHECKED_IN')">
                       <ng-icon name="lucideUserCheck" size="14" />
                       <span>Complete Desk Check-In</span>
                     </button>
@@ -294,7 +285,7 @@ import {
                       <ng-icon name="lucideHeartPulse" size="14" />
                       <span>Start Consultation</span>
                     </button>
-                    <button (click)="openRteModal(apt.patient.id)" hlmBtn size="sm" variant="ghost" class="text-xs text-sky-600 hover:text-sky-700 h-8">
+                    <button *ngIf="apt.patientId || apt.patient?.id" (click)="openRteModal(apt.patientId || apt.patient!.id)" hlmBtn size="sm" variant="ghost" class="text-xs text-sky-600 hover:text-sky-700 h-8">
                       RTE Check
                     </button>
                   </div>

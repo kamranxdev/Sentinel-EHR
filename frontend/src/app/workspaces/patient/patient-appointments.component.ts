@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
-import { Appointment, DoctorRecommendationDTO, Patient, User } from '../../core/models/models';
+import { Appointment, AppointmentRequestDTO, DoctorRecommendationDTO, Patient, User } from '../../core/models/models';
 import { toast } from '@spartan-ng/brain/sonner';
 
 import { HlmCardImports } from '@spartan-ng/helm/card';
@@ -167,9 +167,9 @@ import {
                       Dr
                     </div>
                     <div>
-                      <div class="font-semibold text-foreground">Dr. {{ apt.doctor.fullName || 'Assigned Physician' }}</div>
-                      <div class="text-[10px] text-muted-foreground" *ngIf="apt.doctor.specialization">
-                        {{ apt.doctor.specialization }}
+                      <div class="font-semibold text-foreground">{{ getDoctorDisplayName(apt) }}</div>
+                      <div class="text-[10px] text-muted-foreground" *ngIf="getDoctorSpecialization(apt)">
+                        {{ getDoctorSpecialization(apt) }}
                       </div>
                     </div>
                   </div>
@@ -677,6 +677,16 @@ export class PatientAppointmentsComponent implements OnInit {
     'Blood Pressure Consultation',
   ];
 
+  getDoctorDisplayName(apt: Appointment): string {
+    const rawName = apt.doctorName || apt.doctor?.fullName;
+    if (!rawName) return 'Assigned Physician';
+    return rawName.startsWith('Dr.') ? rawName : `Dr. ${rawName}`;
+  }
+
+  getDoctorSpecialization(apt: Appointment): string {
+    return apt.doctorSpecialization || apt.doctor?.specialization || '';
+  }
+
   // Computed Properties for Filtering
   filteredAppointments = computed(() => {
     let list = this.appointments();
@@ -691,7 +701,9 @@ export class PatientAppointmentsComponent implements OnInit {
       list = list.filter(
         (a) =>
           a.reason?.toLowerCase().includes(q) ||
+          a.doctorName?.toLowerCase().includes(q) ||
           a.doctor?.fullName?.toLowerCase().includes(q) ||
+          a.doctorSpecialization?.toLowerCase().includes(q) ||
           a.doctor?.specialization?.toLowerCase().includes(q)
       );
     }
@@ -870,9 +882,9 @@ export class PatientAppointmentsComponent implements OnInit {
     const timeStr = this.selectedSlot ? this.extractTimeFromSlot(this.selectedSlot) : this.bookingTime;
     const dateTimeIso = `${this.bookingDate}T${timeStr}:00`;
 
-    const appointmentPayload: Partial<Appointment> = {
-      patient: { id: patient.id } as Patient,
-      doctor: { id: this.selectedDoctor.id } as User,
+    const appointmentPayload: AppointmentRequestDTO = {
+      patientId: patient.id,
+      doctorId: this.selectedDoctor.id,
       appointmentDate: dateTimeIso,
       reason: this.bookingReason,
       notes: this.bookingNotes,
@@ -887,8 +899,11 @@ export class PatientAppointmentsComponent implements OnInit {
         this.bookingInProgress.set(false);
         this.closeBookingModal();
 
+        const rawDocName = this.selectedDoctor?.fullName || '';
+        const docDisplayName = rawDocName.startsWith('Dr.') ? rawDocName : `Dr. ${rawDocName}`;
+
         toast.success('Consultation Scheduled Successfully!', {
-          description: `Appointment with Dr. ${this.selectedDoctor?.fullName} set for ${this.bookingDate}.`,
+          description: `Appointment with ${docDisplayName} set for ${this.bookingDate}.`,
         });
 
         // Refresh list

@@ -180,8 +180,14 @@ export interface DoctorRecommendationDTO {
 
 export interface Appointment {
   id?: number;
-  patient: Patient;
-  doctor: User;
+  patientId?: number;
+  patientName?: string;
+  patientCode?: string;
+  patient?: Patient;
+  doctorId?: number;
+  doctorName?: string;
+  doctorSpecialization?: string;
+  doctor?: User;
   appointmentDate: string;
   status: string;
   stage?: string;
@@ -191,8 +197,19 @@ export interface Appointment {
   insuranceDetails?: string;
   reportsUploaded?: string;
   followUpDate?: string;
+  arrivedAt?: string;
   vitals?: Vitals;
   createdAt?: string;
+}
+
+export interface AppointmentRequestDTO {
+  patientId: number;
+  doctorId: number;
+  appointmentDate: string;
+  status?: string;
+  stage?: string;
+  reason?: string;
+  notes?: string;
 }
 
 export interface AppointmentNote {

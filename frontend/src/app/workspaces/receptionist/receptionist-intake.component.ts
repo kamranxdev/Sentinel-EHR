@@ -485,8 +485,8 @@ export class ReceptionistIntakeComponent implements OnInit {
 
             this.apiService
               .scheduleAppointment({
-                patient: { id: savedPatient.id } as any,
-                doctor: { id: this.selectedDoctorId } as any,
+                patientId: savedPatient.id,
+                doctorId: Number(this.selectedDoctorId),
                 appointmentDate: dateTimeIso,
                 reason: this.consultationReason,
                 status: this.initialStage,

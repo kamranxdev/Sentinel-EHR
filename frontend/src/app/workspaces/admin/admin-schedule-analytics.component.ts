@@ -389,20 +389,20 @@ import {
                 <td hlmTableCell class="py-3 px-4 font-semibold text-foreground">
                   <div class="flex items-center gap-2">
                     <span class="size-6 rounded-full bg-muted text-foreground font-bold text-[10px] flex items-center justify-center shrink-0 border border-border">
-                      {{ apt.patient.fullName.charAt(0) || 'P' }}
+                      {{ (apt.patientName || apt.patient?.fullName || 'P').charAt(0) }}
                     </span>
                     <div>
-                      <div class="font-semibold text-foreground">{{ apt.patient.fullName }}</div>
-                      <div class="text-[10px] text-muted-foreground font-mono">{{ apt.patient.patientCode || 'MRN-REG' }}</div>
+                      <div class="font-semibold text-foreground">{{ apt.patientName || apt.patient?.fullName || 'Patient Profile' }}</div>
+                      <div class="text-[10px] text-muted-foreground font-mono">{{ apt.patientCode || apt.patient?.patientCode || 'MRN-REG' }}</div>
                     </div>
                   </div>
                 </td>
                 <td hlmTableCell class="py-3 px-4 text-muted-foreground">
                   <div class="font-medium text-foreground">
-                    Dr. {{ apt.doctor.fullName || 'Assigned Staff' }}
+                    {{ apt.doctorName || (apt.doctor?.fullName ? 'Dr. ' + apt.doctor?.fullName : 'Assigned Staff') }}
                   </div>
                   <div class="text-[10px] text-muted-foreground">
-                    {{ apt.doctor.specialization || 'General Practice' }}
+                    {{ apt.doctorSpecialization || apt.doctor?.specialization || 'General Practice' }}
                   </div>
                 </td>
                 <td hlmTableCell class="py-3 px-4 text-muted-foreground">
@@ -518,9 +518,8 @@ export class AdminScheduleAnalyticsComponent implements OnInit {
     >();
 
     for (const apt of apts) {
-      const docName = apt.doctor.fullName
-        ? `Dr. ${apt.doctor.fullName}`
-        : 'Assigned Clinical Staff';
+      const rawDoc = apt.doctorName || apt.doctor?.fullName;
+      const docName = rawDoc ? (rawDoc.startsWith('Dr.') ? rawDoc : `Dr. ${rawDoc}`) : 'Assigned Clinical Staff';
       const entry = doctorMap.get(docName) || {
         name: docName,
         total: 0,
@@ -567,10 +566,10 @@ export class AdminScheduleAnalyticsComponent implements OnInit {
       // Search Query match
       let matchesQuery = true;
       if (q) {
-        const patientName = (apt.patient ? apt.patient.fullName : '').toLowerCase();
-        const doctorName = (apt.doctor ? apt.doctor.fullName : '').toLowerCase();
+        const patientName = (apt.patientName || apt.patient?.fullName || '').toLowerCase();
+        const doctorName = (apt.doctorName || apt.doctor?.fullName || '').toLowerCase();
         const reason = (apt.reason || '').toLowerCase();
-        const mrn = (apt.patient ? apt.patient.patientCode || '' : '').toLowerCase();
+        const mrn = (apt.patientCode || apt.patient?.patientCode || '').toLowerCase();
         matchesQuery =
           patientName.includes(q) ||
           doctorName.includes(q) ||

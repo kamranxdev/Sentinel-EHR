@@ -257,11 +257,11 @@ import { StatCardComponent } from '../../shared/ui/stat-card.component';
                   </div>
                 </td>
                 <td hlmTableCell>
-                  <div class="font-bold text-foreground text-xs">{{ apt.patient.fullName || 'Patient Profile' }}</div>
-                  <div class="text-[10px] font-mono text-muted-foreground">MRN: {{ apt.patient.patientCode || 'N/A' }}</div>
+                  <div class="font-bold text-foreground text-xs">{{ apt.patientName || apt.patient?.fullName || 'Patient Profile' }}</div>
+                  <div class="text-[10px] font-mono text-muted-foreground">MRN: {{ apt.patientCode || apt.patient?.patientCode || 'N/A' }}</div>
                 </td>
                 <td hlmTableCell>
-                  <div class="text-xs text-foreground font-medium">Dr. {{ apt.doctor.fullName || 'Assigned Staff' }}</div>
+                  <div class="text-xs text-foreground font-medium">{{ apt.doctorName || apt.doctor?.fullName || 'Assigned Staff' }}</div>
                   <div class="text-[10px] text-muted-foreground">{{ apt.reason || 'General Consult' }}</div>
                 </td>
                 <td hlmTableCell>
@@ -325,8 +325,8 @@ import { StatCardComponent } from '../../shared/ui/stat-card.component';
                     </button>
                     <!-- Link to RTE verification Modal -->
                     <button
-                      *ngIf="apt.patient.id"
-                      (click)="openRteModal(apt.patient.id)"
+                      *ngIf="apt.patientId || apt.patient?.id"
+                      (click)="openRteModal(apt.patientId || apt.patient!.id)"
                       hlmBtn size="sm" variant="ghost"
                       class="text-xs text-sky-600 hover:text-sky-700 h-8">
                       RTE Check
@@ -443,12 +443,16 @@ export class ReceptionistAppointmentsComponent implements OnInit {
 
   filteredAppointments = computed(() => {
     return this.dateScopedAppointments().filter((apt) => {
-      const docMatch = this.selectedDoctor === 'ALL' || (apt.doctor?.fullName === this.selectedDoctor);
+      const docName = apt.doctorName || apt.doctor?.fullName || '';
+      const patName = apt.patientName || apt.patient?.fullName || '';
+      const patCode = apt.patientCode || apt.patient?.patientCode || '';
+
+      const docMatch = this.selectedDoctor === 'ALL' || (docName === this.selectedDoctor);
       const stageMatch = this.selectedStage === 'ALL' || (apt.stage || apt.status) === this.selectedStage;
       const termMatch = !this.searchTerm.trim() ||
-        (apt.patient?.fullName && apt.patient.fullName.toLowerCase().includes(this.searchTerm.toLowerCase())) ||
-        (apt.patient?.patientCode && apt.patient.patientCode.toLowerCase().includes(this.searchTerm.toLowerCase())) ||
-        (apt.doctor?.fullName && apt.doctor.fullName.toLowerCase().includes(this.searchTerm.toLowerCase())) ||
+        patName.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+        patCode.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
+        docName.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
         (apt.reason && apt.reason.toLowerCase().includes(this.searchTerm.toLowerCase()));
 
       return docMatch && stageMatch && termMatch;

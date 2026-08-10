@@ -1,8 +1,10 @@
 package com.sentinel.appointments.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class AppointmentRequestDTO {
 
     @NotNull(message = "Patient ID is required")
@@ -27,15 +29,6 @@ public class AppointmentRequestDTO {
 
     public void setPatientId(Long patientId) {
         this.patientId = patientId;
-    }
-
-    public void setPatient(java.util.Map<String, Object> patientMap) {
-        if (patientMap != null && patientMap.containsKey("id")) {
-            Object idObj = patientMap.get("id");
-            if (idObj instanceof Number) {
-                this.patientId = ((Number) idObj).longValue();
-            }
-        }
     }
 
     public Long getDoctorId() {

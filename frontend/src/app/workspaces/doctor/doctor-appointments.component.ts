@@ -58,7 +58,7 @@ import { lucideCalendarClock, lucideStethoscope, lucidePlus } from '@ng-icons/lu
             <tbody hlmTableBody class="divide-y divide-border">
               <tr *ngFor="let apt of appointments()" hlmTableRow class="hover:bg-muted/40 transition-colors">
                 <td hlmTableCell class="py-3 px-4 font-mono text-muted-foreground">{{ apt.appointmentDate | date:'short' }}</td>
-                <td hlmTableCell class="py-3 px-4 font-semibold text-foreground">{{ apt.patient.fullName }}</td>
+                <td hlmTableCell class="py-3 px-4 font-semibold text-foreground">{{ apt.patientName || apt.patient?.fullName || 'Patient Profile' }}</td>
                 <td hlmTableCell class="py-3 px-4 text-muted-foreground">{{ apt.reason || 'General Consultation' }}</td>
                 <td hlmTableCell class="py-3 px-4"><span hlmBadge variant="secondary" class="text-[10px]">{{ apt.status }}</span></td>
                 <td hlmTableCell class="py-3 px-4 text-right">
