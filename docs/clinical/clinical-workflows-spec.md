@@ -109,6 +109,6 @@ Sentinel structures clinical progress notes according to standard SOAP methodolo
 
 - [System Architecture](file:///mnt/workspace/Sentinel-EHR/docs/architecture/system-architecture-spec.md)
 - [EHR Database Schema](file:///mnt/workspace/Sentinel-EHR/docs/clinical/relational-database-schema.md)
-- [Security & HIPAA Compliance](file:///mnt/workspace/Sentinel-EHR/docs/security-compliance/security-hipaa-compliance-spec.md)
+- [Security & Compliance Specification](file:///mnt/workspace/Sentinel-EHR/docs/security-compliance/security-compliance-spec.md)
 - [RBAC & ABAC Matrix](file:///mnt/workspace/Sentinel-EHR/docs/security-compliance/rbac-abac-security-matrix.md)
 - [Doctor Workspace Specification](file:///mnt/workspace/Sentinel-EHR/docs/workspaces/doctor-workspace-spec.md)

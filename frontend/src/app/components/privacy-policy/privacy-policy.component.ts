@@ -40,7 +40,7 @@ import {
   templateUrl: './privacy-policy.component.html',
 })
 export class PrivacyPolicyComponent implements OnInit {
-  lastUpdated = 'August 2, 2026';
+  lastUpdated = 'August 11, 2026';
 
   ngOnInit(): void {
     if (typeof window !== 'undefined') {

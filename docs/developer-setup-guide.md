@@ -23,9 +23,10 @@ Sentinel provides pre-seeded accounts representing real-world healthcare roles:
 | **Patient 1** | `user_kamran` | `patient123` | **Kamran Khan** (`PAT-1001`) | Personal Health Portal (`/patient-portal`), Type 2 Diabetes, Penicillin Allergy |
 | **Patient 2** | `user_aarav` | `patient123` | **Aarav Patel** (`PAT-1002`) | Personal Health Portal (`/patient-portal`), Essential Hypertension |
 | **Patient 3** | `user_ananya` | `patient123` | **Ananya Sharma** (`PAT-1003`) | Personal Health Portal (`/patient-portal`), Latex Allergy |
-| **Doctor (Cardiology)**| `doctor_mahtab` | `doctor123` | **Dr. Mahtab Khan** | Physician Desk (`/dashboard`), SOAP Progress Notes, eRx Safety Overrides |
-| **Doctor (Neurology)**| `doctor_rajesh` | `doctor123` | **Dr. Rajesh Sharma** | Physician Desk (`/dashboard`), Neurology Consultations |
-| **Clinical Nurse** | `nurse_priya` | `nurse123` | **Nurse Priya Verma** | Bedside Vitals Flowsheet (`/vitals`), Encounter Logs |
+| **Doctor (Cardiology)**| `doctor_mahtab` | `doctor123` | **Dr. Mahtab Khan** | Physician Workstation (`/doctor`), Outpatient Consultation, eRx & Lab Orders |
+| **Doctor (Neurology)**| `doctor_rajesh` | `doctor123` | **Dr. Rajesh Sharma** | Physician Workstation (`/doctor`), Outpatient Consultation & Inpatient ABAC |
+| **Clinical Nurse** | `nurse_priya` | `nurse123` | **Nurse Priya Verma** | Triage Desk (`/nurse`), Check-In Vitals Intake & Bedside Flowsheet |
+| **Receptionist** | `receptionist` | `receptionist123` | **Anjali Sharma** | Reception Desk (`/receptionist`), MPI Search & Desk Check-In (`CHECKED_IN`) |
 | **Hospital Admin** | `admin` | `admin123` | **Dr. Vikramaditya Gupta** | Admin Command Center (`/admin`), Master Patient Index, Synthea Pipeline |
 | **Compliance Auditor**| `auditor` | `auditor123` | **Inspector Suresh Menon** | Read-Only WORM Audit Vault (`/audit-ledger`), Forensic Reports |
 
@@ -95,13 +96,9 @@ cd backend
 ## 🧪 Build & Testing Commands
 
 ```bash
-# Backend Compilation & Automated Test Suite
+# Backend Security Suite & Workflow Tests
 cd backend
-./mvnw compile
-./mvnw test
-
-# Run Synthea Synthetic Data Pipeline Script
-./scripts/run_synthea_pipeline.sh 5 Massachusetts
+./mvnw test -Dtest=PatientSecurityServiceTest,AbacSecurityEvaluatorTest,AppointmentWorkflowServiceTest,SecurityIntegrationTest
 
 # Frontend Production Build
 cd frontend
@@ -110,14 +107,13 @@ npm run build
 
 ---
 
-## 📚 Domain-Driven Documentation Suite
+## 🔗 Related Platform Documentation
 
-- **[System Architecture](file:///mnt/workspace/Sentinel/docs/architecture/system-architecture-spec.md)**
-- **[Clinical Workflows](file:///mnt/workspace/Sentinel/docs/clinical/clinical-workflows-spec.md)**
-- **[EHR Database Schema](file:///mnt/workspace/Sentinel/docs/clinical/relational-database-schema.md)**
-- **[Security & Compliance](file:///mnt/workspace/Sentinel/docs/security-compliance/security-hipaa-compliance-spec.md)**
-- **[RBAC & ABAC Matrix](file:///mnt/workspace/Sentinel/docs/security-compliance/rbac-abac-security-matrix.md)**
-- **[REST API Specification](file:///mnt/workspace/Sentinel/docs/interoperability/rest-api-specification.md)**
-- **[Synthea Pipeline Guide](file:///mnt/workspace/Sentinel/docs/interoperability/synthea-pipeline-integration.md)**
-- **[Workspaces Overview](file:///mnt/workspace/Sentinel/docs/workspaces/README.md)**
-- **[Software Audit Report](file:///mnt/workspace/Sentinel/docs/audit/software-audit-report.md)**
+- **[System Architecture](file:///mnt/workspace/Sentinel-EHR/docs/architecture/system-architecture-spec.md)**
+- **[Clinical Workflows Specification](file:///mnt/workspace/Sentinel-EHR/docs/clinical/clinical-workflows-spec.md)**
+- **[EHR Database Schema](file:///mnt/workspace/Sentinel-EHR/docs/clinical/relational-database-schema.md)**
+- **[Security & Compliance](file:///mnt/workspace/Sentinel-EHR/docs/security-compliance/security-compliance-spec.md)**
+- **[RBAC & ABAC Matrix](file:///mnt/workspace/Sentinel-EHR/docs/security-compliance/rbac-abac-security-matrix.md)**
+- **[REST API Specification](file:///mnt/workspace/Sentinel-EHR/docs/interoperability/rest-api-specification.md)**
+- **[Synthea Pipeline Guide](file:///mnt/workspace/Sentinel-EHR/docs/interoperability/synthea-pipeline-integration.md)**
+- **[Workspaces Overview](file:///mnt/workspace/Sentinel-EHR/docs/workspaces/README.md)**

@@ -72,12 +72,11 @@ All documentation is organized in domain subdirectories within [`docs/`](docs/):
 | **Architecture** | **[System Architecture](docs/architecture/system-architecture-spec.md)** | High-level system architecture, package-by-feature modular design, multi-tier diagrams |
 | **Clinical** | **[Clinical Workflows](docs/clinical/clinical-workflows-spec.md)** | Encounter lifecycle, eRx safety engine, SOAP notes, triage & flowsheets |
 | **Clinical** | **[EHR Database Schema](docs/clinical/relational-database-schema.md)** | ER diagram, JPA entities, patient care assignments, security tables |
-| **Security** | **[Security & Compliance](docs/security-compliance/security-hipaa-compliance-spec.md)** | Stateless JWT authentication, security filter chain, WORM audit ledger, HIPAA & ABDM compliance |
+| **Security** | **[Security & Compliance](docs/security-compliance/security-compliance-spec.md)** | Stateless JWT authentication, security filter chain, WORM audit ledger, Indian & International compliance (ABDM, DPDP Act 2023, DISHA, ISO 27001, GDPR, HIPAA) |
 | **Security** | **[RBAC & ABAC Matrix](docs/security-compliance/rbac-abac-security-matrix.md)** | 10 baseline roles, resource permission matrices, SpEL contextual rules |
 | **Interoperability**| **[REST API Reference](docs/interoperability/rest-api-specification.md)** | REST endpoints catalog, JSON payload formats, FHIR R4 exporter APIs |
 | **Interoperability**| **[Synthea Pipeline](docs/interoperability/synthea-pipeline-integration.md)** | Synthetic patient generator setup, FHIR-to-entity mapping, CLI execution |
 | **Workspaces** | **[Workspaces Overview](docs/workspaces/README.md)** | Guides for 9 role-specific clinical workspaces |
-| **Audit** | **[Software Audit Report](docs/audit/software-audit-report.md)** | Exhaustive technical software audit report evaluating all issues (P1-P4) |
 
 ---
 
@@ -100,8 +99,7 @@ Sentinel/
 │   ├── clinical/             # Clinical workflows & EHR database schema
 │   ├── security-compliance/  # Security, HIPAA compliance & RBAC/ABAC matrix
 │   ├── interoperability/    # REST API specification & Synthea pipeline
-│   ├── workspaces/           # 9 Role-based clinical workspace manuals
-│   └── audit/                # Comprehensive Software Audit Report (P1-P4)
+│   └── workspaces/           # 9 Role-based clinical workspace manuals
 │
 ├── scripts/                  # Data pipeline execution scripts
 └── docker-compose.yml        # PostgreSQL 16 local container configuration

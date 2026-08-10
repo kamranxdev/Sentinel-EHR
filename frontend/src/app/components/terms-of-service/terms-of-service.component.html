@@ -11,12 +11,12 @@
       <div class="flex items-center gap-2">
         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
           <span class="size-1.5 rounded-full bg-primary"></span>
-          Legally Binding End User Agreement
+          Global Clinical End User Agreement
         </span>
       </div>
     </div>
 
-    <!-- Header Section (Open Typography Header, No Boxed Card) -->
+    <!-- Header Section -->
     <div class="py-4 space-y-4 border-b border-border/40 pb-8">
       <div class="flex items-center gap-4">
         <div class="p-3.5 rounded-2xl bg-primary/10 text-primary border border-primary/20 shrink-0">
@@ -24,19 +24,19 @@
         </div>
         <div>
           <h1 class="text-3xl sm:text-4xl font-black tracking-tight text-foreground">Sentinel EHR Terms of Service</h1>
-          <p class="text-xs sm:text-sm text-muted-foreground mt-1 font-medium">Clinical End User Agreement & Master Healthcare Platform Terms</p>
+          <p class="text-xs sm:text-sm text-muted-foreground mt-1 font-medium">Clinical End User Agreement & Master Global Healthcare Platform Terms</p>
         </div>
       </div>
 
       <div class="flex flex-wrap items-center gap-3 text-xs text-muted-foreground font-medium pt-1">
         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-muted/60 border border-border/40">
-          Last Revised: <strong class="text-foreground font-semibold">August 2, 2026</strong>
+          Last Revised: <strong class="text-foreground font-semibold">August 11, 2026</strong>
         </span>
         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-muted/60 border border-border/40">
-          Governance: <strong class="text-foreground font-semibold">Clinical Systems & HIPAA Safeguards (§ 164.312)</strong>
+          Governance: <strong class="text-foreground font-semibold">ABDM HDMP • DPDP Act 2023 • DISHA • ISO 27001 • GDPR • HIPAA</strong>
         </span>
         <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-muted/60 border border-border/40">
-          Version: <strong class="text-foreground font-semibold">1.0.0-ENTERPRISE-GOLD</strong>
+          Version: <strong class="text-foreground font-semibold">2.0.0-GLOBAL-ENTERPRISE</strong>
         </span>
       </div>
     </div>
@@ -64,28 +64,28 @@
           <h2 class="text-base font-bold text-foreground">1. Acceptance of Terms & Account Authorization</h2>
         </div>
         <p class="text-xs text-muted-foreground leading-relaxed">
-          By registering, logging into, or utilizing the Sentinel platform, you represent and warrant that you are authorized under assigned clinical roles (Physician `ROLE_DOCTOR`, Nurse `ROLE_NURSE`, Hospital Administrator `ROLE_ADMIN`, Compliance Auditor `ROLE_AUDITOR`, or Patient `ROLE_PATIENT`). If you do not agree to these Terms of Service, you must immediately cease accessing the system.
+          By registering, logging into, or utilizing the Sentinel platform, you represent and warrant that you are authorized under assigned clinical roles (Physician <code class="text-primary font-mono">ROLE_DOCTOR</code>, Nurse <code class="text-primary font-mono">ROLE_NURSE</code>, Hospital Administrator <code class="text-primary font-mono">ROLE_ADMIN</code>, Compliance Auditor <code class="text-primary font-mono">ROLE_AUDITOR</code>, or Patient <code class="text-primary font-mono">ROLE_PATIENT</code>). If you do not agree to these Terms of Service, you must immediately cease accessing the system.
         </p>
       </div>
 
-      <!-- SECTION 2: User Account Security & HIPAA Duties -->
+      <!-- SECTION 2: User Account Security & Safeguards -->
       <div class="bg-card/60 backdrop-blur-md p-6 rounded-2xl border border-border/40 shadow-sm space-y-4">
         <div class="flex items-center gap-2.5">
           <div class="p-2 rounded-lg bg-muted text-foreground">
             <ng-icon name="lucideKey" size="18" />
           </div>
-          <h2 class="text-base font-bold text-foreground">2. Account Security & HIPAA Credentials Safeguards</h2>
+          <h2 class="text-base font-bold text-foreground">2. Account Security & Global Compliance Safeguards</h2>
         </div>
 
         <div class="space-y-3 text-xs text-muted-foreground leading-relaxed">
           <div class="p-4 rounded-xl border border-border/40 bg-card space-y-1.5">
-            <span class="font-semibold text-foreground block">Protection of Login Credentials</span>
-            <p>Users are strictly prohibited from sharing usernames, passwords, or JWT Bearer tokens with any unauthorized third party. All activities performed under a user account are logged to the immutable WORM audit trail.</p>
+            <span class="font-semibold text-foreground block">Protection of Login & ABHA Credentials</span>
+            <p>Users are strictly prohibited from sharing usernames, passwords, ABHA credentials, or JWT Bearer tokens with any unauthorized third party. All activities performed under a user account are logged to the immutable WORM audit trail.</p>
           </div>
 
           <div class="p-4 rounded-xl border border-border/40 bg-card space-y-1.5">
             <span class="font-semibold text-foreground block">Mandatory Security Incident Reporting</span>
-            <p>Users must notify the Sentinel Security Office immediately upon suspecting any unauthorized account access, lost credentials, or potential security breach involving Protected Health Information (PHI).</p>
+            <p>Users must notify the Sentinel Security Office immediately upon suspecting any unauthorized account access, lost credentials, or potential security breach involving Electronic Health Information (EHI).</p>
           </div>
         </div>
       </div>
@@ -110,7 +110,7 @@
               <li>Recording & tracking longitudinal patient vitals.</li>
               <li>Executing RxNorm eRx orders with safety checks.</li>
               <li>Exporting FHIR R4 bundles for patient care.</li>
-              <li>Performing authorized HIPAA compliance audits.</li>
+              <li>Performing authorized compliance and audit reviews.</li>
             </ul>
           </div>
 
@@ -120,7 +120,7 @@
               Strictly Prohibited Conduct
             </h3>
             <ul class="list-disc list-inside text-muted-foreground space-y-1 pl-1">
-              <li>Unauthorized access to PHI outside clinical scope.</li>
+              <li>Unauthorized access to EHI outside clinical scope.</li>
               <li>Automated scraping or mass data harvesting.</li>
               <li>Reverse engineering or decompiling source code.</li>
               <li>Injecting malicious payloads or bypass exploits.</li>
@@ -130,16 +130,16 @@
         </div>
       </div>
 
-      <!-- SECTION 4: HL7 FHIR R4 API Access Terms -->
+      <!-- SECTION 4: HL7 FHIR R4 & ABDM API Terms -->
       <div class="bg-card/60 backdrop-blur-md p-6 rounded-2xl border border-border/40 shadow-sm space-y-3">
         <div class="flex items-center gap-2.5">
           <div class="p-2 rounded-lg bg-muted text-foreground">
             <ng-icon name="lucideGlobe" size="18" />
           </div>
-          <h2 class="text-base font-bold text-foreground">4. HL7 FHIR R4 Interoperability & API Terms</h2>
+          <h2 class="text-base font-bold text-foreground">4. HL7 FHIR R4 Interoperability & ABDM API Terms</h2>
         </div>
         <p class="text-xs text-muted-foreground leading-relaxed">
-          Access to Sentinel's HL7 FHIR R4 REST endpoints (`/fhir/v1/...`) is governed by the 21st Century Cures Act non-information blocking regulations. API consumers must maintain valid OAuth2/JWT authentication headers, observe fair-use rate limits, and ensure all ingested payloads conform to standard FHIR R4 schemas.
+          Access to Sentinel's HL7 FHIR R4 REST endpoints (<code class="text-primary font-mono">/fhir/v1/...</code>) and ABDM integration services is governed by national health data exchange policies and international open health data standards. API consumers must maintain valid OAuth2/JWT authentication headers, observe fair-use rate limits, and ensure all ingested payloads conform to standard FHIR R4 schemas.
         </p>
       </div>
 
@@ -152,7 +152,7 @@
           <h2 class="text-base font-bold text-foreground">5. Limitation of Liability & Indemnification</h2>
         </div>
         <p class="text-xs text-muted-foreground leading-relaxed">
-          To the maximum extent permitted by applicable federal and state law, Sentinel Systems shall not be liable for any indirect, incidental, consequential, or punitive damages arising from clinical treatment outcomes, diagnostic delays, third-party network outages, or unauthorized credential disclosure by users. Healthcare institutions agree to defend and indemnify Sentinel against third-party claims resulting from clinical user negligence.
+          To the maximum extent permitted by applicable laws, Sentinel Systems shall not be liable for any indirect, incidental, consequential, or punitive damages arising from clinical treatment outcomes, diagnostic delays, third-party network outages, or unauthorized credential disclosure by users. Healthcare institutions agree to defend and indemnify Sentinel against third-party claims resulting from clinical user negligence.
         </p>
       </div>
 
@@ -165,7 +165,7 @@
           <h2 class="text-base font-bold text-foreground">6. Termination & Offboarding</h2>
         </div>
         <p class="text-xs text-muted-foreground leading-relaxed">
-          Sentinel reserves the right to immediately suspend or terminate system access for any account found in violation of these Terms of Service or engaged in security policy breaches. Upon employee offboarding, institutional administrators (`ROLE_ADMIN`) must immediately revoke active credentials.
+          Sentinel reserves the right to immediately suspend or terminate system access for any account found in violation of these Terms of Service or engaged in security policy breaches. Upon employee offboarding, institutional administrators (<code class="text-primary font-mono">ROLE_ADMIN</code>) must immediately revoke active credentials.
         </p>
       </div>
 
@@ -178,12 +178,12 @@
           <h2 class="text-base font-bold text-foreground">7. Governing Law & Legal Contact</h2>
         </div>
         <p class="text-xs text-muted-foreground leading-relaxed">
-          These Terms shall be governed by and construed in accordance with federal healthcare regulations (HIPAA / HITECH / 21st Century Cures Act) and state laws. For legal notices or contractual inquiries, contact:
+          These Terms shall be governed by and construed in accordance with applicable health data regulations (ABDM HDMP, DPDP Act 2023, DISHA, ISO 27001, GDPR, and HIPAA). For legal notices or contractual inquiries, contact:
         </p>
         <div class="p-4 rounded-xl border border-border/40 bg-muted/20 text-xs space-y-1">
-          <p class="font-semibold text-foreground">Sentinel Legal & Compliance Directorate</p>
-          <p class="text-muted-foreground">Email: legal&#64;sentinel.health | Phone: +1 (800) 555-SENTINEL</p>
-          <p class="text-muted-foreground">Address: 100 Health Systems Plaza, Suite 600, Healthcare City, US</p>
+          <p class="font-semibold text-foreground">Sentinel Global Legal & Compliance Directorate</p>
+          <p class="text-muted-foreground">Email: legal&#64;sentinel.health | Phone: +91 (800) 555-SENTINEL</p>
+          <p class="text-muted-foreground">Governance: ABDM HDMP • DPDP Act 2023 • DISHA • ISO 27001 • GDPR • HIPAA</p>
         </div>
       </div>
 
@@ -192,12 +192,12 @@
     <!-- Footer Copyright -->
     <div class="text-center text-xs text-muted-foreground py-4 border-t border-border/30 space-y-2">
       <div class="flex items-center justify-center gap-4">
-        <a routerLink="/privacy-policy" class="hover:text-foreground transition-colors">HIPAA Privacy Policy</a>
+        <a routerLink="/privacy-policy" class="hover:text-foreground transition-colors">Privacy Policy</a>
         <span>&bull;</span>
         <a routerLink="/terms-of-service" class="hover:text-foreground transition-colors font-semibold text-foreground">Terms of Service</a>
       </div>
       <div>
-        &copy; 2026 Sentinel EHR Platform Systems. All rights reserved. Clinical Agreement v1.0.0.
+        &copy; 2026 Sentinel EHR Platform Systems. All rights reserved. ABDM, DISHA & ISO 27001 Protected.
       </div>
     </div>
 

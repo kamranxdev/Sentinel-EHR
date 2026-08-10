@@ -122,5 +122,5 @@ public class PatientSecurityService {
 
 - [System Architecture](file:///mnt/workspace/Sentinel-EHR/docs/architecture/system-architecture-spec.md)
 - [Clinical Workflows Specification](file:///mnt/workspace/Sentinel-EHR/docs/clinical/clinical-workflows-spec.md)
-- [Security & HIPAA Compliance](file:///mnt/workspace/Sentinel-EHR/docs/security-compliance/security-hipaa-compliance-spec.md)
+- [Security & Compliance Specification](file:///mnt/workspace/Sentinel-EHR/docs/security-compliance/security-compliance-spec.md)
 - [Doctor Workspace Specification](file:///mnt/workspace/Sentinel-EHR/docs/workspaces/doctor-workspace-spec.md)

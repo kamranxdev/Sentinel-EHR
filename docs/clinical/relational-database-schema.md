@@ -192,7 +192,6 @@ erDiagram
 
 ## 🔗 Related Documentation
 
-- [System Architecture](file:///mnt/workspace/Sentinel/docs/architecture/system-architecture-spec.md)
-- [Clinical Workflows](file:///mnt/workspace/Sentinel/docs/clinical/clinical-workflows-spec.md)
-- [Security & HIPAA Compliance](file:///mnt/workspace/Sentinel/docs/security-compliance/security-hipaa-compliance-spec.md)
-- [Software Audit Report](file:///mnt/workspace/Sentinel/docs/audit/software-audit-report.md)
+- [System Architecture Specification](file:///mnt/workspace/Sentinel-EHR/docs/architecture/system-architecture-spec.md)
+- [Clinical Workflows Specification](file:///mnt/workspace/Sentinel-EHR/docs/clinical/clinical-workflows-spec.md)
+- [Security & Compliance Specification](file:///mnt/workspace/Sentinel-EHR/docs/security-compliance/security-compliance-spec.md)

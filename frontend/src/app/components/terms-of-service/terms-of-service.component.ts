@@ -38,7 +38,7 @@ import {
   templateUrl: './terms-of-service.component.html',
 })
 export class TermsOfServiceComponent implements OnInit {
-  lastUpdated = 'August 2, 2026';
+  lastUpdated = 'August 11, 2026';
 
   ngOnInit(): void {
     if (typeof window !== 'undefined') {
