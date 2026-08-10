@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, throwError } from 'rxjs';
+import { Observable, throwError, catchError, of } from 'rxjs';
 import {
   Allergy,
   Appointment,
@@ -342,9 +342,25 @@ export class ApiService {
     return this.http.get<User[]>(`${this.baseUrl}/users/doctors`);
   }
 
-  // Compliance Audit Ledger
+  // Compliance Audit Ledger & User RBAC Management
   getUsers(): Observable<User[]> {
     return this.http.get<User[]>(`${this.baseUrl}/admin/users`);
+  }
+
+  updateUser(id: number, payload: any): Observable<User> {
+    return this.http.put<User>(`${this.baseUrl}/admin/users/${id}`, payload);
+  }
+
+  updateUserStatus(id: number, status: string): Observable<any> {
+    return this.http.patch<any>(`${this.baseUrl}/admin/users/${id}/status`, { status });
+  }
+
+  resetUserPassword(id: number, newPassword?: string): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/admin/users/${id}/reset-password`, { newPassword });
+  }
+
+  deleteUser(id: number): Observable<any> {
+    return this.http.delete<any>(`${this.baseUrl}/admin/users/${id}`);
   }
 
   getAuditLogs(search?: string): Observable<AuditLog[]> {
