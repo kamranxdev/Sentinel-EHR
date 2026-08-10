@@ -455,7 +455,7 @@ export class App implements OnInit, OnDestroy {
           items: [
             { icon: 'lucideLayoutDashboard', label: 'Command Center', routerLink: '/admin/dashboard' },
             { icon: 'lucideHeartPulse', label: 'Master Patient Index (MPI)', routerLink: '/admin/patients' },
-            { icon: 'lucideCalendarClock', label: 'Appointment Desk', routerLink: '/admin/appointments' },
+            { icon: 'lucideCalendarClock', label: 'Facility Schedule Analytics', routerLink: '/admin/schedule-analytics' },
           ],
         },
         {

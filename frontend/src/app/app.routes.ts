@@ -173,9 +173,9 @@ export const routes: Routes = [
     data: { roles: ['ROLE_ADMIN'] },
   },
   {
-    path: 'admin/appointments',
+    path: 'admin/schedule-analytics',
     loadComponent: () =>
-      import('./workspaces/admin/admin-appointments.component').then((m) => m.AdminAppointmentsComponent),
+      import('./workspaces/admin/admin-schedule-analytics.component').then((m) => m.AdminScheduleAnalyticsComponent),
     canActivate: [authGuard, roleGuard],
     data: { roles: ['ROLE_ADMIN'] },
   },
