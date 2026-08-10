@@ -5,8 +5,6 @@ import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
 import { PatientContextService } from '../../core/services/patient-context.service';
 import { Patient } from '../../core/models/models';
-import { StatCardComponent } from '../../shared/ui/stat-card.component';
-import { ActionButtonComponent } from '../../shared/ui/action-button.component';
 
 import { HlmCardImports } from '@spartan-ng/helm/card';
 import { HlmBadgeImports } from '@spartan-ng/helm/badge';
@@ -21,6 +19,7 @@ import {
   lucideCalendarClock,
   lucideChevronRight,
   lucideUsers,
+  lucideClipboardList,
 } from '@ng-icons/lucide';
 
 @Component({
@@ -44,6 +43,7 @@ import {
       lucideCalendarClock,
       lucideChevronRight,
       lucideUsers,
+      lucideClipboardList,
     }),
   ],
   template: `
@@ -59,97 +59,109 @@ import {
               Welcome, Nurse {{ currentUser?.fullName }}
               <span hlmBadge variant="secondary" class="text-[11px]">Nursing Station</span>
             </h1>
-            <p class="text-xs text-muted-foreground mt-0.5">Active Unit Clinical Shift & Bedside Triage Operations</p>
+            <p class="text-xs text-muted-foreground mt-0.5">Active Ward Census • Clinical Triage Intake • Bedside Vitals & Medication MAR</p>
           </div>
         </div>
 
         <div class="flex items-center gap-3">
           <div class="p-2.5 rounded-lg border border-border bg-card text-center min-w-[110px]">
             <span class="text-xl font-semibold text-foreground block leading-none">{{ patientCount() }}</span>
-            <span class="text-[10px] text-muted-foreground font-medium uppercase tracking-wide mt-0.5 block">Unit Census</span>
+            <span class="text-[10px] text-muted-foreground font-medium uppercase tracking-wide mt-0.5 block">Unit Ward Census</span>
           </div>
         </div>
       </div>
 
-      <!-- Station Workspaces -->
+      <!-- Quick Action Cards -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <a routerLink="/appointments" class="p-5 rounded-xl border border-border bg-card hover:bg-accent/40 transition-colors space-y-3 flex flex-col justify-between group">
+        <a routerLink="/nurse/triage" class="p-5 rounded-xl border border-border bg-card hover:bg-accent/40 transition-colors space-y-3 flex flex-col justify-between group">
           <div class="flex items-center justify-between">
-            <div class="size-9 rounded-md bg-muted flex items-center justify-center text-foreground">
-              <ng-icon name="lucideActivity" size="18" />
+            <div class="size-9 rounded-md bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+              <ng-icon name="lucideClipboardList" size="18" />
             </div>
             <ng-icon name="lucideChevronRight" size="16" class="text-muted-foreground group-hover:text-foreground" />
           </div>
           <div>
-            <h3 class="text-sm font-semibold text-foreground">Nursing Triage Vitals</h3>
-            <p class="text-xs text-muted-foreground mt-1">Pre-consultation vitals intake & notes.</p>
+            <h3 class="text-sm font-semibold text-foreground">Clinical Triage Intake</h3>
+            <p class="text-xs text-muted-foreground mt-1">Pre-consultation intake, chief complaint & priority.</p>
           </div>
         </a>
 
-        <a routerLink="/vitals" class="p-5 rounded-xl border border-border bg-card hover:bg-accent/40 transition-colors space-y-3 flex flex-col justify-between group">
+        <a routerLink="/nurse/vitals" class="p-5 rounded-xl border border-border bg-card hover:bg-accent/40 transition-colors space-y-3 flex flex-col justify-between group">
           <div class="flex items-center justify-between">
-            <div class="size-9 rounded-md bg-muted flex items-center justify-center text-foreground">
+            <div class="size-9 rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center">
               <ng-icon name="lucideActivity" size="18" />
             </div>
             <ng-icon name="lucideChevronRight" size="16" class="text-muted-foreground group-hover:text-foreground" />
           </div>
           <div>
             <h3 class="text-sm font-semibold text-foreground">Bedside Vitals Flowsheet</h3>
-            <p class="text-xs text-muted-foreground mt-1">Log BP, Heart Rate, SpO2 & BMI.</p>
+            <p class="text-xs text-muted-foreground mt-1">Log BP, Pulse, Temp, SpO2 & BMI.</p>
           </div>
         </a>
 
-        <a routerLink="/allergies" class="p-5 rounded-xl border border-border bg-card hover:bg-accent/40 transition-colors space-y-3 flex flex-col justify-between group">
+        <a routerLink="/nurse/prescriptions" class="p-5 rounded-xl border border-border bg-card hover:bg-accent/40 transition-colors space-y-3 flex flex-col justify-between group">
           <div class="flex items-center justify-between">
-            <div class="size-9 rounded-md bg-muted flex items-center justify-center text-foreground">
-              <ng-icon name="lucideTriangleAlert" size="18" />
-            </div>
-            <ng-icon name="lucideChevronRight" size="16" class="text-muted-foreground group-hover:text-foreground" />
-          </div>
-          <div>
-            <h3 class="text-sm font-semibold text-foreground">Coded Allergies & ADRs</h3>
-            <p class="text-xs text-muted-foreground mt-1">Document allergen safety register.</p>
-          </div>
-        </a>
-
-        <a routerLink="/prescriptions" class="p-5 rounded-xl border border-border bg-card hover:bg-accent/40 transition-colors space-y-3 flex flex-col justify-between group">
-          <div class="flex items-center justify-between">
-            <div class="size-9 rounded-md bg-muted flex items-center justify-center text-foreground">
+            <div class="size-9 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
               <ng-icon name="lucidePill" size="18" />
             </div>
             <ng-icon name="lucideChevronRight" size="16" class="text-muted-foreground group-hover:text-foreground" />
           </div>
           <div>
-            <h3 class="text-sm font-semibold text-foreground">Medication MAR Orders</h3>
-            <p class="text-xs text-muted-foreground mt-1">Verify eRx orders & status.</p>
+            <h3 class="text-sm font-semibold text-foreground">Medication Administration (MAR)</h3>
+            <p class="text-xs text-muted-foreground mt-1">Verify eRx orders & log bedside dose administration.</p>
+          </div>
+        </a>
+
+        <a routerLink="/nurse/appointments" class="p-5 rounded-xl border border-border bg-card hover:bg-accent/40 transition-colors space-y-3 flex flex-col justify-between group">
+          <div class="flex items-center justify-between">
+            <div class="size-9 rounded-md bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center">
+              <ng-icon name="lucideCalendarClock" size="18" />
+            </div>
+            <ng-icon name="lucideChevronRight" size="16" class="text-muted-foreground group-hover:text-foreground" />
+          </div>
+          <div>
+            <h3 class="text-sm font-semibold text-foreground">Unit Ward Schedule</h3>
+            <p class="text-xs text-muted-foreground mt-1">View patient appointment calendar.</p>
           </div>
         </a>
       </div>
 
-      <!-- Active Patient Census -->
+      <!-- Active Patient Census Roster -->
       <div class="p-6 rounded-xl border border-border bg-card space-y-4">
         <div class="flex justify-between items-center border-b border-border pb-3">
           <div class="flex items-center gap-2">
-            <ng-icon name="lucideUsers" size="18" class="text-muted-foreground" />
-            <h3 class="text-sm font-semibold text-foreground">Active Patient Census</h3>
+            <ng-icon name="lucideUsers" size="18" class="text-emerald-500" />
+            <h3 class="text-sm font-semibold text-foreground">Unit Patient Roster</h3>
           </div>
-          <a routerLink="/patients" hlmBtn variant="ghost" size="sm" class="h-7 text-xs">View All Patients</a>
+          <span class="text-xs text-muted-foreground">Select patient to set active clinical context</span>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4" *ngIf="patients().length > 0">
-          <div *ngFor="let p of patients().slice(0, 3)" class="p-4 rounded-lg border border-border bg-muted/20 flex flex-col justify-between space-y-3">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4" *ngIf="patients().length > 0; else noPatients">
+          <div 
+            *ngFor="let p of patients().slice(0, 6)" 
+            class="p-4 rounded-lg border transition-all cursor-pointer flex flex-col justify-between space-y-3"
+            [ngClass]="patientContext.activePatient()?.id === p.id ? 'border-emerald-500 bg-emerald-500/5 shadow-xs' : 'border-border bg-muted/20 hover:border-muted-foreground/30'"
+            (click)="selectPatient(p)"
+          >
             <div class="flex justify-between items-start">
               <div>
                 <span class="text-sm font-semibold text-foreground block">{{ p.fullName }}</span>
                 <span class="text-[11px] font-mono text-muted-foreground block">MRN: {{ p.patientCode }}</span>
               </div>
-              <span hlmBadge variant="outline" class="text-[10px]">{{ p.bloodType }}</span>
+              <span hlmBadge variant="outline" class="text-[10px]">{{ p.bloodType || 'A+' }}</span>
             </div>
-            <button hlmBtn variant="secondary" size="sm" (click)="selectPatient(p)" class="w-full h-7 text-[11px]">
-              Open Patient Chart
+
+            <button hlmBtn [variant]="patientContext.activePatient()?.id === p.id ? 'default' : 'secondary'" size="sm" class="w-full h-7 text-[11px]">
+              {{ patientContext.activePatient()?.id === p.id ? 'Active Patient Chart' : 'Select Patient Chart' }}
             </button>
           </div>
         </div>
+
+        <ng-template #noPatients>
+          <div class="p-8 text-center text-xs text-muted-foreground">
+            No patients loaded in current unit roster.
+          </div>
+        </ng-template>
       </div>
     </div>
   `,
@@ -172,6 +184,9 @@ export class NurseDashboardComponent implements OnInit {
     this.apiService.getPatients().subscribe((pts) => {
       this.patients.set(pts);
       this.patientCount.set(pts.length);
+      if (pts.length > 0 && !this.patientContext.activePatient()) {
+        this.patientContext.setActivePatient(pts[0]);
+      }
     });
   }
 

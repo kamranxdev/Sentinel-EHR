@@ -133,6 +133,9 @@ export interface Vitals {
   heightCm?: number;
   bmi?: number;
   bloodGlucose?: number;
+  painScore?: number;
+  fluidIntakeMl?: number;
+  fluidOutputMl?: number;
   recordedAt?: string;
 }
 

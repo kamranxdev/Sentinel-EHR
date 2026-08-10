@@ -72,4 +72,30 @@ public class VitalsController {
 
         return ResponseEntity.ok(saved);
     }
+
+    @PostMapping("/telemetry")
+    @PreAuthorize("hasAuthority('VITALS_CREATE') and (#vitals != null and #vitals.patient != null and #vitals.patient.id != null and @abacEvaluator.hasTreatmentRelationship(authentication, #vitals.patient.id))")
+    public ResponseEntity<?> recordTelemetry(@RequestBody Vitals vitals, Authentication auth) {
+        if (vitals.getPatient() == null || vitals.getPatient().getId() == null) {
+            throw new IllegalArgumentException("Patient ID is required");
+        }
+
+        User staff = userRepository.findByUsername(auth.getName())
+                .orElseThrow(() -> new ResourceNotFoundException("Staff user profile not found"));
+        Patient patient = patientRepository.findById(vitals.getPatient().getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Patient record with ID " + vitals.getPatient().getId() + " not found"));
+
+        vitals.setRecordedBy(staff);
+        vitals.setPatient(patient);
+
+        Vitals saved = vitalsRepository.save(vitals);
+        auditService.logAction(auth, "CREATE", "TELEMETRY_VITALS", String.valueOf(saved.getId()), 
+                "Recorded telemetry flowsheet (BP: " + saved.getBloodPressure() + ", HR: " + saved.getHeartRate() 
+                + ", SpO2: " + saved.getOxygenSaturation() + "%, Pain Score: " + (saved.getPainScore() != null ? saved.getPainScore() : "N/A") 
+                + ", Intake: " + (saved.getFluidIntakeMl() != null ? saved.getFluidIntakeMl() + "mL" : "N/A") 
+                + ", Output: " + (saved.getFluidOutputMl() != null ? saved.getFluidOutputMl() + "mL" : "N/A") 
+                + ") for patient ID: " + patient.getId());
+
+        return ResponseEntity.ok(saved);
+    }
 }

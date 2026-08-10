@@ -56,15 +56,22 @@ INSERT INTO permissions (id, code, category, description) VALUES (20, 'INVOICE_C
 INSERT INTO permissions (id, code, category, description) VALUES (21, 'INVOICE_READ', 'BILLING', 'View financial billing invoices');
 INSERT INTO permissions (id, code, category, description) VALUES (22, 'AUDIT_LOG_READ', 'SYSTEM', 'Read ABDM / DISHA WORM audit log');
 INSERT INTO permissions (id, code, category, description) VALUES (23, 'USER_CREATE', 'SYSTEM', 'Provision new staff user');
+INSERT INTO permissions (id, code, category, description) VALUES (24, 'MAR_READ', 'MEDICATION', 'Read medication administration records');
+INSERT INTO permissions (id, code, category, description) VALUES (25, 'MAR_ADMINISTER', 'MEDICATION', 'Administer bedside medication eMAR');
+INSERT INTO permissions (id, code, category, description) VALUES (26, 'BCMA_EXECUTE', 'MEDICATION', 'Execute 5-Rights bedside barcode scanning');
+INSERT INTO permissions (id, code, category, description) VALUES (27, 'TRIAGE_EWS_EXECUTE', 'CLINICAL', 'Calculate NEWS2 early warning score');
+INSERT INTO permissions (id, code, category, description) VALUES (28, 'CARE_PLAN_CREATE', 'NURSING', 'Create NANDA-I care plan');
+INSERT INTO permissions (id, code, category, description) VALUES (29, 'CARE_PLAN_READ', 'NURSING', 'View NANDA-I care plan');
+INSERT INTO permissions (id, code, category, description) VALUES (30, 'NURSING_NOTE_CREATE', 'NURSING', 'Create SBAR nursing handoff note');
 
 -- ------------------------------------------------------------------------------
 -- 4. ROLE_PERMISSIONS MAPPING
 -- ------------------------------------------------------------------------------
 -- Doctor (ROLE_DOCTOR): Full Clinical
-INSERT INTO role_permissions (role_id, permission_id) VALUES (3, 1), (3, 2), (3, 3), (3, 4), (3, 5), (3, 6), (3, 7), (3, 8), (3, 9), (3, 10), (3, 11), (3, 12), (3, 13), (3, 14), (3, 15), (3, 17), (3, 19);
+INSERT INTO role_permissions (role_id, permission_id) VALUES (3, 1), (3, 2), (3, 3), (3, 4), (3, 5), (3, 6), (3, 7), (3, 8), (3, 9), (3, 10), (3, 11), (3, 12), (3, 13), (3, 14), (3, 15), (3, 17), (3, 19), (3, 24), (3, 27), (3, 29);
 
--- Nurse (ROLE_NURSE): Triage, Vitals, MAR, Notes Read
-INSERT INTO role_permissions (role_id, permission_id) VALUES (4, 1), (4, 2), (4, 4), (4, 5), (4, 6), (4, 9), (4, 11), (4, 12), (4, 13), (4, 15), (4, 19);
+-- Nurse (ROLE_NURSE): Triage, Vitals, MAR, Notes Read, Care Plans, BCMA
+INSERT INTO role_permissions (role_id, permission_id) VALUES (4, 1), (4, 2), (4, 4), (4, 5), (4, 6), (4, 9), (4, 11), (4, 12), (4, 13), (4, 15), (4, 19), (4, 24), (4, 25), (4, 26), (4, 27), (4, 28), (4, 29), (4, 30);
 
 -- Receptionist (ROLE_RECEPTIONIST): Demographics & Appointments
 INSERT INTO role_permissions (role_id, permission_id) VALUES (5, 1), (5, 2), (5, 3), (5, 4), (5, 5), (5, 6), (5, 7), (5, 21);

@@ -108,6 +108,27 @@ export const routes: Routes = [
     data: { roles: ['ROLE_NURSE'] },
   },
   {
+    path: 'nurse/triage',
+    loadComponent: () =>
+      import('./workspaces/nurse/nurse-triage.component').then((m) => m.NurseTriageComponent),
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['ROLE_NURSE'] },
+  },
+  {
+    path: 'nurse/vitals',
+    loadComponent: () =>
+      import('./workspaces/nurse/nurse-vitals.component').then((m) => m.NurseVitalsComponent),
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['ROLE_NURSE'] },
+  },
+  {
+    path: 'nurse/prescriptions',
+    loadComponent: () =>
+      import('./workspaces/nurse/nurse-prescriptions.component').then((m) => m.NursePrescriptionsComponent),
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['ROLE_NURSE'] },
+  },
+  {
     path: 'nurse/patients',
     loadComponent: () =>
       import('./workspaces/nurse/nurse-patients.component').then((m) => m.NursePatientsComponent),
@@ -122,23 +143,9 @@ export const routes: Routes = [
     data: { roles: ['ROLE_NURSE'] },
   },
   {
-    path: 'nurse/vitals',
-    loadComponent: () =>
-      import('./workspaces/nurse/nurse-vitals.component').then((m) => m.NurseVitalsComponent),
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['ROLE_NURSE'] },
-  },
-  {
     path: 'nurse/allergies',
     loadComponent: () =>
       import('./workspaces/nurse/nurse-allergies.component').then((m) => m.NurseAllergiesComponent),
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['ROLE_NURSE'] },
-  },
-  {
-    path: 'nurse/prescriptions',
-    loadComponent: () =>
-      import('./workspaces/nurse/nurse-prescriptions.component').then((m) => m.NursePrescriptionsComponent),
     canActivate: [authGuard, roleGuard],
     data: { roles: ['ROLE_NURSE'] },
   },

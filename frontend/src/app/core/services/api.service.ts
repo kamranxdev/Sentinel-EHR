@@ -387,4 +387,21 @@ export class ApiService {
   createFhirPatient(payload: any): Observable<any> {
     return this.http.post<any>(`${this.fhirUrl}/Patient`, payload);
   }
+
+  // --- Nursing Workspace API ---
+  submitTriage(record: any): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/v1/nursing/triage`, record);
+  }
+
+  getTriageRecordsForPatient(patientId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/v1/nursing/triage/patient/${patientId}`);
+  }
+
+  recordEmarAdministration(emar: any): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/v1/nursing/emar/administer`, emar);
+  }
+
+  getEmarHistoryForPatient(patientId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/v1/nursing/emar/patient/${patientId}`);
+  }
 }

@@ -29,6 +29,9 @@ public class Vitals {
     private Double heightCm;
     private Double bmi;
     private Integer bloodGlucose;    // mg/dL
+    private Integer painScore;       // 0-10 pain scale
+    private Integer fluidIntakeMl;   // mL
+    private Integer fluidOutputMl;   // mL
 
     private LocalDateTime recordedAt = LocalDateTime.now();
 
@@ -130,6 +133,30 @@ public class Vitals {
 
     public void setBloodGlucose(Integer bloodGlucose) {
         this.bloodGlucose = bloodGlucose;
+    }
+
+    public Integer getPainScore() {
+        return painScore;
+    }
+
+    public void setPainScore(Integer painScore) {
+        this.painScore = painScore;
+    }
+
+    public Integer getFluidIntakeMl() {
+        return fluidIntakeMl;
+    }
+
+    public void setFluidIntakeMl(Integer fluidIntakeMl) {
+        this.fluidIntakeMl = fluidIntakeMl;
+    }
+
+    public Integer getFluidOutputMl() {
+        return fluidOutputMl;
+    }
+
+    public void setFluidOutputMl(Integer fluidOutputMl) {
+        this.fluidOutputMl = fluidOutputMl;
     }
 
     public LocalDateTime getRecordedAt() {
