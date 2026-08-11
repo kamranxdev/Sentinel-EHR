@@ -40,7 +40,7 @@ public class PrescriptionController {
     }
 
     @GetMapping("/patient/{patientId}")
-    @PreAuthorize("hasAuthority('PRESCRIPTION_READ') and @abacEvaluator.hasTreatmentRelationship(authentication, #patientId)")
+    @PreAuthorize("(hasAuthority('PRESCRIPTION_READ') or hasRole('ROLE_DOCTOR') or hasRole('ROLE_NURSE') or hasRole('ROLE_PATIENT')) and @abacEvaluator.hasTreatmentRelationship(authentication, #patientId)")
     public List<PrescriptionResponseDTO> getPrescriptionsByPatient(@PathVariable Long patientId, Authentication auth) {
         auditService.logAction(auth, "READ", "PRESCRIPTION", String.valueOf(patientId), "Accessed eRx prescription history for patient ID: " + patientId);
         return prescriptionService.getPrescriptionsByPatientId(patientId).stream()
@@ -91,7 +91,7 @@ public class PrescriptionController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('PRESCRIPTION_CREATE') and (#payload?.patientId != null and @abacEvaluator.hasTreatmentRelationship(authentication, #payload.patientId))")
+    @PreAuthorize("(hasAuthority('PRESCRIPTION_CREATE') or hasRole('ROLE_DOCTOR') or hasRole('ROLE_NURSE')) and (#payload?.patientId != null and @abacEvaluator.hasTreatmentRelationship(authentication, #payload.patientId))")
     public ResponseEntity<?> createPrescription(@Valid @RequestBody PrescriptionRequestDTO payload, 
                                                  @RequestParam(value = "overrideWarning", defaultValue = "false") boolean overrideWarning,
                                                  Authentication auth) {

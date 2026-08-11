@@ -36,7 +36,7 @@ public class VitalsController {
     }
 
     @GetMapping("/patient/{patientId}")
-    @PreAuthorize("hasAuthority('VITALS_READ')")
+    @PreAuthorize("hasAuthority('VITALS_READ') or hasRole('ROLE_DOCTOR') or hasRole('ROLE_NURSE') or hasRole('ROLE_PATIENT')")
     public List<VitalsResponseDTO> getVitalsByPatient(@PathVariable Long patientId, Authentication auth) {
         if (!abacEvaluator.canAccessPatientData(auth, patientId, "READ_VITALS")) {
             throw new org.springframework.security.access.AccessDeniedException("ABAC Policy Violation: Department mismatch or no active care relationship.");
@@ -49,7 +49,7 @@ public class VitalsController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('VITALS_CREATE') and (#payload != null and #payload.patientId != null and @abacEvaluator.hasTreatmentRelationship(authentication, #payload.patientId))")
+    @PreAuthorize("(hasAuthority('VITALS_CREATE') or hasRole('ROLE_DOCTOR') or hasRole('ROLE_NURSE')) and (#payload != null and #payload.patientId != null and @abacEvaluator.hasTreatmentRelationship(authentication, #payload.patientId))")
     public ResponseEntity<VitalsResponseDTO> recordVitals(@Valid @RequestBody VitalsRequestDTO payload, Authentication auth) {
         Vitals entity = vitalsMapper.toEntity(payload);
         com.sentinel.patients.entity.Patient p = new com.sentinel.patients.entity.Patient();

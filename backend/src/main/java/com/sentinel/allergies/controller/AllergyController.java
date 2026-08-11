@@ -32,7 +32,7 @@ public class AllergyController {
     }
 
     @GetMapping("/patient/{patientId}")
-    @PreAuthorize("(hasAuthority('ALLERGY_READ') or hasAuthority('DIAGNOSIS_READ') or hasAuthority('VITALS_READ')) and @abacEvaluator.hasTreatmentRelationship(authentication, #patientId)")
+    @PreAuthorize("(hasAuthority('ALLERGY_READ') or hasAuthority('DIAGNOSIS_READ') or hasAuthority('VITALS_READ') or hasRole('ROLE_DOCTOR') or hasRole('ROLE_NURSE') or hasRole('ROLE_PATIENT')) and @abacEvaluator.hasTreatmentRelationship(authentication, #patientId)")
     public List<AllergyResponseDTO> getAllergiesByPatient(@PathVariable Long patientId, Authentication auth) {
         auditService.logAction(auth, "READ", "ALLERGY", String.valueOf(patientId), "Accessed allergy profile for patient ID: " + patientId);
         return allergyService.getAllergiesByPatientId(patientId).stream()
@@ -41,7 +41,7 @@ public class AllergyController {
     }
 
     @PostMapping
-    @PreAuthorize("(hasAuthority('ALLERGY_CREATE') or hasAuthority('VITALS_CREATE') or hasAuthority('CLINICAL_NOTE_CREATE')) and (#payload != null and #payload.patientId != null and @abacEvaluator.hasTreatmentRelationship(authentication, #payload.patientId))")
+    @PreAuthorize("(hasAuthority('ALLERGY_CREATE') or hasAuthority('VITALS_CREATE') or hasAuthority('CLINICAL_NOTE_CREATE') or hasRole('ROLE_DOCTOR') or hasRole('ROLE_NURSE')) and (#payload != null and #payload.patientId != null and @abacEvaluator.hasTreatmentRelationship(authentication, #payload.patientId))")
     public ResponseEntity<AllergyResponseDTO> createAllergy(@Valid @RequestBody AllergyRequestDTO payload, Authentication auth) {
         Allergy entity = allergyMapper.toEntity(payload);
         com.sentinel.patients.entity.Patient p = new com.sentinel.patients.entity.Patient();
@@ -54,7 +54,7 @@ public class AllergyController {
     }
 
     @PutMapping("/{id}/status")
-    @PreAuthorize("(hasAuthority('ALLERGY_CREATE') or hasAuthority('VITALS_CREATE')) and @patientSecurityService.canAccessAllergy(authentication, #id)")
+    @PreAuthorize("(hasAuthority('ALLERGY_CREATE') or hasAuthority('VITALS_CREATE') or hasRole('ROLE_DOCTOR') or hasRole('ROLE_NURSE')) and @patientSecurityService.canAccessAllergy(authentication, #id)")
     public ResponseEntity<AllergyResponseDTO> updateAllergyStatus(@PathVariable Long id, @RequestParam String status, Authentication auth) {
         Allergy saved = allergyService.updateAllergyStatus(id, status);
         auditService.logAction(auth, "UPDATE", "ALLERGY", String.valueOf(id), "Updated allergy status to " + status + " for allergy ID: " + id);

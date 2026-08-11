@@ -6,7 +6,6 @@ import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
 import { PatientContextService } from '../../core/services/patient-context.service';
 import { Patient } from '../../core/models/models';
-import { ActionButtonComponent } from '../../shared/ui/action-button.component';
 
 import { HlmCardImports } from '@spartan-ng/helm/card';
 import { HlmTableImports } from '@spartan-ng/helm/table';
@@ -22,7 +21,6 @@ import {
   lucideCalendarClock,
   lucideChevronRight,
   lucideUsers,
-  lucideSparkles,
   lucideSearch,
   lucideActivity,
 } from '@ng-icons/lucide';
@@ -44,7 +42,6 @@ interface QuickAction {
     CommonModule,
     FormsModule,
     RouterModule,
-    ActionButtonComponent,
     HlmCardImports,
     HlmTableImports,
     HlmBadgeImports,
@@ -61,7 +58,6 @@ interface QuickAction {
       lucideCalendarClock,
       lucideChevronRight,
       lucideUsers,
-      lucideSparkles,
       lucideSearch,
       lucideActivity,
     }),
@@ -76,30 +72,13 @@ interface QuickAction {
           </div>
           <div>
             <h1 class="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
-              Dr. {{ currentUser?.fullName }}
+              {{ currentUser?.fullName }}
               <span hlmBadge variant="secondary" class="text-[11px] bg-primary/10 text-primary border border-primary/20">
                 Physician Desk
               </span>
             </h1>
             <p class="text-xs text-muted-foreground mt-0.5">Active Clinical Shift • Patient MPI Roster • SOAP Notes & eRx Orders</p>
           </div>
-        </div>
-
-        <div class="flex items-center gap-3">
-          <div class="p-2.5 rounded-lg border border-border bg-card text-center min-w-[110px]">
-            <span class="text-xl font-bold text-foreground block leading-none">{{ patientCount() }}</span>
-            <span class="text-[10px] text-muted-foreground font-semibold uppercase tracking-wide mt-1 block">MPI Census</span>
-          </div>
-
-          <app-action-button
-            variant="outline"
-            size="sm"
-            [loading]="generating()"
-            (action)="generateSyntheticCohort()"
-            customClass="gap-2 text-xs">
-            <ng-icon name="lucideSparkles" size="14" />
-            <span>{{ generating() ? 'Generating...' : 'Add Cohort' }}</span>
-          </app-action-button>
         </div>
       </div>
 
@@ -209,9 +188,6 @@ interface QuickAction {
 export class DoctorDashboardComponent implements OnInit {
   patients = signal<Patient[]>([]);
   searchQuery = signal('');
-  generating = signal(false);
-
-  patientCount = computed(() => this.patients().length);
 
   filteredPatients = computed(() => {
     const q = this.searchQuery().toLowerCase().trim();
@@ -266,7 +242,7 @@ export class DoctorDashboardComponent implements OnInit {
     private apiService: ApiService,
     public patientContext: PatientContextService,
     private router: Router
-  ) {}
+  ) { }
 
   get currentUser() {
     return this.authService.currentUser();
@@ -284,18 +260,5 @@ export class DoctorDashboardComponent implements OnInit {
   selectPatient(p: Patient): void {
     this.patientContext.setActivePatient(p);
     this.router.navigate(['/doctor/chart']);
-  }
-
-  generateSyntheticCohort(): void {
-    this.generating.set(true);
-    this.apiService.generateSyntheticCohort(3).subscribe({
-      next: () => {
-        this.generating.set(false);
-        this.apiService.getPatients().subscribe((pts) => {
-          this.patients.set(pts);
-        });
-      },
-      error: () => this.generating.set(false),
-    });
   }
 }

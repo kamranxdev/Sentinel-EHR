@@ -32,7 +32,7 @@ public class DiagnosisController {
     }
 
     @GetMapping("/patient/{patientId}")
-    @PreAuthorize("hasAuthority('DIAGNOSIS_READ') and @abacEvaluator.hasTreatmentRelationship(authentication, #patientId)")
+    @PreAuthorize("(hasAuthority('DIAGNOSIS_READ') or hasRole('ROLE_DOCTOR') or hasRole('ROLE_NURSE') or hasRole('ROLE_PATIENT')) and @abacEvaluator.hasTreatmentRelationship(authentication, #patientId)")
     public List<DiagnosisResponseDTO> getDiagnosesByPatient(@PathVariable Long patientId, Authentication auth) {
         auditService.logAction(auth, "READ", "DIAGNOSIS", String.valueOf(patientId), "Accessed coded problem list & diagnoses for patient ID: " + patientId);
         return diagnosisService.getDiagnosesByPatientId(patientId).stream()
@@ -41,7 +41,7 @@ public class DiagnosisController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('DIAGNOSIS_CREATE') and (#payload != null and #payload.patientId != null and @abacEvaluator.hasTreatmentRelationship(authentication, #payload.patientId))")
+    @PreAuthorize("(hasAuthority('DIAGNOSIS_CREATE') or hasRole('ROLE_DOCTOR') or hasRole('ROLE_NURSE')) and (#payload != null and #payload.patientId != null and @abacEvaluator.hasTreatmentRelationship(authentication, #payload.patientId))")
     public ResponseEntity<DiagnosisResponseDTO> createDiagnosis(@Valid @RequestBody DiagnosisRequestDTO payload, Authentication auth) {
         Diagnosis entity = diagnosisMapper.toEntity(payload);
         com.sentinel.patients.entity.Patient p = new com.sentinel.patients.entity.Patient();
@@ -54,7 +54,7 @@ public class DiagnosisController {
     }
 
     @PutMapping("/{id}/status")
-    @PreAuthorize("hasAuthority('DIAGNOSIS_CREATE') and @patientSecurityService.canAccessDiagnosis(authentication, #id)")
+    @PreAuthorize("(hasAuthority('DIAGNOSIS_CREATE') or hasRole('ROLE_DOCTOR') or hasRole('ROLE_NURSE')) and @patientSecurityService.canAccessDiagnosis(authentication, #id)")
     public ResponseEntity<DiagnosisResponseDTO> updateDiagnosisStatus(@PathVariable Long id, @RequestParam String status, Authentication auth) {
         Diagnosis saved = diagnosisService.updateDiagnosisStatus(id, status);
         auditService.logAction(auth, "UPDATE", "DIAGNOSIS", String.valueOf(id), "Updated diagnosis lifecycle status to " + status + " for ID: " + id);

@@ -41,8 +41,12 @@ public class EncounterController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyAuthority('CLINICAL_NOTE_CREATE', 'ENCOUNTER_CREATE', 'ROLE_RECEPTIONIST', 'ROLE_NURSE', 'ROLE_DOCTOR', 'ROLE_ADMIN', 'ROLE_SYS_ADMIN') and (#payload != null and #payload.patientId != null and @abacEvaluator.hasTreatmentRelationship(authentication, #payload.patientId))")
+    @PreAuthorize("hasAnyAuthority('CLINICAL_NOTE_CREATE', 'ENCOUNTER_CREATE', 'ROLE_NURSE', 'ROLE_DOCTOR', 'ROLE_ADMIN', 'ROLE_SYS_ADMIN') and (#payload != null and #payload.patientId != null and @abacEvaluator.hasTreatmentRelationship(authentication, #payload.patientId))")
     public ResponseEntity<EncounterResponseDTO> createEncounter(@Valid @RequestBody EncounterRequestDTO payload, Authentication auth) {
+        if (auth != null && auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_RECEPTIONIST"))) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
         Encounter entity = encounterMapper.toEntity(payload);
 
         com.sentinel.patients.entity.Patient p = new com.sentinel.patients.entity.Patient();
@@ -61,8 +65,11 @@ public class EncounterController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyAuthority('CLINICAL_NOTE_CREATE', 'ENCOUNTER_UPDATE', 'ROLE_RECEPTIONIST', 'ROLE_NURSE', 'ROLE_DOCTOR', 'ROLE_ADMIN', 'ROLE_SYS_ADMIN') and @patientSecurityService.canAccessEncounter(authentication, #id)")
+    @PreAuthorize("hasAnyAuthority('CLINICAL_NOTE_CREATE', 'ENCOUNTER_UPDATE', 'ROLE_NURSE', 'ROLE_DOCTOR', 'ROLE_ADMIN', 'ROLE_SYS_ADMIN') and @patientSecurityService.canAccessEncounter(authentication, #id)")
     public ResponseEntity<EncounterResponseDTO> updateEncounter(@PathVariable Long id, @Valid @RequestBody EncounterRequestDTO payload, Authentication auth) {
+        if (auth != null && auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_RECEPTIONIST"))) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
         Encounter updatedEntity = encounterMapper.toEntity(payload);
         Encounter saved = encounterService.updateEncounter(id, updatedEntity);
         auditService.logAction(auth, "UPDATE", "ENCOUNTER", String.valueOf(id), "Updated encounter details / clinical notes for ID: " + id);

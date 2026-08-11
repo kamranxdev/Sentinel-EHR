@@ -182,7 +182,7 @@ import {
             <ng-icon name="lucideCalendar" size="16" class="text-primary" />
           </div>
           <div *ngIf="nextAppointment()" class="space-y-0.5">
-            <div class="text-sm font-bold text-foreground truncate">Dr. {{ nextAppointment()?.doctor?.fullName }}</div>
+            <div class="text-sm font-bold text-foreground truncate">{{ nextAppointment()?.doctor?.fullName || nextAppointment()?.doctorName || 'Unknown' }}</div>
             <div class="text-xs text-primary font-medium flex items-center gap-1">
               <ng-icon name="lucideClock" size="12" />
               <span>{{ nextAppointment()?.appointmentDate | date:'mediumDate' }}</span>
@@ -275,8 +275,8 @@ import {
                   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-primary/10">
                     <div>
                       <span class="text-[11px] font-semibold text-primary uppercase tracking-wider block">Attending Provider</span>
-                      <h3 class="text-base font-bold text-foreground">Dr. {{ nextAppointment()?.doctor?.fullName }}</h3>
-                      <p class="text-xs text-muted-foreground">{{ nextAppointment()?.doctor?.specialization || 'General Practice' }}</p>
+                      <h3 class="text-base font-bold text-foreground">{{ nextAppointment()?.doctor?.fullName || nextAppointment()?.doctorName || 'Unknown' }}</h3>
+                      <p class="text-xs text-muted-foreground">{{ nextAppointment()?.doctor?.specialization || nextAppointment()?.doctorSpecialization || 'General Practice' }}</p>
                     </div>
                     <span hlmBadge variant="default" class="self-start sm:self-center text-xs">
                       {{ nextAppointment()?.status }}

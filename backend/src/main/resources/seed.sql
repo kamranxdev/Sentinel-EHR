@@ -104,10 +104,7 @@ INSERT INTO users (id, username, password, email, full_name, specialization, dep
 VALUES (7, 'auditor', '$2a$10$3Uj7vg0rhOtYROAzLYvK2.HbXLWJfNM4lfK8DNWsGCsEHLH14A3ei', 'auditor@sentinel.org', 'Inspector Suresh Menon (Compliance Auditor)', NULL, 'Regulatory Compliance & Forensics', CURRENT_TIMESTAMP);
 
 INSERT INTO users (id, username, password, email, full_name, specialization, department, created_at) 
-VALUES (8, 'patient', '$2a$10$1Knu6HwyDwDWpqngg1N6nOoWKupSsqQLU0Mw/3EmTdJ.XKt4e32kC', 'patient@sentinel.org', 'Kamran Khan', NULL, NULL, CURRENT_TIMESTAMP);
-
-INSERT INTO users (id, username, password, email, full_name, specialization, department, created_at) 
-VALUES (9, 'user_kamran', '$2a$10$1Knu6HwyDwDWpqngg1N6nOoWKupSsqQLU0Mw/3EmTdJ.XKt4e32kC', 'kamran.khan@example.com', 'Kamran Khan', NULL, NULL, CURRENT_TIMESTAMP);
+VALUES (9, 'patient', '$2a$10$1Knu6HwyDwDWpqngg1N6nOoWKupSsqQLU0Mw/3EmTdJ.XKt4e32kC', 'kamran.khan@example.com', 'Kamran Khan', NULL, NULL, CURRENT_TIMESTAMP);
 
 INSERT INTO users (id, username, password, email, full_name, specialization, department, created_at) 
 VALUES (10, 'user_aarav', '$2a$10$1Knu6HwyDwDWpqngg1N6nOoWKupSsqQLU0Mw/3EmTdJ.XKt4e32kC', 'aarav.patel@example.com', 'Aarav Patel', NULL, NULL, CURRENT_TIMESTAMP);
@@ -142,7 +139,6 @@ INSERT INTO user_roles (user_id, role_id) VALUES (4, 3);
 INSERT INTO user_roles (user_id, role_id) VALUES (5, 4);
 INSERT INTO user_roles (user_id, role_id) VALUES (6, 4);
 INSERT INTO user_roles (user_id, role_id) VALUES (7, 10);
-INSERT INTO user_roles (user_id, role_id) VALUES (8, 9);
 INSERT INTO user_roles (user_id, role_id) VALUES (9, 9);
 INSERT INTO user_roles (user_id, role_id) VALUES (10, 9);
 INSERT INTO user_roles (user_id, role_id) VALUES (11, 9);
@@ -166,9 +162,6 @@ VALUES (3, 'PAT-1003', '91-7810-0449-1003', 'AADHAAR-7810-4491', 'Ananya Sharma'
 
 INSERT INTO patients (id, patient_code, abha_id, national_id, full_name, date_of_birth, gender, blood_type, phone, email, address, pin_code, emergency_contact, insurance_provider, insurance_policy_number, insurance_group_number, coverage_plan, medical_alerts, user_id, created_at) 
 VALUES (4, 'PAT-1004', '91-3120-0558-2004', 'AADHAAR-3120-5582', 'Rohan Mehta', '1990-07-22', 'Male', 'AB+', '+91 98765 88990', 'rohan.mehta@example.com', '88 Bandra Reclamation, Mumbai', '400050', 'Neha Mehta (Sister) - +91 98765 11223', 'Care Health Insurance', 'CARE-3341029', 'GRP-99401', 'Peanut Allergy', 12, CURRENT_TIMESTAMP);
-
-INSERT INTO patients (id, patient_code, abha_id, national_id, full_name, date_of_birth, gender, blood_type, phone, email, address, pin_code, emergency_contact, insurance_provider, insurance_policy_number, insurance_group_number, coverage_plan, medical_alerts, user_id, created_at) 
-VALUES (5, 'PAT-1005', '91-9990-0111-1005', 'AADHAAR-9990-1111', 'Kamran Khan', '1985-04-12', 'Male', 'O+', '+91 98765 43210', 'patient@sentinel.org', '742 Marine Drive, Mumbai', '400001', 'Farah Khan (Wife) - +91 98765 98765', 'Star Health Insurance', 'STAR-9874102', 'GRP-55410', 'Premier Comprehensive Care', 'Type 2 Diabetes, Severe Penicillin Allergy, Mild Asthma', 8, CURRENT_TIMESTAMP);
 
 -- ------------------------------------------------------------------------------
 -- 8. BEDS (SPATIAL LOCATION HIERARCHY)

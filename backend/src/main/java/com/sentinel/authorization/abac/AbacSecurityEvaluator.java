@@ -45,12 +45,26 @@ public class AbacSecurityEvaluator implements ABACEvaluator {
         String username = authentication.getName();
 
         if (hasRole(authentication, "ROLE_SYS_ADMIN") || hasRole(authentication, "ROLE_ADMIN") ||
-            hasRole(authentication, "ROLE_AUDITOR") || hasRole(authentication, "ROLE_NURSE") ||
-            hasRole(authentication, "ROLE_RECEPTIONIST")) {
+            hasRole(authentication, "ROLE_AUDITOR") || hasRole(authentication, "ROLE_DOCTOR") ||
+            hasRole(authentication, "ROLE_NURSE") || hasRole(authentication, "ROLE_RECEPTIONIST")) {
             return true;
         }
 
-        // 1. Check Self-Service patient profile access
+        // Patient self-service: verify they are accessing their own record
+        if (hasRole(authentication, "ROLE_PATIENT")) {
+            Optional<Patient> selfPatient = patientRepository.findFirstByUser_Username(username);
+            if (selfPatient.isPresent() && selfPatient.get().getId().equals(patientId)) {
+                return true;
+            }
+            // Fallback: check via linked user entity on the patient record
+            Optional<Patient> patientOpt2 = patientRepository.findById(patientId);
+            if (patientOpt2.isPresent() && patientOpt2.get().getUser() != null) {
+                return patientOpt2.get().getUser().getUsername().equalsIgnoreCase(username);
+            }
+            return false;
+        }
+
+        // 1. Check Self-Service patient profile access (for non-patient roles linked to patient records)
         Optional<Patient> patientOpt = patientRepository.findById(patientId);
         if (patientOpt.isPresent() && patientOpt.get().getUser() != null) {
             if (patientOpt.get().getUser().getUsername().equalsIgnoreCase(username)) {

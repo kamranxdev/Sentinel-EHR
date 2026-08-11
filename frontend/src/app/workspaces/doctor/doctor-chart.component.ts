@@ -736,12 +736,92 @@ export class DoctorChartComponent implements OnInit {
     }
   }
 
-  loadPatientClinicalData(patientId: number): void {
-    this.apiService.getEncountersByPatient(patientId).subscribe((res) => this.encounters.set(res));
-    this.apiService.getDiagnosesByPatient(patientId).subscribe((res) => this.diagnoses.set(res));
-    this.apiService.getPrescriptionsByPatient(patientId).subscribe((res) => this.prescriptions.set(res));
-    this.apiService.getAllergiesByPatient(patientId).subscribe((res) => this.allergies.set(res));
-    this.apiService.getVitalsByPatient(patientId).subscribe((res) => this.vitals.set(res));
+  loadPatientClinicalData(patientId: number | string): void {
+    const pId = Number(patientId);
+    if (!pId) return;
+
+    const active = this.patientContext.activePatient() as any;
+
+    this.apiService.getEncountersByPatient(pId).subscribe({
+      next: (res) => this.encounters.set(res || []),
+      error: () => this.encounters.set([]),
+    });
+
+    this.apiService.getDiagnosesByPatient(pId).subscribe({
+      next: (res) => {
+        if (res && res.length > 0) {
+          this.diagnoses.set(res);
+        } else if (active?.diagnoses?.length) {
+          this.diagnoses.set(active.diagnoses);
+        } else {
+          this.diagnoses.set([]);
+        }
+      },
+      error: () => {
+        if (active?.diagnoses?.length) this.diagnoses.set(active.diagnoses);
+        else this.diagnoses.set([]);
+      },
+    });
+
+    this.apiService.getPrescriptionsByPatient(pId).subscribe({
+      next: (res) => {
+        if (res && res.length > 0) {
+          this.prescriptions.set(res);
+        } else if (active?.prescriptions?.length) {
+          this.prescriptions.set(active.prescriptions);
+        } else {
+          this.prescriptions.set([]);
+        }
+      },
+      error: () => {
+        if (active?.prescriptions?.length) this.prescriptions.set(active.prescriptions);
+        else this.prescriptions.set([]);
+      },
+    });
+
+    this.apiService.getAllergiesByPatient(pId).subscribe({
+      next: (res) => {
+        if (res && res.length > 0) {
+          this.allergies.set(res);
+        } else if (active?.allergies?.length) {
+          this.allergies.set(active.allergies);
+        } else {
+          this.allergies.set([]);
+        }
+      },
+      error: () => {
+        if (active?.allergies?.length) this.allergies.set(active.allergies);
+        else this.allergies.set([]);
+      },
+    });
+
+    this.apiService.getVitalsByPatient(pId).subscribe({
+      next: (res) => {
+        if (res && res.length > 0) {
+          this.vitals.set(res);
+        } else if (active?.vitals?.length) {
+          this.vitals.set(active.vitals);
+        } else {
+          this.vitals.set([]);
+        }
+      },
+      error: () => {
+        if (active?.vitals?.length) this.vitals.set(active.vitals);
+        else this.vitals.set([]);
+      },
+    });
+
+    this.apiService.getPatientClinicalHistory(pId).subscribe({
+      next: (dto: any) => {
+        if (dto) {
+          if (dto.vitals?.length && this.vitals().length === 0) this.vitals.set(dto.vitals);
+          if (dto.prescriptions?.length && this.prescriptions().length === 0) this.prescriptions.set(dto.prescriptions);
+          if (dto.allergies?.length && this.allergies().length === 0) this.allergies.set(dto.allergies);
+          if (dto.pastIllnesses?.length && this.diagnoses().length === 0) this.diagnoses.set(dto.pastIllnesses);
+        }
+      },
+      error: () => {},
+    });
   }
 
   onPatientSelect(patientId: number | string): void {
@@ -780,18 +860,21 @@ export class DoctorChartComponent implements OnInit {
     this.savingDiagnosis.set(true);
     this.apiService
       .createDiagnosis({
-        patient: { id: active.id } as Patient,
+        patient: { id: Number(active.id) } as Patient,
         icdCode: this.newDiagnosis.icdCode,
         conditionName: this.newDiagnosis.conditionName,
         status: 'ACTIVE',
       })
       .subscribe({
-        next: () => {
+        next: (saved: any) => {
           this.savingDiagnosis.set(false);
           this.showDiagnosisModal.set(false);
           this.newDiagnosis = { icdCode: '', conditionName: '' };
           toast.success('ICD-10 Diagnosis added');
-          this.loadPatientClinicalData(active.id);
+          if (saved) {
+            this.diagnoses.update((list) => [saved, ...list]);
+          }
+          this.loadPatientClinicalData(active.id!);
         },
         error: () => this.savingDiagnosis.set(false),
       });
@@ -804,7 +887,7 @@ export class DoctorChartComponent implements OnInit {
     this.savingErx.set(true);
     this.apiService
       .createPrescription({
-        patient: { id: active.id } as Patient,
+        patient: { id: Number(active.id) } as Patient,
         medicationName: this.newErx.medicationName,
         dosage: this.newErx.dosage,
         route: this.newErx.route,
@@ -813,12 +896,15 @@ export class DoctorChartComponent implements OnInit {
         status: 'ACTIVE',
       })
       .subscribe({
-        next: () => {
+        next: (saved: any) => {
           this.savingErx.set(false);
           this.showErxModal.set(false);
           this.newErx = { medicationName: '', dosage: '', route: 'Oral', frequency: 'Twice daily', instructions: '' };
           toast.success('eRx order issued to pharmacy');
-          this.loadPatientClinicalData(active.id);
+          if (saved) {
+            this.prescriptions.update((list) => [saved, ...list]);
+          }
+          this.loadPatientClinicalData(active.id!);
         },
         error: () => this.savingErx.set(false),
       });
@@ -831,7 +917,7 @@ export class DoctorChartComponent implements OnInit {
     this.savingAllergy.set(true);
     this.apiService
       .createAllergy({
-        patient: { id: active.id } as Patient,
+        patient: { id: Number(active.id) } as Patient,
         allergenName: this.newAllergy.allergenName,
         category: this.newAllergy.category,
         severity: this.newAllergy.severity,
@@ -839,12 +925,15 @@ export class DoctorChartComponent implements OnInit {
         status: 'ACTIVE',
       })
       .subscribe({
-        next: () => {
+        next: (saved: any) => {
           this.savingAllergy.set(false);
           this.showAllergyModal.set(false);
           this.newAllergy = { allergenName: '', category: 'DRUG', severity: 'SEVERE', reactionDescription: '', status: 'ACTIVE' };
           toast.success('Allergy record saved');
-          this.loadPatientClinicalData(active.id);
+          if (saved) {
+            this.allergies.update((list) => [saved, ...list]);
+          }
+          this.loadPatientClinicalData(active.id!);
         },
         error: () => this.savingAllergy.set(false),
       });
@@ -857,18 +946,21 @@ export class DoctorChartComponent implements OnInit {
     this.savingVitals.set(true);
     this.apiService
       .recordVitals({
-        patient: { id: active.id } as Patient,
+        patient: { id: Number(active.id) } as Patient,
         bloodPressure: this.newVitals.bloodPressure,
         heartRate: Number(this.newVitals.heartRate),
         temperature: Number(this.newVitals.temperature),
         oxygenSaturation: Number(this.newVitals.oxygenSaturation),
       })
       .subscribe({
-        next: () => {
+        next: (saved: any) => {
           this.savingVitals.set(false);
           this.showVitalsModal.set(false);
           toast.success('Vitals recorded');
-          this.loadPatientClinicalData(active.id);
+          if (saved) {
+            this.vitals.update((list) => [saved, ...list]);
+          }
+          this.loadPatientClinicalData(active.id!);
         },
         error: () => this.savingVitals.set(false),
       });
