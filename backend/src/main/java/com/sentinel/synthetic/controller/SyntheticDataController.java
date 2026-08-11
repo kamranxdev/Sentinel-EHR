@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping({"/api/v1/synthetic", "/api/synthetic"})
+@RequestMapping("/api/v1/synthetic")
 public class SyntheticDataController {
 
     private final SyntheticDataService syntheticDataService;

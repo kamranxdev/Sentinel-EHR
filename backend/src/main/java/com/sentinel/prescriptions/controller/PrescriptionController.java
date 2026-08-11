@@ -5,6 +5,7 @@ import com.sentinel.patients.service.PatientSecurityService;
 import com.sentinel.prescriptions.dto.PrescriptionRequestDTO;
 import com.sentinel.prescriptions.dto.PrescriptionResponseDTO;
 import com.sentinel.prescriptions.dto.PrescriptionSafetyCheckRequest;
+import com.sentinel.prescriptions.dto.PrescriptionStatusUpdateDTO;
 import com.sentinel.prescriptions.dto.SafetyCheckResultDTO;
 import com.sentinel.prescriptions.entity.Prescription;
 import com.sentinel.prescriptions.mapper.PrescriptionMapper;
@@ -21,7 +22,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping({"/api/v1/prescriptions", "/api/prescriptions"})
+@RequestMapping("/api/v1/prescriptions")
 public class PrescriptionController {
 
     private final PrescriptionService prescriptionService;
@@ -48,38 +49,15 @@ public class PrescriptionController {
                 .toList();
     }
 
+    /**
+     * Drug-allergy and contraindication safety check before writing a prescription.
+     * Consolidated from the previous duplicate /validate-safety endpoint.
+     */
     @PostMapping("/safety-check")
-    @PreAuthorize("hasAuthority('PRESCRIPTION_CREATE')")
-    public ResponseEntity<SafetyCheckResultDTO> checkSafety(@Valid @RequestBody PrescriptionSafetyCheckRequest request, Authentication auth) {
-        if (request.getPatientId() == null || request.getMedicationName() == null) {
-            throw new IllegalArgumentException("patientId and medicationName are required fields");
-        }
-
-        if (!patientSecurityService.canAccessPatient(auth, request.getPatientId())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
-        String primaryRole = getPrimaryRole(auth);
-        SafetyCheckResultDTO result = prescriptionService.validateSafety(
-                request.getPatientId(), 
-                request.getMedicationName(), 
-                auth.getName(), 
-                primaryRole
-        );
-        return ResponseEntity.ok(result);
-    }
-
-    @PostMapping("/validate-safety")
-    @PreAuthorize("hasAuthority('PRESCRIPTION_READ')")
-    public ResponseEntity<SafetyCheckResultDTO> validatePrescriptionSafety(@Valid @RequestBody PrescriptionSafetyCheckRequest request, Authentication auth) {
-        if (request.getPatientId() == null || request.getMedicationName() == null) {
-            throw new IllegalArgumentException("patientId and medicationName are required for safety validation");
-        }
-
-        if (!patientSecurityService.canAccessPatient(auth, request.getPatientId())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
+    @PreAuthorize("hasAuthority('PRESCRIPTION_CREATE') and @abacEvaluator.canAccessPatientData(authentication, #request.patientId, 'PRESCRIPTION_CHECK')")
+    public ResponseEntity<SafetyCheckResultDTO> checkPrescriptionSafety(
+            @Valid @RequestBody PrescriptionSafetyCheckRequest request,
+            Authentication auth) {
         String primaryRole = getPrimaryRole(auth);
         SafetyCheckResultDTO result = prescriptionService.validateSafety(
                 request.getPatientId(),
@@ -90,20 +68,25 @@ public class PrescriptionController {
         return ResponseEntity.ok(result);
     }
 
+    /**
+     * Creates a new prescription. If a drug-allergy conflict is found and the clinician
+     * wants to override, set {@code overrideWarning: true} in the request body.
+     */
     @PostMapping
-    @PreAuthorize("(hasAuthority('PRESCRIPTION_CREATE') or hasRole('ROLE_DOCTOR') or hasRole('ROLE_NURSE')) and (#payload?.patientId != null and @abacEvaluator.hasTreatmentRelationship(authentication, #payload.patientId))")
-    public ResponseEntity<?> createPrescription(@Valid @RequestBody PrescriptionRequestDTO payload, 
-                                                 @RequestParam(value = "overrideWarning", defaultValue = "false") boolean overrideWarning,
-                                                 Authentication auth) {
+    @PreAuthorize("(hasAuthority('PRESCRIPTION_CREATE') or hasRole('ROLE_DOCTOR')) and (#payload?.patientId != null and @abacEvaluator.hasTreatmentRelationship(authentication, #payload.patientId))")
+    public ResponseEntity<?> createPrescription(
+            @Valid @RequestBody PrescriptionRequestDTO payload,
+            Authentication auth) {
         if (payload.getPatientId() == null) {
             throw new IllegalArgumentException("Patient ID is required for prescription creation");
         }
 
+        boolean overrideWarning = Boolean.TRUE.equals(payload.getOverrideWarning());
         String primaryRole = getPrimaryRole(auth);
         SafetyCheckResultDTO safetyResult = prescriptionService.validateSafety(
-                payload.getPatientId(), 
-                payload.getMedicationName(), 
-                auth.getName(), 
+                payload.getPatientId(),
+                payload.getMedicationName(),
+                auth.getName(),
                 primaryRole
         );
 
@@ -121,23 +104,24 @@ public class PrescriptionController {
         entity.setPatient(p);
 
         Prescription saved = prescriptionService.createPrescription(entity, auth.getName());
-        
+
         String auditDetail = "Prescribed " + saved.getMedicationName() + " (" + saved.getDosage() + ") to patient ID: " + saved.getPatient().getId();
         if (!safetyResult.isSafe() && overrideWarning) {
             auditDetail += " [CLINICIAN OVERRIDE OF ALLERGY WARNING: " + safetyResult.getConflictingAllergen() + "]";
         }
 
         auditService.logAction(auth, "CREATE", "PRESCRIPTION", String.valueOf(saved.getId()), auditDetail);
-
         return ResponseEntity.status(HttpStatus.CREATED).body(prescriptionMapper.toResponseDTO(saved));
     }
 
-    @PutMapping("/{id}/status")
-    @PreAuthorize("hasAuthority('PRESCRIPTION_READ') and @patientSecurityService.canAccessPrescription(authentication, #id)")
-    public ResponseEntity<PrescriptionResponseDTO> updateStatus(@PathVariable Long id, @RequestParam String status, Authentication auth) {
-        Prescription saved = prescriptionService.updateStatus(id, status);
-        auditService.logAction(auth, "UPDATE", "PRESCRIPTION", String.valueOf(id), "Updated prescription ID: " + id + " status to " + status);
-
+    @PatchMapping("/{id}/status")
+    @PreAuthorize("hasAuthority('PRESCRIPTION_UPDATE') and @patientSecurityService.canAccessPrescription(authentication, #id)")
+    public ResponseEntity<PrescriptionResponseDTO> updateStatus(
+            @PathVariable Long id,
+            @Valid @RequestBody PrescriptionStatusUpdateDTO payload,
+            Authentication auth) {
+        Prescription saved = prescriptionService.updateStatus(id, payload.getStatus());
+        auditService.logAction(auth, "UPDATE", "PRESCRIPTION", String.valueOf(id), "Updated prescription ID: " + id + " status to " + payload.getStatus());
         return ResponseEntity.ok(prescriptionMapper.toResponseDTO(saved));
     }
 

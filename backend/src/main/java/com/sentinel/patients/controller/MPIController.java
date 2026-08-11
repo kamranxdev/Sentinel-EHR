@@ -3,6 +3,7 @@ package com.sentinel.patients.controller;
 import com.sentinel.patients.dto.MPIMatchCandidateDTO;
 import com.sentinel.patients.dto.MPIMergeRequestDTO;
 import com.sentinel.patients.service.MPISearchService;
+import jakarta.validation.Valid;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -13,7 +14,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping({"/api/v1/mpi", "/api/mpi", "/v1/mpi", "/mpi"})
+@RequestMapping("/api/v1/patients/mpi")
 public class MPIController {
 
     private final MPISearchService mpiSearchService;
@@ -22,8 +23,8 @@ public class MPIController {
         this.mpiSearchService = mpiSearchService;
     }
 
-    @GetMapping({"/search", "/search/"})
-    @PreAuthorize("hasAnyAuthority('MPI_SEARCH', 'PATIENT_READ', 'ROLE_RECEPTIONIST', 'ROLE_INTAKE_SPEC', 'ROLE_ADMIN', 'ROLE_SYS_ADMIN', 'RECEPTIONIST', 'ADMIN')")
+    @GetMapping("/search")
+    @PreAuthorize("hasAnyAuthority('MPI_SEARCH', 'PATIENT_READ', 'ROLE_RECEPTIONIST', 'ROLE_INTAKE_SPEC', 'ROLE_ADMIN', 'ROLE_SYS_ADMIN')")
     public List<MPIMatchCandidateDTO> searchMPI(
             @RequestParam(value = "fullName", required = false) String fullName,
             @RequestParam(value = "dateOfBirth", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateOfBirth,
@@ -35,19 +36,18 @@ public class MPIController {
             @RequestParam(value = "address", required = false) String address,
             @RequestParam(value = "gender", required = false) String gender,
             Authentication auth) {
-        
         return mpiSearchService.searchMPI(fullName, dateOfBirth, abhaId, nationalId, mrn, phone, email, address, gender, auth);
     }
 
-    @GetMapping({"/scan", "/scan/", "/duplicate-candidates", "/duplicate-candidates/"})
-    @PreAuthorize("hasAnyAuthority('MPI_SEARCH', 'PATIENT_READ', 'ROLE_RECEPTIONIST', 'ROLE_INTAKE_SPEC', 'ROLE_ADMIN', 'ROLE_SYS_ADMIN', 'RECEPTIONIST', 'ADMIN')")
+    @GetMapping("/duplicates")
+    @PreAuthorize("hasAnyAuthority('MPI_SEARCH', 'PATIENT_READ', 'ROLE_RECEPTIONIST', 'ROLE_INTAKE_SPEC', 'ROLE_ADMIN', 'ROLE_SYS_ADMIN')")
     public List<MPIMatchCandidateDTO> scanDuplicateCandidates(Authentication auth) {
         return mpiSearchService.scanDuplicateCandidates(auth);
     }
 
-    @PostMapping({"/merge-request", "/merge-request/", "/merge", "/merge/"})
+    @PostMapping("/merge-requests")
     @PreAuthorize("hasAnyAuthority('MPI_MERGE_REQUEST', 'ROLE_RECEPTIONIST', 'ROLE_ADMIN', 'ROLE_SYS_ADMIN')")
-    public ResponseEntity<String> requestChartMerge(@RequestBody MPIMergeRequestDTO mergeRequest, Authentication auth) {
+    public ResponseEntity<String> requestChartMerge(@Valid @RequestBody MPIMergeRequestDTO mergeRequest, Authentication auth) {
         String result = mpiSearchService.requestChartMerge(mergeRequest, auth);
         return ResponseEntity.ok(result);
     }

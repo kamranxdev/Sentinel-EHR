@@ -44,9 +44,9 @@ public class AbacSecurityEvaluator implements ABACEvaluator {
 
         String username = authentication.getName();
 
+        // Administrative bypass: System admins, Auditors, and Receptionists (for intake/MPI)
         if (hasRole(authentication, "ROLE_SYS_ADMIN") || hasRole(authentication, "ROLE_ADMIN") ||
-            hasRole(authentication, "ROLE_AUDITOR") || hasRole(authentication, "ROLE_DOCTOR") ||
-            hasRole(authentication, "ROLE_NURSE") || hasRole(authentication, "ROLE_RECEPTIONIST")) {
+            hasRole(authentication, "ROLE_AUDITOR") || hasRole(authentication, "ROLE_RECEPTIONIST")) {
             return true;
         }
 

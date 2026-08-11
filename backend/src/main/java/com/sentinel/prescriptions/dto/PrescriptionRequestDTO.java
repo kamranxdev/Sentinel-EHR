@@ -28,6 +28,12 @@ public class PrescriptionRequestDTO {
     private String instructions;
     private String status;
 
+    /**
+     * When true, the clinician explicitly acknowledges and overrides a drug-allergy
+     * or contraindication warning flagged by the safety-check engine.
+     */
+    private Boolean overrideWarning = false;
+
     public PrescriptionRequestDTO() {}
 
     public Long getPatientId() {
@@ -125,5 +131,13 @@ public class PrescriptionRequestDTO {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public Boolean getOverrideWarning() {
+        return overrideWarning;
+    }
+
+    public void setOverrideWarning(Boolean overrideWarning) {
+        this.overrideWarning = overrideWarning;
     }
 }

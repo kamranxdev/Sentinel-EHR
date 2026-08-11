@@ -19,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping({"/api/v1/nursing", "/api/nursing"})
+@RequestMapping("/api/v1/nursing")
 public class NursingController {
 
     private final NursingService nursingService;
@@ -35,7 +35,7 @@ public class NursingController {
     }
 
     // --- 1. CLINICAL TRIAGE ---
-    @PostMapping({"/triage", "/triage-ews"})
+    @PostMapping("/triage")
     @PreAuthorize("hasAnyAuthority('VITALS_CREATE', 'ROLE_NURSE', 'ROLE_DOCTOR', 'ROLE_SYS_ADMIN')")
     public ResponseEntity<TriageEwsResponseDTO> submitTriage(@Valid @RequestBody TriageEwsRequestDTO payload, Authentication auth) {
         TriageEwsRecord entity = nursingMapper.toTriageEntity(payload);
@@ -49,7 +49,7 @@ public class NursingController {
         return ResponseEntity.status(HttpStatus.CREATED).body(nursingMapper.toTriageResponseDTO(saved));
     }
 
-    @GetMapping({"/triage/patient/{patientId}", "/triage-ews/patient/{patientId}"})
+    @GetMapping("/triage/patient/{patientId}")
     @PreAuthorize("hasAnyAuthority('VITALS_READ', 'ROLE_NURSE', 'ROLE_DOCTOR', 'ROLE_SYS_ADMIN')")
     public List<TriageEwsResponseDTO> getTriageRecordsForPatient(@PathVariable Long patientId, Authentication auth) {
         return nursingService.getTriageRecordsForPatient(patientId).stream()

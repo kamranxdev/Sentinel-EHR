@@ -257,8 +257,8 @@ export class BedManagementComponent implements OnInit {
 
     const body = {
       encounterId: this.selectedBedForTransfer.currentEncounter.id,
-      destinationBedId: this.destinationBedId,
-      reason: this.transferReason,
+      newBedId: this.destinationBedId,
+      transferReason: this.transferReason,
     };
 
     this.apiService.post('/beds/transfer', body).subscribe({

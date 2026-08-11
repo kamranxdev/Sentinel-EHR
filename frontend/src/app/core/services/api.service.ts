@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, throwError, catchError, of } from 'rxjs';
+import { Observable } from 'rxjs';
 import {
   Allergy,
   Appointment,
@@ -24,7 +24,7 @@ import {
   providedIn: 'root',
 })
 export class ApiService {
-  private baseUrl = 'http://localhost:8080/api';
+  private baseUrl = 'http://localhost:8080/api/v1';
 
   constructor(private http: HttpClient) {}
 
@@ -61,7 +61,7 @@ export class ApiService {
 
   searchPatients(query: string): Observable<Patient[]> {
     return this.http.get<Patient[]>(
-      `${this.baseUrl}/patients/search?query=${encodeURIComponent(query)}`,
+      `${this.baseUrl}/patients?search=${encodeURIComponent(query)}`,
     );
   }
 
@@ -93,6 +93,10 @@ export class ApiService {
     return this.http.post<Patient>(`${this.baseUrl}/patients/intake`, patient);
   }
 
+  updatePatient(id: number, patient: Partial<Patient>): Observable<Patient> {
+    return this.http.put<Patient>(`${this.baseUrl}/patients/${id}`, patient);
+  }
+
   // Master Patient Index (MPI) Search & Merge
   searchMPI(params: any): Observable<any[]> {
     let queryParams = new URLSearchParams();
@@ -104,37 +108,33 @@ export class ApiService {
     if (params.phone) queryParams.set('phone', params.phone);
     if (params.email) queryParams.set('email', params.email);
     if (params.gender) queryParams.set('gender', params.gender);
-    return this.http.get<any[]>(`${this.baseUrl}/v1/mpi/search?${queryParams.toString()}`);
+    return this.http.get<any[]>(`${this.baseUrl}/patients/mpi/search?${queryParams.toString()}`);
   }
 
   scanDuplicateMPI(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.baseUrl}/v1/mpi/scan`);
+    return this.http.get<any[]>(`${this.baseUrl}/patients/mpi/duplicates`);
   }
 
   requestMPIMerge(payload: { primaryPatientId: number; duplicatePatientId: number; mergeReason: string }): Observable<string> {
-    return this.http.post(`${this.baseUrl}/v1/mpi/merge-request`, payload, { responseType: 'text' });
+    return this.http.post(`${this.baseUrl}/patients/mpi/merge-requests`, payload, { responseType: 'text' });
   }
 
   // Real-Time Insurance Eligibility (ANSI X12 270/271 RTE)
   checkEligibility(inquiry: any): Observable<any> {
-    return this.http.post<any>(`${this.baseUrl}/v1/insurance/rte`, inquiry);
+    return this.http.post<any>(`${this.baseUrl}/insurance/rte`, inquiry);
   }
 
   collectCopay(copayPayload: any): Observable<any> {
-    return this.http.post<any>(`${this.baseUrl}/v1/insurance/copay/collect`, copayPayload);
+    return this.http.post<any>(`${this.baseUrl}/insurance/copay/collect`, copayPayload);
   }
 
   // Appointment Stage Transitions & Resource Grid
   updateAppointmentStage(id: number, stage: string): Observable<Appointment> {
-    return this.http.put<Appointment>(`${this.baseUrl}/v1/appointments/${id}/stage?stage=${encodeURIComponent(stage)}`, {});
+    return this.http.patch<Appointment>(`${this.baseUrl}/appointments/${id}/stage`, { stage });
   }
 
   getMultiResourceGrid(): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}/v1/appointments/resources`);
-  }
-
-  updatePatient(id: number, patient: Partial<Patient>): Observable<Patient> {
-    return this.http.put<Patient>(`${this.baseUrl}/patients/${id}`, patient);
+    return this.http.get<any>(`${this.baseUrl}/appointments/resources`);
   }
 
   // Encounters & Visits
@@ -160,7 +160,7 @@ export class ApiService {
   }
 
   updateAllergyStatus(id: number, status: string): Observable<Allergy> {
-    return this.http.put<Allergy>(`${this.baseUrl}/allergies/${id}/status?status=${status}`, {});
+    return this.http.patch<Allergy>(`${this.baseUrl}/allergies/${id}/status`, { status });
   }
 
   // Diagnoses & Problem Lists
@@ -173,16 +173,16 @@ export class ApiService {
   }
 
   updateDiagnosisStatus(id: number, status: string): Observable<Diagnosis> {
-    return this.http.put<Diagnosis>(`${this.baseUrl}/diagnoses/${id}/status?status=${status}`, {});
+    return this.http.patch<Diagnosis>(`${this.baseUrl}/diagnoses/${id}/status`, { status });
   }
 
   // Medical Records (EHR Legacy Notes)
   getRecordsByPatient(patientId: number): Observable<MedicalRecord[]> {
-    return this.http.get<MedicalRecord[]>(`${this.baseUrl}/records/patient/${patientId}`);
+    return this.http.get<MedicalRecord[]>(`${this.baseUrl}/clinical-records/patient/${patientId}`);
   }
 
   createRecord(record: Partial<MedicalRecord>): Observable<MedicalRecord> {
-    return this.http.post<MedicalRecord>(`${this.baseUrl}/records`, record);
+    return this.http.post<MedicalRecord>(`${this.baseUrl}/clinical-records`, record);
   }
 
   // Vitals & Observations
@@ -215,7 +215,7 @@ export class ApiService {
     dosage?: string,
     instructions?: string,
   ): Observable<SafetyCheckResult> {
-    return this.http.post<SafetyCheckResult>(`${this.baseUrl}/prescriptions/validate-safety`, {
+    return this.http.post<SafetyCheckResult>(`${this.baseUrl}/prescriptions/safety-check`, {
       patientId,
       medicationName,
       dosage,
@@ -227,17 +227,14 @@ export class ApiService {
     prescription: Partial<Prescription>,
     overrideWarning = false,
   ): Observable<Prescription> {
-    return this.http.post<Prescription>(
-      `${this.baseUrl}/prescriptions?overrideWarning=${overrideWarning}`,
-      prescription,
-    );
+    return this.http.post<Prescription>(`${this.baseUrl}/prescriptions`, {
+      ...prescription,
+      overrideWarning,
+    });
   }
 
   updatePrescriptionStatus(id: number, status: string): Observable<Prescription> {
-    return this.http.put<Prescription>(
-      `${this.baseUrl}/prescriptions/${id}/status?status=${status}`,
-      {},
-    );
+    return this.http.patch<Prescription>(`${this.baseUrl}/prescriptions/${id}/status`, { status });
   }
 
   // Appointments & Collaborative Workflow
@@ -267,10 +264,7 @@ export class ApiService {
   }
 
   updateAppointmentStatus(id: number, status: string): Observable<Appointment> {
-    return this.http.put<Appointment>(
-      `${this.baseUrl}/appointments/${id}/status?status=${status}`,
-      {},
-    );
+    return this.http.patch<Appointment>(`${this.baseUrl}/appointments/${id}/status`, { status });
   }
 
   checkInPatient(
@@ -312,7 +306,7 @@ export class ApiService {
   }
 
   editAppointmentNote(noteId: number, content: string): Observable<AppointmentNote> {
-    return this.http.put<AppointmentNote>(`${this.baseUrl}/appointments/notes/${noteId}`, {
+    return this.http.patch<AppointmentNote>(`${this.baseUrl}/appointments/notes/${noteId}`, {
       content,
     });
   }
@@ -436,18 +430,18 @@ export class ApiService {
 
   // --- Nursing Workspace API ---
   submitTriage(record: any): Observable<any> {
-    return this.http.post<any>(`${this.baseUrl}/v1/nursing/triage`, record);
+    return this.http.post<any>(`${this.baseUrl}/nursing/triage`, record);
   }
 
   getTriageRecordsForPatient(patientId: number): Observable<any[]> {
-    return this.http.get<any[]>(`${this.baseUrl}/v1/nursing/triage/patient/${patientId}`);
+    return this.http.get<any[]>(`${this.baseUrl}/nursing/triage/patient/${patientId}`);
   }
 
   recordEmarAdministration(emar: any): Observable<any> {
-    return this.http.post<any>(`${this.baseUrl}/v1/nursing/emar/administer`, emar);
+    return this.http.post<any>(`${this.baseUrl}/nursing/emar/administer`, emar);
   }
 
   getEmarHistoryForPatient(patientId: number): Observable<any[]> {
-    return this.http.get<any[]>(`${this.baseUrl}/v1/nursing/emar/patient/${patientId}`);
+    return this.http.get<any[]>(`${this.baseUrl}/nursing/emar/patient/${patientId}`);
   }
 }

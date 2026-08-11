@@ -1,5 +1,7 @@
 package com.sentinel.diagnoses.controller;
 
+import com.sentinel.diagnoses.dto.DiagnosisStatusUpdateDTO;
+
 import com.sentinel.audit.service.AuditTrailService;
 import com.sentinel.diagnoses.dto.DiagnosisRequestDTO;
 import com.sentinel.diagnoses.dto.DiagnosisResponseDTO;
@@ -16,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping({"/api/v1/diagnoses", "/api/diagnoses"})
+@RequestMapping("/api/v1/diagnoses")
 public class DiagnosisController {
 
     private final DiagnosisService diagnosisService;
@@ -53,11 +55,14 @@ public class DiagnosisController {
         return ResponseEntity.status(HttpStatus.CREATED).body(diagnosisMapper.toResponseDTO(saved));
     }
 
-    @PutMapping("/{id}/status")
-    @PreAuthorize("(hasAuthority('DIAGNOSIS_CREATE') or hasRole('ROLE_DOCTOR') or hasRole('ROLE_NURSE')) and @patientSecurityService.canAccessDiagnosis(authentication, #id)")
-    public ResponseEntity<DiagnosisResponseDTO> updateDiagnosisStatus(@PathVariable Long id, @RequestParam String status, Authentication auth) {
-        Diagnosis saved = diagnosisService.updateDiagnosisStatus(id, status);
-        auditService.logAction(auth, "UPDATE", "DIAGNOSIS", String.valueOf(id), "Updated diagnosis lifecycle status to " + status + " for ID: " + id);
+    @PatchMapping("/{id}/status")
+    @PreAuthorize("(hasAuthority('DIAGNOSIS_UPDATE') or hasRole('ROLE_DOCTOR') or hasRole('ROLE_NURSE')) and @patientSecurityService.canAccessDiagnosis(authentication, #id)")
+    public ResponseEntity<DiagnosisResponseDTO> updateDiagnosisStatus(
+            @PathVariable Long id,
+            @Valid @RequestBody DiagnosisStatusUpdateDTO payload,
+            Authentication auth) {
+        Diagnosis saved = diagnosisService.updateDiagnosisStatus(id, payload.getStatus());
+        auditService.logAction(auth, "UPDATE", "DIAGNOSIS", String.valueOf(id), "Updated diagnosis lifecycle status to " + payload.getStatus() + " for ID: " + id);
         return ResponseEntity.ok(diagnosisMapper.toResponseDTO(saved));
     }
 }

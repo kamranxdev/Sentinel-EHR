@@ -10,7 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping({"/api/v1/insurance", "/api/insurance"})
+@RequestMapping("/api/v1/insurance")
 public class EligibilityController {
 
     private final EligibilityService eligibilityService;

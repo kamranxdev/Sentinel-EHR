@@ -8,7 +8,7 @@ import { Capability, ROLE_CAPABILITY_MAP, UserRole } from '../models/permissions
   providedIn: 'root',
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:8080/api/auth';
+  private apiUrl = 'http://localhost:8080/api/v1/auth';
 
   currentUser = signal<JwtAuthResponse | null>(this.getStoredUser());
 

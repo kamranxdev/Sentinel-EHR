@@ -1,6 +1,5 @@
 package com.sentinel.appointments.controller;
 
-import com.sentinel.allergies.mapper.AllergyMapper;
 import com.sentinel.appointments.dto.*;
 import com.sentinel.appointments.entity.*;
 import com.sentinel.appointments.mapper.AppointmentMapper;
@@ -26,7 +25,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 @RestController
-@RequestMapping({"/api/v1/appointments", "/api/appointments"})
+@RequestMapping("/api/v1/appointments")
 public class AppointmentController {
 
     private final AppointmentService appointmentService;
@@ -55,10 +54,12 @@ public class AppointmentController {
 
     @GetMapping("/recommended-doctors")
     @PreAuthorize("hasAuthority('APPOINTMENT_READ')")
-    public List<DoctorRecommendationDTO> getRecommendedDoctors(@RequestParam(value = "patientId", required = false) Long patientId,
-                                                                @RequestParam(value = "reason", required = false) String reason,
-                                                                Authentication auth) {
-        auditService.logAction(auth, "READ", "DOCTOR_MATCHING", patientId != null ? String.valueOf(patientId) : null, "Queried AI doctor recommendation matching engine for reason: " + reason);
+    public List<DoctorRecommendationDTO> getRecommendedDoctors(
+            @RequestParam(value = "patientId", required = false) Long patientId,
+            @RequestParam(value = "reason", required = false) String reason,
+            Authentication auth) {
+        auditService.logAction(auth, "READ", "DOCTOR_MATCHING", patientId != null ? String.valueOf(patientId) : null,
+                "Queried AI doctor recommendation matching engine for reason: " + reason);
         return doctorMatchingService.recommendDoctorsForPatient(patientId, reason);
     }
 
@@ -81,7 +82,8 @@ public class AppointmentController {
     @GetMapping("/patient/{patientId}")
     @PreAuthorize("hasAuthority('APPOINTMENT_READ') and @abacEvaluator.hasTreatmentRelationship(authentication, #patientId)")
     public List<AppointmentResponseDTO> getAppointmentsByPatient(@PathVariable Long patientId, Authentication auth) {
-        auditService.logAction(auth, "READ", "APPOINTMENT", String.valueOf(patientId), "Accessed appointment history for patient ID: " + patientId);
+        auditService.logAction(auth, "READ", "APPOINTMENT", String.valueOf(patientId),
+                "Accessed appointment history for patient ID: " + patientId);
         return appointmentService.getAppointmentsByPatientId(patientId).stream()
                 .map(appointmentMapper::toResponseDTO)
                 .toList();
@@ -89,7 +91,8 @@ public class AppointmentController {
 
     @PostMapping
     @PreAuthorize("hasAuthority('APPOINTMENT_CREATE') or hasRole('PATIENT')")
-    public ResponseEntity<AppointmentResponseDTO> scheduleAppointment(@Valid @RequestBody AppointmentRequestDTO payload, Authentication auth) {
+    public ResponseEntity<AppointmentResponseDTO> scheduleAppointment(
+            @Valid @RequestBody AppointmentRequestDTO payload, Authentication auth) {
         Appointment entity = appointmentMapper.toEntity(payload);
         com.sentinel.patients.entity.Patient p = new com.sentinel.patients.entity.Patient();
         p.setId(payload.getPatientId());
@@ -100,30 +103,33 @@ public class AppointmentController {
         entity.setDoctor(d);
 
         Appointment saved = appointmentService.scheduleAppointment(entity);
-        auditService.logAction(auth, "CREATE", "APPOINTMENT", String.valueOf(saved.getId()), "Scheduled appointment for patient ID: " + saved.getPatient().getId() + " on " + saved.getAppointmentDate());
-
+        auditService.logAction(auth, "CREATE", "APPOINTMENT", String.valueOf(saved.getId()),
+                "Scheduled appointment for patient ID: " + saved.getPatient().getId() + " on " + saved.getAppointmentDate());
         return ResponseEntity.status(HttpStatus.CREATED).body(appointmentMapper.toResponseDTO(saved));
     }
 
-    @PutMapping("/{id}/status")
+    @PatchMapping("/{id}/status")
     @PreAuthorize("hasAuthority('APPOINTMENT_UPDATE') and @patientSecurityService.canAccessAppointment(authentication, #id)")
-    public ResponseEntity<AppointmentResponseDTO> updateStatus(@PathVariable Long id, @RequestParam String status, Authentication auth) {
-        Appointment saved = appointmentService.updateStatus(id, status);
-        auditService.logAction(auth, "UPDATE", "APPOINTMENT", String.valueOf(id), "Changed appointment ID: " + id + " status to " + status);
-
+    public ResponseEntity<AppointmentResponseDTO> updateStatus(
+            @PathVariable Long id,
+            @Valid @RequestBody AppointmentStatusUpdateDTO payload,
+            Authentication auth) {
+        Appointment saved = appointmentService.updateStatus(id, payload.getStatus());
+        auditService.logAction(auth, "UPDATE", "APPOINTMENT", String.valueOf(id),
+                "Changed appointment ID: " + id + " status to " + payload.getStatus());
         return ResponseEntity.ok(appointmentMapper.toResponseDTO(saved));
     }
 
-    @PutMapping("/{id}/stage")
+    @PatchMapping("/{id}/stage")
     @PreAuthorize("hasAnyAuthority('APPOINTMENT_UPDATE', 'ROLE_RECEPTIONIST', 'ROLE_NURSE', 'ROLE_DOCTOR', 'ROLE_ADMIN')")
-    public ResponseEntity<AppointmentResponseDTO> updateAppointmentStage(@PathVariable Long id,
-                                                                @RequestParam String stage,
-                                                                Authentication auth) {
-        Appointment saved = appointmentService.updateAppointmentStage(id, stage);
+    public ResponseEntity<AppointmentResponseDTO> updateAppointmentStage(
+            @PathVariable Long id,
+            @Valid @RequestBody AppointmentStageUpdateDTO payload,
+            Authentication auth) {
+        Appointment saved = appointmentService.updateAppointmentStage(id, payload.getStage());
         auditService.logAction(auth, "APPOINTMENT_STAGE_TRANSITION", "APPOINTMENT", String.valueOf(id),
                 String.format("Transitioned appointment #%d stage to %s (Patient MRN: %s)",
-                        id, stage, saved.getPatient() != null ? saved.getPatient().getPatientCode() : "N/A"));
-
+                        id, payload.getStage(), saved.getPatient() != null ? saved.getPatient().getPatientCode() : "N/A"));
         return ResponseEntity.ok(appointmentMapper.toResponseDTO(saved));
     }
 
@@ -135,25 +141,27 @@ public class AppointmentController {
 
     @PostMapping("/{id}/check-in")
     @PreAuthorize("hasAuthority('APPOINTMENT_UPDATE') and @patientSecurityService.canAccessAppointment(authentication, #id)")
-    public ResponseEntity<AppointmentResponseDTO> checkInPatient(@PathVariable Long id,
-                                                       @Valid @RequestBody CheckInRequestDTO payload,
-                                                       Authentication auth) {
+    public ResponseEntity<AppointmentResponseDTO> checkInPatient(
+            @PathVariable Long id,
+            @Valid @RequestBody CheckInRequestDTO payload,
+            Authentication auth) {
         Appointment checkedIn = workflowService.checkInPatient(
-                id, 
-                payload.getInsuranceVerified(), 
-                payload.getInsuranceDetails(), 
-                payload.getReportsUploaded(), 
-                payload.getNote(), 
+                id,
+                payload.getInsuranceVerified(),
+                payload.getInsuranceDetails(),
+                payload.getReportsUploaded(),
+                payload.getNote(),
                 auth
         );
         return ResponseEntity.ok(appointmentMapper.toResponseDTO(checkedIn));
     }
 
     @PostMapping("/{id}/triage-vitals")
-    @PreAuthorize("(hasAuthority('VITALS_CREATE') or hasRole('NURSE') or hasRole('DOCTOR') or hasRole('ADMIN')) and @patientSecurityService.canAccessAppointment(authentication, #id)")
-    public ResponseEntity<AppointmentResponseDTO> recordTriageVitals(@PathVariable Long id,
-                                                           @Valid @RequestBody TriageVitalsRequestDTO payload,
-                                                           Authentication auth) {
+    @PreAuthorize("(hasAuthority('VITALS_CREATE') or hasAuthority('APPOINTMENT_UPDATE')) and @patientSecurityService.canAccessAppointment(authentication, #id)")
+    public ResponseEntity<AppointmentResponseDTO> recordTriageVitals(
+            @PathVariable Long id,
+            @Valid @RequestBody TriageVitalsRequestDTO payload,
+            Authentication auth) {
         Vitals vitals = new Vitals();
         if (payload.getBloodPressure() != null) vitals.setBloodPressure(payload.getBloodPressure());
         if (payload.getHeartRate() != null) vitals.setHeartRate(payload.getHeartRate());
@@ -176,33 +184,33 @@ public class AppointmentController {
     }
 
     @PostMapping("/{id}/doctor-consultation")
-    @PreAuthorize("(hasAuthority('CLINICAL_NOTE_CREATE') or hasRole('DOCTOR') or hasRole('ADMIN')) and @patientSecurityService.canAccessAppointment(authentication, #id)")
-    public ResponseEntity<AppointmentResponseDTO> recordDoctorConsultation(@PathVariable Long id,
-                                                                 @Valid @RequestBody DoctorConsultationRequestDTO payload,
-                                                                 Authentication auth) {
+    @PreAuthorize("(hasAuthority('CLINICAL_NOTE_CREATE') or hasAuthority('APPOINTMENT_UPDATE')) and @patientSecurityService.canAccessAppointment(authentication, #id)")
+    public ResponseEntity<AppointmentResponseDTO> recordDoctorConsultation(
+            @PathVariable Long id,
+            @Valid @RequestBody DoctorConsultationRequestDTO payload,
+            Authentication auth) {
         LocalDateTime followUpDate = null;
         if (payload.getFollowUpDate() != null && !payload.getFollowUpDate().isEmpty()) {
             followUpDate = LocalDateTime.parse(payload.getFollowUpDate());
         }
 
-        List<Diagnosis> diagnoses = payload.getDiagnoses() != null ? payload.getDiagnoses().stream().map(diagnosisMapper::toEntity).toList() : new ArrayList<>();
-        List<Prescription> prescriptions = payload.getPrescriptions() != null ? payload.getPrescriptions().stream().map(prescriptionMapper::toEntity).toList() : new ArrayList<>();
-        List<AppointmentLabOrder> labOrders = payload.getLabOrders() != null ? payload.getLabOrders().stream().map(appointmentMapper::toLabOrderEntity).toList() : new ArrayList<>();
+        List<Diagnosis> diagnoses = payload.getDiagnoses() != null
+                ? payload.getDiagnoses().stream().map(diagnosisMapper::toEntity).toList()
+                : new ArrayList<>();
+        List<Prescription> prescriptions = payload.getPrescriptions() != null
+                ? payload.getPrescriptions().stream().map(prescriptionMapper::toEntity).toList()
+                : new ArrayList<>();
+        List<AppointmentLabOrder> labOrders = payload.getLabOrders() != null
+                ? payload.getLabOrders().stream().map(appointmentMapper::toLabOrderEntity).toList()
+                : new ArrayList<>();
 
         Appointment updated = workflowService.recordDoctorConsultation(
-                id, 
-                diagnoses, 
-                prescriptions, 
-                labOrders, 
-                payload.getDoctorNotes(), 
-                followUpDate, 
-                auth
-        );
+                id, diagnoses, prescriptions, labOrders, payload.getDoctorNotes(), followUpDate, auth);
         return ResponseEntity.ok(appointmentMapper.toResponseDTO(updated));
     }
 
     @GetMapping("/{id}/notes")
-    @PreAuthorize("(hasAuthority('APPOINTMENT_READ') or hasRole('DOCTOR') or hasRole('NURSE') or hasRole('RECEPTIONIST') or hasRole('ADMIN')) and @patientSecurityService.canAccessAppointment(authentication, #id)")
+    @PreAuthorize("hasAuthority('APPOINTMENT_READ') and @patientSecurityService.canAccessAppointment(authentication, #id)")
     public List<AppointmentNoteResponseDTO> getNotesForAppointment(@PathVariable Long id) {
         return workflowService.getNotesForAppointment(id).stream()
                 .map(appointmentMapper::toNoteResponseDTO)
@@ -210,28 +218,31 @@ public class AppointmentController {
     }
 
     @PostMapping("/{id}/notes")
-    @PreAuthorize("(hasAuthority('APPOINTMENT_READ') or hasRole('DOCTOR') or hasRole('NURSE') or hasRole('RECEPTIONIST') or hasRole('ADMIN')) and @patientSecurityService.canAccessAppointment(authentication, #id)")
-    public ResponseEntity<AppointmentNoteResponseDTO> addNote(@PathVariable Long id,
-                                                    @Valid @RequestBody AppointmentNoteRequestDTO payload,
-                                                    Authentication auth) {
+    @PreAuthorize("hasAuthority('APPOINTMENT_UPDATE') and @patientSecurityService.canAccessAppointment(authentication, #id)")
+    public ResponseEntity<AppointmentNoteResponseDTO> addNote(
+            @PathVariable Long id,
+            @Valid @RequestBody AppointmentNoteRequestDTO payload,
+            Authentication auth) {
         AppointmentNote note = workflowService.addAppointmentNote(id, payload.getNoteType(), payload.getContent(), auth);
         return ResponseEntity.status(HttpStatus.CREATED).body(appointmentMapper.toNoteResponseDTO(note));
     }
 
-    @PutMapping("/notes/{noteId}")
-    @PreAuthorize("hasAuthority('APPOINTMENT_READ')")
-    public ResponseEntity<AppointmentNoteResponseDTO> editNote(@PathVariable Long noteId,
-                                                     @Valid @RequestBody AppointmentNoteRequestDTO payload,
-                                                     Authentication auth) {
+    @PatchMapping("/notes/{noteId}")
+    @PreAuthorize("hasAuthority('APPOINTMENT_UPDATE')")
+    public ResponseEntity<AppointmentNoteResponseDTO> editNote(
+            @PathVariable Long noteId,
+            @Valid @RequestBody AppointmentNoteRequestDTO payload,
+            Authentication auth) {
         AppointmentNote updated = workflowService.editAppointmentNote(noteId, payload.getContent(), auth);
         return ResponseEntity.ok(appointmentMapper.toNoteResponseDTO(updated));
     }
 
     @PostMapping("/{id}/cancel")
     @PreAuthorize("(hasAuthority('APPOINTMENT_CANCEL') or hasRole('PATIENT')) and @patientSecurityService.canAccessAppointment(authentication, #id)")
-    public ResponseEntity<AppointmentCancellationResponseDTO> cancelAppointment(@PathVariable Long id,
-                                                                      @Valid @RequestBody AppointmentCancellationRequestDTO payload,
-                                                                      Authentication auth) {
+    public ResponseEntity<AppointmentCancellationResponseDTO> cancelAppointment(
+            @PathVariable Long id,
+            @Valid @RequestBody AppointmentCancellationRequestDTO payload,
+            Authentication auth) {
         AppointmentCancellation cancellation = workflowService.cancelAppointment(id, payload.getReason(), payload.getComment(), auth);
         return ResponseEntity.ok(appointmentMapper.toCancellationResponseDTO(cancellation));
     }
@@ -245,17 +256,18 @@ public class AppointmentController {
     }
 
     @PostMapping("/{id}/billing")
-    @PreAuthorize("(hasAuthority('INVOICE_CREATE') or hasRole('DOCTOR') or hasRole('ADMIN') or hasRole('BILLING')) and @patientSecurityService.canAccessAppointment(authentication, #id)")
-    public ResponseEntity<AppointmentBillingResponseDTO> generateBilling(@PathVariable Long id,
-                                                               @Valid @RequestBody BillingGenerationRequestDTO payload,
-                                                               Authentication auth) {
+    @PreAuthorize("(hasAuthority('INVOICE_CREATE') or hasAuthority('APPOINTMENT_UPDATE')) and @patientSecurityService.canAccessAppointment(authentication, #id)")
+    public ResponseEntity<AppointmentBillingResponseDTO> generateBilling(
+            @PathVariable Long id,
+            @Valid @RequestBody BillingGenerationRequestDTO payload,
+            Authentication auth) {
         AppointmentBilling billing = workflowService.generateBilling(
-                id, 
-                payload.getConsultationFee(), 
-                payload.getTriageFee(), 
-                payload.getLabFee(), 
-                payload.getPharmacyFee(), 
-                payload.getInsuranceCoverage(), 
+                id,
+                payload.getConsultationFee(),
+                payload.getTriageFee(),
+                payload.getLabFee(),
+                payload.getPharmacyFee(),
+                payload.getInsuranceCoverage(),
                 auth
         );
         return ResponseEntity.status(HttpStatus.CREATED).body(appointmentMapper.toBillingResponseDTO(billing));

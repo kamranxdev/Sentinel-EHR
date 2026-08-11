@@ -1,5 +1,7 @@
 package com.sentinel.allergies.controller;
 
+import com.sentinel.allergies.dto.AllergyStatusUpdateDTO;
+
 import com.sentinel.allergies.dto.AllergyRequestDTO;
 import com.sentinel.allergies.dto.AllergyResponseDTO;
 import com.sentinel.allergies.entity.Allergy;
@@ -16,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping({"/api/v1/allergies", "/api/allergies"})
+@RequestMapping("/api/v1/allergies")
 public class AllergyController {
 
     private final AllergyService allergyService;
@@ -53,11 +55,14 @@ public class AllergyController {
         return ResponseEntity.status(HttpStatus.CREATED).body(allergyMapper.toResponseDTO(saved));
     }
 
-    @PutMapping("/{id}/status")
-    @PreAuthorize("(hasAuthority('ALLERGY_CREATE') or hasAuthority('VITALS_CREATE') or hasRole('ROLE_DOCTOR') or hasRole('ROLE_NURSE')) and @patientSecurityService.canAccessAllergy(authentication, #id)")
-    public ResponseEntity<AllergyResponseDTO> updateAllergyStatus(@PathVariable Long id, @RequestParam String status, Authentication auth) {
-        Allergy saved = allergyService.updateAllergyStatus(id, status);
-        auditService.logAction(auth, "UPDATE", "ALLERGY", String.valueOf(id), "Updated allergy status to " + status + " for allergy ID: " + id);
+    @PatchMapping("/{id}/status")
+    @PreAuthorize("(hasAuthority('ALLERGY_UPDATE') or hasRole('ROLE_DOCTOR') or hasRole('ROLE_NURSE')) and @patientSecurityService.canAccessAllergy(authentication, #id)")
+    public ResponseEntity<AllergyResponseDTO> updateAllergyStatus(
+            @PathVariable Long id,
+            @Valid @RequestBody AllergyStatusUpdateDTO payload,
+            Authentication auth) {
+        Allergy saved = allergyService.updateAllergyStatus(id, payload.getStatus());
+        auditService.logAction(auth, "UPDATE", "ALLERGY", String.valueOf(id), "Updated allergy status to " + payload.getStatus() + " for allergy ID: " + id);
         return ResponseEntity.ok(allergyMapper.toResponseDTO(saved));
     }
 }

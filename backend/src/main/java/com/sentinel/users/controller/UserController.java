@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping({"/api/v1/users", "/api/users"})
+@RequestMapping("/api/v1/users")
 public class UserController {
 
     private final UserService userService;
@@ -22,16 +22,8 @@ public class UserController {
         this.userMapper = userMapper;
     }
 
-    @GetMapping
-    @PreAuthorize("hasAnyAuthority('USER_READ', 'ROLE_SYS_ADMIN', 'ROLE_ADMIN')")
-    public List<UserResponseDTO> getAllUsers() {
-        return userService.getAllUsers().stream()
-                .map(userMapper::toResponseDTO)
-                .toList();
-    }
-
     @GetMapping("/doctors")
-    @PreAuthorize("hasAuthority('APPOINTMENT_READ')")
+    @PreAuthorize("hasAuthority('APPOINTMENT_READ') or hasRole('ROLE_DOCTOR') or hasRole('ROLE_NURSE') or hasRole('ROLE_RECEPTIONIST') or hasRole('ROLE_ADMIN')")
     public List<UserResponseDTO> getDoctors() {
         return userService.getDoctors().stream()
                 .map(userMapper::toResponseDTO)
