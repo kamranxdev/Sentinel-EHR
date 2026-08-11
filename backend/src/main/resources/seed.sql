@@ -104,7 +104,7 @@ INSERT INTO users (id, username, password, email, full_name, specialization, dep
 VALUES (7, 'auditor', '$2a$10$3Uj7vg0rhOtYROAzLYvK2.HbXLWJfNM4lfK8DNWsGCsEHLH14A3ei', 'auditor@sentinel.org', 'Inspector Suresh Menon (Compliance Auditor)', NULL, 'Regulatory Compliance & Forensics', CURRENT_TIMESTAMP);
 
 INSERT INTO users (id, username, password, email, full_name, specialization, department, created_at) 
-VALUES (9, 'patient', '$2a$10$1Knu6HwyDwDWpqngg1N6nOoWKupSsqQLU0Mw/3EmTdJ.XKt4e32kC', 'kamran.khan@example.com', 'Kamran Khan', NULL, NULL, CURRENT_TIMESTAMP);
+VALUES (9, 'patient', '$2a$10$1Knu6HwyDwDWpqngg1N6nOoWKupSsqQLU0Mw/3EmTdJ.XKt4e32kC', 'kamrankhan.sde@gmail.com', 'Kamran Khan', NULL, NULL, CURRENT_TIMESTAMP);
 
 INSERT INTO users (id, username, password, email, full_name, specialization, department, created_at) 
 VALUES (10, 'user_aarav', '$2a$10$1Knu6HwyDwDWpqngg1N6nOoWKupSsqQLU0Mw/3EmTdJ.XKt4e32kC', 'aarav.patel@example.com', 'Aarav Patel', NULL, NULL, CURRENT_TIMESTAMP);
@@ -152,7 +152,7 @@ INSERT INTO user_roles (user_id, role_id) VALUES (16, 8);
 -- 7. PATIENTS
 -- ------------------------------------------------------------------------------
 INSERT INTO patients (id, patient_code, abha_id, national_id, full_name, date_of_birth, gender, blood_type, phone, email, address, pin_code, emergency_contact, insurance_provider, insurance_policy_number, insurance_group_number, coverage_plan, medical_alerts, user_id, created_at) 
-VALUES (1, 'PAT-1001', '91-4590-1284-9001', 'AADHAAR-4590-1284', 'Kamran Khan', '1985-04-12', 'Male', 'O+', '+91 98765 43210', 'kamran.khan@example.com', '742 Marine Drive, Mumbai', '400001', 'Farah Khan (Wife) - +91 98765 98765', 'Star Health Insurance', 'STAR-9874102', 'GRP-55410', 'Premier Comprehensive Care', 'Type 2 Diabetes, Severe Penicillin Allergy, Mild Asthma', 9, CURRENT_TIMESTAMP);
+VALUES (1, 'PAT-1001', '91-4590-1284-9001', 'AADHAAR-4590-1284', 'Kamran Khan', '2004-04-04', 'Male', 'A+', '+91 80979 05879', 'kamrankhan.sde@gmail.com', '742 Marine Drive, Mumbai', '400001', 'Mahtab Khan (Siblings) - +91 98765 98765', 'Star Health Insurance', 'STAR-9874102', 'GRP-55410', 'Premier Comprehensive Care', 'Type 2 Diabetes, Severe Penicillin Allergy, Mild Asthma', 9, CURRENT_TIMESTAMP);
 
 INSERT INTO patients (id, patient_code, abha_id, national_id, full_name, date_of_birth, gender, blood_type, phone, email, address, pin_code, emergency_contact, insurance_provider, insurance_policy_number, insurance_group_number, coverage_plan, medical_alerts, user_id, created_at) 
 VALUES (2, 'PAT-1002', '91-2180-0983-1002', 'AADHAAR-2180-9831', 'Aarav Patel', '1972-09-28', 'Male', 'A+', '+91 98765 12345', 'aarav.patel@example.com', '1204 CG Road, Ahmedabad', '380009', 'Priya Patel (Wife) - +91 98765 87654', 'HDFC ERGO Health', 'HDFC-5510923', 'GRP-11092', 'Optima Secure', 'Essential Hypertension, Hyperlipidemia', 10, CURRENT_TIMESTAMP);
