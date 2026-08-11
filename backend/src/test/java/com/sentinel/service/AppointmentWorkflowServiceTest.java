@@ -121,6 +121,9 @@ public class AppointmentWorkflowServiceTest {
 
     @Test
     public void testRecordTriageVitals_Success() {
+        testAppointment.setStage("CHECKED_IN");
+        testAppointment.setStatus("CHECKED_IN");
+
         Vitals vitals = new Vitals();
         vitals.setBloodPressure("120/80");
         vitals.setHeartRate(72);
@@ -141,6 +144,9 @@ public class AppointmentWorkflowServiceTest {
 
     @Test
     public void testStartConsultation_Success() {
+        testAppointment.setStage("TRIAGED");
+        testAppointment.setStatus("TRIAGED");
+
         Appointment started = workflowService.startConsultation(100L, authMock);
 
         assertNotNull(started);

@@ -14,6 +14,6 @@ public interface PatientAssignmentRepository extends JpaRepository<PatientAssign
     List<PatientAssignment> findByPatientIdAndEndDateIsNull(Long patientId);
     List<PatientAssignment> findByStaffUserIdAndEndDateIsNull(Long staffUserId);
 
-    @Query("SELECT COUNT(pa) > 0 FROM PatientAssignment pa WHERE pa.patient.id = :patientId AND pa.staffUser.username = :username AND pa.endDate IS NULL")
+    @Query("SELECT COUNT(pa) > 0 FROM PatientAssignment pa WHERE pa.patient.id = :patientId AND LOWER(pa.staffUser.username) = LOWER(:username) AND pa.endDate IS NULL")
     boolean existsActiveAssignmentByPatientIdAndUsername(@Param("patientId") Long patientId, @Param("username") String username);
 }

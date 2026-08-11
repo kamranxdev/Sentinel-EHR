@@ -67,47 +67,20 @@ INSERT INTO permissions (id, code, category, description) VALUES (30, 'NURSING_N
 -- ------------------------------------------------------------------------------
 -- 4. ROLE_PERMISSIONS MAPPING
 -- ------------------------------------------------------------------------------
--- Doctor (ROLE_DOCTOR): Full Clinical
 INSERT INTO role_permissions (role_id, permission_id) VALUES (3, 1), (3, 2), (3, 3), (3, 4), (3, 5), (3, 6), (3, 7), (3, 8), (3, 9), (3, 10), (3, 11), (3, 12), (3, 13), (3, 14), (3, 15), (3, 17), (3, 19), (3, 24), (3, 27), (3, 29);
-
--- Nurse (ROLE_NURSE): Triage, Vitals, MAR, Notes Read, Care Plans, BCMA
 INSERT INTO role_permissions (role_id, permission_id) VALUES (4, 1), (4, 2), (4, 4), (4, 5), (4, 6), (4, 9), (4, 11), (4, 12), (4, 13), (4, 15), (4, 19), (4, 24), (4, 25), (4, 26), (4, 27), (4, 28), (4, 29), (4, 30);
-
--- Receptionist (ROLE_RECEPTIONIST): Demographics & Appointments
 INSERT INTO role_permissions (role_id, permission_id) VALUES (5, 1), (5, 2), (5, 3), (5, 4), (5, 5), (5, 6), (5, 7), (5, 21);
-
--- Lab Tech (ROLE_LAB_TECH): Specimen & Lab Results
 INSERT INTO role_permissions (role_id, permission_id) VALUES (6, 2), (6, 5), (6, 18), (6, 19);
-
--- Pharmacist (ROLE_PHARMACIST): eRx Review & Dispensing
 INSERT INTO role_permissions (role_id, permission_id) VALUES (7, 2), (7, 15), (7, 16);
-
--- Billing Officer (ROLE_BILLING): Invoices & Revenue Cycle
 INSERT INTO role_permissions (role_id, permission_id) VALUES (8, 2), (8, 20), (8, 21);
-
--- Patient (ROLE_PATIENT): Personal Self-Service
 INSERT INTO role_permissions (role_id, permission_id) VALUES (9, 2), (9, 4), (9, 5), (9, 7), (9, 9), (9, 11), (9, 13), (9, 15), (9, 19), (9, 21);
-
--- Auditor (ROLE_AUDITOR): Read-only Compliance
 INSERT INTO role_permissions (role_id, permission_id) VALUES (10, 2), (10, 5), (10, 9), (10, 11), (10, 13), (10, 15), (10, 19), (10, 21), (10, 22);
-
--- System Admin (ROLE_SYS_ADMIN) & Org Admin (ROLE_ORG_ADMIN): All
 INSERT INTO role_permissions (role_id, permission_id) SELECT 1, id FROM permissions;
 INSERT INTO role_permissions (role_id, permission_id) SELECT 2, id FROM permissions;
 INSERT INTO role_permissions (role_id, permission_id) SELECT 11, id FROM permissions;
 
 -- ------------------------------------------------------------------------------
 -- 5. USERS
--- Default Login Passwords:
--- Admin: admin / admin123
--- Receptionist: receptionist / receptionist123
--- Doctors: doctor (or doctor_mahtab, doctor_rajesh) / doctor123
--- Nurse: nurse (or nurse_priya) / nurse123
--- Lab Tech: labtech / labtech123
--- Pharmacist: pharmacist / pharmacist123
--- Billing: billing / billing123
--- Auditor: auditor / auditor123
--- Patient: patient (or user_kamran, user_aarav, user_ananya) / patient123
 -- ------------------------------------------------------------------------------
 INSERT INTO users (id, username, password, email, full_name, specialization, department, created_at) 
 VALUES (1, 'admin', '$2a$10$rIxvNrZcsreC0tp5Ik9S4uFff/IyrYl3eiLHyH53l6IyuM5jHY67C', 'admin@sentinel.org', 'Dr. Vikramaditya Gupta (Admin/Intake)', NULL, 'Patient Intake & Administration', CURRENT_TIMESTAMP);
@@ -198,19 +171,34 @@ INSERT INTO patients (id, patient_code, abha_id, national_id, full_name, date_of
 VALUES (5, 'PAT-1005', '91-9990-0111-1005', 'AADHAAR-9990-1111', 'Kamran Khan', '1985-04-12', 'Male', 'O+', '+91 98765 43210', 'patient@sentinel.org', '742 Marine Drive, Mumbai', '400001', 'Farah Khan (Wife) - +91 98765 98765', 'Star Health Insurance', 'STAR-9874102', 'GRP-55410', 'Premier Comprehensive Care', 'Type 2 Diabetes, Severe Penicillin Allergy, Mild Asthma', 8, CURRENT_TIMESTAMP);
 
 -- ------------------------------------------------------------------------------
--- 8. PATIENT CARE TEAM ASSIGNMENTS (ABAC)
+-- 8. BEDS (SPATIAL LOCATION HIERARCHY)
 -- ------------------------------------------------------------------------------
-INSERT INTO patient_assignments (id, patient_id, staff_user_id, assignment_type, start_date)
-VALUES (1, 1, 3, 'ATTENDING_PHYSICIAN', CURRENT_TIMESTAMP);
+INSERT INTO beds (id, bed_code, facility_name, department_name, ward_name, room_number, bed_number, status, features)
+VALUES (1, 'CARD-WARD-A-101-B1', 'Sentinel General Hospital', 'Cardiovascular Medicine', 'Ward A', '101', '1', 'AVAILABLE', 'Telemetry, Oxygen Hookup');
 
-INSERT INTO patient_assignments (id, patient_id, staff_user_id, assignment_type, start_date)
-VALUES (2, 1, 6, 'ASSIGNED_NURSE', CURRENT_TIMESTAMP);
+INSERT INTO beds (id, bed_code, facility_name, department_name, ward_name, room_number, bed_number, status, features)
+VALUES (2, 'CARD-WARD-A-101-B2', 'Sentinel General Hospital', 'Cardiovascular Medicine', 'Ward A', '101', '2', 'AVAILABLE', 'Telemetry');
 
-INSERT INTO patient_assignments (id, patient_id, staff_user_id, assignment_type, start_date)
-VALUES (3, 2, 4, 'ATTENDING_PHYSICIAN', CURRENT_TIMESTAMP);
+INSERT INTO beds (id, bed_code, facility_name, department_name, ward_name, room_number, bed_number, status, features)
+VALUES (3, 'EMG-ICU-01-B1', 'Sentinel General Hospital', 'Emergency & Acute Care', 'ICU Unit 1', '01', '1', 'AVAILABLE', 'Telemetry, Mechanical Ventilator, Negative Pressure');
+
+INSERT INTO beds (id, bed_code, facility_name, department_name, ward_name, room_number, bed_number, status, features)
+VALUES (4, 'EMG-ICU-01-B2', 'Sentinel General Hospital', 'Emergency & Acute Care', 'ICU Unit 1', '01', '2', 'AVAILABLE', 'Telemetry, Bariatric Bed');
 
 -- ------------------------------------------------------------------------------
--- 9. ENCOUNTERS
+-- 9. PATIENT CARE TEAM ASSIGNMENTS (ABAC)
+-- ------------------------------------------------------------------------------
+INSERT INTO patient_assignments (id, patient_id, staff_user_id, assignment_type, status, start_date)
+VALUES (1, 1, 3, 'ATTENDING', 'ACTIVE', CURRENT_TIMESTAMP);
+
+INSERT INTO patient_assignments (id, patient_id, staff_user_id, assignment_type, status, start_date)
+VALUES (2, 1, 6, 'PRIMARY_NURSE', 'ACTIVE', CURRENT_TIMESTAMP);
+
+INSERT INTO patient_assignments (id, patient_id, staff_user_id, assignment_type, status, start_date)
+VALUES (3, 2, 4, 'ATTENDING', 'ACTIVE', CURRENT_TIMESTAMP);
+
+-- ------------------------------------------------------------------------------
+-- 10. ENCOUNTERS
 -- ------------------------------------------------------------------------------
 INSERT INTO encounters (id, patient_id, attending_provider_id, encounter_type, chief_complaint, clinical_notes, discharge_summary, status, encounter_date)
 VALUES (1, 1, 2, 'OUTPATIENT', 'Routine diabetes checkup and cardiovascular risk evaluation.', 'Patient reports good dietary discipline. Blood pressure reading is 128/82. HbA1c is 6.8%.', 'Continue current Metformin therapy. Follow up in 90 days.', 'COMPLETED', CURRENT_TIMESTAMP);
@@ -225,7 +213,7 @@ INSERT INTO encounters (id, patient_id, attending_provider_id, encounter_type, c
 VALUES (4, 4, 4, 'OUTPATIENT', 'Annual physical and neurological screening.', 'Neurological exam normal. Cranial nerves II-XII intact. DTRs 2+ bilaterally.', 'Screening completed without abnormalities.', 'COMPLETED', CURRENT_TIMESTAMP);
 
 -- ------------------------------------------------------------------------------
--- 10. ALLERGIES
+-- 11. ALLERGIES
 -- ------------------------------------------------------------------------------
 INSERT INTO allergies (id, patient_id, allergen_name, allergen_code, category, severity, reaction_description, status, recorded_by_id, recorded_at)
 VALUES (1, 1, 'Penicillin', 'RxNorm-70618', 'DRUG', 'SEVERE', 'Anaphylaxis, acute bronchial constriction, severe hives.', 'ACTIVE', 2, CURRENT_TIMESTAMP);
@@ -240,7 +228,7 @@ INSERT INTO allergies (id, patient_id, allergen_name, allergen_code, category, s
 VALUES (4, 2, 'Sulfa Drugs', 'RxNorm-10160', 'DRUG', 'MODERATE', 'Skin rash and localized hives upon exposure.', 'ACTIVE', 2, CURRENT_TIMESTAMP);
 
 -- ------------------------------------------------------------------------------
--- 11. DIAGNOSES
+-- 12. DIAGNOSES
 -- ------------------------------------------------------------------------------
 INSERT INTO diagnoses (id, patient_id, doctor_id, condition_name, icd_code, snomed_code, onset_date, status, notes, recorded_at)
 VALUES (1, 1, 2, 'Type 2 Diabetes Mellitus without complications', 'E11.9', '44054006', '2020-03-15', 'CHRONIC', 'Managed with oral antihyperglycemic agents and quarterly glycemic monitoring.', CURRENT_TIMESTAMP);
@@ -255,7 +243,7 @@ INSERT INTO diagnoses (id, patient_id, doctor_id, condition_name, icd_code, snom
 VALUES (4, 4, 4, 'Tension Headache', 'G44.2', '398057008', '2025-11-12', 'RESOLVED', 'Stress-related tension headaches, resolved after lifestyle modifications.', CURRENT_TIMESTAMP);
 
 -- ------------------------------------------------------------------------------
--- 12. MEDICAL RECORDS
+-- 13. MEDICAL RECORDS
 -- ------------------------------------------------------------------------------
 INSERT INTO medical_records (id, patient_id, doctor_id, diagnosis, icd_code, symptoms, treatment_plan, notes, created_at)
 VALUES (1, 1, 2, 'Routine Cardiac Follow-up & Glycemic Assessment', 'E11.9', 'Mild fatigue, occasional shortness of breath after climbing stairs.', 'Continue Metformin 500mg. Start daily 30-min walking routine. Follow up in 3 months.', 'Patient reports good compliance with diet. Blood pressure slightly elevated.', CURRENT_TIMESTAMP);
@@ -267,7 +255,7 @@ INSERT INTO medical_records (id, patient_id, doctor_id, diagnosis, icd_code, sym
 VALUES (3, 4, 4, 'Annual Neurological Check', 'Z00.00', 'None reported.', 'Maintain regular physical exercise and sleep hygiene.', 'All vitals and reflex responses within optimal baseline parameters.', CURRENT_TIMESTAMP);
 
 -- ------------------------------------------------------------------------------
--- 13. VITALS
+-- 14. VITALS
 -- ------------------------------------------------------------------------------
 INSERT INTO vitals (id, patient_id, recorded_by_id, blood_pressure, heart_rate, temperature, oxygen_saturation, respiratory_rate, weight_kg, height_cm, bmi, blood_glucose, recorded_at)
 VALUES (1, 1, 5, '134/86', 78, 36.7, 98, 16, 70.0, 165.0, 25.7, 135, CURRENT_TIMESTAMP);
@@ -294,7 +282,7 @@ INSERT INTO vitals (id, patient_id, recorded_by_id, blood_pressure, heart_rate, 
 VALUES (8, 4, 5, '120/78', 70, 36.6, 99, 15, 75.0, 175.0, 24.5, 92, CURRENT_TIMESTAMP);
 
 -- ------------------------------------------------------------------------------
--- 14. PRESCRIPTIONS
+-- 15. PRESCRIPTIONS
 -- ------------------------------------------------------------------------------
 INSERT INTO prescriptions (id, patient_id, doctor_id, medication_name, rx_norm_code, dosage, route, frequency, duration_days, refills, instructions, status, prescribed_at)
 VALUES (1, 1, 2, 'Metformin HCl', '6809', '500 mg', 'Oral', 'Twice daily with meals', 90, 3, 'Take after morning and evening meals with a full glass of water.', 'ACTIVE', CURRENT_TIMESTAMP);
@@ -309,7 +297,7 @@ INSERT INTO prescriptions (id, patient_id, doctor_id, medication_name, rx_norm_c
 VALUES (4, 4, 4, 'EpiPen Auto-Injector', '314684', '0.3 mg', 'Intramuscular', 'As needed for severe allergic reaction', 365, 2, 'Use immediately upon accidental peanut exposure and call emergency services.', 'ACTIVE', CURRENT_TIMESTAMP);
 
 -- ------------------------------------------------------------------------------
--- 15. APPOINTMENTS
+-- 16. APPOINTMENTS
 -- ------------------------------------------------------------------------------
 INSERT INTO appointments (id, patient_id, doctor_id, appointment_date, status, reason, notes, created_at)
 VALUES (1, 1, 2, '2026-08-04 10:00:00', 'SCHEDULED', '3-Month Diabetes & Cardiology Review', 'Patient requested morning slot.', CURRENT_TIMESTAMP);
@@ -324,7 +312,7 @@ INSERT INTO appointments (id, patient_id, doctor_id, appointment_date, status, r
 VALUES (4, 4, 4, '2026-08-10 15:00:00', 'SCHEDULED', 'Neurology Routine Review', 'Annual follow up.', CURRENT_TIMESTAMP);
 
 -- ------------------------------------------------------------------------------
--- 16. AUDIT LOGS
+-- 17. AUDIT LOGS
 -- ------------------------------------------------------------------------------
 INSERT INTO audit_logs (id, username, user_role, action, entity_name, resource_id, ip_address, details, timestamp)
 VALUES (1, 'SYSTEM', 'SYSTEM', 'SEED', 'DATABASE', '0', '127.0.0.1', 'Initialized Sentinel EHR database via manual SQL seed script with 10 production roles and RBAC+ABAC matrices.', CURRENT_TIMESTAMP);
@@ -337,6 +325,7 @@ ALTER TABLE permissions ALTER COLUMN id RESTART WITH 3000;
 ALTER TABLE roles ALTER COLUMN id RESTART WITH 3000;
 ALTER TABLE users ALTER COLUMN id RESTART WITH 3000;
 ALTER TABLE patients ALTER COLUMN id RESTART WITH 3000;
+ALTER TABLE beds ALTER COLUMN id RESTART WITH 3000;
 ALTER TABLE patient_assignments ALTER COLUMN id RESTART WITH 3000;
 ALTER TABLE encounters ALTER COLUMN id RESTART WITH 3000;
 ALTER TABLE allergies ALTER COLUMN id RESTART WITH 3000;

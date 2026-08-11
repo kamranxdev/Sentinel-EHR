@@ -46,6 +46,12 @@ public class AuditTrailService {
 
     @Async
     @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public CompletableFuture<AuditLog> logAction(String username, String action, String entityName, String resourceId, String details) {
+        return logAction(username != null ? username : "SYSTEM", "ROLE_USER", action, entityName, resourceId, details);
+    }
+
+    @Async
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public CompletableFuture<AuditLog> logAction(String username, String userRole, String action, String entityName, String resourceId, String details) {
         try {
             AuditLog log = new AuditLog(username, userRole, action, entityName, resourceId, details);

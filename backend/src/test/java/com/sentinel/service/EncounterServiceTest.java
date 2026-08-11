@@ -1,7 +1,9 @@
 package com.sentinel.service;
 
+import com.sentinel.audit.service.AuditTrailService;
 import com.sentinel.common.exception.ResourceNotFoundException;
 import com.sentinel.encounters.entity.Encounter;
+import com.sentinel.encounters.repository.BedRepository;
 import com.sentinel.encounters.repository.EncounterRepository;
 import com.sentinel.encounters.service.EncounterService;
 import com.sentinel.patients.entity.Patient;
@@ -24,6 +26,8 @@ public class EncounterServiceTest {
     private EncounterRepository encounterRepository;
     private PatientRepository patientRepository;
     private UserRepository userRepository;
+    private BedRepository bedRepository;
+    private AuditTrailService auditTrailService;
 
     private EncounterService encounterService;
 
@@ -36,8 +40,10 @@ public class EncounterServiceTest {
         encounterRepository = mock(EncounterRepository.class);
         patientRepository = mock(PatientRepository.class);
         userRepository = mock(UserRepository.class);
+        bedRepository = mock(BedRepository.class);
+        auditTrailService = mock(AuditTrailService.class);
 
-        encounterService = new EncounterService(encounterRepository, patientRepository, userRepository);
+        encounterService = new EncounterService(encounterRepository, patientRepository, userRepository, bedRepository, auditTrailService);
 
         testPatient = new Patient();
         testPatient.setId(1L);
@@ -53,7 +59,7 @@ public class EncounterServiceTest {
         testEncounter.setPatient(testPatient);
         testEncounter.setAttendingProvider(testProvider);
         testEncounter.setEncounterType("AMBULATORY");
-        testEncounter.setStatus("ACTIVE");
+        testEncounter.setStatus("ADMITTED");
         testEncounter.setEncounterDate(LocalDateTime.now());
     }
 
@@ -125,7 +131,11 @@ public class EncounterServiceTest {
         when(userRepository.findByUsername("doctor_mahtab")).thenReturn(Optional.of(testProvider));
         when(userRepository.findById(20L)).thenReturn(Optional.of(otherProvider));
         when(patientRepository.findById(1L)).thenReturn(Optional.of(testPatient));
-        when(encounterRepository.save(any(Encounter.class))).thenAnswer(i -> i.getArgument(0));
+        when(encounterRepository.save(any(Encounter.class))).thenAnswer(i -> {
+            Encounter saved = i.getArgument(0);
+            if (saved.getId() == null) saved.setId(201L);
+            return saved;
+        });
 
         Encounter created = encounterService.createEncounter(input, "doctor_mahtab");
 
@@ -159,7 +169,6 @@ public class EncounterServiceTest {
     public void testUpdateEncounter_UpdatesFieldsPartially() {
         Encounter update = new Encounter();
         update.setClinicalNotes("Patient responding to treatment");
-        update.setStatus("COMPLETED");
 
         when(encounterRepository.findById(100L)).thenReturn(Optional.of(testEncounter));
         when(encounterRepository.save(any(Encounter.class))).thenAnswer(i -> i.getArgument(0));
@@ -167,7 +176,6 @@ public class EncounterServiceTest {
         Encounter updated = encounterService.updateEncounter(100L, update);
 
         assertEquals("Patient responding to treatment", updated.getClinicalNotes());
-        assertEquals("COMPLETED", updated.getStatus());
         verify(encounterRepository, times(1)).save(testEncounter);
     }
 

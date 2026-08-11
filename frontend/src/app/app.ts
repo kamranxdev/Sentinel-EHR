@@ -159,6 +159,7 @@ export class App implements OnInit, OnDestroy {
       ledger: { label: 'Audit Ledger', icon: 'lucideShieldCheck' },
       records: { label: 'SOAP Progress Notes', icon: 'lucideFileText' },
       triage: { label: 'Clinical Triage & NEWS2', icon: 'lucideActivity' },
+      chart: { label: 'Bedside Patient Chart', icon: 'lucideHeartPulse' },
       bcma: { label: 'BCMA 5-Rights Bedside', icon: 'lucidePill' },
       'care-plans': { label: 'NANDA-I Care Plans', icon: 'lucideListChecks' },
       handoff: { label: 'SBAR Shift Handoff', icon: 'lucideFileText' },
@@ -373,13 +374,7 @@ export class App implements OnInit, OnDestroy {
         {
           label: 'Physician Desk Workspace',
           items: [
-            { icon: 'lucideLayoutDashboard', label: 'Clinician Dashboard', routerLink: '/doctor/dashboard' },
-            { icon: 'lucideHeartPulse', label: 'Patient Charts (MPI)', routerLink: '/doctor/patients' },
-            { icon: 'lucideHospital', label: 'Visits & Encounters', routerLink: '/doctor/encounters' },
-            { icon: 'lucidePill', label: 'Pharmacy & eRx Orders', routerLink: '/doctor/prescriptions' },
-            { icon: 'lucideListChecks', label: 'Problem List (ICD-10)', routerLink: '/doctor/diagnoses' },
-            { icon: 'lucideTriangleAlert', label: 'Allergies & Risk Register', routerLink: '/doctor/allergies' },
-            { icon: 'lucideActivity', label: 'Bedside Vitals', routerLink: '/doctor/vitals' },
+            { icon: 'lucideLayoutDashboard', label: 'Physician Desk', routerLink: '/doctor/dashboard' },
             { icon: 'lucideCalendarClock', label: 'Consultation Schedule', routerLink: '/doctor/appointments' },
           ],
         },
@@ -391,11 +386,8 @@ export class App implements OnInit, OnDestroy {
           label: 'Nurse Station Workspace',
           items: [
             { icon: 'lucideLayoutDashboard', label: 'Nursing Station', routerLink: '/nurse/dashboard' },
-            { icon: 'lucideActivity', label: 'Clinical Triage Intake', routerLink: '/nurse/triage' },
-            { icon: 'lucideHeartPulse', label: 'Bedside Vitals Flowsheet', routerLink: '/nurse/vitals' },
-            { icon: 'lucidePill', label: 'Medication MAR Orders', routerLink: '/nurse/prescriptions' },
-            { icon: 'lucideTriangleAlert', label: 'Coded Allergies & ADRs', routerLink: '/nurse/allergies' },
-            { icon: 'lucideCalendarClock', label: 'Unit Ward Schedule', routerLink: '/nurse/appointments' },
+            { icon: 'lucideCalendarClock', label: 'Unit Triage & Ward Schedule', routerLink: '/nurse/appointments' },
+            { icon: 'lucideHospital', label: 'Spatial Bed & Ward Census', routerLink: '/nurse/beds' },
           ],
         },
       ];

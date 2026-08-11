@@ -1,5 +1,6 @@
 package com.sentinel.patients.entity;
 
+import com.sentinel.encounters.entity.Encounter;
 import com.sentinel.users.entity.User;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
@@ -16,11 +17,20 @@ public class PatientAssignment {
     private Patient patient;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "encounter_id")
+    private Encounter encounter;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "staff_user_id", nullable = false)
     private User staffUser;
 
     @Column(nullable = false, length = 40)
-    private String assignmentType; // ATTENDING_PHYSICIAN, ASSIGNED_NURSE, CONSULTING_SPECIALIST
+    private String assignmentType; // ATTENDING, CONSULTING, PRIMARY_NURSE, COVERAGE_NURSE, ANCILLARY
+
+    private String departmentName;
+
+    @Column(nullable = false, length = 20)
+    private String status = "ACTIVE"; // ACTIVE, INACTIVE, TRANSFERRED
 
     private LocalDateTime startDate = LocalDateTime.now();
     private LocalDateTime endDate;
@@ -31,6 +41,17 @@ public class PatientAssignment {
         this.patient = patient;
         this.staffUser = staffUser;
         this.assignmentType = assignmentType;
+        this.status = "ACTIVE";
+    }
+
+    public PatientAssignment(Patient patient, Encounter encounter, User staffUser, String assignmentType, String departmentName) {
+        this.patient = patient;
+        this.encounter = encounter;
+        this.staffUser = staffUser;
+        this.assignmentType = assignmentType;
+        this.departmentName = departmentName;
+        this.status = "ACTIVE";
+        this.startDate = LocalDateTime.now();
     }
 
     public Long getId() {
@@ -49,6 +70,14 @@ public class PatientAssignment {
         this.patient = patient;
     }
 
+    public Encounter getEncounter() {
+        return encounter;
+    }
+
+    public void setEncounter(Encounter encounter) {
+        this.encounter = encounter;
+    }
+
     public User getStaffUser() {
         return staffUser;
     }
@@ -63,6 +92,22 @@ public class PatientAssignment {
 
     public void setAssignmentType(String assignmentType) {
         this.assignmentType = assignmentType;
+    }
+
+    public String getDepartmentName() {
+        return departmentName;
+    }
+
+    public void setDepartmentName(String departmentName) {
+        this.departmentName = departmentName;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public LocalDateTime getStartDate() {

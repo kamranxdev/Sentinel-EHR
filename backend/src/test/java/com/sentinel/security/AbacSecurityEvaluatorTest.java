@@ -1,6 +1,7 @@
 package com.sentinel.security;
 
 import com.sentinel.authorization.abac.AbacSecurityEvaluator;
+import com.sentinel.authorization.service.BreakGlassService;
 import com.sentinel.patients.entity.Patient;
 import com.sentinel.patients.repository.PatientAssignmentRepository;
 import com.sentinel.patients.repository.PatientRepository;
@@ -22,6 +23,7 @@ public class AbacSecurityEvaluatorTest {
     private PatientAssignmentRepository assignmentRepository;
     private UserRepository userRepository;
     private PatientRepository patientRepository;
+    private BreakGlassService breakGlassService;
     private AbacSecurityEvaluator evaluator;
 
     @BeforeEach
@@ -29,8 +31,9 @@ public class AbacSecurityEvaluatorTest {
         assignmentRepository = mock(PatientAssignmentRepository.class);
         userRepository = mock(UserRepository.class);
         patientRepository = mock(PatientRepository.class);
+        breakGlassService = mock(BreakGlassService.class);
 
-        evaluator = new AbacSecurityEvaluator(assignmentRepository, userRepository, patientRepository);
+        evaluator = new AbacSecurityEvaluator(assignmentRepository, userRepository, patientRepository, breakGlassService);
     }
 
     @Test
@@ -110,6 +113,21 @@ public class AbacSecurityEvaluatorTest {
 
         boolean allowed = evaluator.hasTreatmentRelationship(auth, 1L);
         assertTrue(allowed, "On-duty clinician in matching department must be allowed");
+    }
+
+    @Test
+    public void testBreakGlassOverrideAllowed() {
+        Authentication auth = mock(Authentication.class);
+        when(auth.isAuthenticated()).thenReturn(true);
+        when(auth.getName()).thenReturn("covering_doctor");
+        doReturn(List.of(new SimpleGrantedAuthority("ROLE_DOCTOR"))).when(auth).getAuthorities();
+
+        when(patientRepository.findById(1L)).thenReturn(Optional.of(new Patient()));
+        when(assignmentRepository.existsActiveAssignmentByPatientIdAndUsername(1L, "covering_doctor")).thenReturn(false);
+        when(breakGlassService.hasActiveBreakGlassOverride(1L, "covering_doctor")).thenReturn(true);
+
+        boolean allowed = evaluator.hasTreatmentRelationship(auth, 1L);
+        assertTrue(allowed, "Active Break-Glass emergency override must grant access");
     }
 
     @Test

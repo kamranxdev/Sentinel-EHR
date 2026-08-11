@@ -50,11 +50,16 @@ export const routes: Routes = [
     data: { roles: ['ROLE_DOCTOR'] },
   },
   {
-    path: 'doctor/patients',
+    path: 'doctor/chart',
     loadComponent: () =>
-      import('./workspaces/doctor/doctor-patients.component').then((m) => m.DoctorPatientsComponent),
+      import('./workspaces/doctor/doctor-chart.component').then((m) => m.DoctorChartComponent),
     canActivate: [authGuard, roleGuard, clinicalAccessGuard],
-    data: { roles: ['ROLE_DOCTOR'], permission: 'PATIENT_READ' },
+    data: { roles: ['ROLE_DOCTOR'] },
+  },
+  {
+    path: 'doctor/patients',
+    redirectTo: 'doctor/dashboard',
+    pathMatch: 'full',
   },
   {
     path: 'doctor/appointments',
@@ -65,38 +70,28 @@ export const routes: Routes = [
   },
   {
     path: 'doctor/encounters',
-    loadComponent: () =>
-      import('./workspaces/doctor/doctor-encounters.component').then((m) => m.DoctorEncountersComponent),
-    canActivate: [authGuard, roleGuard, clinicalAccessGuard],
-    data: { roles: ['ROLE_DOCTOR'], permission: 'CLINICAL_NOTE_READ' },
+    redirectTo: 'doctor/chart',
+    pathMatch: 'full',
   },
   {
     path: 'doctor/prescriptions',
-    loadComponent: () =>
-      import('./workspaces/doctor/doctor-prescriptions.component').then((m) => m.DoctorPrescriptionsComponent),
-    canActivate: [authGuard, roleGuard, clinicalAccessGuard],
-    data: { roles: ['ROLE_DOCTOR'], permission: 'PRESCRIPTION_READ' },
+    redirectTo: 'doctor/chart',
+    pathMatch: 'full',
   },
   {
     path: 'doctor/diagnoses',
-    loadComponent: () =>
-      import('./workspaces/doctor/doctor-diagnoses.component').then((m) => m.DoctorDiagnosesComponent),
-    canActivate: [authGuard, roleGuard, clinicalAccessGuard],
-    data: { roles: ['ROLE_DOCTOR'], permission: 'DIAGNOSIS_READ' },
+    redirectTo: 'doctor/chart',
+    pathMatch: 'full',
   },
   {
     path: 'doctor/allergies',
-    loadComponent: () =>
-      import('./workspaces/doctor/doctor-allergies.component').then((m) => m.DoctorAllergiesComponent),
-    canActivate: [authGuard, roleGuard, clinicalAccessGuard],
-    data: { roles: ['ROLE_DOCTOR'], permission: 'ALLERGY_READ' },
+    redirectTo: 'doctor/chart',
+    pathMatch: 'full',
   },
   {
     path: 'doctor/vitals',
-    loadComponent: () =>
-      import('./workspaces/doctor/doctor-vitals.component').then((m) => m.DoctorVitalsComponent),
-    canActivate: [authGuard, roleGuard, clinicalAccessGuard],
-    data: { roles: ['ROLE_DOCTOR'], permission: 'VITALS_READ' },
+    redirectTo: 'doctor/chart',
+    pathMatch: 'full',
   },
 
   // --- NURSE WORKSPACE ROUTES ---
@@ -108,32 +103,26 @@ export const routes: Routes = [
     data: { roles: ['ROLE_NURSE'] },
   },
   {
-    path: 'nurse/triage',
+    path: 'nurse/chart',
     loadComponent: () =>
-      import('./workspaces/nurse/nurse-triage.component').then((m) => m.NurseTriageComponent),
+      import('./workspaces/nurse/nurse-chart.component').then((m) => m.NurseChartComponent),
     canActivate: [authGuard, roleGuard],
     data: { roles: ['ROLE_NURSE'] },
   },
   {
     path: 'nurse/vitals',
-    loadComponent: () =>
-      import('./workspaces/nurse/nurse-vitals.component').then((m) => m.NurseVitalsComponent),
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['ROLE_NURSE'] },
+    redirectTo: 'nurse/chart',
+    pathMatch: 'full',
   },
   {
     path: 'nurse/prescriptions',
-    loadComponent: () =>
-      import('./workspaces/nurse/nurse-prescriptions.component').then((m) => m.NursePrescriptionsComponent),
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['ROLE_NURSE'] },
+    redirectTo: 'nurse/chart',
+    pathMatch: 'full',
   },
   {
     path: 'nurse/patients',
-    loadComponent: () =>
-      import('./workspaces/nurse/nurse-patients.component').then((m) => m.NursePatientsComponent),
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['ROLE_NURSE'] },
+    redirectTo: 'nurse/dashboard',
+    pathMatch: 'full',
   },
   {
     path: 'nurse/appointments',
@@ -144,10 +133,15 @@ export const routes: Routes = [
   },
   {
     path: 'nurse/allergies',
+    redirectTo: 'nurse/chart',
+    pathMatch: 'full',
+  },
+  {
+    path: 'nurse/beds',
     loadComponent: () =>
-      import('./workspaces/nurse/nurse-allergies.component').then((m) => m.NurseAllergiesComponent),
+      import('./workspaces/nurse/nurse-beds.component').then((m) => m.NurseBedsComponent),
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ROLE_NURSE'] },
+    data: { roles: ['ROLE_NURSE', 'ROLE_ADMIN', 'ROLE_SYS_ADMIN', 'ROLE_ORG_ADMIN'] },
   },
 
   // --- ADMIN WORKSPACE ROUTES ---

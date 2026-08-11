@@ -349,6 +349,47 @@ public class FhirService {
         return r;
     }
 
+    public Map<String, Object> toLocationResource(com.sentinel.encounters.entity.Bed bed) {
+        Map<String, Object> r = new LinkedHashMap<>();
+        r.put("resourceType", "Location");
+        r.put("id", bed.getId().toString());
+        r.put("status", bed.getStatus() != null && bed.getStatus().equalsIgnoreCase("AVAILABLE") ? "active" : "suspended");
+        r.put("name", bed.getBedCode());
+        r.put("description", bed.getFacilityName() + " - " + bed.getDepartmentName() + " - " + bed.getWardName() + " Room " + bed.getRoomNumber() + " Bed " + bed.getBedNumber());
+        r.put("physicalType", Map.of("coding", List.of(Map.of("system", "http://terminology.hl7.org/CodeSystem/location-physical-type", "code", "bd", "display", "Bed"))));
+        return r;
+    }
+
+    public Map<String, Object> toCareTeamResource(com.sentinel.patients.entity.PatientAssignment pa) {
+        Map<String, Object> r = new LinkedHashMap<>();
+        r.put("resourceType", "CareTeam");
+        r.put("id", pa.getId().toString());
+        r.put("status", pa.getStatus() != null ? pa.getStatus().toLowerCase() : "active");
+        if (pa.getPatient() != null) {
+            r.put("subject", Map.of("reference", "Patient/" + pa.getPatient().getId(), "display", pa.getPatient().getFullName()));
+        }
+        if (pa.getStaffUser() != null) {
+            r.put("participant", List.of(Map.of(
+                "role", List.of(Map.of("text", pa.getAssignmentType())),
+                "member", Map.of("reference", "Practitioner/" + pa.getStaffUser().getId(), "display", pa.getStaffUser().getFullName())
+            )));
+        }
+        return r;
+    }
+
+    public Map<String, Object> toServiceRequestResource(com.sentinel.laboratory.entity.LabOrder lo) {
+        Map<String, Object> r = new LinkedHashMap<>();
+        r.put("resourceType", "ServiceRequest");
+        r.put("id", lo.getId().toString());
+        r.put("status", lo.getStatus() != null ? lo.getStatus().toLowerCase() : "active");
+        r.put("intent", "order");
+        r.put("code", Map.of("text", lo.getTestName()));
+        if (lo.getPatient() != null) {
+            r.put("subject", Map.of("reference", "Patient/" + lo.getPatient().getId(), "display", lo.getPatient().getFullName()));
+        }
+        return r;
+    }
+
     public Map<String, Object> toObservationResource(Vitals v) {
         Map<String, Object> r = new LinkedHashMap<>();
         r.put("resourceType", "Observation");

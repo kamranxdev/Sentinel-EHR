@@ -28,6 +28,32 @@ export class ApiService {
 
   constructor(private http: HttpClient) {}
 
+  // Generic HTTP helper methods
+  get<T>(endpoint: string): Observable<T> {
+    const url = endpoint.startsWith('http') ? endpoint : `${this.baseUrl}${endpoint.startsWith('/') ? '' : '/'}${endpoint}`;
+    return this.http.get<T>(url);
+  }
+
+  post<T>(endpoint: string, body: any): Observable<T> {
+    const url = endpoint.startsWith('http') ? endpoint : `${this.baseUrl}${endpoint.startsWith('/') ? '' : '/'}${endpoint}`;
+    return this.http.post<T>(url, body);
+  }
+
+  put<T>(endpoint: string, body: any): Observable<T> {
+    const url = endpoint.startsWith('http') ? endpoint : `${this.baseUrl}${endpoint.startsWith('/') ? '' : '/'}${endpoint}`;
+    return this.http.put<T>(url, body);
+  }
+
+  patch<T>(endpoint: string, body: any): Observable<T> {
+    const url = endpoint.startsWith('http') ? endpoint : `${this.baseUrl}${endpoint.startsWith('/') ? '' : '/'}${endpoint}`;
+    return this.http.patch<T>(url, body);
+  }
+
+  delete<T>(endpoint: string): Observable<T> {
+    const url = endpoint.startsWith('http') ? endpoint : `${this.baseUrl}${endpoint.startsWith('/') ? '' : '/'}${endpoint}`;
+    return this.http.delete<T>(url);
+  }
+
   // Patients (Demographics & Identity)
   getPatients(): Observable<Patient[]> {
     return this.http.get<Patient[]>(`${this.baseUrl}/patients`);

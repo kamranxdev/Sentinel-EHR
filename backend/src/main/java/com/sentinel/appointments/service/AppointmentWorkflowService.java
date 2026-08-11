@@ -120,6 +120,10 @@ public class AppointmentWorkflowService {
         Appointment apt = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Appointment #" + appointmentId + " not found"));
 
+        if ("SCHEDULED".equalsIgnoreCase(apt.getStage()) || "SCHEDULED".equalsIgnoreCase(apt.getStatus())) {
+            throw new IllegalStateException("Appointment #" + appointmentId + " must undergo front desk check-in before nurse triage vitals intake.");
+        }
+
         User user = getAuthenticatedUser(auth);
         vitalsInput.setPatient(apt.getPatient());
         vitalsInput.setRecordedBy(user);
@@ -153,6 +157,10 @@ public class AppointmentWorkflowService {
     public Appointment startConsultation(Long appointmentId, Authentication auth) {
         Appointment apt = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Appointment #" + appointmentId + " not found"));
+
+        if (!"TRIAGED".equalsIgnoreCase(apt.getStage()) && !"IN_CONSULTATION".equalsIgnoreCase(apt.getStage())) {
+            throw new IllegalStateException("Appointment #" + appointmentId + " is currently in '" + apt.getStage() + "' stage and must be triaged by nursing before consultation start.");
+        }
 
         apt.setStage("IN_CONSULTATION");
         apt.setStatus("IN_CONSULTATION");

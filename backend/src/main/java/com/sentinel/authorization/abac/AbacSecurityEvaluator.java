@@ -1,6 +1,7 @@
 package com.sentinel.authorization.abac;
 
 import com.sentinel.authorization.evaluator.ABACEvaluator;
+import com.sentinel.authorization.service.BreakGlassService;
 import com.sentinel.patients.entity.Patient;
 import com.sentinel.patients.repository.PatientAssignmentRepository;
 import com.sentinel.patients.repository.PatientRepository;
@@ -18,13 +19,16 @@ public class AbacSecurityEvaluator implements ABACEvaluator {
     private final PatientAssignmentRepository assignmentRepository;
     private final UserRepository userRepository;
     private final PatientRepository patientRepository;
+    private final BreakGlassService breakGlassService;
 
     public AbacSecurityEvaluator(PatientAssignmentRepository assignmentRepository,
                                 UserRepository userRepository,
-                                PatientRepository patientRepository) {
+                                PatientRepository patientRepository,
+                                BreakGlassService breakGlassService) {
         this.assignmentRepository = assignmentRepository;
         this.userRepository = userRepository;
         this.patientRepository = patientRepository;
+        this.breakGlassService = breakGlassService;
     }
 
     @Override
@@ -46,6 +50,7 @@ public class AbacSecurityEvaluator implements ABACEvaluator {
             return true;
         }
 
+        // 1. Check Self-Service patient profile access
         Optional<Patient> patientOpt = patientRepository.findById(patientId);
         if (patientOpt.isPresent() && patientOpt.get().getUser() != null) {
             if (patientOpt.get().getUser().getUsername().equalsIgnoreCase(username)) {
@@ -53,19 +58,32 @@ public class AbacSecurityEvaluator implements ABACEvaluator {
             }
         }
 
+        // 2. Check active Care Team assignment roster
         boolean hasAssignment = assignmentRepository.existsActiveAssignmentByPatientIdAndUsername(patientId, username);
         if (hasAssignment) {
             return true;
         }
 
-        Optional<User> currentUserOpt = userRepository.findByUsername(username);
-        if (currentUserOpt.isPresent() && patientOpt.isPresent()) {
-            User currentUser = currentUserOpt.get();
-            Patient patient = patientOpt.get();
-
-            if (currentUser.getDepartment() != null && currentUser.getDepartment().equalsIgnoreCase(patient.getDepartment())) {
-                return true;
+        // 5. Ward / Department match
+        Optional<User> userOpt = userRepository.findByUsername(username);
+        if (userOpt.isPresent() && patientOpt.isPresent()) {
+            User clinician = userOpt.get();
+            Patient p = patientOpt.get();
+            if (clinician.getDepartment() != null && p.getDepartment() != null) {
+                String cDept = clinician.getDepartment().trim().toLowerCase();
+                String pDept = p.getDepartment().trim().toLowerCase();
+                if (cDept.equals(pDept) ||
+                    (cDept.contains("card") && pDept.contains("card")) ||
+                    (cDept.contains("emg") && pDept.contains("emg")) ||
+                    (cDept.contains("emergency") && pDept.contains("emergency"))) {
+                    return true;
+                }
             }
+        }
+
+        // 4. Check active Emergency Break-Glass override lease
+        if (breakGlassService.hasActiveBreakGlassOverride(patientId, username)) {
+            return true;
         }
 
         return false;

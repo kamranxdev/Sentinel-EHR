@@ -32,7 +32,7 @@ public class EncounterController {
     }
 
     @GetMapping("/patient/{patientId}")
-    @PreAuthorize("hasAuthority('CLINICAL_NOTE_READ') and @abacEvaluator.hasTreatmentRelationship(authentication, #patientId)")
+    @PreAuthorize("hasAnyAuthority('CLINICAL_NOTE_READ', 'ENCOUNTER_READ', 'ROLE_RECEPTIONIST', 'ROLE_NURSE', 'ROLE_DOCTOR', 'ROLE_ADMIN', 'ROLE_SYS_ADMIN') and @abacEvaluator.hasTreatmentRelationship(authentication, #patientId)")
     public List<EncounterResponseDTO> getEncountersByPatient(@PathVariable Long patientId, Authentication auth) {
         auditService.logAction(auth, "READ", "ENCOUNTER", String.valueOf(patientId), "Accessed encounter & visit log history for patient ID: " + patientId);
         return encounterService.getEncountersByPatientId(patientId).stream()
@@ -41,7 +41,7 @@ public class EncounterController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('CLINICAL_NOTE_CREATE') and (#payload != null and #payload.patientId != null and @abacEvaluator.hasTreatmentRelationship(authentication, #payload.patientId))")
+    @PreAuthorize("hasAnyAuthority('CLINICAL_NOTE_CREATE', 'ENCOUNTER_CREATE', 'ROLE_RECEPTIONIST', 'ROLE_NURSE', 'ROLE_DOCTOR', 'ROLE_ADMIN', 'ROLE_SYS_ADMIN') and (#payload != null and #payload.patientId != null and @abacEvaluator.hasTreatmentRelationship(authentication, #payload.patientId))")
     public ResponseEntity<EncounterResponseDTO> createEncounter(@Valid @RequestBody EncounterRequestDTO payload, Authentication auth) {
         Encounter entity = encounterMapper.toEntity(payload);
 
@@ -61,7 +61,7 @@ public class EncounterController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('CLINICAL_NOTE_CREATE') and @patientSecurityService.canAccessEncounter(authentication, #id)")
+    @PreAuthorize("hasAnyAuthority('CLINICAL_NOTE_CREATE', 'ENCOUNTER_UPDATE', 'ROLE_RECEPTIONIST', 'ROLE_NURSE', 'ROLE_DOCTOR', 'ROLE_ADMIN', 'ROLE_SYS_ADMIN') and @patientSecurityService.canAccessEncounter(authentication, #id)")
     public ResponseEntity<EncounterResponseDTO> updateEncounter(@PathVariable Long id, @Valid @RequestBody EncounterRequestDTO payload, Authentication auth) {
         Encounter updatedEntity = encounterMapper.toEntity(payload);
         Encounter saved = encounterService.updateEncounter(id, updatedEntity);

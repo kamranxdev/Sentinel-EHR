@@ -1,9 +1,11 @@
 package com.sentinel.encounters.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class EncounterRequestDTO {
 
     @NotNull(message = "Patient ID is required")
@@ -19,6 +21,14 @@ public class EncounterRequestDTO {
     private String dischargeSummary;
     private String status;
     private LocalDateTime encounterDate;
+
+    // Admission fields
+    private String admissionType;
+    private String admissionSource;
+    private String department;
+    private String departmentName;
+    private String acuityScore;
+    private String admissionDiagnosisIcd;
 
     public EncounterRequestDTO() {}
 
@@ -93,5 +103,56 @@ public class EncounterRequestDTO {
 
     public void setEncounterDate(LocalDateTime encounterDate) {
         this.encounterDate = encounterDate;
+    }
+
+    public String getAdmissionType() {
+        return admissionType;
+    }
+
+    public void setAdmissionType(String admissionType) {
+        this.admissionType = admissionType;
+    }
+
+    public String getAdmissionSource() {
+        return admissionSource;
+    }
+
+    public void setAdmissionSource(String admissionSource) {
+        this.admissionSource = admissionSource;
+    }
+
+    public String getDepartment() {
+        return department;
+    }
+
+    public void setDepartment(String department) {
+        this.department = department;
+        if (this.departmentName == null) {
+            this.departmentName = department;
+        }
+    }
+
+    public String getDepartmentName() {
+        return departmentName != null ? departmentName : department;
+    }
+
+    public void setDepartmentName(String departmentName) {
+        this.departmentName = departmentName;
+    }
+
+    public String getAcuityScore() {
+        return acuityScore;
+    }
+
+    public void setAcuityScore(String acuityScore) {
+        this.acuityScore = acuityScore;
+    }
+
+    public String getAdmissionDiagnosisIcd() {
+        return admissionDiagnosisIcd;
+    }
+
+    public void setAdmissionDiagnosisIcd(String admissionDiagnosisIcd) {
+        this.admissionDiagnosisIcd = admissionDiagnosisIcd;
     }
 }

@@ -8,6 +8,7 @@ import { StatCardComponent } from '../../shared/ui/stat-card.component';
 import { Appointment } from '../../core/models/models';
 import { ReceptionistIntakeComponent } from './receptionist-intake.component';
 import { ReceptionistEligibilityComponent } from './receptionist-eligibility.component';
+import { InpatientAdmissionModalComponent } from '../../shared/inpatient-admission-modal.component';
 
 import { HlmCardImports } from '@spartan-ng/helm/card';
 import { HlmBadgeImports } from '@spartan-ng/helm/badge';
@@ -28,6 +29,7 @@ import {
   lucideUserCheck,
   lucideAlertTriangle,
   lucideCalendarClock,
+  lucideHospital,
 } from '@ng-icons/lucide';
 
 @Component({
@@ -45,6 +47,7 @@ import {
     NgIcon,
     ReceptionistIntakeComponent,
     ReceptionistEligibilityComponent,
+    InpatientAdmissionModalComponent,
   ],
   providers: [
     provideIcons({
@@ -89,6 +92,10 @@ import {
             <ng-icon name="lucideHeartPulse" size="14" class="text-emerald-500" />
             <span>MPI Search</span>
           </a>
+          <button (click)="isAdmissionModalOpen.set(true)" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-purple-500/30 bg-purple-500/10 text-purple-600 dark:text-purple-400 text-xs font-semibold hover:bg-purple-500/20 transition-colors">
+            <ng-icon name="lucideHospital" size="14" />
+            <span>Inpatient Admission</span>
+          </button>
           <button (click)="openRteModal()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-card text-foreground text-xs font-semibold hover:bg-accent transition-colors">
             <ng-icon name="lucideShieldCheck" size="14" class="text-sky-500" />
             <span>RTE Verification</span>
@@ -317,10 +324,17 @@ import {
       [patientIdInput]="rtePatientId()"
       (close)="showRteModal.set(false); loadData()">
     </app-receptionist-eligibility>
+
+    <app-inpatient-admission-modal
+      [isOpen]="isAdmissionModalOpen()"
+      (closed)="isAdmissionModalOpen.set(false)"
+      (admitted)="loadData()"
+    ></app-inpatient-admission-modal>
   `,
 })
 export class ReceptionistDashboardComponent implements OnInit {
   appointments = signal<Appointment[]>([]);
+  isAdmissionModalOpen = signal(false);
   patientCount = signal(0);
 
   showIntakeModal = signal(false);

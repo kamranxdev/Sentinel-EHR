@@ -17,6 +17,13 @@ public class EncounterResponseDTO {
     private String status;
     private LocalDateTime encounterDate;
 
+    // Admission fields
+    private String admissionType;
+    private String admissionSource;
+    private String departmentName;
+    private String acuityScore;
+    private String admissionDiagnosisIcd;
+
     public EncounterResponseDTO() {}
 
     public Long getId() {
@@ -113,5 +120,45 @@ public class EncounterResponseDTO {
 
     public void setEncounterDate(LocalDateTime encounterDate) {
         this.encounterDate = encounterDate;
+    }
+
+    public String getAdmissionType() {
+        return admissionType;
+    }
+
+    public void setAdmissionType(String admissionType) {
+        this.admissionType = admissionType;
+    }
+
+    public String getAdmissionSource() {
+        return admissionSource;
+    }
+
+    public void setAdmissionSource(String admissionSource) {
+        this.admissionSource = admissionSource;
+    }
+
+    public String getDepartmentName() {
+        return departmentName;
+    }
+
+    public void setDepartmentName(String departmentName) {
+        this.departmentName = departmentName;
+    }
+
+    public String getAcuityScore() {
+        return acuityScore;
+    }
+
+    public void setAcuityScore(String acuityScore) {
+        this.acuityScore = acuityScore;
+    }
+
+    public String getAdmissionDiagnosisIcd() {
+        return admissionDiagnosisIcd;
+    }
+
+    public void setAdmissionDiagnosisIcd(String admissionDiagnosisIcd) {
+        this.admissionDiagnosisIcd = admissionDiagnosisIcd;
     }
 }
