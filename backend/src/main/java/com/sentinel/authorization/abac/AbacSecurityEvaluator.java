@@ -44,8 +44,8 @@ public class AbacSecurityEvaluator implements ABACEvaluator {
 
         String username = authentication.getName();
 
-        // Administrative bypass: System admins, Auditors, and Receptionists (for intake/MPI)
-        if (hasRole(authentication, "ROLE_SYS_ADMIN") || hasRole(authentication, "ROLE_ADMIN") ||
+        // Administrative bypass: System admins, Org admins, Auditors, and Receptionists (for intake/MPI)
+        if (hasRole(authentication, "ROLE_SYS_ADMIN") || hasRole(authentication, "ROLE_ORG_ADMIN") ||
             hasRole(authentication, "ROLE_AUDITOR") || hasRole(authentication, "ROLE_RECEPTIONIST")) {
             return true;
         }
@@ -122,7 +122,7 @@ public class AbacSecurityEvaluator implements ABACEvaluator {
 
         return authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
-                .anyMatch(auth -> auth.equals(permissionCode) || auth.equals("ROLE_SYS_ADMIN") || auth.equals("ROLE_ADMIN"));
+                .anyMatch(auth -> auth.equals(permissionCode) || auth.equals("ROLE_SYS_ADMIN") || auth.equals("ROLE_ORG_ADMIN"));
     }
 
     private boolean hasRole(Authentication authentication, String roleName) {

@@ -81,7 +81,8 @@ public class AppointmentWorkflowService {
                 .map(GrantedAuthority::getAuthority)
                 .toList();
 
-        if (roles.contains("ROLE_ADMIN")) return "Admin";
+        if (roles.contains("ROLE_SYS_ADMIN")) return "System Admin";
+        if (roles.contains("ROLE_ORG_ADMIN")) return "Org Admin";
         if (roles.contains("ROLE_RECEPTIONIST")) return "Receptionist";
         if (roles.contains("ROLE_DOCTOR")) return "Doctor";
         if (roles.contains("ROLE_NURSE")) return "Nurse";
@@ -269,7 +270,7 @@ public class AppointmentWorkflowService {
                 .orElseThrow(() -> new ResourceNotFoundException("Note #" + noteId + " not found"));
 
         User user = getAuthenticatedUser(auth);
-        boolean isAdmin = auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        boolean isAdmin = auth.getAuthorities().stream().anyMatch(a -> a.getAuthority().equals("ROLE_SYS_ADMIN") || a.getAuthority().equals("ROLE_ORG_ADMIN"));
 
         if (!note.getAuthor().getId().equals(user.getId()) && !isAdmin) {
             throw new IllegalStateException("Only the creator of the note or an Admin can edit this note.");

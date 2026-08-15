@@ -39,15 +39,25 @@ public class AdminController {
     }
 
     @GetMapping("/users")
-    @PreAuthorize("hasAnyAuthority('USER_CREATE', 'USER_READ', 'ROLE_SYS_ADMIN', 'ROLE_ADMIN', 'ROLE_ORG_ADMIN', 'ROLE_DOCTOR', 'ROLE_NURSE', 'ROLE_RECEPTIONIST', 'ROLE_AUDITOR')")
-    public List<UserResponseDTO> getAllUsers() {
+    @PreAuthorize("hasAnyAuthority('USER_CREATE', 'USER_READ', 'ROLE_SYS_ADMIN', 'ROLE_ORG_ADMIN', 'ROLE_DOCTOR', 'ROLE_NURSE', 'ROLE_RECEPTIONIST', 'ROLE_AUDITOR')")
+    public List<UserResponseDTO> getAllUsers(Authentication auth) {
+        if (auth != null && auth.getAuthorities().stream().anyMatch(a -> "ROLE_ORG_ADMIN".equals(a.getAuthority()))
+                && auth.getAuthorities().stream().noneMatch(a -> "ROLE_SYS_ADMIN".equals(a.getAuthority()))) {
+            User currentAdmin = userService.getUserByUsername(auth.getName()).orElse(null);
+            if (currentAdmin != null && currentAdmin.getOrganization() != null) {
+                return userService.getUsersByOrganization(currentAdmin.getOrganization().getId()).stream()
+                        .map(userMapper::toResponseDTO)
+                        .toList();
+            }
+        }
+
         return userService.getAllUsers().stream()
                 .map(userMapper::toResponseDTO)
                 .toList();
     }
 
     @PutMapping("/users/{id}")
-    @PreAuthorize("hasAnyAuthority('ROLE_SYS_ADMIN', 'ROLE_ADMIN', 'USER_CREATE')")
+    @PreAuthorize("hasAnyAuthority('ROLE_SYS_ADMIN', 'ROLE_ORG_ADMIN', 'USER_CREATE')")
     public ResponseEntity<UserResponseDTO> updateUser(@PathVariable Long id, @Valid @RequestBody UserUpdateRequestDTO payload, Authentication auth) {
         User saved = userService.updateUser(id, payload);
         auditTrailService.logAction(auth, "UPDATE_USER", "USER", String.valueOf(saved.getId()),
@@ -57,7 +67,7 @@ public class AdminController {
     }
 
     @PatchMapping("/users/{id}/status")
-    @PreAuthorize("hasAnyAuthority('ROLE_SYS_ADMIN', 'ROLE_ADMIN', 'USER_CREATE')")
+    @PreAuthorize("hasAnyAuthority('ROLE_SYS_ADMIN', 'ROLE_ORG_ADMIN', 'USER_CREATE')")
     public ResponseEntity<Map<String, String>> updateUserStatus(@PathVariable Long id, @Valid @RequestBody UserStatusUpdateRequestDTO payload, Authentication auth) {
         String newStatus = payload.getStatus() != null ? payload.getStatus() : "VERIFIED";
         User saved = userService.updateUserStatus(id, newStatus);
@@ -69,7 +79,7 @@ public class AdminController {
     }
 
     @PostMapping("/users/{id}/reset-password")
-    @PreAuthorize("hasAnyAuthority('ROLE_SYS_ADMIN', 'ROLE_ADMIN', 'USER_CREATE')")
+    @PreAuthorize("hasAnyAuthority('ROLE_SYS_ADMIN', 'ROLE_ORG_ADMIN', 'USER_CREATE')")
     public ResponseEntity<Map<String, String>> resetUserPassword(@PathVariable Long id, @Valid @RequestBody UserPasswordResetRequestDTO payload, Authentication auth) {
         User user = userService.resetUserPassword(id, payload.getNewPassword());
 
@@ -80,7 +90,7 @@ public class AdminController {
     }
 
     @DeleteMapping("/users/{id}")
-    @PreAuthorize("hasAnyAuthority('ROLE_SYS_ADMIN', 'ROLE_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROLE_SYS_ADMIN', 'ROLE_ORG_ADMIN')")
     public ResponseEntity<Map<String, String>> deleteUser(@PathVariable Long id, Authentication auth) {
         String targetUsername = userService.deleteUser(id);
 
@@ -91,8 +101,18 @@ public class AdminController {
     }
 
     @GetMapping("/audit-logs")
-    @PreAuthorize("hasAnyAuthority('AUDIT_LOG_READ', 'ROLE_SYS_ADMIN', 'ROLE_ADMIN')")
-    public List<AuditLogResponseDTO> getAuditLogs(@RequestParam(value = "search", required = false) String search) {
+    @PreAuthorize("hasAnyAuthority('AUDIT_LOG_READ', 'ROLE_SYS_ADMIN', 'ROLE_ORG_ADMIN', 'ROLE_AUDITOR')")
+    public List<AuditLogResponseDTO> getAuditLogs(@RequestParam(value = "search", required = false) String search, Authentication auth) {
+        if (auth != null && auth.getAuthorities().stream().anyMatch(a -> "ROLE_ORG_ADMIN".equals(a.getAuthority()))
+                && auth.getAuthorities().stream().noneMatch(a -> "ROLE_SYS_ADMIN".equals(a.getAuthority()))) {
+            User currentAdmin = userService.getUserByUsername(auth.getName()).orElse(null);
+            if (currentAdmin != null && currentAdmin.getOrganization() != null) {
+                return userService.getAuditLogsForOrganization(currentAdmin.getOrganization().getId(), search).stream()
+                        .map(auditLogMapper::toResponseDTO)
+                        .toList();
+            }
+        }
+
         return userService.getAuditLogs(search).stream()
                 .map(auditLogMapper::toResponseDTO)
                 .toList();

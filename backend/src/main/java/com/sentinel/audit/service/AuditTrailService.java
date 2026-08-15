@@ -42,7 +42,7 @@ public class AuditTrailService {
     @Async
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public CompletableFuture<AuditLog> logAction(String username, String action, String entityName, String resourceId, String details) {
-        return logAction(username != null ? username : "SYSTEM", "ROLE_USER", action, entityName, resourceId, details);
+        return logAction(username != null ? username : "SYSTEM", "ANONYMOUS", action, entityName, resourceId, details);
     }
 
     @Async
@@ -99,7 +99,7 @@ public class AuditTrailService {
             return authorities.get(0);
         }
 
-        return "ROLE_USER";
+        return "ROLE_PATIENT";
     }
 
     public List<AuditLog> getRecentAuditLogs() {

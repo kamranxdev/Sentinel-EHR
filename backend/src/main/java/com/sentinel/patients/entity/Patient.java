@@ -39,6 +39,10 @@ public class Patient {
     
     private String department; // e.g. "Cardiovascular Medicine", "Emergency & Acute Care"
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "organization_id")
+    private com.sentinel.organization.entity.Organization organization;
+
     @Column(length = 1000)
     private String medicalAlerts; // Allergies, chronic conditions summary
 
@@ -359,6 +363,14 @@ public class Patient {
         }
 
         return fhirPatient;
+    }
+
+    public com.sentinel.organization.entity.Organization getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(com.sentinel.organization.entity.Organization organization) {
+        this.organization = organization;
     }
 }
 

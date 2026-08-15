@@ -19,7 +19,7 @@ public class SentinelPermissionEvaluator implements PermissionEvaluator {
         String requiredPermission = permission.toString();
         return authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
-                .anyMatch(auth -> auth.equals(requiredPermission) || auth.equals("ROLE_SYS_ADMIN") || auth.equals("ROLE_ADMIN"));
+                .anyMatch(auth -> auth.equals(requiredPermission) || auth.equals("ROLE_SYS_ADMIN") || auth.equals("ROLE_ORG_ADMIN"));
     }
 
     @Override

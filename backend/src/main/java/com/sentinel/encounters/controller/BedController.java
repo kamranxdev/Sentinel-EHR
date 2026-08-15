@@ -25,7 +25,7 @@ public class BedController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyAuthority('ROLE_SYS_ADMIN', 'ROLE_ORG_ADMIN', 'ROLE_ADMIN', 'ROLE_DOCTOR', 'ROLE_NURSE')")
+    @PreAuthorize("hasAnyAuthority('ROLE_SYS_ADMIN', 'ROLE_ORG_ADMIN', 'ROLE_DOCTOR', 'ROLE_NURSE')")
     public ResponseEntity<List<Bed>> getAllBeds(@RequestParam(required = false) String department) {
         if (department != null && !department.trim().isEmpty()) {
             return ResponseEntity.ok(bedManagementService.getBedsByDepartment(department));
@@ -34,13 +34,13 @@ public class BedController {
     }
 
     @GetMapping("/available")
-    @PreAuthorize("hasAnyAuthority('ROLE_SYS_ADMIN', 'ROLE_ORG_ADMIN', 'ROLE_ADMIN', 'ROLE_DOCTOR', 'ROLE_NURSE', 'ROLE_RECEPTIONIST')")
+    @PreAuthorize("hasAnyAuthority('ROLE_SYS_ADMIN', 'ROLE_ORG_ADMIN', 'ROLE_DOCTOR', 'ROLE_NURSE', 'ROLE_RECEPTIONIST')")
     public ResponseEntity<List<Bed>> getAvailableBeds(@RequestParam(required = false) String department) {
         return ResponseEntity.ok(bedManagementService.getAvailableBeds(department));
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyAuthority('ROLE_SYS_ADMIN', 'ROLE_ORG_ADMIN', 'ROLE_ADMIN', 'ROLE_DOCTOR', 'ROLE_NURSE')")
+    @PreAuthorize("hasAnyAuthority('ROLE_SYS_ADMIN', 'ROLE_ORG_ADMIN', 'ROLE_DOCTOR', 'ROLE_NURSE')")
     public ResponseEntity<Bed> getBedById(@PathVariable Long id) {
         return bedManagementService.getBedById(id)
                 .map(ResponseEntity::ok)
@@ -48,7 +48,7 @@ public class BedController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyAuthority('ROLE_SYS_ADMIN', 'ROLE_ORG_ADMIN', 'ROLE_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROLE_SYS_ADMIN', 'ROLE_ORG_ADMIN')")
     public ResponseEntity<Bed> createBed(@Valid @RequestBody BedRequestDTO request) {
         Bed bed = new Bed();
         bed.setBedNumber(request.getBedNumber());
@@ -62,13 +62,13 @@ public class BedController {
     }
 
     @PatchMapping("/{id}/status")
-    @PreAuthorize("hasAnyAuthority('ROLE_SYS_ADMIN', 'ROLE_ORG_ADMIN', 'ROLE_ADMIN', 'ROLE_NURSE')")
+    @PreAuthorize("hasAnyAuthority('ROLE_SYS_ADMIN', 'ROLE_ORG_ADMIN', 'ROLE_NURSE')")
     public ResponseEntity<Bed> updateBedStatus(@PathVariable Long id, @Valid @RequestBody BedStatusUpdateDTO body) {
         return ResponseEntity.ok(bedManagementService.updateBedStatus(id, body.getStatus()));
     }
 
     @PostMapping("/transfer")
-    @PreAuthorize("hasAnyAuthority('ROLE_SYS_ADMIN', 'ROLE_ORG_ADMIN', 'ROLE_ADMIN', 'ROLE_DOCTOR', 'ROLE_NURSE')")
+    @PreAuthorize("hasAnyAuthority('ROLE_SYS_ADMIN', 'ROLE_ORG_ADMIN', 'ROLE_DOCTOR', 'ROLE_NURSE')")
     public ResponseEntity<LocationHistory> executeBedTransfer(@RequestBody Map<String, Object> body, Authentication authentication) {
         Long encounterId = Long.parseLong(body.get("encounterId").toString());
         Long newBedId = Long.parseLong(body.get("newBedId").toString());
@@ -80,7 +80,7 @@ public class BedController {
     }
 
     @GetMapping("/encounters/{encounterId}/location-history")
-    @PreAuthorize("hasAnyAuthority('ROLE_SYS_ADMIN', 'ROLE_ORG_ADMIN', 'ROLE_ADMIN', 'ROLE_DOCTOR', 'ROLE_NURSE')")
+    @PreAuthorize("hasAnyAuthority('ROLE_SYS_ADMIN', 'ROLE_ORG_ADMIN', 'ROLE_DOCTOR', 'ROLE_NURSE')")
     public ResponseEntity<List<LocationHistory>> getLocationHistory(@PathVariable Long encounterId) {
         return ResponseEntity.ok(bedManagementService.getLocationHistory(encounterId));
     }

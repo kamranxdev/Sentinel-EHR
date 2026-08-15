@@ -24,7 +24,7 @@ public class MPIController {
     }
 
     @GetMapping("/search")
-    @PreAuthorize("hasAnyAuthority('MPI_SEARCH', 'PATIENT_READ', 'ROLE_RECEPTIONIST', 'ROLE_INTAKE_SPEC', 'ROLE_ADMIN', 'ROLE_SYS_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('MPI_SEARCH', 'PATIENT_READ', 'ROLE_RECEPTIONIST', 'ROLE_SYS_ADMIN', 'ROLE_ORG_ADMIN')")
     public List<MPIMatchCandidateDTO> searchMPI(
             @RequestParam(value = "fullName", required = false) String fullName,
             @RequestParam(value = "dateOfBirth", required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate dateOfBirth,
@@ -40,13 +40,13 @@ public class MPIController {
     }
 
     @GetMapping("/duplicates")
-    @PreAuthorize("hasAnyAuthority('MPI_SEARCH', 'PATIENT_READ', 'ROLE_RECEPTIONIST', 'ROLE_INTAKE_SPEC', 'ROLE_ADMIN', 'ROLE_SYS_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('MPI_SEARCH', 'PATIENT_READ', 'ROLE_RECEPTIONIST', 'ROLE_SYS_ADMIN', 'ROLE_ORG_ADMIN')")
     public List<MPIMatchCandidateDTO> scanDuplicateCandidates(Authentication auth) {
         return mpiSearchService.scanDuplicateCandidates(auth);
     }
 
     @PostMapping("/merge-requests")
-    @PreAuthorize("hasAnyAuthority('MPI_MERGE_REQUEST', 'ROLE_RECEPTIONIST', 'ROLE_ADMIN', 'ROLE_SYS_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('MPI_MERGE_REQUEST', 'ROLE_RECEPTIONIST', 'ROLE_SYS_ADMIN', 'ROLE_ORG_ADMIN')")
     public ResponseEntity<String> requestChartMerge(@Valid @RequestBody MPIMergeRequestDTO mergeRequest, Authentication auth) {
         String result = mpiSearchService.requestChartMerge(mergeRequest, auth);
         return ResponseEntity.ok(result);

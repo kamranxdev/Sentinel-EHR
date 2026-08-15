@@ -23,8 +23,10 @@ export class DashboardComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    if (this.authService.hasRole('ROLE_SYS_ADMIN') || this.authService.hasRole('ROLE_ORG_ADMIN') || this.authService.hasRole('ROLE_ADMIN')) {
-      this.router.navigate(['/admin/dashboard']);
+    if (this.authService.hasRole('ROLE_SYS_ADMIN')) {
+      this.router.navigate(['/sys-admin/dashboard']);
+    } else if (this.authService.hasRole('ROLE_ORG_ADMIN')) {
+      this.router.navigate(['/org-admin/dashboard']);
     } else if (this.authService.hasRole('ROLE_DOCTOR')) {
       this.router.navigate(['/doctor/dashboard']);
     } else if (this.authService.hasRole('ROLE_NURSE')) {

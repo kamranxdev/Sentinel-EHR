@@ -32,7 +32,7 @@ public class EncounterController {
     }
 
     @GetMapping("/patient/{patientId}")
-    @PreAuthorize("hasAnyAuthority('CLINICAL_NOTE_READ', 'ENCOUNTER_READ', 'ROLE_NURSE', 'ROLE_DOCTOR', 'ROLE_ADMIN', 'ROLE_SYS_ADMIN') and @abacEvaluator.hasTreatmentRelationship(authentication, #patientId)")
+    @PreAuthorize("hasAnyAuthority('CLINICAL_NOTE_READ', 'ENCOUNTER_READ', 'ROLE_NURSE', 'ROLE_DOCTOR', 'ROLE_ORG_ADMIN', 'ROLE_SYS_ADMIN') and @abacEvaluator.hasTreatmentRelationship(authentication, #patientId)")
     public List<EncounterResponseDTO> getEncountersByPatient(@PathVariable Long patientId, Authentication auth) {
         auditService.logAction(auth, "READ", "ENCOUNTER", String.valueOf(patientId), "Accessed encounter & visit log history for patient ID: " + patientId);
         return encounterService.getEncountersByPatientId(patientId).stream()
@@ -45,7 +45,7 @@ public class EncounterController {
      * Receptionists are explicitly excluded as they do not perform clinical documentation.
      */
     @PostMapping
-    @PreAuthorize("hasAnyAuthority('CLINICAL_NOTE_CREATE', 'ENCOUNTER_CREATE', 'ROLE_NURSE', 'ROLE_DOCTOR', 'ROLE_ADMIN', 'ROLE_SYS_ADMIN') and (#payload != null and #payload.patientId != null and @abacEvaluator.hasTreatmentRelationship(authentication, #payload.patientId))")
+    @PreAuthorize("hasAnyAuthority('CLINICAL_NOTE_CREATE', 'ENCOUNTER_CREATE', 'ROLE_NURSE', 'ROLE_DOCTOR', 'ROLE_ORG_ADMIN', 'ROLE_SYS_ADMIN') and (#payload != null and #payload.patientId != null and @abacEvaluator.hasTreatmentRelationship(authentication, #payload.patientId))")
     public ResponseEntity<EncounterResponseDTO> createEncounter(@Valid @RequestBody EncounterRequestDTO payload, Authentication auth) {
         Encounter entity = encounterMapper.toEntity(payload);
 
@@ -65,7 +65,7 @@ public class EncounterController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyAuthority('CLINICAL_NOTE_CREATE', 'ENCOUNTER_UPDATE', 'ROLE_NURSE', 'ROLE_DOCTOR', 'ROLE_ADMIN', 'ROLE_SYS_ADMIN') and @patientSecurityService.canAccessEncounter(authentication, #id)")
+    @PreAuthorize("hasAnyAuthority('CLINICAL_NOTE_CREATE', 'ENCOUNTER_UPDATE', 'ROLE_NURSE', 'ROLE_DOCTOR', 'ROLE_ORG_ADMIN', 'ROLE_SYS_ADMIN') and @patientSecurityService.canAccessEncounter(authentication, #id)")
     public ResponseEntity<EncounterResponseDTO> updateEncounter(@PathVariable Long id, @Valid @RequestBody EncounterRequestDTO payload, Authentication auth) {
         Encounter updatedEntity = encounterMapper.toEntity(payload);
         Encounter saved = encounterService.updateEncounter(id, updatedEntity);

@@ -72,7 +72,7 @@ public class PatientSecurityService {
                 .collect(Collectors.toSet());
 
         if (authorities.contains("ROLE_SYS_ADMIN") || authorities.contains("ROLE_ORG_ADMIN") ||
-            authorities.contains("ROLE_ADMIN") || authorities.contains("ROLE_DOCTOR") ||
+            authorities.contains("ROLE_DOCTOR") ||
             authorities.contains("ROLE_NURSE") || authorities.contains("ROLE_RECEPTIONIST") ||
             authorities.contains("ROLE_LAB_TECH") || authorities.contains("ROLE_PHARMACIST") ||
             authorities.contains("ROLE_BILLING") || authorities.contains("ROLE_AUDITOR") ||
@@ -102,7 +102,7 @@ public class PatientSecurityService {
                 .collect(Collectors.toSet());
 
         if (authorities.contains("ROLE_SYS_ADMIN") || authorities.contains("ROLE_ORG_ADMIN") ||
-            authorities.contains("ROLE_ADMIN") || authorities.contains("ROLE_DOCTOR") ||
+            authorities.contains("ROLE_DOCTOR") ||
             authorities.contains("ROLE_NURSE") || authorities.contains("ROLE_RECEPTIONIST") ||
             authorities.contains("ROLE_AUDITOR")) {
             return true;
@@ -145,7 +145,7 @@ public class PatientSecurityService {
                 .collect(Collectors.toSet());
 
         if (authorities.contains("ROLE_SYS_ADMIN") || authorities.contains("ROLE_ORG_ADMIN") ||
-            authorities.contains("ROLE_ADMIN") || authorities.contains("ROLE_NURSE") ||
+            authorities.contains("ROLE_NURSE") ||
             authorities.contains("ROLE_RECEPTIONIST") || authorities.contains("ROLE_AUDITOR")) {
             return true;
         }

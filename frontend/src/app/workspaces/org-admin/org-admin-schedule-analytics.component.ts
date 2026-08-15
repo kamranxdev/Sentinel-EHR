@@ -30,7 +30,7 @@ import {
 } from '@ng-icons/lucide';
 
 @Component({
-  selector: 'app-admin-schedule-analytics',
+  selector: 'app-org-admin-schedule-analytics',
   standalone: true,
   imports: [
     CommonModule,
@@ -76,7 +76,7 @@ import {
                 Facility Capacity & Schedule Analytics
               </h1>
               <span hlmBadge variant="secondary" class="text-[10px] uppercase font-mono tracking-wider">
-                System Governance
+                ROLE_ORG_ADMIN
               </span>
             </div>
             <p class="text-xs text-muted-foreground mt-0.5 flex items-center gap-2">
@@ -452,7 +452,7 @@ import {
     </div>
   `,
 })
-export class AdminScheduleAnalyticsComponent implements OnInit {
+export class OrgAdminScheduleAnalyticsComponent implements OnInit {
   appointments = signal<Appointment[]>([]);
   loading = signal<boolean>(false);
   searchQuery = signal<string>('');
@@ -551,7 +551,6 @@ export class AdminScheduleAnalyticsComponent implements OnInit {
     const st = this.selectedStatusFilter();
 
     return this.appointments().filter((apt) => {
-      // Status Filter match
       let matchesStatus = true;
       if (st !== 'ALL') {
         if (st === 'SCHEDULED') {
@@ -563,7 +562,6 @@ export class AdminScheduleAnalyticsComponent implements OnInit {
         }
       }
 
-      // Search Query match
       let matchesQuery = true;
       if (q) {
         const patientName = (apt.patientName || apt.patient?.fullName || '').toLowerCase();

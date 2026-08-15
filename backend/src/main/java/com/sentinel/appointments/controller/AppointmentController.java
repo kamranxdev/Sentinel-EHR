@@ -121,7 +121,7 @@ public class AppointmentController {
     }
 
     @PatchMapping("/{id}/stage")
-    @PreAuthorize("hasAnyAuthority('APPOINTMENT_UPDATE', 'ROLE_RECEPTIONIST', 'ROLE_NURSE', 'ROLE_DOCTOR', 'ROLE_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('APPOINTMENT_UPDATE', 'ROLE_RECEPTIONIST', 'ROLE_NURSE', 'ROLE_DOCTOR', 'ROLE_SYS_ADMIN', 'ROLE_ORG_ADMIN')")
     public ResponseEntity<AppointmentResponseDTO> updateAppointmentStage(
             @PathVariable Long id,
             @Valid @RequestBody AppointmentStageUpdateDTO payload,
@@ -134,7 +134,7 @@ public class AppointmentController {
     }
 
     @GetMapping("/resources")
-    @PreAuthorize("hasAnyAuthority('APPOINTMENT_READ', 'ROLE_RECEPTIONIST', 'ROLE_DOCTOR', 'ROLE_NURSE', 'ROLE_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('APPOINTMENT_READ', 'ROLE_RECEPTIONIST', 'ROLE_DOCTOR', 'ROLE_NURSE', 'ROLE_SYS_ADMIN', 'ROLE_ORG_ADMIN')")
     public ResponseEntity<Map<String, Object>> getMultiResourceGrid(Authentication auth) {
         return ResponseEntity.ok(appointmentService.getMultiResourceGrid());
     }

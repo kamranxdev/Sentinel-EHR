@@ -36,7 +36,7 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<JwtAuthResponse> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
         JwtAuthResponse response = authService.login(loginRequest);
-        String primaryRole = response.getRoles().isEmpty() ? "ROLE_USER" : response.getRoles().iterator().next();
+        String primaryRole = response.getRoles().isEmpty() ? "ROLE_PATIENT" : response.getRoles().iterator().next();
         auditService.logAction(response.getUsername(), primaryRole, "LOGIN", "AUTH", String.valueOf(response.getId()), "User authenticated successfully");
         return ResponseEntity.ok(response);
     }
@@ -54,7 +54,7 @@ public class AuthController {
     }
 
     @PostMapping("/admin/create-user")
-    @PreAuthorize("hasAnyAuthority('ROLE_SYS_ADMIN', 'ROLE_ORG_ADMIN', 'ROLE_ADMIN', 'USER_CREATE')")
+    @PreAuthorize("hasAnyAuthority('ROLE_SYS_ADMIN', 'ROLE_ORG_ADMIN', 'USER_CREATE')")
     public ResponseEntity<UserResponseDTO> createUserByAdmin(@Valid @RequestBody RegisterRequest registerRequest, Authentication auth) {
         User saved = authService.createUserByAdmin(registerRequest);
         auditService.logAction(auth, "CREATE_STAFF", "USER", String.valueOf(saved.getId()), "Admin created account for " + saved.getUsername() + " with roles: " + registerRequest.getRoles());

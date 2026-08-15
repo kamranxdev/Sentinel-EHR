@@ -128,7 +128,8 @@ export class App implements OnInit, OnDestroy {
     const roleMap: Record<string, { label: string; url: string; icon: string }> = {
       doctor: { label: 'Doctor Workspace', url: '/doctor/dashboard', icon: 'lucideHeartPulse' },
       nurse: { label: 'Nurse Workspace', url: '/nurse/dashboard', icon: 'lucideActivity' },
-      admin: { label: 'Admin Center', url: '/admin/dashboard', icon: 'lucideSettings' },
+      'sys-admin': { label: 'System Admin Desk', url: '/sys-admin/dashboard', icon: 'lucideSettings' },
+      'org-admin': { label: 'Org Admin Center', url: '/org-admin/dashboard', icon: 'lucideBuilding2' },
       patient: { label: 'Patient Portal', url: '/patient/dashboard', icon: 'lucideUserRound' },
       receptionist: { label: 'Front Desk', url: '/receptionist/dashboard', icon: 'lucideCalendarClock' },
       labtech: { label: 'Pathology Lab', url: '/labtech/dashboard', icon: 'lucideMicroscope' },
@@ -321,8 +322,14 @@ export class App implements OnInit, OnDestroy {
   isNurse(): boolean {
     return this.authService.hasRole('ROLE_NURSE');
   }
+  isSysAdmin(): boolean {
+    return this.authService.hasRole('ROLE_SYS_ADMIN');
+  }
+  isOrgAdmin(): boolean {
+    return this.authService.hasRole('ROLE_ORG_ADMIN');
+  }
   isAdmin(): boolean {
-    return this.authService.hasRole('ROLE_SYS_ADMIN') || this.authService.hasRole('ROLE_ORG_ADMIN') || this.authService.hasRole('ROLE_ADMIN');
+    return this.isSysAdmin() || this.isOrgAdmin();
   }
   isReceptionist(): boolean {
     return this.authService.hasRole('ROLE_RECEPTIONIST');
@@ -347,7 +354,6 @@ export class App implements OnInit, OnDestroy {
     const roles = this.authService.currentUser()?.roles || [];
     if (roles.includes('ROLE_SYS_ADMIN')) return 'System Admin';
     if (roles.includes('ROLE_ORG_ADMIN')) return 'Org Admin';
-    if (roles.includes('ROLE_ADMIN')) return 'Admin / Executive';
     if (roles.includes('ROLE_DOCTOR')) return 'Physician / Clinician';
     if (roles.includes('ROLE_NURSE')) return 'Clinical Nurse';
     if (roles.includes('ROLE_RECEPTIONIST')) return 'Front Desk Receptionist';
@@ -440,21 +446,31 @@ export class App implements OnInit, OnDestroy {
         },
       ];
     }
-    if (this.isAdmin()) {
+    if (this.isSysAdmin()) {
       return [
         {
-          label: 'Hospital Admin & Intake',
+          label: 'Platform & Infrastructure',
           items: [
-            { icon: 'lucideLayoutDashboard', label: 'Command Center', routerLink: '/admin/dashboard' },
-            { icon: 'lucideHeartPulse', label: 'Master Patient Index (MPI)', routerLink: '/admin/patients' },
-            { icon: 'lucideCalendarClock', label: 'Facility Schedule Analytics', routerLink: '/admin/schedule-analytics' },
+            { icon: 'lucideLayoutDashboard', label: 'System Admin Command Desk', routerLink: '/sys-admin/dashboard' },
+            { icon: 'lucideBuilding2', label: 'Clinic Onboarding & Network', routerLink: '/sys-admin/organizations' },
+            { icon: 'lucideSettings', label: 'Global RBAC User Management', routerLink: '/sys-admin/users' },
+            { icon: 'lucideHeartPulse', label: 'Master Patient Index (MPI)', routerLink: '/sys-admin/patients' },
+            { icon: 'lucideCalendarClock', label: 'Facility Schedule Analytics', routerLink: '/sys-admin/schedule-analytics' },
+            { icon: 'lucideShieldCheck', label: 'HIPAA Platform WORM Ledger', routerLink: '/auditor/ledger' },
           ],
         },
+      ];
+    }
+    if (this.isOrgAdmin()) {
+      return [
         {
-          label: 'System Administration',
+          label: 'Facility Administration',
           items: [
-            { icon: 'lucideSettings', label: 'User RBAC Management', routerLink: '/admin/users' },
-            { icon: 'lucideShieldCheck', label: 'HIPAA Compliance Vault', routerLink: '/auditor/ledger' },
+            { icon: 'lucideLayoutDashboard', label: 'Org Admin Workspace', routerLink: '/org-admin/dashboard' },
+            { icon: 'lucideBuilding2', label: 'Facility Demographics & Settings', routerLink: '/org-admin/facility-settings' },
+            { icon: 'lucideUsers', label: 'Facility Staff Roster', routerLink: '/org-admin/users' },
+            { icon: 'lucideHeartPulse', label: 'Master Patient Index (MPI)', routerLink: '/org-admin/patients' },
+            { icon: 'lucideCalendarClock', label: 'Facility Schedule Analytics', routerLink: '/org-admin/schedule-analytics' },
           ],
         },
       ];

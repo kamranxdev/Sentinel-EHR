@@ -50,7 +50,7 @@ public class SecurityIntegrationTest {
                     "password": "Password123!",
                     "email": "self_reg@example.com",
                     "fullName": "Self Registered Patient",
-                    "roles": ["ROLE_ADMIN"]
+                    "roles": ["ROLE_SYS_ADMIN"]
                 }
                 """;
 
@@ -104,14 +104,14 @@ public class SecurityIntegrationTest {
     @Test
     public void testAllRoleLoginsSucceed() throws Exception {
         String[][] credentials = {
-            {"admin", "admin123"},
-            {"doctor", "doctor123"},
-            {"nurse", "nurse123"},
-            {"receptionist", "receptionist123"},
-            {"labtech", "labtech123"},
-            {"pharmacist", "pharmacist123"},
-            {"billing", "billing123"},
-            {"patient", "patient123"}
+            {"sysadmin.vikram", "admin123"},
+            {"dr.mahtab.khan", "doctor123"},
+            {"nurse.priya.verma", "nurse123"},
+            {"receptionist.sarita", "receptionist123"},
+            {"labtech.roy", "labtech123"},
+            {"pharmacist.anita", "pharmacist123"},
+            {"billing.vikram", "billing123"},
+            {"patient.kamran", "patient123"}
         };
 
         for (String[] cred : credentials) {
@@ -139,7 +139,7 @@ public class SecurityIntegrationTest {
 
     @Test
     public void testAssignedDoctorCanAccessPatientPrescriptions() throws Exception {
-        String token = loginAndGetToken("doctor_mahtab", "doctor123");
+        String token = loginAndGetToken("dr.mahtab.khan", "doctor123");
 
         mockMvc.perform(get("/api/v1/prescriptions/patient/1")
                 .header("Authorization", "Bearer " + token))
@@ -148,7 +148,7 @@ public class SecurityIntegrationTest {
 
     @Test
     public void testUnassignedDoctorCannotAccessPatientPrescriptions() throws Exception {
-        String token = loginAndGetToken("doctor_rajesh", "doctor123");
+        String token = loginAndGetToken("dr.rajesh.sharma", "doctor123");
 
         mockMvc.perform(get("/api/v1/prescriptions/patient/1")
                 .header("Authorization", "Bearer " + token))
@@ -157,7 +157,7 @@ public class SecurityIntegrationTest {
 
     @Test
     public void testNurseCannotCreatePrescription() throws Exception {
-        String token = loginAndGetToken("nurse", "nurse123");
+        String token = loginAndGetToken("nurse.priya.verma", "nurse123");
 
         String prescriptionJson = """
                 {
@@ -179,7 +179,7 @@ public class SecurityIntegrationTest {
 
     @Test
     public void testPatientCanAccessOwnVitals() throws Exception {
-        String token = loginAndGetToken("patient", "patient123");
+        String token = loginAndGetToken("patient.kamran", "patient123");
 
         mockMvc.perform(get("/api/v1/vitals/patient/1")
                 .header("Authorization", "Bearer " + token))
@@ -188,7 +188,7 @@ public class SecurityIntegrationTest {
 
     @Test
     public void testPatientCannotAccessOtherPatientVitals() throws Exception {
-        String token = loginAndGetToken("patient", "patient123");
+        String token = loginAndGetToken("patient.kamran", "patient123");
 
         mockMvc.perform(get("/api/v1/vitals/patient/2")
                 .header("Authorization", "Bearer " + token))
@@ -197,7 +197,7 @@ public class SecurityIntegrationTest {
 
     @Test
     public void testAuditorCanReadAuditLogs() throws Exception {
-        String token = loginAndGetToken("auditor", "auditor123");
+        String token = loginAndGetToken("auditor.suresh", "auditor123");
 
         mockMvc.perform(get("/api/v1/admin/audit-logs")
                 .header("Authorization", "Bearer " + token))
@@ -206,7 +206,7 @@ public class SecurityIntegrationTest {
 
     @Test
     public void testReceptionistCannotReadAuditLogs() throws Exception {
-        String token = loginAndGetToken("receptionist", "receptionist123");
+        String token = loginAndGetToken("receptionist.sarita", "receptionist123");
 
         mockMvc.perform(get("/api/v1/admin/audit-logs")
                 .header("Authorization", "Bearer " + token))
@@ -215,7 +215,7 @@ public class SecurityIntegrationTest {
 
     @Test
     public void testUnassignedDoctorCannotCheckInAppointment() throws Exception {
-        String token = loginAndGetToken("doctor_rajesh", "doctor123");
+        String token = loginAndGetToken("dr.rajesh.sharma", "doctor123");
 
         String checkInJson = "{\"insuranceVerified\": true, \"note\": \"Check-in\"}";
 
@@ -228,7 +228,7 @@ public class SecurityIntegrationTest {
 
     @Test
     public void testUnassignedDoctorCannotAccessFhirEncounter() throws Exception {
-        String token = loginAndGetToken("doctor_rajesh", "doctor123");
+        String token = loginAndGetToken("dr.rajesh.sharma", "doctor123");
 
         mockMvc.perform(get("/api/v1/encounters/patient/1")
                 .header("Authorization", "Bearer " + token))
@@ -237,7 +237,7 @@ public class SecurityIntegrationTest {
 
     @Test
     public void testPatientUser8GetPatientByUserIdSucceeds() throws Exception {
-        String token = loginAndGetToken("patient", "patient123");
+        String token = loginAndGetToken("patient.kamran", "patient123");
 
         mockMvc.perform(get("/api/v1/patients/user/9")
                 .header("Authorization", "Bearer " + token))

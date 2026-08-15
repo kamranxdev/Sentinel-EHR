@@ -42,7 +42,7 @@ public class AppointmentService {
                 .anyMatch(r -> r.equals("ROLE_PATIENT")) &&
                 auth.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
-                .noneMatch(r -> r.equals("ROLE_ADMIN") || r.equals("ROLE_DOCTOR") || r.equals("ROLE_NURSE") || r.equals("ROLE_RECEPTIONIST") || r.equals("ROLE_AUDITOR"));
+                .noneMatch(r -> r.equals("ROLE_SYS_ADMIN") || r.equals("ROLE_ORG_ADMIN") || r.equals("ROLE_DOCTOR") || r.equals("ROLE_NURSE") || r.equals("ROLE_RECEPTIONIST") || r.equals("ROLE_AUDITOR"));
 
         if (isPatientOnly) {
             Optional<User> userOpt = userRepository.findByUsername(auth.getName());

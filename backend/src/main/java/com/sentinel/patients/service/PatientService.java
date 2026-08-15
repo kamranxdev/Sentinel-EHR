@@ -57,6 +57,14 @@ public class PatientService {
     }
 
     @Transactional(readOnly = true)
+    public List<Patient> getPatientsByOrganization(Long organizationId, String search) {
+        List<Patient> allPatients = getAllPatients(search);
+        return allPatients.stream()
+                .filter(p -> p.getOrganization() == null || p.getOrganization().getId().equals(organizationId))
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
     public Patient getPatientById(Long id) {
         return patientRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Patient record with ID " + id + " not found"));

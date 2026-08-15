@@ -23,7 +23,7 @@ public class UserController {
     }
 
     @GetMapping("/doctors")
-    @PreAuthorize("hasAuthority('APPOINTMENT_READ') or hasAuthority('ROLE_DOCTOR') or hasAuthority('ROLE_NURSE') or hasAuthority('ROLE_RECEPTIONIST') or hasAuthority('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('APPOINTMENT_READ') or hasAuthority('ROLE_DOCTOR') or hasAuthority('ROLE_NURSE') or hasAuthority('ROLE_RECEPTIONIST') or hasAuthority('ROLE_SYS_ADMIN') or hasAuthority('ROLE_ORG_ADMIN')")
     public List<UserResponseDTO> getDoctors() {
         return userService.getDoctors().stream()
                 .map(userMapper::toResponseDTO)

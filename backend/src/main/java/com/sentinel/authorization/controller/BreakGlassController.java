@@ -23,7 +23,7 @@ public class BreakGlassController {
     }
 
     @PostMapping("/request")
-    @PreAuthorize("hasAnyAuthority('ROLE_DOCTOR', 'ROLE_NURSE', 'ROLE_SYS_ADMIN', 'ROLE_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROLE_DOCTOR', 'ROLE_NURSE', 'ROLE_SYS_ADMIN', 'ROLE_ORG_ADMIN')")
     public ResponseEntity<BreakGlassRecord> requestEmergencyAccess(
             @Valid @RequestBody BreakGlassRequestDTO payload,
             Authentication authentication,
@@ -42,13 +42,13 @@ public class BreakGlassController {
     }
 
     @GetMapping("/patient/{patientId}")
-    @PreAuthorize("hasAnyAuthority('ROLE_SYS_ADMIN', 'ROLE_ORG_ADMIN', 'ROLE_ADMIN', 'ROLE_AUDITOR', 'ROLE_DOCTOR')")
+    @PreAuthorize("hasAnyAuthority('ROLE_SYS_ADMIN', 'ROLE_ORG_ADMIN', 'ROLE_AUDITOR', 'ROLE_DOCTOR')")
     public ResponseEntity<List<BreakGlassRecord>> getRecordsByPatient(@PathVariable Long patientId) {
         return ResponseEntity.ok(breakGlassService.getRecordsByPatient(patientId));
     }
 
     @GetMapping("/user/{username}")
-    @PreAuthorize("hasAnyAuthority('ROLE_SYS_ADMIN', 'ROLE_ORG_ADMIN', 'ROLE_ADMIN', 'ROLE_AUDITOR')")
+    @PreAuthorize("hasAnyAuthority('ROLE_SYS_ADMIN', 'ROLE_ORG_ADMIN', 'ROLE_AUDITOR')")
     public ResponseEntity<List<BreakGlassRecord>> getRecordsByUser(@PathVariable String username) {
         return ResponseEntity.ok(breakGlassService.getRecordsByUser(username));
     }

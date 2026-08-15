@@ -36,6 +36,10 @@ public class User {
     @JoinColumn(name = "department_id")
     private Department departmentEntity; // Optional relation to Department entity
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "organization_id")
+    private com.sentinel.organization.entity.Organization organization;
+
     private String licenseNumber;     // Medical Practice License / NPI Number
     private String qualifications;    // e.g., MD, MBBS, FACC, Board Certified
     private Integer yearsOfExperience; // Years of clinical practice
@@ -179,6 +183,14 @@ public class User {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public com.sentinel.organization.entity.Organization getOrganization() {
+        return organization;
+    }
+
+    public void setOrganization(com.sentinel.organization.entity.Organization organization) {
+        this.organization = organization;
     }
 
     public org.hl7.fhir.r4.model.Practitioner toFhirPractitioner() {

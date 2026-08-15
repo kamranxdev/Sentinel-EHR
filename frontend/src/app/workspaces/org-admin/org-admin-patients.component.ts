@@ -43,7 +43,7 @@ interface ToastAlert {
 }
 
 @Component({
-  selector: 'app-admin-patients',
+  selector: 'app-org-admin-patients',
   standalone: true,
   imports: [
     CommonModule,
@@ -109,10 +109,10 @@ interface ToastAlert {
           <div>
             <div class="flex items-center gap-2">
               <h1 class="text-xl font-bold tracking-tight text-foreground">
-                Master Patient Index (MPI Governance)
+                Master Patient Index (MPI Census)
               </h1>
               <span hlmBadge variant="secondary" class="text-[10px] uppercase font-mono tracking-wider">
-                System Governance
+                ROLE_ORG_ADMIN
               </span>
             </div>
             <p class="text-xs text-muted-foreground mt-0.5 flex items-center gap-2">
@@ -120,7 +120,7 @@ interface ToastAlert {
                 <ng-icon name="lucideShieldCheck" size="13" /> HIPAA Minimum Necessary Compliant
               </span>
               <span>•</span>
-              <span>Enterprise identity registry, MRN code allocation, & Fellegi-Sunter de-duplication</span>
+              <span>Facility patient identity registry, MRN code allocation, & clinical demographics</span>
             </p>
           </div>
         </div>
@@ -162,7 +162,7 @@ interface ToastAlert {
             <div class="text-2xl font-bold text-emerald-600 font-mono">{{ patients().length }}</div>
             <span class="text-[11px] font-medium text-emerald-500 font-mono">Registered</span>
           </div>
-          <p class="text-[10px] text-muted-foreground mt-1">Unique enterprise medical records</p>
+          <p class="text-[10px] text-muted-foreground mt-1">Unique facility medical records</p>
         </div>
 
         <div class="p-4 rounded-xl border border-border bg-card shadow-xs hover:border-sky-500/30 transition-all">
@@ -368,166 +368,10 @@ interface ToastAlert {
           </table>
         </div>
       </div>
-
-      <!-- HIPAA PHI Vault Detail Modal / Drawer -->
-      <div *ngIf="selectedPatient()" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-        <div class="bg-card border border-border rounded-xl max-w-2xl w-full p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in duration-200">
-          <div class="flex justify-between items-start border-b border-border pb-4">
-            <div class="flex items-center gap-3">
-              <div class="size-10 rounded-full bg-emerald-500/10 text-emerald-600 font-bold flex items-center justify-center border border-emerald-500/20">
-                {{ getInitials(selectedPatient()!.fullName) }}
-              </div>
-              <div>
-                <h3 class="text-base font-bold text-foreground flex items-center gap-2">
-                  {{ selectedPatient()!.fullName }}
-                  <span hlmBadge variant="outline" class="font-mono text-[10px]">{{ selectedPatient()!.patientCode }}</span>
-                </h3>
-                <p class="text-xs text-muted-foreground">HIPAA Minimum Necessary Scoped PHI Vault</p>
-              </div>
-            </div>
-            <button (click)="selectedPatient.set(null)" class="p-1 rounded-md text-muted-foreground hover:text-foreground">
-              <ng-icon name="lucideX" size="18" />
-            </button>
-          </div>
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-            <div class="p-3 rounded-lg bg-muted/30 border border-border/60 space-y-1">
-              <div class="text-[10px] uppercase font-semibold text-muted-foreground">Demographics</div>
-              <div class="font-medium text-foreground">DOB: {{ selectedPatient()!.dateOfBirth }} ({{ getAge(selectedPatient()!.dateOfBirth) }} yrs)</div>
-              <div class="text-muted-foreground">Gender: {{ selectedPatient()!.gender }} • Blood: {{ selectedPatient()!.bloodType }}</div>
-            </div>
-
-            <div class="p-3 rounded-lg bg-muted/30 border border-border/60 space-y-1">
-              <div class="text-[10px] uppercase font-semibold text-muted-foreground">National Identifiers</div>
-              <div class="font-mono text-sky-600 font-semibold">ABHA ID: {{ selectedPatient()!.abhaId || 'Not Linked' }}</div>
-              <div class="font-mono flex items-center justify-between">
-                <span>National ID: {{ revealPHI() ? (selectedPatient()!.nationalId || 'Not Provided') : maskNationalId(selectedPatient()!.nationalId) }}</span>
-                <button (click)="toggleRevealPHI()" class="text-[10px] text-primary underline ml-2">
-                  {{ revealPHI() ? 'Mask PHI' : 'Unmask (Audit Logged)' }}
-                </button>
-              </div>
-            </div>
-
-            <div class="p-3 rounded-lg bg-muted/30 border border-border/60 space-y-1">
-              <div class="text-[10px] uppercase font-semibold text-muted-foreground">Contact & Address</div>
-              <div class="text-foreground">Phone: {{ selectedPatient()!.phone }}</div>
-              <div class="text-muted-foreground">Email: {{ selectedPatient()!.email }}</div>
-              <div class="text-muted-foreground truncate" [title]="selectedPatient()!.address">Address: {{ selectedPatient()!.address }}</div>
-            </div>
-
-            <div class="p-3 rounded-lg bg-muted/30 border border-border/60 space-y-1">
-              <div class="text-[10px] uppercase font-semibold text-muted-foreground">Insurance & Payer</div>
-              <div class="font-medium text-foreground">Payer: {{ selectedPatient()!.insuranceProvider || 'Self-Pay' }}</div>
-              <div class="font-mono text-muted-foreground">Policy #: {{ selectedPatient()!.insurancePolicyNumber || 'N/A' }}</div>
-              <div class="text-muted-foreground">Plan: {{ selectedPatient()!.coveragePlan || 'Standard' }}</div>
-            </div>
-          </div>
-
-          <div *ngIf="selectedPatient()!.medicalAlerts" class="p-3 rounded-lg bg-destructive/10 border border-destructive/30 space-y-1 text-xs">
-            <div class="font-semibold text-destructive flex items-center gap-1.5">
-              <ng-icon name="lucideAlertTriangle" size="14" /> Clinical Risk & Allergy Alerts
-            </div>
-            <p class="text-destructive/90">{{ selectedPatient()!.medicalAlerts }}</p>
-          </div>
-
-          <div class="flex justify-end border-t border-border pt-4">
-            <button hlmBtn variant="outline" size="sm" (click)="selectedPatient.set(null)" class="h-8 text-xs">
-              Close Vault
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- New Patient Intake Modal -->
-      <div *ngIf="showIntakeModal()" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-        <div class="bg-card border border-border rounded-xl max-w-xl w-full p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in duration-200">
-          <div class="flex justify-between items-center border-b border-border pb-3">
-            <div>
-              <h3 class="text-base font-bold text-foreground">MPI Administrative Patient Intake</h3>
-              <p class="text-xs text-muted-foreground">Register new patient identity & allocate deterministic MRN code.</p>
-            </div>
-            <button (click)="showIntakeModal.set(false)" class="p-1 rounded-md text-muted-foreground hover:text-foreground">
-              <ng-icon name="lucideX" size="18" />
-            </button>
-          </div>
-
-          <form (ngSubmit)="submitIntakeForm()" class="space-y-3.5 text-xs">
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label class="block font-semibold mb-1">Full Name *</label>
-                <input hlmInput type="text" [(ngModel)]="intakeForm.fullName" name="fullName" required placeholder="e.g. Ananya Sharma" class="w-full h-8 text-xs" />
-              </div>
-              <div>
-                <label class="block font-semibold mb-1">Date of Birth *</label>
-                <input hlmInput type="date" [(ngModel)]="intakeForm.dateOfBirth" name="dateOfBirth" required class="w-full h-8 text-xs" />
-              </div>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div>
-                <label class="block font-semibold mb-1">Gender *</label>
-                <select [(ngModel)]="intakeForm.gender" name="gender" class="w-full h-8 text-xs rounded-lg border border-border bg-background px-2">
-                  <option value="Male">Male</option>
-                  <option value="Female">Female</option>
-                  <option value="Other">Other</option>
-                </select>
-              </div>
-              <div>
-                <label class="block font-semibold mb-1">Blood Type</label>
-                <select [(ngModel)]="intakeForm.bloodType" name="bloodType" class="w-full h-8 text-xs rounded-lg border border-border bg-background px-2">
-                  <option value="A+">A+</option>
-                  <option value="A-">A-</option>
-                  <option value="B+">B+</option>
-                  <option value="B-">B-</option>
-                  <option value="O+">O+</option>
-                  <option value="O-">O-</option>
-                  <option value="AB+">AB+</option>
-                  <option value="AB-">AB-</option>
-                </select>
-              </div>
-              <div>
-                <label class="block font-semibold mb-1">ABHA Health ID</label>
-                <input hlmInput type="text" [(ngModel)]="intakeForm.abhaId" name="abhaId" placeholder="14-digit ABHA" class="w-full h-8 text-xs" />
-              </div>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label class="block font-semibold mb-1">Phone Number</label>
-                <input hlmInput type="tel" [(ngModel)]="intakeForm.phone" name="phone" placeholder="+91 9876543210" class="w-full h-8 text-xs" />
-              </div>
-              <div>
-                <label class="block font-semibold mb-1">Email Address</label>
-                <input hlmInput type="email" [(ngModel)]="intakeForm.email" name="email" placeholder="patient@example.com" class="w-full h-8 text-xs" />
-              </div>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label class="block font-semibold mb-1">Insurance Payer</label>
-                <input hlmInput type="text" [(ngModel)]="intakeForm.insuranceProvider" name="insuranceProvider" placeholder="e.g. Star Health / Self-Pay" class="w-full h-8 text-xs" />
-              </div>
-              <div>
-                <label class="block font-semibold mb-1">Medical Risk Alerts / Allergies</label>
-                <input hlmInput type="text" [(ngModel)]="intakeForm.medicalAlerts" name="medicalAlerts" placeholder="e.g. Penicillin Allergy" class="w-full h-8 text-xs" />
-              </div>
-            </div>
-
-            <div class="flex justify-end gap-2 border-t border-border pt-3 mt-4">
-              <button type="button" hlmBtn variant="outline" size="sm" (click)="showIntakeModal.set(false)" class="h-8 text-xs">
-                Cancel
-              </button>
-              <button type="submit" hlmBtn variant="default" size="sm" [disabled]="submittingIntake()" class="h-8 text-xs bg-emerald-600 hover:bg-emerald-700 text-white">
-                {{ submittingIntake() ? 'Registering...' : 'Complete Intake & Create MRN' }}
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
     </div>
   `,
 })
-export class AdminPatientsComponent implements OnInit {
+export class OrgAdminPatientsComponent implements OnInit {
   patients = signal<Patient[]>([]);
   searchQuery = signal<string>('');
   genderFilter = signal<string>('ALL');
@@ -586,13 +430,11 @@ export class AdminPatientsComponent implements OnInit {
     const ins = this.insuranceFilter();
 
     return this.patients().filter((p) => {
-      // Gender filter match
       let matchesGender = true;
       if (gen !== 'ALL') {
         matchesGender = (p.gender || '').toLowerCase() === gen.toLowerCase();
       }
 
-      // Insurance filter match
       let matchesInsurance = true;
       if (ins === 'INSURED') {
         matchesInsurance = !!p.insuranceProvider && p.insuranceProvider.toLowerCase() !== 'self-pay';
@@ -600,7 +442,6 @@ export class AdminPatientsComponent implements OnInit {
         matchesInsurance = !p.insuranceProvider || p.insuranceProvider.toLowerCase() === 'self-pay';
       }
 
-      // Search query match
       let matchesQuery = true;
       if (q) {
         const name = (p.fullName || '').toLowerCase();

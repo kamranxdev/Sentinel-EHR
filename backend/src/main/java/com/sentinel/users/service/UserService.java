@@ -12,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -114,11 +115,36 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
+    public List<User> getUsersByOrganization(Long organizationId) {
+        return userRepository.findByOrganizationId(organizationId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<User> getDoctorsByOrganization(Long organizationId) {
+        return userRepository.findByOrganizationIdAndRolesName(organizationId, "ROLE_DOCTOR");
+    }
+
+    @Transactional(readOnly = true)
     public List<AuditLog> getAuditLogs(String search) {
         if (search != null && !search.trim().isEmpty()) {
             return auditLogRepository.searchAuditLogs(search.trim());
         }
         return auditLogRepository.findAllByOrderByTimestampDesc();
+    }
+
+    @Transactional(readOnly = true)
+    public List<AuditLog> getAuditLogsForOrganization(Long organizationId, String search) {
+        List<String> orgUsernames = userRepository.findByOrganizationId(organizationId).stream()
+                .map(User::getUsername)
+                .toList();
+
+        List<AuditLog> allLogs = getAuditLogs(search);
+        if (orgUsernames.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return allLogs.stream()
+                .filter(log -> orgUsernames.contains(log.getUsername()))
+                .toList();
     }
 }
 

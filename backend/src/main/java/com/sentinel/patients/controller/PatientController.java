@@ -25,21 +25,35 @@ public class PatientController {
     private final AuditTrailService auditService;
     private final PatientSecurityService patientSecurityService;
     private final PatientMapper patientMapper;
+    private final com.sentinel.users.service.UserService userService;
 
     public PatientController(PatientService patientService,
                              AuditTrailService auditService,
                              PatientSecurityService patientSecurityService,
-                             PatientMapper patientMapper) {
+                             PatientMapper patientMapper,
+                             com.sentinel.users.service.UserService userService) {
         this.patientService = patientService;
         this.auditService = auditService;
         this.patientSecurityService = patientSecurityService;
         this.patientMapper = patientMapper;
+        this.userService = userService;
     }
 
     @GetMapping
     @PreAuthorize("hasAnyAuthority('PATIENT_READ', 'ROLE_SYS_ADMIN', 'ROLE_ORG_ADMIN', 'ROLE_DOCTOR', 'ROLE_NURSE', 'ROLE_RECEPTIONIST')")
     public List<PatientResponseDTO> getAllPatients(@RequestParam(value = "search", required = false) String search, Authentication auth) {
         auditService.logAction(auth, "READ_ALL", "PATIENT_LIST", "0", "Retrieved Master Patient Index roster");
+
+        if (auth != null && auth.getAuthorities().stream().anyMatch(a -> "ROLE_ORG_ADMIN".equals(a.getAuthority()))
+                && auth.getAuthorities().stream().noneMatch(a -> "ROLE_SYS_ADMIN".equals(a.getAuthority()))) {
+            com.sentinel.users.entity.User currentAdmin = userService.getUserByUsername(auth.getName()).orElse(null);
+            if (currentAdmin != null && currentAdmin.getOrganization() != null) {
+                return patientService.getPatientsByOrganization(currentAdmin.getOrganization().getId(), search).stream()
+                        .map(patientMapper::toResponseDTO)
+                        .toList();
+            }
+        }
+
         return patientService.getAllPatients(search).stream()
                 .map(patientMapper::toResponseDTO)
                 .toList();
@@ -71,7 +85,7 @@ public class PatientController {
     }
 
     @PostMapping("/intake")
-    @PreAuthorize("hasAnyAuthority('PATIENT_CREATE', 'ROLE_RECEPTIONIST', 'ROLE_INTAKE_SPEC', 'ROLE_ADMIN', 'ROLE_SYS_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('PATIENT_CREATE', 'ROLE_RECEPTIONIST', 'ROLE_SYS_ADMIN', 'ROLE_ORG_ADMIN')")
     public ResponseEntity<PatientResponseDTO> registerIntakePatient(@Valid @RequestBody PatientRequestDTO payload, Authentication auth) {
         Patient patientEntity = patientMapper.toEntity(payload);
         Patient saved = patientService.registerIntakePatient(patientEntity);

@@ -141,38 +141,98 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./workspaces/nurse/nurse-beds.component').then((m) => m.NurseBedsComponent),
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ROLE_NURSE', 'ROLE_ADMIN', 'ROLE_SYS_ADMIN', 'ROLE_ORG_ADMIN'] },
+    data: { roles: ['ROLE_NURSE', 'ROLE_SYS_ADMIN', 'ROLE_ORG_ADMIN'] },
   },
 
-  // --- ADMIN WORKSPACE ROUTES ---
   {
-    path: 'admin/dashboard',
+    path: 'auth/register-org',
     loadComponent: () =>
-      import('./workspaces/admin/admin-dashboard.component').then((m) => m.AdminDashboardComponent),
+      import('./auth/register-org/register-org.component').then((m) => m.RegisterOrgComponent),
+    data: { standalone: true },
+  },
+
+  // --- SYSTEM ADMIN WORKSPACE ROUTES ---
+  {
+    path: 'sys-admin/dashboard',
+    loadComponent: () =>
+      import('./workspaces/sys-admin/sys-admin-dashboard.component').then((m) => m.SysAdminDashboardComponent),
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ROLE_ADMIN'] },
+    data: { roles: ['ROLE_SYS_ADMIN'] },
   },
   {
-    path: 'admin/users',
+    path: 'sys-admin/organizations',
     loadComponent: () =>
-      import('./workspaces/admin/admin-users.component').then((m) => m.AdminUsersComponent),
+      import('./workspaces/sys-admin/sys-admin-organizations.component').then((m) => m.SysAdminOrganizationsComponent),
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ROLE_ADMIN'] },
+    data: { roles: ['ROLE_SYS_ADMIN'] },
   },
   {
-    path: 'admin/patients',
+    path: 'sys-admin/users',
     loadComponent: () =>
-      import('./workspaces/admin/admin-patients.component').then((m) => m.AdminPatientsComponent),
+      import('./workspaces/sys-admin/sys-admin-users.component').then((m) => m.SysAdminUsersComponent),
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ROLE_ADMIN'] },
+    data: { roles: ['ROLE_SYS_ADMIN'] },
   },
   {
-    path: 'admin/schedule-analytics',
+    path: 'sys-admin/patients',
     loadComponent: () =>
-      import('./workspaces/admin/admin-schedule-analytics.component').then((m) => m.AdminScheduleAnalyticsComponent),
+      import('./workspaces/sys-admin/sys-admin-patients.component').then((m) => m.SysAdminPatientsComponent),
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ROLE_ADMIN'] },
+    data: { roles: ['ROLE_SYS_ADMIN'] },
   },
+  {
+    path: 'sys-admin/schedule-analytics',
+    loadComponent: () =>
+      import('./workspaces/sys-admin/sys-admin-schedule-analytics.component').then((m) => m.SysAdminScheduleAnalyticsComponent),
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['ROLE_SYS_ADMIN'] },
+  },
+
+  // --- ORGANIZATION ADMIN WORKSPACE ROUTES ---
+  {
+    path: 'org-admin/dashboard',
+    loadComponent: () =>
+      import('./workspaces/org-admin/org-admin-dashboard.component').then((m) => m.OrgAdminDashboardComponent),
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['ROLE_ORG_ADMIN'] },
+  },
+  {
+    path: 'org-admin/facility-settings',
+    loadComponent: () =>
+      import('./workspaces/org-admin/org-admin-facility-settings.component').then((m) => m.OrgAdminFacilitySettingsComponent),
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['ROLE_ORG_ADMIN'] },
+  },
+  {
+    path: 'org-admin/users',
+    loadComponent: () =>
+      import('./workspaces/org-admin/org-admin-users.component').then((m) => m.OrgAdminUsersComponent),
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['ROLE_ORG_ADMIN'] },
+  },
+  {
+    path: 'org-admin/patients',
+    loadComponent: () =>
+      import('./workspaces/org-admin/org-admin-patients.component').then((m) => m.OrgAdminPatientsComponent),
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['ROLE_ORG_ADMIN'] },
+  },
+  {
+    path: 'org-admin/schedule-analytics',
+    loadComponent: () =>
+      import('./workspaces/org-admin/org-admin-schedule-analytics.component').then((m) => m.OrgAdminScheduleAnalyticsComponent),
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['ROLE_ORG_ADMIN'] },
+  },
+
+  // Legacy Redirects for backwards compatibility
+  { path: 'admin/dashboard', redirectTo: 'sys-admin/dashboard', pathMatch: 'full' },
+  { path: 'admin/organizations', redirectTo: 'sys-admin/organizations', pathMatch: 'full' },
+  { path: 'admin/org-dashboard', redirectTo: 'org-admin/dashboard', pathMatch: 'full' },
+  { path: 'admin/facility-settings', redirectTo: 'org-admin/facility-settings', pathMatch: 'full' },
+  { path: 'admin/users', redirectTo: 'dashboard', pathMatch: 'full' },
+  { path: 'admin/patients', redirectTo: 'dashboard', pathMatch: 'full' },
+  { path: 'admin/schedule-analytics', redirectTo: 'dashboard', pathMatch: 'full' },
 
   // --- PATIENT WORKSPACE ROUTES ---
   {
@@ -323,7 +383,7 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./workspaces/auditor/auditor-ledger.component').then((m) => m.AuditorLedgerComponent),
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ROLE_AUDITOR', 'ROLE_SYS_ADMIN', 'ROLE_ORG_ADMIN', 'ROLE_ADMIN'] },
+    data: { roles: ['ROLE_AUDITOR', 'ROLE_SYS_ADMIN', 'ROLE_ORG_ADMIN'] },
   },
 
   // Public Static Routes
