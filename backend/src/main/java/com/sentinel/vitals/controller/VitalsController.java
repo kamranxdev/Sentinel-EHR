@@ -32,7 +32,7 @@ public class VitalsController {
     }
 
     @GetMapping("/patient/{patientId}")
-    @PreAuthorize("(hasAuthority('VITALS_READ') or hasRole('ROLE_DOCTOR') or hasRole('ROLE_NURSE') or hasRole('ROLE_PATIENT')) and @abacEvaluator.hasTreatmentRelationship(authentication, #patientId)")
+    @PreAuthorize("(hasAuthority('VITALS_READ') or hasAuthority('ROLE_DOCTOR') or hasAuthority('ROLE_NURSE') or hasAuthority('ROLE_PATIENT')) and @abacEvaluator.hasTreatmentRelationship(authentication, #patientId)")
     public List<VitalsResponseDTO> getVitalsByPatient(@PathVariable Long patientId, Authentication auth) {
         auditService.logAction(auth, "READ", "VITALS", String.valueOf(patientId), "Accessed physiological vitals for patient ID: " + patientId);
         return vitalSignService.getVitalsEntityByPatientId(patientId).stream()
@@ -41,7 +41,7 @@ public class VitalsController {
     }
 
     @PostMapping
-    @PreAuthorize("(hasAuthority('VITALS_CREATE') or hasRole('ROLE_DOCTOR') or hasRole('ROLE_NURSE')) and (#payload != null and #payload.patientId != null and @abacEvaluator.hasTreatmentRelationship(authentication, #payload.patientId))")
+    @PreAuthorize("(hasAuthority('VITALS_CREATE') or hasAuthority('ROLE_DOCTOR') or hasAuthority('ROLE_NURSE')) and (#payload != null and #payload.patientId != null and @abacEvaluator.hasTreatmentRelationship(authentication, #payload.patientId))")
     public ResponseEntity<VitalsResponseDTO> recordVitals(@Valid @RequestBody VitalsRequestDTO payload, Authentication auth) {
         Vitals entity = vitalsMapper.toEntity(payload);
         com.sentinel.patients.entity.Patient p = new com.sentinel.patients.entity.Patient();

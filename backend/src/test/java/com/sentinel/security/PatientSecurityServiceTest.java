@@ -5,7 +5,7 @@ import com.sentinel.allergies.repository.AllergyRepository;
 import com.sentinel.appointments.entity.Appointment;
 import com.sentinel.appointments.repository.AppointmentRepository;
 import com.sentinel.authorization.abac.AbacSecurityEvaluator;
-import com.sentinel.clinicalrecords.repository.MedicalRecordRepository;
+import com.sentinel.encounters.repository.MedicalRecordRepository;
 import com.sentinel.diagnoses.repository.DiagnosisRepository;
 import com.sentinel.encounters.repository.EncounterRepository;
 import com.sentinel.patients.entity.Patient;

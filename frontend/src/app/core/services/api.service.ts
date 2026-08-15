@@ -343,25 +343,6 @@ export class ApiService {
     return this.http.get<AppointmentLabOrder[]>(`${this.baseUrl}/appointments/${id}/lab-orders`);
   }
 
-  // Synthetic Data Pipeline
-  generateSyntheticCohort(count = 3): Observable<any> {
-    return this.http.post<any>(`${this.baseUrl}/synthetic/generate`, { count });
-  }
-
-  getSyntheaPipelineStatus(): Observable<any> {
-    return this.http.get<any>(`${this.baseUrl}/synthetic/pipeline-status`);
-  }
-
-  generateSyntheaPipeline(count = 3, state = 'Massachusetts'): Observable<any> {
-    return this.http.post<any>(`${this.baseUrl}/synthetic/generate`, { count, state });
-  }
-
-  ingestSyntheaBundle(bundleJson: string): Observable<any> {
-    return this.http.post<any>(`${this.baseUrl}/synthetic/ingest-bundle`, bundleJson, {
-      headers: { 'Content-Type': 'application/json' },
-    });
-  }
-
   getDoctors(): Observable<User[]> {
     return this.http.get<User[]>(`${this.baseUrl}/users/doctors`);
   }

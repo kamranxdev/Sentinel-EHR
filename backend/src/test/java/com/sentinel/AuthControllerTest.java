@@ -25,13 +25,13 @@ public class AuthControllerTest {
 
     @Test
     public void testUserKamranLogin() throws Exception {
-        String jsonRequest = "{\"username\":\"user_kamran\",\"password\":\"patient123\"}";
+        String jsonRequest = "{\"username\":\"patient\",\"password\":\"patient123\"}";
 
-        mockMvc.perform(post("/api/auth/login")
+        mockMvc.perform(post("/api/v1/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jsonRequest))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.username").value("user_kamran"))
+                .andExpect(jsonPath("$.username").value("patient"))
                 .andExpect(jsonPath("$.accessToken").exists());
     }
 
@@ -39,7 +39,7 @@ public class AuthControllerTest {
     public void testAdminLogin() throws Exception {
         String jsonRequest = "{\"username\":\"admin\",\"password\":\"admin123\"}";
 
-        mockMvc.perform(post("/api/auth/login")
+        mockMvc.perform(post("/api/v1/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jsonRequest))
                 .andExpect(status().isOk())

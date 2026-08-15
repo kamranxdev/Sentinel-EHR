@@ -180,4 +180,59 @@ public class User {
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
+
+    public org.hl7.fhir.r4.model.Practitioner toFhirPractitioner() {
+        org.hl7.fhir.r4.model.Practitioner p = new org.hl7.fhir.r4.model.Practitioner();
+        if (id != null) {
+            p.setId("Practitioner/" + id);
+        }
+
+        if (licenseNumber != null && !licenseNumber.isBlank()) {
+            p.addIdentifier()
+                    .setSystem("urn:sentinel:license")
+                    .setValue(licenseNumber);
+        }
+
+        if (fullName != null) {
+            p.addName().setText(fullName);
+        }
+
+        if (email != null && !email.isBlank()) {
+            p.addTelecom()
+                    .setSystem(org.hl7.fhir.r4.model.ContactPoint.ContactPointSystem.EMAIL)
+                    .setValue(email);
+        }
+
+        if (qualifications != null && !qualifications.isBlank()) {
+            org.hl7.fhir.r4.model.Practitioner.PractitionerQualificationComponent q = p.addQualification();
+            q.getCode().setText(qualifications);
+        }
+
+        return p;
+    }
+
+    public org.hl7.fhir.r4.model.PractitionerRole toFhirPractitionerRole() {
+        org.hl7.fhir.r4.model.PractitionerRole pr = new org.hl7.fhir.r4.model.PractitionerRole();
+        if (id != null) {
+            pr.setId("PractitionerRole/" + id);
+            pr.setPractitioner(new org.hl7.fhir.r4.model.Reference("Practitioner/" + id));
+        }
+
+        if (specialization != null && !specialization.isBlank()) {
+            org.hl7.fhir.r4.model.CodeableConcept spec = new org.hl7.fhir.r4.model.CodeableConcept();
+            spec.setText(specialization);
+            pr.addSpecialty(spec);
+        }
+
+        if (roles != null && !roles.isEmpty()) {
+            for (Role role : roles) {
+                org.hl7.fhir.r4.model.CodeableConcept roleCode = new org.hl7.fhir.r4.model.CodeableConcept();
+                roleCode.setText(role.getName());
+                pr.addCode(roleCode);
+            }
+        }
+
+        return pr;
+    }
 }
+

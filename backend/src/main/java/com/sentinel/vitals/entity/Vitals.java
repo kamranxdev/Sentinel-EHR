@@ -173,4 +173,85 @@ public class Vitals {
             this.bmi = Math.round((weightKg / (heightM * heightM)) * 10.0) / 10.0;
         }
     }
+
+    public org.hl7.fhir.r4.model.Observation toFhirResource() {
+        org.hl7.fhir.r4.model.Observation obs = new org.hl7.fhir.r4.model.Observation();
+        if (id != null) {
+            obs.setId("Observation/" + id);
+        }
+
+        obs.setStatus(org.hl7.fhir.r4.model.Observation.ObservationStatus.FINAL);
+
+        org.hl7.fhir.r4.model.CodeableConcept category = obs.addCategory();
+        category.addCoding(new org.hl7.fhir.r4.model.Coding(
+                "http://terminology.hl7.org/CodeSystem/observation-category",
+                "vital-signs",
+                "Vital Signs"
+        ));
+
+        org.hl7.fhir.r4.model.CodeableConcept codeConcept = new org.hl7.fhir.r4.model.CodeableConcept();
+        codeConcept.addCoding(new org.hl7.fhir.r4.model.Coding("http://loinc.org", "85353-1", "Vital Signs Panel"));
+        codeConcept.setText("Vital Signs Measurement");
+        obs.setCode(codeConcept);
+
+        if (patient != null && patient.getId() != null) {
+            obs.setSubject(new org.hl7.fhir.r4.model.Reference("Patient/" + patient.getId()));
+        }
+
+        if (recordedBy != null && recordedBy.getId() != null) {
+            obs.addPerformer(new org.hl7.fhir.r4.model.Reference("Practitioner/" + recordedBy.getId()));
+        }
+
+        if (recordedAt != null) {
+            obs.setEffective(new org.hl7.fhir.r4.model.DateTimeType(java.sql.Timestamp.valueOf(recordedAt)));
+        }
+
+        // Components: Heart Rate (LOINC 8867-4)
+        if (heartRate != null) {
+            org.hl7.fhir.r4.model.Observation.ObservationComponentComponent comp = obs.addComponent();
+            comp.setCode(new org.hl7.fhir.r4.model.CodeableConcept().addCoding(new org.hl7.fhir.r4.model.Coding("http://loinc.org", "8867-4", "Heart rate")));
+            comp.setValue(new org.hl7.fhir.r4.model.Quantity().setValue(heartRate).setUnit("beats/min").setCode("/min").setSystem("http://unitsofmeasure.org"));
+        }
+
+        // Component: SpO2 (LOINC 2708-6)
+        if (oxygenSaturation != null) {
+            org.hl7.fhir.r4.model.Observation.ObservationComponentComponent comp = obs.addComponent();
+            comp.setCode(new org.hl7.fhir.r4.model.CodeableConcept().addCoding(new org.hl7.fhir.r4.model.Coding("http://loinc.org", "2708-6", "Oxygen saturation")));
+            comp.setValue(new org.hl7.fhir.r4.model.Quantity().setValue(oxygenSaturation).setUnit("%").setCode("%").setSystem("http://unitsofmeasure.org"));
+        }
+
+        // Component: Temperature (LOINC 8310-5)
+        if (temperature != null) {
+            org.hl7.fhir.r4.model.Observation.ObservationComponentComponent comp = obs.addComponent();
+            comp.setCode(new org.hl7.fhir.r4.model.CodeableConcept().addCoding(new org.hl7.fhir.r4.model.Coding("http://loinc.org", "8310-5", "Body temperature")));
+            comp.setValue(new org.hl7.fhir.r4.model.Quantity().setValue(temperature).setUnit("Cel").setCode("Cel").setSystem("http://unitsofmeasure.org"));
+        }
+
+        // Component: Respiratory Rate (LOINC 9279-1)
+        if (respiratoryRate != null) {
+            org.hl7.fhir.r4.model.Observation.ObservationComponentComponent comp = obs.addComponent();
+            comp.setCode(new org.hl7.fhir.r4.model.CodeableConcept().addCoding(new org.hl7.fhir.r4.model.Coding("http://loinc.org", "9279-1", "Respiratory rate")));
+            comp.setValue(new org.hl7.fhir.r4.model.Quantity().setValue(respiratoryRate).setUnit("breaths/min").setCode("/min").setSystem("http://unitsofmeasure.org"));
+        }
+
+        // Component: Blood Pressure (LOINC 8480-6 Systolic & LOINC 8462-4 Diastolic)
+        if (bloodPressure != null && bloodPressure.contains("/")) {
+            String[] parts = bloodPressure.split("/");
+            try {
+                double sys = Double.parseDouble(parts[0].trim());
+                double dia = Double.parseDouble(parts[1].trim());
+
+                org.hl7.fhir.r4.model.Observation.ObservationComponentComponent sysComp = obs.addComponent();
+                sysComp.setCode(new org.hl7.fhir.r4.model.CodeableConcept().addCoding(new org.hl7.fhir.r4.model.Coding("http://loinc.org", "8480-6", "Systolic blood pressure")));
+                sysComp.setValue(new org.hl7.fhir.r4.model.Quantity().setValue(sys).setUnit("mmHg").setCode("mm[Hg]").setSystem("http://unitsofmeasure.org"));
+
+                org.hl7.fhir.r4.model.Observation.ObservationComponentComponent diaComp = obs.addComponent();
+                diaComp.setCode(new org.hl7.fhir.r4.model.CodeableConcept().addCoding(new org.hl7.fhir.r4.model.Coding("http://loinc.org", "8462-4", "Diastolic blood pressure")));
+                diaComp.setValue(new org.hl7.fhir.r4.model.Quantity().setValue(dia).setUnit("mmHg").setCode("mm[Hg]").setSystem("http://unitsofmeasure.org"));
+            } catch (Exception ignored) {}
+        }
+
+        return obs;
+    }
 }
+

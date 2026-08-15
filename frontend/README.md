@@ -24,7 +24,7 @@ Modern standalone Angular enterprise application featuring role-tailored clinica
   - **Medical Records (`/records`)**: Legacy clinical notes and medical history.
   - **Appointments (`/appointments`)**: Schedule consultations with physicians.
   - **Audit Ledger (`/audit-ledger`)**: HIPAA § 164.312(b) audit trail viewer with query filters.
-  - **Admin Control Center (`/admin`)**: User directory and Synthetic Cohort generator.
+  - **Admin Control Center (`/admin`)**: User directory, staff management, and system metrics.
 
 ---
 

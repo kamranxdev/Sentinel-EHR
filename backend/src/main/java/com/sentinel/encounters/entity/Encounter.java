@@ -188,4 +188,63 @@ public class Encounter {
     public void setDischargeTime(LocalDateTime dischargeTime) {
         this.dischargeTime = dischargeTime;
     }
+
+    public org.hl7.fhir.r4.model.Encounter toFhirResource() {
+        org.hl7.fhir.r4.model.Encounter fhirEnc = new org.hl7.fhir.r4.model.Encounter();
+        if (id != null) {
+            fhirEnc.setId("Encounter/" + id);
+        }
+
+        // Status mapping
+        if ("DISCHARGED".equalsIgnoreCase(status) || "ENCOUNTER_CLOSED".equalsIgnoreCase(status)) {
+            fhirEnc.setStatus(org.hl7.fhir.r4.model.Encounter.EncounterStatus.FINISHED);
+        } else if ("ADMITTED".equalsIgnoreCase(status) || "INPATIENT_ACTIVE".equalsIgnoreCase(status)) {
+            fhirEnc.setStatus(org.hl7.fhir.r4.model.Encounter.EncounterStatus.INPROGRESS);
+        } else if ("CANCELLED".equalsIgnoreCase(status)) {
+            fhirEnc.setStatus(org.hl7.fhir.r4.model.Encounter.EncounterStatus.CANCELLED);
+        } else {
+            fhirEnc.setStatus(org.hl7.fhir.r4.model.Encounter.EncounterStatus.INPROGRESS);
+        }
+
+        // Class mapping (AMB / IMP / EMER)
+        org.hl7.fhir.r4.model.Coding classCoding = new org.hl7.fhir.r4.model.Coding();
+        classCoding.setSystem("http://terminology.hl7.org/CodeSystem/v3-ActCode");
+        if ("OUTPATIENT".equalsIgnoreCase(encounterType) || "OPD".equalsIgnoreCase(encounterType)) {
+            classCoding.setCode("AMB");
+            classCoding.setDisplay("ambulatory");
+        } else if ("EMERGENCY".equalsIgnoreCase(encounterType)) {
+            classCoding.setCode("EMER");
+            classCoding.setDisplay("emergency");
+        } else {
+            classCoding.setCode("IMP");
+            classCoding.setDisplay("inpatient encounter");
+        }
+        fhirEnc.setClass_(classCoding);
+
+        if (patient != null && patient.getId() != null) {
+            fhirEnc.setSubject(new org.hl7.fhir.r4.model.Reference("Patient/" + patient.getId()));
+        }
+
+        if (attendingProvider != null && attendingProvider.getId() != null) {
+            org.hl7.fhir.r4.model.Encounter.EncounterParticipantComponent participant = fhirEnc.addParticipant();
+            participant.setIndividual(new org.hl7.fhir.r4.model.Reference("Practitioner/" + attendingProvider.getId()));
+        }
+
+        if (encounterDate != null) {
+            org.hl7.fhir.r4.model.Period period = new org.hl7.fhir.r4.model.Period();
+            period.setStart(java.sql.Timestamp.valueOf(encounterDate));
+            if (dischargeTime != null) {
+                period.setEnd(java.sql.Timestamp.valueOf(dischargeTime));
+            }
+            fhirEnc.setPeriod(period);
+        }
+
+        if (assignedBed != null) {
+            org.hl7.fhir.r4.model.Encounter.EncounterLocationComponent loc = fhirEnc.addLocation();
+            loc.setLocation(new org.hl7.fhir.r4.model.Reference("Location/" + assignedBed.getBedNumber()));
+        }
+
+        return fhirEnc;
+    }
 }
+

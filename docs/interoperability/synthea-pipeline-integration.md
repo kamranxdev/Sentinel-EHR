@@ -1,30 +1,42 @@
-# Synthea Synthetic EHR Data Pipeline Guide
+# Standalone Patient Data Generator CLI Guide
 
-This guide details the integration, configuration, and execution workflows for generating realistic synthetic patient populations using the **Synthea Patient Generator** and ingesting them into **Sentinel**.
-
----
-
-## 🔬 Synthea Overview
-
-[Synthea™](https://github.com/synthetichealth/synthea) is an open-source synthetic patient generator that simulates the life histories of synthetic patients. It generates realistic, synthetic healthcare records in **HL7 FHIR R4** JSON formats.
-
-Sentinel uses Synthea to:
-- Seed demo environments with clinically complex patient profiles (Diabetes, Hypertension, Allergies, Procedures).
-- Test clinical safety check algorithms against diverse allergy profiles.
-- Benchmark system performance and search indexing under large patient volumes.
+This guide details the usage, design, and execution workflows for generating realistic fake patient data and clinical records using the standalone **Sentinel Patient Data Generator CLI** (`scripts/generate_fake_patients.py`).
 
 ---
 
-## 🚀 Pipeline Execution Workflow
+## 🔬 Generator Overview
+
+The **Sentinel Patient Data Generator** is a standalone, high-fidelity Python CLI tool designed to populate the Sentinel EHR system with realistic patient identities, encounters, diagnoses, vitals, allergies, prescriptions, and lab results without relying on external API calls or Spring Boot runtime dependencies.
+
+Key Capabilities:
+- **Demographic Realism**: Generates realistic Indian patient profiles with ABDM ABHA IDs (`91-xxxx-xxxx-xxxx`), Aadhaar-formatted national IDs (`AADHAAR-xxxx-xxxx`), and realistic MRN codes.
+- **Clinical Fidelity**: Emits ICD-10 & SNOMED CT coded diagnoses (e.g. Essential Hypertension, Type 2 Diabetes, Asthma), RxNorm-coded medications, LOINC-coded lab panels, and longitudinal vitals.
+- **SQL & JSON Export**: Outputs database seed scripts directly in PostgreSQL, H2, or MySQL compliant SQL or structured JSON export.
+- **Decoupled Architecture**: 100% self-contained Python script using standard library modules with zero runtime external dependencies or web API requirements.
+
+---
+
+## 🚀 Execution Workflow
 
 ```mermaid
 flowchart TD
-    Config[Configure Generation Parameters: Size & State] --> ExecScript[Run ./scripts/run_synthea_pipeline.sh]
-    ExecScript --> GenerateFHIR[Synthea Generator Emits FHIR R4 JSON Bundles]
-    GenerateFHIR --> IngestPipeline[SyntheaPipelineService Parses Resources]
-    IngestPipeline --> MapEntities[Map FHIR Patient, Encounter, Vitals, Meds to JPA Entities]
-    MapEntities --> Database[(Persist to Sentinel DB)]
-    Database --> Audit[Log Synthetic Generation Event in Audit Ledger]
+    RunCLI["Execute python3 scripts/generate_fake_patients.py --count 50"] --> GenerateRecords["Synthesize Patient, Encounter, Vitals & Clinical Data"]
+    GenerateRecords --> FormatSQL["Format ANSI/PostgreSQL SQL Insert Statements"]
+    FormatSQL --> WriteFile["Write output to scripts/seed_fake_patients.sql"]
+    WriteFile --> ImportDB["Execute SQL script against Sentinel Database"]
+```
+
+### CLI Command Options
+
+```bash
+# Generate 10 realistic patient records (default SQL format)
+python3 scripts/generate_fake_patients.py --count 10 --output scripts/seed_fake_patients.sql
+
+# Generate JSON format export
+python3 scripts/generate_fake_patients.py --count 5 --format json --output scripts/patients.json
+
+# Execute against PostgreSQL database
+psql -U postgres -d sentinel -f scripts/seed_fake_patients.sql
 ```
 
 ---
@@ -32,5 +44,5 @@ flowchart TD
 ## 🔗 Related Documentation
 
 - [System Architecture Specification](file:///mnt/workspace/Sentinel-EHR/docs/architecture/system-architecture-spec.md)
-- [REST API Specification](file:///mnt/workspace/Sentinel-EHR/docs/interoperability/rest-api-specification.md)
 - [EHR Database Schema](file:///mnt/workspace/Sentinel-EHR/docs/clinical/relational-database-schema.md)
+- [Developer Setup Guide](file:///mnt/workspace/Sentinel-EHR/docs/developer-setup-guide.md)

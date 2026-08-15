@@ -4,7 +4,6 @@ import { RouterModule } from '@angular/router';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
 import { User, Patient, Appointment } from '../../core/models/models';
-import { ActionButtonComponent } from '../../shared/ui/action-button.component';
 
 import { HlmCardImports } from '@spartan-ng/helm/card';
 import { HlmBadgeImports } from '@spartan-ng/helm/badge';
@@ -45,7 +44,6 @@ interface ToastAlert {
   imports: [
     CommonModule,
     RouterModule,
-    ActionButtonComponent,
     HlmCardImports,
     HlmBadgeImports,
     HlmButtonImports,
@@ -122,19 +120,6 @@ interface ToastAlert {
           </div>
         </div>
 
-        <!-- Quick Action Toolbar -->
-        <div class="flex items-center gap-3">
-          <app-action-button
-            variant="outline"
-            size="sm"
-            [loading]="generating()"
-            (action)="generateSyntheticCohort()"
-            customClass="gap-2 text-xs border-primary/30 hover:bg-primary/10">
-            <ng-icon name="lucideSparkles" size="14" class="text-primary" />
-            <span>{{ generating() ? 'Ingesting Cohort...' : 'Generate Synthea Cohort' }}</span>
-          </app-action-button>
-        </div>
-      </div>
 
       <!-- System KPI Overview (4 Cards) -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -242,7 +227,7 @@ interface ToastAlert {
           <div>
             <h3 class="text-base font-semibold text-foreground group-hover:text-emerald-600 transition-colors">Master Patient Index (MPI)</h3>
             <p class="text-xs text-muted-foreground mt-1 leading-relaxed">
-              Enterprise identity registry, FHIR patient intake, duplicate record resolution, MRN generation, and automated Synthea cohort pipeline.
+              Enterprise identity registry, FHIR patient intake, duplicate record resolution, MRN generation, and standalone patient data generator CLI.
             </p>
           </div>
           <div class="pt-3 border-t border-border/60 flex items-center justify-between text-[11px] font-mono text-muted-foreground">
@@ -320,12 +305,13 @@ interface ToastAlert {
             <div class="p-3.5 rounded-lg border border-border/80 bg-muted/20 space-y-2">
               <div class="flex items-center gap-2 text-xs font-semibold text-foreground">
                 <ng-icon name="lucideSparkles" size="15" class="text-amber-500" />
-                Synthea Cohort Pipeline
+                Standalone Patient Data Generator
               </div>
               <p class="text-[11px] text-muted-foreground leading-relaxed">
-                Automated synthetic patient generator for strain testing, realistic clinical simulations, and system benchmarks.
+                CLI data generation script for populating realistic patient records, clinical encounters, diagnoses, and vitals.
               </p>
             </div>
+
           </div>
         </div>
       </div>
@@ -335,7 +321,6 @@ export class AdminDashboardComponent implements OnInit {
   users = signal<User[]>([]);
   patients = signal<Patient[]>([]);
   appointments = signal<Appointment[]>([]);
-  generating = signal(false);
   toastMessage = signal<ToastAlert | null>(null);
 
   doctorCount = computed(() =>
@@ -384,27 +369,6 @@ export class AdminDashboardComponent implements OnInit {
     this.apiService.getUsers().subscribe((u) => this.users.set(u));
     this.apiService.getPatients().subscribe((p) => this.patients.set(p));
     this.apiService.getAppointments().subscribe((a) => this.appointments.set(a));
-  }
-
-  generateSyntheticCohort(): void {
-    this.generating.set(true);
-    this.apiService.generateSyntheticCohort(3).subscribe({
-      next: () => {
-        this.generating.set(false);
-        this.toastMessage.set({
-          message: 'Successfully generated 3 synthetic patient cohorts with realistic clinical histories.',
-          type: 'success',
-        });
-        this.loadData();
-      },
-      error: () => {
-        this.generating.set(false);
-        this.toastMessage.set({
-          message: 'Failed to generate synthetic patient cohort. Please try again.',
-          type: 'error',
-        });
-      },
-    });
   }
 
   getRolePct(count: number): number {

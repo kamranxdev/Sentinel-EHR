@@ -14,6 +14,7 @@ import com.sentinel.prescriptions.repository.PrescriptionRepository;
 import com.sentinel.users.repository.UserRepository;
 import com.sentinel.vitals.entity.Vitals;
 import com.sentinel.vitals.repository.VitalsRepository;
+import org.hl7.fhir.r4.model.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -52,10 +53,10 @@ public class FhirServiceTest {
 
     @Test
     public void testGetCapabilityStatement() {
-        Map<String, Object> cs = fhirService.getCapabilityStatement();
+        CapabilityStatement cs = fhirService.getCapabilityStatement();
         assertNotNull(cs);
-        assertEquals("CapabilityStatement", cs.get("resourceType"));
-        assertEquals("4.0.1", cs.get("fhirVersion"));
+        assertEquals(Enumerations.PublicationStatus.ACTIVE, cs.getStatus());
+        assertEquals(Enumerations.FHIRVersion._4_0_1, cs.getFhirVersion());
     }
 
     @Test
@@ -66,15 +67,12 @@ public class FhirServiceTest {
         p.setFullName("Jane Doe");
         p.setGender("Female");
         p.setDateOfBirth(LocalDate.of(1990, 5, 20));
-        p.setPhone("+15550001111");
-        p.setEmail("jane.doe@sentinel.org");
 
-        Map<String, Object> resource = fhirService.toPatientResource(p);
+        org.hl7.fhir.r4.model.Patient resource = fhirService.toPatientResource(p);
 
         assertNotNull(resource);
-        assertEquals("Patient", resource.get("resourceType"));
-        assertEquals("1", resource.get("id"));
-        assertEquals("female", resource.get("gender"));
+        assertEquals("Patient/1", resource.getId());
+        assertEquals(Enumerations.AdministrativeGender.FEMALE, resource.getGender());
     }
 
     @Test
@@ -85,11 +83,10 @@ public class FhirServiceTest {
         enc.setEncounterType("AMBULATORY");
         enc.setEncounterDate(LocalDateTime.now());
 
-        Map<String, Object> resource = fhirService.toEncounterResource(enc);
+        org.hl7.fhir.r4.model.Encounter resource = fhirService.toEncounterResource(enc);
 
         assertNotNull(resource);
-        assertEquals("Encounter", resource.get("resourceType"));
-        assertEquals("10", resource.get("id"));
+        assertEquals("Encounter/10", resource.getId());
     }
 
     @Test
@@ -99,11 +96,10 @@ public class FhirServiceTest {
         allergy.setAllergenName("Penicillin");
         allergy.setSeverity("HIGH");
 
-        Map<String, Object> resource = fhirService.toAllergyResource(allergy);
+        AllergyIntolerance resource = fhirService.toAllergyResource(allergy);
 
         assertNotNull(resource);
-        assertEquals("AllergyIntolerance", resource.get("resourceType"));
-        assertEquals("5", resource.get("id"));
+        assertEquals("AllergyIntolerance/5", resource.getId());
     }
 
     @Test
@@ -113,11 +109,10 @@ public class FhirServiceTest {
         diag.setConditionName("Type 2 Diabetes");
         diag.setIcdCode("E11.9");
 
-        Map<String, Object> resource = fhirService.toConditionResource(diag);
+        Condition resource = fhirService.toConditionResource(diag);
 
         assertNotNull(resource);
-        assertEquals("Condition", resource.get("resourceType"));
-        assertEquals("15", resource.get("id"));
+        assertEquals("Condition/15", resource.getId());
     }
 
     @Test
@@ -128,11 +123,10 @@ public class FhirServiceTest {
         rx.setDosage("500mg");
         rx.setStatus("ACTIVE");
 
-        Map<String, Object> resource = fhirService.toMedicationRequestResource(rx);
+        MedicationRequest resource = fhirService.toMedicationRequestResource(rx);
 
         assertNotNull(resource);
-        assertEquals("MedicationRequest", resource.get("resourceType"));
-        assertEquals("20", resource.get("id"));
+        assertEquals("MedicationRequest/20", resource.getId());
     }
 
     @Test
@@ -142,31 +136,30 @@ public class FhirServiceTest {
         vitals.setBloodPressure("120/80");
         vitals.setHeartRate(75);
 
-        Map<String, Object> resource = fhirService.toObservationResource(vitals);
+        Observation resource = fhirService.toObservationResource(vitals);
 
         assertNotNull(resource);
-        assertEquals("Observation", resource.get("resourceType"));
-        assertEquals("30", resource.get("id"));
+        assertEquals("Observation/30", resource.getId());
     }
 
     @Test
     public void testBuildBundle() {
-        Map<String, Object> p1 = Map.of("resourceType", "Patient", "id", "1");
-        Map<String, Object> bundle = fhirService.buildBundle("Patient", List.of(p1));
+        org.hl7.fhir.r4.model.Patient p1 = new org.hl7.fhir.r4.model.Patient();
+        p1.setId("Patient/1");
+        Bundle bundle = fhirService.buildBundle("Patient", List.of(p1));
 
         assertNotNull(bundle);
-        assertEquals("Bundle", bundle.get("resourceType"));
-        assertEquals("searchset", bundle.get("type"));
-        assertEquals(1, bundle.get("total"));
+        assertEquals(Bundle.BundleType.SEARCHSET, bundle.getType());
+        assertEquals(1, bundle.getTotal());
     }
 
     @Test
     public void testGetPatientEverythingBundle_NotFound() {
         when(patientRepository.findById(999L)).thenReturn(Optional.empty());
 
-        Map<String, Object> outcome = fhirService.getPatientEverythingBundle(999L);
+        Bundle bundle = fhirService.getPatientEverythingBundle(999L);
 
-        assertNotNull(outcome);
-        assertEquals("OperationOutcome", outcome.get("resourceType"));
+        assertNotNull(bundle);
+        assertEquals(0, bundle.getEntry().size());
     }
 }

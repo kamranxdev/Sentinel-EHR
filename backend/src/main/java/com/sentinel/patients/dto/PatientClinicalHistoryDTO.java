@@ -1,7 +1,7 @@
 package com.sentinel.patients.dto;
 
 import com.sentinel.allergies.entity.Allergy;
-import com.sentinel.clinicalrecords.entity.MedicalRecord;
+import com.sentinel.encounters.entity.MedicalRecord;
 import com.sentinel.diagnoses.entity.Diagnosis;
 import com.sentinel.encounters.entity.Encounter;
 import com.sentinel.patients.entity.Patient;

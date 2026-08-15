@@ -90,7 +90,7 @@ public class AppointmentController {
     }
 
     @PostMapping
-    @PreAuthorize("hasAuthority('APPOINTMENT_CREATE') or hasRole('PATIENT')")
+    @PreAuthorize("hasAuthority('APPOINTMENT_CREATE') or hasAuthority('ROLE_PATIENT')")
     public ResponseEntity<AppointmentResponseDTO> scheduleAppointment(
             @Valid @RequestBody AppointmentRequestDTO payload, Authentication auth) {
         Appointment entity = appointmentMapper.toEntity(payload);
@@ -238,7 +238,7 @@ public class AppointmentController {
     }
 
     @PostMapping("/{id}/cancel")
-    @PreAuthorize("(hasAuthority('APPOINTMENT_CANCEL') or hasRole('PATIENT')) and @patientSecurityService.canAccessAppointment(authentication, #id)")
+    @PreAuthorize("(hasAuthority('APPOINTMENT_CANCEL') or hasAuthority('ROLE_PATIENT')) and @patientSecurityService.canAccessAppointment(authentication, #id)")
     public ResponseEntity<AppointmentCancellationResponseDTO> cancelAppointment(
             @PathVariable Long id,
             @Valid @RequestBody AppointmentCancellationRequestDTO payload,

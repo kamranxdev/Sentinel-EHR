@@ -119,4 +119,67 @@ public class Allergy {
     public void setRecordedAt(LocalDateTime recordedAt) {
         this.recordedAt = recordedAt;
     }
+
+    public org.hl7.fhir.r4.model.AllergyIntolerance toFhirResource() {
+        org.hl7.fhir.r4.model.AllergyIntolerance allergy = new org.hl7.fhir.r4.model.AllergyIntolerance();
+        if (id != null) {
+            allergy.setId("AllergyIntolerance/" + id);
+        }
+
+        // Clinical status
+        org.hl7.fhir.r4.model.CodeableConcept clinicalStatus = new org.hl7.fhir.r4.model.CodeableConcept();
+        String statusCode = "RESOLVED".equalsIgnoreCase(status) ? "resolved" : "active";
+        clinicalStatus.addCoding(new org.hl7.fhir.r4.model.Coding(
+                "http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical",
+                statusCode,
+                statusCode
+        ));
+        allergy.setClinicalStatus(clinicalStatus);
+
+        // Criticality / Severity
+        if ("SEVERE".equalsIgnoreCase(severity) || "LIFE_THREATENING".equalsIgnoreCase(severity)) {
+            allergy.setCriticality(org.hl7.fhir.r4.model.AllergyIntolerance.AllergyIntoleranceCriticality.HIGH);
+        } else {
+            allergy.setCriticality(org.hl7.fhir.r4.model.AllergyIntolerance.AllergyIntoleranceCriticality.LOW);
+        }
+
+        // Category
+        if ("DRUG".equalsIgnoreCase(category)) {
+            allergy.addCategory(org.hl7.fhir.r4.model.AllergyIntolerance.AllergyIntoleranceCategory.MEDICATION);
+        } else if ("FOOD".equalsIgnoreCase(category)) {
+            allergy.addCategory(org.hl7.fhir.r4.model.AllergyIntolerance.AllergyIntoleranceCategory.FOOD);
+        } else if ("ENVIRONMENTAL".equalsIgnoreCase(category)) {
+            allergy.addCategory(org.hl7.fhir.r4.model.AllergyIntolerance.AllergyIntoleranceCategory.ENVIRONMENT);
+        }
+
+        // Code
+        org.hl7.fhir.r4.model.CodeableConcept codeConcept = new org.hl7.fhir.r4.model.CodeableConcept();
+        if (allergenName != null) {
+            codeConcept.setText(allergenName);
+        }
+        if (allergenCode != null && !allergenCode.isBlank()) {
+            codeConcept.addCoding(new org.hl7.fhir.r4.model.Coding(
+                    "http://snomed.info/sct",
+                    allergenCode,
+                    allergenName
+            ));
+        }
+        allergy.setCode(codeConcept);
+
+        if (patient != null && patient.getId() != null) {
+            allergy.setPatient(new org.hl7.fhir.r4.model.Reference("Patient/" + patient.getId()));
+        }
+
+        if (recordedBy != null && recordedBy.getId() != null) {
+            allergy.setRecorder(new org.hl7.fhir.r4.model.Reference("Practitioner/" + recordedBy.getId()));
+        }
+
+        if (reactionDescription != null && !reactionDescription.isBlank()) {
+            org.hl7.fhir.r4.model.AllergyIntolerance.AllergyIntoleranceReactionComponent rx = allergy.addReaction();
+            rx.setDescription(reactionDescription);
+        }
+
+        return allergy;
+    }
 }
+

@@ -2,8 +2,8 @@ package com.sentinel.patients.service;
 
 import com.sentinel.allergies.entity.Allergy;
 import com.sentinel.allergies.repository.AllergyRepository;
-import com.sentinel.clinicalrecords.entity.MedicalRecord;
-import com.sentinel.clinicalrecords.repository.MedicalRecordRepository;
+import com.sentinel.encounters.entity.MedicalRecord;
+import com.sentinel.encounters.repository.MedicalRecordRepository;
 import com.sentinel.common.exception.ResourceNotFoundException;
 import com.sentinel.diagnoses.entity.Diagnosis;
 import com.sentinel.diagnoses.repository.DiagnosisRepository;

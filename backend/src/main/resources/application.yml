@@ -1,0 +1,39 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: sentinel-backend
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:h2:mem:sentineldb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=PostgreSQL}
+    driverClassName: ${SPRING_DATASOURCE_DRIVER:org.h2.Driver}
+    username: ${SPRING_DATASOURCE_USERNAME:sa}
+    password: ${SPRING_DATASOURCE_PASSWORD:}
+  jpa:
+    database-platform: ${SPRING_JPA_DATABASE_PLATFORM:org.hibernate.dialect.H2Dialect}
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    defer-datasource-initialization: true
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  sql:
+    init:
+      data-locations: classpath:seed.sql
+      mode: always
+      continue-on-error: true
+
+app:
+  jwt-secret: ${JWT_SECRET:9a2f8c4e7b1a3d6f8e5c2b0a4f6e8d1c3b5a7f9e2d4c6b8a0f2e4d6c8b0a1f3}
+  jwt-expiration-milliseconds: 86400000
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    operationsSorter: method
+    tagsSorter: alpha
+    display-request-duration: true

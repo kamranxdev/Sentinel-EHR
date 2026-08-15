@@ -1,6 +1,6 @@
 # Target Architecture Specification: Admin Workspace (`ROLE_SYS_ADMIN`, `ROLE_ORG_ADMIN`)
 
-This document defines how the **Organization & System Admin Workspace** should be architected in an enterprise Electronic Health Record (EHR) platform, establishing gold-standard specifications for Multi-Tenant Facility Hierarchies, Identity & Access Management (IAM / SCIM / OIDC), Dynamic ABAC SpEL/OPA Policy Rule Deployment, FHIR R4 Interoperability Gateway management, and Synthea Synthetic Population Simulation.
+This document defines how the **Organization & System Admin Workspace** should be architected in an enterprise Electronic Health Record (EHR) platform, establishing gold-standard specifications for Multi-Tenant Facility Hierarchies, Identity & Access Management (IAM / SCIM / OIDC), Dynamic ABAC SpEL/OPA Policy Rule Deployment, FHIR R4 Interoperability Gateway management, and Standalone Patient Data Generation.
 
 ---
 
@@ -15,7 +15,7 @@ flowchart TD
         IAM_Desk["Identity & Access Management (SCIM / LDAP / SAML / OIDC)"]
         ABAC_PolicyEngine["Dynamic ABAC Policy Rules Registry & SpEL Evaluator"]
         InteropGateway["HL7 FHIR R4 Interoperability Gateway Monitor"]
-        SyntheaPipeline["Synthea Synthetic Population Generator & Data Ingestion"]
+        DataGenCLI["Standalone Patient Data Generator CLI"]
     end
 
     subgraph Security_Boundary ["🛡️ Strict Privileged Separation"]
@@ -33,11 +33,10 @@ flowchart TD
 
 | Component Name | Route Path | Ideal Feature Scope & Specifications |
 | :--- | :--- | :--- |
-| `AdminDashboardComponent` | `/admin/dashboard` | Executive Command Center: System health indicators, API transaction throughput, active concurrent sessions, IAM security metrics, Synthea pipeline launcher. |
+| `AdminDashboardComponent` | `/admin/dashboard` | Executive Command Center: System health indicators, API transaction throughput, active concurrent sessions, IAM security metrics, system benchmarks. |
 | `AdminUsersComponent` | `/admin/users` | Identity & User Lifecycle Desk: SCIM 2.0 provisioning, Active Directory / LDAP synchronization, NPI/license verification, role assignment, multi-factor auth (MFA) enforcement, credential resets, account lockouts. |
 | `AdminFacilitiesComponent` | `/admin/facilities` | Organizational Hierarchy Manager: Configure hospital networks, clinic sites, inpatient wards, departments, operating rooms, and provider shift rosters. |
 | `AdminAbacPoliciesComponent` | `/admin/abac-policies` | Dynamic ABAC Policy Registry: Manage SpEL / Open Policy Agent (OPA) contextual rules, Purpose of Use (PoU) requirements, and emergency break-glass alert thresholds. |
-| `AdminSyntheaComponent` | `/admin/synthea` | Synthea Population Simulator: Configure synthetic cohort size, state demographics, disease prevalence modules, FHIR R4 JSON ingestion, and database population metrics. |
 | `AdminFhirGatewayComponent` | `/admin/fhir-gateway` | Interoperability Management: Monitor FHIR R4 REST API endpoints (`/fhir/v1/*`), inspect `$everything` bundle exports, manage OAuth2 SMART on FHIR client applications. |
 
 ---
@@ -52,7 +51,6 @@ flowchart TD
 | Facility & Department Setup | **CRU** | **CRU** | — |
 | Provision Staff Accounts & Roles | **CRU** | **CRU (Facility Roles)** | — |
 | Deploy Dynamic ABAC Policies | **CRU** | **R** | — |
-| Execute Synthea Population Generator | **CRU** | **CRU** | — |
 | View System & Security Audit Logs | **R** | **R** | — |
 | View Patient SOAP Notes & Vitals | **— (BLOCKED)** | **— (BLOCKED)** | **CRU** |
 | View Diagnostic Lab Results & eRx | **— (BLOCKED)** | **— (BLOCKED)** | **CRU** |
@@ -67,31 +65,14 @@ flowchart TD
 
 ---
 
-## 🧬 4. Synthea Synthetic Population Simulation & FHIR Ingestion Workflow
+## 🧬 4. Standalone Patient Data Generation Workflow
 
 ```mermaid
 flowchart TD
-    Admin([Administrator]) --> OpenUI[Access Admin Workspace '/admin/synthea']
-    OpenUI --> Config[Set Cohort Population Count & State Demographic Target]
-    Config --> Trigger[Click 'Execute Synthea Pipeline']
-    
-    Trigger --> Engine[Synthea Pipeline Execution Engine]
-    Engine --> CLI[Execute java -jar synthea-with-dependencies.jar -p N State]
-    CLI --> Bundles[Output HL7 FHIR R4 JSON Bundles]
-    
-    subgraph Process_Bundles ["🔄 Process FHIR Bundles Loop"]
-        Jackson[Jackson Tree Analysis & Resource Extraction]
-        Mapper[Map FHIR Resources: Patient, Encounter, AllergyIntolerance, Condition, MedicationRequest, Observation]
-        DB[(Persist to PostgreSQL Database)]
-        Audit[Append SHA-256 Block Entry: SYNTHEA_POPULATION_INGESTED]
-
-        Jackson --> Mapper
-        Mapper --> DB
-        DB --> Audit
-    end
-
-    Bundles --> Jackson
-    Audit --> Response[Return Ingestion Metrics to Admin Dashboard]
+    Admin([Administrator / Developer]) --> ExecCLI[Run 'python3 scripts/generate_fake_patients.py --count 50']
+    ExecCLI --> GenerateData[Synthesize Indian Patient Demographics & Encounters]
+    GenerateData --> SQLFormat[Format ANSI/PostgreSQL SQL Insert Statements]
+    SQLFormat --> SeedDB[Execute SQL File onto PostgreSQL / H2 Database]
 ```
 
 ---
@@ -102,5 +83,4 @@ flowchart TD
 | :--- | :--- | :--- | :--- |
 | `POST` | `/api/v1/admin/users/scim` | `USER_CREATE` | `hasRole('ROLE_SYS_ADMIN')` OR `isFacilityAdmin(#facilityId)` |
 | `POST` | `/api/v1/admin/abac/policies` | `ABAC_POLICY_MANAGE` | `hasRole('ROLE_SYS_ADMIN')` |
-| `POST` | `/api/v1/synthetic/generate` | `SYNTHEA_EXECUTE` | `hasRole('ROLE_SYS_ADMIN')` OR `hasRole('ROLE_ORG_ADMIN')` |
 | `GET` | `/api/v1/admin/fhir/metrics` | `INTEROP_MANAGE` | `hasRole('ROLE_SYS_ADMIN')` |

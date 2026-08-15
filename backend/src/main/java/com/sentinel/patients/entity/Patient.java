@@ -307,4 +307,58 @@ public class Patient {
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
+
+    public org.hl7.fhir.r4.model.Patient toFhirResource() {
+        org.hl7.fhir.r4.model.Patient fhirPatient = new org.hl7.fhir.r4.model.Patient();
+        if (id != null) {
+            fhirPatient.setId("Patient/" + id);
+        }
+
+        if (patientCode != null) {
+            fhirPatient.addIdentifier()
+                    .setSystem("urn:sentinel:mrn")
+                    .setValue(patientCode);
+        }
+
+        if (abhaId != null && !abhaId.isBlank()) {
+            fhirPatient.addIdentifier()
+                    .setSystem("https://healthid.ndhm.gov.in")
+                    .setValue(abhaId);
+        }
+
+        if (fullName != null) {
+            fhirPatient.addName().setText(fullName);
+        }
+
+        if (gender != null) {
+            try {
+                fhirPatient.setGender(org.hl7.fhir.r4.model.Enumerations.AdministrativeGender.fromCode(gender.toLowerCase()));
+            } catch (Exception e) {
+                fhirPatient.setGender(org.hl7.fhir.r4.model.Enumerations.AdministrativeGender.UNKNOWN);
+            }
+        }
+
+        if (dateOfBirth != null) {
+            fhirPatient.setBirthDate(java.sql.Date.valueOf(dateOfBirth));
+        }
+
+        if (phone != null && !phone.isBlank()) {
+            fhirPatient.addTelecom().setSystem(org.hl7.fhir.r4.model.ContactPoint.ContactPointSystem.PHONE).setValue(phone);
+        }
+
+        if (email != null && !email.isBlank()) {
+            fhirPatient.addTelecom().setSystem(org.hl7.fhir.r4.model.ContactPoint.ContactPointSystem.EMAIL).setValue(email);
+        }
+
+        if (address != null && !address.isBlank()) {
+            org.hl7.fhir.r4.model.Address addr = fhirPatient.addAddress();
+            addr.setText(address);
+            if (pinCode != null) {
+                addr.setPostalCode(pinCode);
+            }
+        }
+
+        return fhirPatient;
+    }
 }
+

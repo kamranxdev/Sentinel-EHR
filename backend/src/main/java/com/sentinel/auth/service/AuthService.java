@@ -51,9 +51,10 @@ public class AuthService {
 
     @Transactional
     public JwtAuthResponse login(LoginRequest loginRequest) {
+        String usernameInput = loginRequest.getUsername();
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        loginRequest.getUsernameOrEmail() != null ? loginRequest.getUsernameOrEmail() : "",
+                        usernameInput != null ? usernameInput : "",
                         loginRequest.getPassword()
                 )
         );
@@ -61,7 +62,7 @@ public class AuthService {
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = tokenProvider.generateToken(authentication);
 
-        User user = userRepository.findByUsernameOrEmail(loginRequest.getUsernameOrEmail(), loginRequest.getUsernameOrEmail())
+        User user = userRepository.findByUsernameOrEmail(usernameInput, usernameInput)
                 .orElseThrow(() -> new ResourceNotFoundException("User record not found"));
 
         Set<String> roles = user.getRoles().stream().map(Role::getName).collect(Collectors.toSet());
@@ -124,7 +125,7 @@ public class AuthService {
         patient.setUser(saved);
         Patient savedPatient = patientRepository.save(patient);
 
-        return Map.of("message", "User registered successfully!", "userId", saved.getId(), "patientId", savedPatient.getId(), "username", saved.getUsername(), "patientCode", savedPatient.getPatientCode());
+        return Map.of("message", "User registered successfully!", "userId", saved.getId(), "patientId", savedPatient.getId(), "username", saved.getUsername(), "patientCode", savedPatient.getPatientCode(), "role", "ROLE_PATIENT");
     }
 
     @Transactional

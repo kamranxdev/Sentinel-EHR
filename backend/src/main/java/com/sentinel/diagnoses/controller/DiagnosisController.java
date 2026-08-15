@@ -34,16 +34,16 @@ public class DiagnosisController {
     }
 
     @GetMapping("/patient/{patientId}")
-    @PreAuthorize("(hasAuthority('DIAGNOSIS_READ') or hasRole('ROLE_DOCTOR') or hasRole('ROLE_NURSE') or hasRole('ROLE_PATIENT')) and @abacEvaluator.hasTreatmentRelationship(authentication, #patientId)")
+    @PreAuthorize("(hasAuthority('DIAGNOSIS_READ') or hasAuthority('ROLE_DOCTOR') or hasAuthority('ROLE_NURSE') or hasAuthority('ROLE_PATIENT')) and @abacEvaluator.hasTreatmentRelationship(authentication, #patientId)")
     public List<DiagnosisResponseDTO> getDiagnosesByPatient(@PathVariable Long patientId, Authentication auth) {
-        auditService.logAction(auth, "READ", "DIAGNOSIS", String.valueOf(patientId), "Accessed coded problem list & diagnoses for patient ID: " + patientId);
+        auditService.logAction(auth, "READ", "DIAGNOSIS", String.valueOf(patientId), "Accessed active problem list for patient ID: " + patientId);
         return diagnosisService.getDiagnosesByPatientId(patientId).stream()
                 .map(diagnosisMapper::toResponseDTO)
                 .toList();
     }
 
     @PostMapping
-    @PreAuthorize("(hasAuthority('DIAGNOSIS_CREATE') or hasRole('ROLE_DOCTOR') or hasRole('ROLE_NURSE')) and (#payload != null and #payload.patientId != null and @abacEvaluator.hasTreatmentRelationship(authentication, #payload.patientId))")
+    @PreAuthorize("(hasAuthority('DIAGNOSIS_CREATE') or hasAuthority('ROLE_DOCTOR') or hasAuthority('ROLE_NURSE')) and (#payload != null and #payload.patientId != null and @abacEvaluator.hasTreatmentRelationship(authentication, #payload.patientId))")
     public ResponseEntity<DiagnosisResponseDTO> createDiagnosis(@Valid @RequestBody DiagnosisRequestDTO payload, Authentication auth) {
         Diagnosis entity = diagnosisMapper.toEntity(payload);
         com.sentinel.patients.entity.Patient p = new com.sentinel.patients.entity.Patient();
@@ -51,12 +51,12 @@ public class DiagnosisController {
         entity.setPatient(p);
 
         Diagnosis saved = diagnosisService.createDiagnosis(entity, auth.getName());
-        auditService.logAction(auth, "CREATE", "DIAGNOSIS", String.valueOf(saved.getId()), "Logged ICD-10 diagnosis (" + saved.getConditionName() + " - " + saved.getIcdCode() + ") for patient ID: " + saved.getPatient().getId());
+        auditService.logAction(auth, "CREATE", "DIAGNOSIS", String.valueOf(saved.getId()), "Recorded diagnosis: " + saved.getDiagnosisName() + " (ICD: " + saved.getIcd10Code() + ") for patient ID: " + saved.getPatient().getId());
         return ResponseEntity.status(HttpStatus.CREATED).body(diagnosisMapper.toResponseDTO(saved));
     }
 
     @PatchMapping("/{id}/status")
-    @PreAuthorize("(hasAuthority('DIAGNOSIS_UPDATE') or hasRole('ROLE_DOCTOR') or hasRole('ROLE_NURSE')) and @patientSecurityService.canAccessDiagnosis(authentication, #id)")
+    @PreAuthorize("(hasAuthority('DIAGNOSIS_UPDATE') or hasAuthority('ROLE_DOCTOR') or hasAuthority('ROLE_NURSE')) and @patientSecurityService.canAccessDiagnosis(authentication, #id)")
     public ResponseEntity<DiagnosisResponseDTO> updateDiagnosisStatus(
             @PathVariable Long id,
             @Valid @RequestBody DiagnosisStatusUpdateDTO payload,

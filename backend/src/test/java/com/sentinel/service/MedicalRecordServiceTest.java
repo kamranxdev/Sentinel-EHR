@@ -1,8 +1,8 @@
 package com.sentinel.service;
 
-import com.sentinel.clinicalrecords.entity.MedicalRecord;
-import com.sentinel.clinicalrecords.repository.MedicalRecordRepository;
-import com.sentinel.clinicalrecords.service.MedicalRecordService;
+import com.sentinel.encounters.entity.MedicalRecord;
+import com.sentinel.encounters.repository.MedicalRecordRepository;
+import com.sentinel.encounters.service.MedicalRecordService;
 import com.sentinel.common.exception.ResourceNotFoundException;
 import com.sentinel.patients.entity.Patient;
 import com.sentinel.patients.repository.PatientRepository;

@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../core/services/api.service';
 import { Patient } from '../../core/models/models';
-import { ActionButtonComponent } from '../../shared/ui/action-button.component';
 
 import { HlmCardImports } from '@spartan-ng/helm/card';
 import { HlmTableImports } from '@spartan-ng/helm/table';
@@ -49,7 +48,6 @@ interface ToastAlert {
   imports: [
     CommonModule,
     FormsModule,
-    ActionButtonComponent,
     HlmCardImports,
     HlmTableImports,
     HlmBadgeImports,
@@ -139,16 +137,6 @@ interface ToastAlert {
             <ng-icon name="lucideGitMerge" size="14" class="text-amber-500" />
             <span>{{ scanning() ? 'Scanning...' : 'Fellegi-Sunter Scan' }}</span>
           </button>
-
-          <app-action-button
-            variant="outline"
-            size="sm"
-            [loading]="generating()"
-            (action)="generateCohort()"
-            customClass="gap-1.5 text-xs border-emerald-500/30 hover:bg-emerald-500/10">
-            <ng-icon name="lucideSparkles" size="14" class="text-emerald-600" />
-            <span>{{ generating() ? 'Ingesting...' : 'Synthea Cohort' }}</span>
-          </app-action-button>
 
           <button
             hlmBtn
@@ -547,7 +535,6 @@ export class AdminPatientsComponent implements OnInit {
   showIntakeModal = signal<boolean>(false);
   selectedPatient = signal<Patient | null>(null);
   revealPHI = signal<boolean>(false);
-  generating = signal<boolean>(false);
   scanning = signal<boolean>(false);
   submittingIntake = signal<boolean>(false);
   toastMessage = signal<ToastAlert | null>(null);
@@ -723,27 +710,6 @@ export class AdminPatientsComponent implements OnInit {
         this.toastMessage.set({
           message: 'Fellegi-Sunter identity scan complete. All registered patient identities verified unique.',
           type: 'success',
-        });
-      },
-    });
-  }
-
-  generateCohort(): void {
-    this.generating.set(true);
-    this.apiService.generateSyntheticCohort(3).subscribe({
-      next: () => {
-        this.generating.set(false);
-        this.toastMessage.set({
-          message: 'Successfully generated 3 synthetic patient cohorts with realistic clinical histories.',
-          type: 'success',
-        });
-        this.loadPatients();
-      },
-      error: () => {
-        this.generating.set(false);
-        this.toastMessage.set({
-          message: 'Failed to generate synthetic patient cohort.',
-          type: 'error',
         });
       },
     });

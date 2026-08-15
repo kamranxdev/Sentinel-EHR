@@ -1,11 +1,11 @@
 package com.sentinel.service;
 
 import com.sentinel.common.exception.ResourceNotFoundException;
-import com.sentinel.nursing.entity.EmarRecord;
-import com.sentinel.nursing.entity.TriageEwsRecord;
-import com.sentinel.nursing.repository.EmarRecordRepository;
-import com.sentinel.nursing.repository.TriageEwsRepository;
-import com.sentinel.nursing.service.NursingService;
+import com.sentinel.prescriptions.entity.EmarRecord;
+import com.sentinel.vitals.entity.TriageEwsRecord;
+import com.sentinel.prescriptions.repository.EmarRecordRepository;
+import com.sentinel.vitals.repository.TriageEwsRepository;
+import com.sentinel.vitals.service.NursingService;
 import com.sentinel.patients.entity.Patient;
 import com.sentinel.patients.repository.PatientRepository;
 import com.sentinel.users.entity.User;

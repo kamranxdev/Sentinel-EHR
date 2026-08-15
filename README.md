@@ -2,7 +2,7 @@
 
 > **HL7 FHIR R4, ABDM & DISHA Compliant Electronic Health Record (EHR) & Clinical Management System**
 
-Sentinel is an enterprise-scale Electronic Health Record (EHR) platform tailored for healthcare ecosystems. It features multi-persona clinical workspaces, Ayushman Bharat Health Account (ABHA ID) integration, a Smart Allergy Safety Engine, immutable DISHA & ABDM WORM audit logging, HL7 FHIR R4 interoperability, and synthetic patient generation.
+Sentinel is an enterprise-scale Electronic Health Record (EHR) platform tailored for healthcare ecosystems. It features multi-persona clinical workspaces, Ayushman Bharat Health Account (ABHA ID) integration, a Smart Allergy Safety Engine, immutable DISHA & ABDM WORM audit logging, HL7 FHIR R4 interoperability, and realistic patient data generation CLI tools.
 
 ---
 
@@ -13,11 +13,11 @@ Sentinel is an enterprise-scale Electronic Health Record (EHR) platform tailored
 | **🔒 Scoped Patient Portal** | Patients see strictly their own health summary — vitals, conditions, prescriptions, allergies, and ABHA ID details |
 | **🩺 Physician Desk** | SOAP progress notes, ICD-10 & SNOMED-CT problem lists, eRx orders with smart allergy safety checks |
 | **💉 Bedside Nurse Flowsheet** | Longitudinal vitals tracking (BP, HR, Temp, SpO2, Glucose, BMI) with trend visualization |
-| **⚙️ Admin Command Center** | Master Patient Index (MPI) probabilistic identity matching, staff directory, synthetic patient generation pipeline |
+| **⚙️ Admin Command Center** | Master Patient Index (MPI) probabilistic identity matching, staff directory, RBAC management |
 | **🛡️ ABDM & DISHA WORM Audit Vault** | Immutable append-only audit ledger for regulatory compliance under DISHA, DPDP Act 2023, and ISO 27001 |
 | **⚠️ Smart Allergy Safety Engine** | Real-time RxNorm & SNOMED contraindication cross-checking before prescription issuance |
 | **🌐 HL7 FHIR R4 & ABDM API** | Standard FHIR endpoints (`Patient`, `Encounter`, `Observation`, `$everything` bundles) with ABHA profile support |
-| **🧬 Cohort Pipeline** | Generate realistic synthetic patient cohorts with Indian and international demographic fidelity |
+| **🧬 Data Generator CLI** | Standalone realistic patient data generator tool (`generate_fake_patients.py`) for system seeding |
 
 ---
 
@@ -86,7 +86,7 @@ All documentation is organized in domain subdirectories within [`docs/`](docs/):
 Sentinel/
 ├── backend/                  # Spring Boot REST API & Security Engine
 │   ├── src/main/java/        # Controllers, Services, Models, Security
-│   ├── src/main/resources/   # schema.sql, seed.sql, application.properties
+│   ├── src/main/resources/   # schema.sql, seed.sql, application.yml
 │   └── pom.xml
 │
 ├── frontend/                 # Angular 19+ Standalone Enterprise UI

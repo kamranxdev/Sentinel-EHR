@@ -66,11 +66,19 @@ public class Diagnosis {
         return conditionName;
     }
 
+    public String getDiagnosisName() {
+        return conditionName;
+    }
+
     public void setConditionName(String conditionName) {
         this.conditionName = conditionName;
     }
 
     public String getIcdCode() {
+        return icdCode;
+    }
+
+    public String getIcd10Code() {
         return icdCode;
     }
 
@@ -117,4 +125,61 @@ public class Diagnosis {
     public void setRecordedAt(LocalDateTime recordedAt) {
         this.recordedAt = recordedAt;
     }
+
+    public org.hl7.fhir.r4.model.Condition toFhirResource() {
+        org.hl7.fhir.r4.model.Condition fhirCondition = new org.hl7.fhir.r4.model.Condition();
+        if (id != null) {
+            fhirCondition.setId("Condition/" + id);
+        }
+
+        // Clinical status
+        org.hl7.fhir.r4.model.CodeableConcept clinicalStatus = new org.hl7.fhir.r4.model.CodeableConcept();
+        String statusCode = "RESOLVED".equalsIgnoreCase(status) ? "resolved" : "active";
+        clinicalStatus.addCoding(new org.hl7.fhir.r4.model.Coding(
+                "http://terminology.hl7.org/CodeSystem/condition-clinical",
+                statusCode,
+                statusCode
+        ));
+        fhirCondition.setClinicalStatus(clinicalStatus);
+
+        // Code (SNOMED CT + ICD-10)
+        org.hl7.fhir.r4.model.CodeableConcept codeConcept = new org.hl7.fhir.r4.model.CodeableConcept();
+        if (conditionName != null) {
+            codeConcept.setText(conditionName);
+        }
+        if (snomedCode != null && !snomedCode.isBlank()) {
+            codeConcept.addCoding(new org.hl7.fhir.r4.model.Coding(
+                    "http://snomed.info/sct",
+                    snomedCode,
+                    conditionName
+            ));
+        }
+        if (icdCode != null && !icdCode.isBlank()) {
+            codeConcept.addCoding(new org.hl7.fhir.r4.model.Coding(
+                    "http://hl7.org/fhir/sid/icd-10",
+                    icdCode,
+                    conditionName
+            ));
+        }
+        fhirCondition.setCode(codeConcept);
+
+        if (patient != null && patient.getId() != null) {
+            fhirCondition.setSubject(new org.hl7.fhir.r4.model.Reference("Patient/" + patient.getId()));
+        }
+
+        if (doctor != null && doctor.getId() != null) {
+            fhirCondition.setRecorder(new org.hl7.fhir.r4.model.Reference("Practitioner/" + doctor.getId()));
+        }
+
+        if (onsetDate != null) {
+            fhirCondition.setOnset(new org.hl7.fhir.r4.model.DateTimeType(java.sql.Date.valueOf(onsetDate)));
+        }
+
+        if (recordedAt != null) {
+            fhirCondition.setRecordedDate(java.sql.Timestamp.valueOf(recordedAt));
+        }
+
+        return fhirCondition;
+    }
 }
+

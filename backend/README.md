@@ -10,7 +10,6 @@ Java 17 / Spring Boot RESTful API service powering the Sentinel Electronic Healt
 - **Method Security**: Spring Security `@EnableMethodSecurity` with fine-grained `@PreAuthorize` rules (`ROLE_ADMIN`, `ROLE_DOCTOR`, `ROLE_NURSE`, `ROLE_AUDITOR`, `ROLE_PATIENT`).
 - **Immutable WORM Audit Ledger**: `AuditLogRepository` storing append-only logs for HIPAA § 164.312(b) audit compliance.
 - **Smart Allergy Safety Engine**: `SmartSafetyService` cross-referencing eRx orders against coded patient allergies (RxNorm / SNOMED CT) with clinician override logging.
-- **Synthetic Cohort Generator**: `SyntheticDataService` generating realistic FHIR/Synthea-aligned patient cohorts.
 - **HL7 FHIR R4 Interoperability**: `FhirController` delivering HL7 FHIR R4 standard JSON resources.
 
 ---
@@ -98,9 +97,8 @@ Java 17 / Spring Boot RESTful API service powering the Sentinel Electronic Healt
 - `GET /api/appointments`: Fetch appointments.
 - `POST /api/appointments`: Schedule appointment.
 
-### 🛡️ Audit Ledger & Synthetic Data
+### 🛡️ Audit Ledger & Compliance Logging
 - `GET /api/admin/audit-logs?search={q}`: Immutable audit trail log search (`ADMIN`, `AUDITOR`).
-- `POST /api/synthetic/generate`: Trigger synthetic cohort generation (`ADMIN`, `DOCTOR`).
 
 ### 🌐 HL7 FHIR R4 API (`/fhir/v1`)
 - `GET /fhir/v1/Patient`: Export FHIR Patient bundle.

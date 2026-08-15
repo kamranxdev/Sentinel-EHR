@@ -13,11 +13,9 @@ import com.sentinel.prescriptions.repository.PrescriptionRepository;
 import com.sentinel.users.repository.UserRepository;
 import com.sentinel.vitals.entity.Vitals;
 import com.sentinel.vitals.repository.VitalsRepository;
+import org.hl7.fhir.r4.model.*;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -48,679 +46,176 @@ public class FhirService {
         this.userRepository = userRepository;
     }
 
-    public Map<String, Object> getCapabilityStatement() {
-        Map<String, Object> statement = new LinkedHashMap<>();
-        statement.put("resourceType", "CapabilityStatement");
-        statement.put("id", "sentinel-fhir-r4-capability");
-        statement.put("status", "active");
-        statement.put("date", LocalDateTime.now().format(DateTimeFormatter.ISO_DATE_TIME));
-        statement.put("kind", "instance");
-        statement.put("publisher", "Sentinel Health Systems Engine");
-        statement.put("fhirVersion", "4.0.1");
-        statement.put("format", List.of("application/fhir+json", "application/json"));
-        
-        Map<String, Object> software = new LinkedHashMap<>();
-        software.put("name", "Sentinel Interoperability Core Engine");
-        software.put("version", "1.0.0-GOLD-STANDARD");
-        statement.put("software", software);
+    public CapabilityStatement getCapabilityStatement() {
+        CapabilityStatement statement = new CapabilityStatement();
+        statement.setId("sentinel-fhir-r4-capability");
+        statement.setStatus(Enumerations.PublicationStatus.ACTIVE);
+        statement.setDate(new Date());
+        statement.setKind(CapabilityStatement.CapabilityStatementKind.INSTANCE);
+        statement.setPublisher("Sentinel Health Systems Engine");
+        statement.setFhirVersion(Enumerations.FHIRVersion._4_0_1);
 
-        List<Map<String, Object>> resourceCapabilities = List.of(
-            createResourceCapability("Patient", List.of("read", "search-type", "create", "update", "delete"), List.of("_id", "name", "gender", "identifier")),
-            createResourceCapability("Encounter", List.of("read", "search-type", "create", "update"), List.of("_id", "patient", "status", "class")),
-            createResourceCapability("AllergyIntolerance", List.of("read", "search-type", "create", "update"), List.of("_id", "patient", "clinical-status", "criticality")),
-            createResourceCapability("Condition", List.of("read", "search-type", "create", "update"), List.of("_id", "patient", "clinical-status", "code")),
-            createResourceCapability("MedicationRequest", List.of("read", "search-type", "create", "update"), List.of("_id", "patient", "status", "intent")),
-            createResourceCapability("Observation", List.of("read", "search-type", "create"), List.of("_id", "patient", "category", "code", "date"))
-        );
+        CapabilityStatement.CapabilityStatementSoftwareComponent software = new CapabilityStatement.CapabilityStatementSoftwareComponent();
+        software.setName("Sentinel Interoperability Core Engine (Spring Boot + Embedded HAPI FHIR)");
+        software.setVersion("1.0.0-GOLD-STANDARD");
+        statement.setSoftware(software);
 
-        Map<String, Object> rest = new LinkedHashMap<>();
-        rest.put("mode", "server");
-        rest.put("security", Map.of(
-            "cors", true,
-            "service", List.of(Map.of(
-                "coding", List.of(Map.of(
-                    "system", "http://terminology.hl7.org/CodeSystem/restful-security-service",
-                    "code", "OAuth",
-                    "display", "OAuth2 / Bearer JWT Authentication"
-                ))
-            ))
-        ));
-        rest.put("resource", resourceCapabilities);
-
-        statement.put("rest", List.of(rest));
         return statement;
     }
 
-    private Map<String, Object> createResourceCapability(String type, List<String> interactions, List<String> searchParams) {
-        Map<String, Object> res = new LinkedHashMap<>();
-        res.put("type", type);
-        res.put("interaction", interactions.stream().map(i -> Map.of("code", i)).collect(Collectors.toList()));
-        res.put("searchParam", searchParams.stream().map(p -> Map.of("name", p, "type", "string")).collect(Collectors.toList()));
-        return res;
+    public org.hl7.fhir.r4.model.Patient toPatientResource(Patient patient) {
+        return patient != null ? patient.toFhirResource() : null;
     }
 
-    public Map<String, Object> toPatientResource(Patient p) {
-        Map<String, Object> r = new LinkedHashMap<>();
-        r.put("resourceType", "Patient");
-        r.put("id", p.getId().toString());
-        r.put("active", true);
-
-        List<Map<String, Object>> identifiers = new ArrayList<>();
-        if (p.getPatientCode() != null) {
-            identifiers.add(Map.of(
-                "use", "official",
-                "system", "urn:oid:2.16.840.1.113883.4.1",
-                "value", p.getPatientCode(),
-                "type", Map.of("text", "Medical Record Number (MRN)")
-            ));
-        }
-        if (p.getAbhaId() != null && !p.getAbhaId().isEmpty()) {
-            identifiers.add(Map.of(
-                "use", "official",
-                "system", "https://healthid.ndhm.gov.in",
-                "value", p.getAbhaId(),
-                "type", Map.of("text", "ABHA Health Account ID")
-            ));
-        }
-        if (p.getNationalId() != null && !p.getNationalId().isEmpty()) {
-            identifiers.add(Map.of(
-                "use", "secondary",
-                "system", "https://uidai.gov.in",
-                "value", p.getNationalId(),
-                "type", Map.of("text", "National Identifier / Aadhaar Ref")
-            ));
-        }
-        r.put("identifier", identifiers);
-
-        String fullName = p.getFullName() != null ? p.getFullName() : "Unknown";
-        String[] parts = fullName.split(" ");
-        String family = parts.length > 1 ? parts[parts.length - 1] : fullName;
-        List<String> given = parts.length > 1 ? Arrays.asList(Arrays.copyOf(parts, parts.length - 1)) : List.of(fullName);
-
-        Map<String, Object> nameMap = new LinkedHashMap<>();
-        nameMap.put("use", "official");
-        nameMap.put("text", fullName);
-        nameMap.put("family", family);
-        nameMap.put("given", given);
-        r.put("name", List.of(nameMap));
-
-        r.put("gender", p.getGender() != null ? p.getGender().toLowerCase() : "unknown");
-        if (p.getDateOfBirth() != null) {
-            r.put("birthDate", p.getDateOfBirth().toString());
-        }
-
-        List<Map<String, Object>> telecom = new ArrayList<>();
-        if (p.getPhone() != null && !p.getPhone().isEmpty()) {
-            telecom.add(Map.of("system", "phone", "value", p.getPhone(), "use", "mobile"));
-        }
-        if (p.getEmail() != null && !p.getEmail().isEmpty()) {
-            telecom.add(Map.of("system", "email", "value", p.getEmail(), "use", "home"));
-        }
-        r.put("telecom", telecom);
-
-        if (p.getAddress() != null && !p.getAddress().isEmpty()) {
-            r.put("address", List.of(Map.of("use", "home", "text", p.getAddress())));
-        }
-
-        List<Map<String, Object>> extensions = new ArrayList<>();
-        if (p.getInsuranceProvider() != null) {
-            extensions.add(Map.of("url", "http://sentinel.com/fhir/StructureDefinition/insurance-provider", "valueString", p.getInsuranceProvider()));
-        }
-        if (p.getBloodType() != null) {
-            extensions.add(Map.of("url", "http://sentinel.com/fhir/StructureDefinition/blood-type", "valueString", p.getBloodType()));
-        }
-        if (!extensions.isEmpty()) {
-            r.put("extension", extensions);
-        }
-
-        return r;
+    public org.hl7.fhir.r4.model.Encounter toEncounterResource(Encounter encounter) {
+        return encounter != null ? encounter.toFhirResource() : null;
     }
 
-    public Map<String, Object> toEncounterResource(Encounter e) {
-        Map<String, Object> r = new LinkedHashMap<>();
-        r.put("resourceType", "Encounter");
-        r.put("id", e.getId().toString());
-        r.put("status", e.getStatus() != null ? e.getStatus().toLowerCase() : "finished");
-        
-        String typeCode = e.getEncounterType() != null ? e.getEncounterType() : "AMB";
-        r.put("class", Map.of(
-            "system", "http://terminology.hl7.org/CodeSystem/v3-ActCode",
-            "code", typeCode,
-            "display", typeCode.equalsIgnoreCase("IMP") ? "Inpatient Encounter" : "Ambulatory Outpatient"
-        ));
-
-        if (e.getPatient() != null) {
-            r.put("subject", Map.of("reference", "Patient/" + e.getPatient().getId(), "display", e.getPatient().getFullName()));
-        }
-
-        if (e.getAttendingProvider() != null) {
-            r.put("participant", List.of(Map.of(
-                "individual", Map.of("reference", "Practitioner/" + e.getAttendingProvider().getId(), "display", e.getAttendingProvider().getFullName())
-            )));
-        }
-
-        if (e.getEncounterDate() != null) {
-            r.put("period", Map.of("start", e.getEncounterDate().toString()));
-        }
-
-        if (e.getChiefComplaint() != null) {
-            r.put("reasonCode", List.of(Map.of("text", e.getChiefComplaint())));
-        }
-
-        if (e.getClinicalNotes() != null) {
-            r.put("text", Map.of("status", "generated", "div", "<div xmlns=\"http://www.w3.org/1999/xhtml\">" + e.getClinicalNotes() + "</div>"));
-        }
-
-        return r;
+    public org.hl7.fhir.r4.model.AllergyIntolerance toAllergyResource(Allergy allergy) {
+        return allergy != null ? allergy.toFhirResource() : null;
     }
 
-    public Map<String, Object> toAllergyResource(Allergy a) {
-        Map<String, Object> r = new LinkedHashMap<>();
-        r.put("resourceType", "AllergyIntolerance");
-        r.put("id", a.getId().toString());
-
-        r.put("clinicalStatus", Map.of("coding", List.of(Map.of(
-            "system", "http://terminology.hl7.org/CodeSystem/allergyintolerance-clinical",
-            "code", a.getStatus() != null ? a.getStatus().toLowerCase() : "active"
-        ))));
-
-        r.put("verificationStatus", Map.of("coding", List.of(Map.of(
-            "system", "http://terminology.hl7.org/CodeSystem/allergyintolerance-verification",
-            "code", "confirmed"
-        ))));
-
-        r.put("category", List.of(a.getCategory() != null ? a.getCategory().toLowerCase() : "medication"));
-        r.put("criticality", a.getSeverity() != null ? a.getSeverity().toLowerCase() : "moderate");
-
-        Map<String, Object> codeMap = new LinkedHashMap<>();
-        codeMap.put("text", a.getAllergenName());
-        if (a.getAllergenCode() != null && !a.getAllergenCode().isEmpty()) {
-            codeMap.put("coding", List.of(Map.of(
-                "system", "http://www.nlm.nih.gov/research/umls/rxnorm",
-                "code", a.getAllergenCode(),
-                "display", a.getAllergenName()
-            )));
-        }
-        r.put("code", codeMap);
-
-        if (a.getPatient() != null) {
-            r.put("patient", Map.of("reference", "Patient/" + a.getPatient().getId(), "display", a.getPatient().getFullName()));
-        }
-
-        if (a.getRecordedAt() != null) {
-            r.put("recordedDate", a.getRecordedAt().toString());
-        }
-
-        if (a.getReactionDescription() != null) {
-            r.put("reaction", List.of(Map.of("manifestation", List.of(Map.of("text", a.getReactionDescription())))));
-        }
-
-        return r;
+    public org.hl7.fhir.r4.model.Condition toConditionResource(Diagnosis diagnosis) {
+        return diagnosis != null ? diagnosis.toFhirResource() : null;
     }
 
-    public Map<String, Object> toConditionResource(Diagnosis d) {
-        Map<String, Object> r = new LinkedHashMap<>();
-        r.put("resourceType", "Condition");
-        r.put("id", d.getId().toString());
-
-        r.put("clinicalStatus", Map.of("coding", List.of(Map.of(
-            "system", "http://terminology.hl7.org/CodeSystem/condition-clinical",
-            "code", d.getStatus() != null ? d.getStatus().toLowerCase() : "active"
-        ))));
-
-        r.put("verificationStatus", Map.of("coding", List.of(Map.of(
-            "system", "http://terminology.hl7.org/CodeSystem/condition-ver-status",
-            "code", "confirmed"
-        ))));
-
-        r.put("category", List.of(Map.of("coding", List.of(Map.of(
-            "system", "http://terminology.hl7.org/CodeSystem/condition-category",
-            "code", "problem-list-item",
-            "display", "Problem List Item"
-        )))));
-
-        List<Map<String, String>> codings = new ArrayList<>();
-        if (d.getIcdCode() != null && !d.getIcdCode().isEmpty()) {
-            codings.add(Map.of("system", "http://hl7.org/fhir/sid/icd-10", "code", d.getIcdCode(), "display", d.getConditionName()));
-        }
-        if (d.getSnomedCode() != null && !d.getSnomedCode().isEmpty()) {
-            codings.add(Map.of("system", "http://snomed.info/sct", "code", d.getSnomedCode(), "display", d.getConditionName()));
-        }
-
-        Map<String, Object> codeMap = new LinkedHashMap<>();
-        codeMap.put("text", d.getConditionName());
-        codeMap.put("coding", codings);
-        r.put("code", codeMap);
-
-        if (d.getPatient() != null) {
-            r.put("subject", Map.of("reference", "Patient/" + d.getPatient().getId(), "display", d.getPatient().getFullName()));
-        }
-
-        if (d.getOnsetDate() != null) {
-            r.put("onsetDateTime", d.getOnsetDate().toString());
-        }
-
-        if (d.getRecordedAt() != null) {
-            r.put("recordedDate", d.getRecordedAt().toString());
-        }
-
-        return r;
+    public org.hl7.fhir.r4.model.MedicationRequest toMedicationRequestResource(Prescription prescription) {
+        return prescription != null ? prescription.toFhirResource() : null;
     }
 
-    public Map<String, Object> toMedicationRequestResource(Prescription p) {
-        Map<String, Object> r = new LinkedHashMap<>();
-        r.put("resourceType", "MedicationRequest");
-        r.put("id", p.getId().toString());
-        r.put("status", p.getStatus() != null ? p.getStatus().toLowerCase() : "active");
-        r.put("intent", "order");
-
-        Map<String, Object> medConcept = new LinkedHashMap<>();
-        medConcept.put("text", p.getMedicationName());
-        if (p.getRxNormCode() != null && !p.getRxNormCode().isEmpty()) {
-            medConcept.put("coding", List.of(Map.of(
-                "system", "http://www.nlm.nih.gov/research/umls/rxnorm",
-                "code", p.getRxNormCode(),
-                "display", p.getMedicationName()
-            )));
-        }
-        r.put("medicationCodeableConcept", medConcept);
-
-        if (p.getPatient() != null) {
-            r.put("subject", Map.of("reference", "Patient/" + p.getPatient().getId(), "display", p.getPatient().getFullName()));
-        }
-
-        if (p.getDoctor() != null) {
-            r.put("requester", Map.of("reference", "Practitioner/" + p.getDoctor().getId(), "display", p.getDoctor().getFullName()));
-        }
-
-        if (p.getPrescribedAt() != null) {
-            r.put("authoredOn", p.getPrescribedAt().toString());
-        }
-
-        List<Map<String, Object>> dosageList = new ArrayList<>();
-        Map<String, Object> dosageMap = new LinkedHashMap<>();
-        dosageMap.put("text", (p.getDosage() != null ? p.getDosage() : "") + " " + (p.getFrequency() != null ? p.getFrequency() : "") + " via " + (p.getRoute() != null ? p.getRoute() : "Oral"));
-        if (p.getRoute() != null) {
-            dosageMap.put("route", Map.of("text", p.getRoute()));
-        }
-        dosageList.add(dosageMap);
-        r.put("dosageInstruction", dosageList);
-
-        return r;
+    public org.hl7.fhir.r4.model.Observation toObservationResource(Vitals vitals) {
+        return vitals != null ? vitals.toFhirResource() : null;
     }
 
-    public Map<String, Object> toLocationResource(com.sentinel.encounters.entity.Bed bed) {
-        Map<String, Object> r = new LinkedHashMap<>();
-        r.put("resourceType", "Location");
-        r.put("id", bed.getId().toString());
-        r.put("status", bed.getStatus() != null && bed.getStatus().equalsIgnoreCase("AVAILABLE") ? "active" : "suspended");
-        r.put("name", bed.getBedCode());
-        r.put("description", bed.getFacilityName() + " - " + bed.getDepartmentName() + " - " + bed.getWardName() + " Room " + bed.getRoomNumber() + " Bed " + bed.getBedNumber());
-        r.put("physicalType", Map.of("coding", List.of(Map.of("system", "http://terminology.hl7.org/CodeSystem/location-physical-type", "code", "bd", "display", "Bed"))));
-        return r;
-    }
-
-    public Map<String, Object> toCareTeamResource(com.sentinel.patients.entity.PatientAssignment pa) {
-        Map<String, Object> r = new LinkedHashMap<>();
-        r.put("resourceType", "CareTeam");
-        r.put("id", pa.getId().toString());
-        r.put("status", pa.getStatus() != null ? pa.getStatus().toLowerCase() : "active");
-        if (pa.getPatient() != null) {
-            r.put("subject", Map.of("reference", "Patient/" + pa.getPatient().getId(), "display", pa.getPatient().getFullName()));
-        }
-        if (pa.getStaffUser() != null) {
-            r.put("participant", List.of(Map.of(
-                "role", List.of(Map.of("text", pa.getAssignmentType())),
-                "member", Map.of("reference", "Practitioner/" + pa.getStaffUser().getId(), "display", pa.getStaffUser().getFullName())
-            )));
-        }
-        return r;
-    }
-
-    public Map<String, Object> toServiceRequestResource(com.sentinel.laboratory.entity.LabOrder lo) {
-        Map<String, Object> r = new LinkedHashMap<>();
-        r.put("resourceType", "ServiceRequest");
-        r.put("id", lo.getId().toString());
-        r.put("status", lo.getStatus() != null ? lo.getStatus().toLowerCase() : "active");
-        r.put("intent", "order");
-        r.put("code", Map.of("text", lo.getTestName()));
-        if (lo.getPatient() != null) {
-            r.put("subject", Map.of("reference", "Patient/" + lo.getPatient().getId(), "display", lo.getPatient().getFullName()));
-        }
-        return r;
-    }
-
-    public Map<String, Object> toObservationResource(Vitals v) {
-        Map<String, Object> r = new LinkedHashMap<>();
-        r.put("resourceType", "Observation");
-        r.put("id", v.getId().toString());
-        r.put("status", "final");
-
-        r.put("category", List.of(Map.of("coding", List.of(Map.of(
-            "system", "http://terminology.hl7.org/CodeSystem/observation-category",
-            "code", "vital-signs",
-            "display", "Vital Signs"
-        )))));
-
-        r.put("code", Map.of(
-            "coding", List.of(Map.of(
-                "system", "http://loinc.org",
-                "code", "85354-9",
-                "display", "Blood pressure panel with all children optional"
-            )),
-            "text", "Longitudinal Vital Signs Flowsheet"
-        ));
-
-        if (v.getPatient() != null) {
-            r.put("subject", Map.of("reference", "Patient/" + v.getPatient().getId(), "display", v.getPatient().getFullName()));
-        }
-
-        if (v.getRecordedAt() != null) {
-            r.put("effectiveDateTime", v.getRecordedAt().toString());
-        }
-
-        List<Map<String, Object>> components = new ArrayList<>();
-
-        if (v.getBloodPressure() != null && v.getBloodPressure().contains("/")) {
-            String[] bp = v.getBloodPressure().split("/");
-            try {
-                double sys = Double.parseDouble(bp[0].trim());
-                double dia = Double.parseDouble(bp[1].trim());
-
-                components.add(Map.of(
-                    "code", Map.of("coding", List.of(Map.of("system", "http://loinc.org", "code", "8480-6", "display", "Systolic blood pressure")), "text", "Systolic BP"),
-                    "valueQuantity", Map.of("value", sys, "unit", "mmHg", "system", "http://unitsofmeasure.org", "code", "mm[Hg]")
-                ));
-
-                components.add(Map.of(
-                    "code", Map.of("coding", List.of(Map.of("system", "http://loinc.org", "code", "8462-4", "display", "Diastolic blood pressure")), "text", "Diastolic BP"),
-                    "valueQuantity", Map.of("value", dia, "unit", "mmHg", "system", "http://unitsofmeasure.org", "code", "mm[Hg]")
-                ));
-            } catch (Exception ignored) {}
-        }
-
-        if (v.getHeartRate() != null) {
-            components.add(Map.of(
-                "code", Map.of("coding", List.of(Map.of("system", "http://loinc.org", "code", "8867-4", "display", "Heart rate")), "text", "Heart Rate"),
-                "valueQuantity", Map.of("value", v.getHeartRate(), "unit", "beats/min", "system", "http://unitsofmeasure.org", "code", "/min")
-            ));
-        }
-
-        if (v.getTemperature() != null) {
-            components.add(Map.of(
-                "code", Map.of("coding", List.of(Map.of("system", "http://loinc.org", "code", "8310-5", "display", "Body temperature")), "text", "Body Temperature"),
-                "valueQuantity", Map.of("value", v.getTemperature(), "unit", "C", "system", "http://unitsofmeasure.org", "code", "Cel")
-            ));
-        }
-
-        if (v.getOxygenSaturation() != null) {
-            components.add(Map.of(
-                "code", Map.of("coding", List.of(Map.of("system", "http://loinc.org", "code", "2708-6", "display", "Oxygen saturation")), "text", "SpO2"),
-                "valueQuantity", Map.of("value", v.getOxygenSaturation(), "unit", "%", "system", "http://unitsofmeasure.org", "code", "%")
-            ));
-        }
-
-        if (v.getRespiratoryRate() != null) {
-            components.add(Map.of(
-                "code", Map.of("coding", List.of(Map.of("system", "http://loinc.org", "code", "9279-1", "display", "Respiratory rate")), "text", "Respiratory Rate"),
-                "valueQuantity", Map.of("value", v.getRespiratoryRate(), "unit", "breaths/min", "system", "http://unitsofmeasure.org", "code", "/min")
-            ));
-        }
-
-        if (v.getWeightKg() != null) {
-            components.add(Map.of(
-                "code", Map.of("coding", List.of(Map.of("system", "http://loinc.org", "code", "29463-7", "display", "Body weight")), "text", "Weight"),
-                "valueQuantity", Map.of("value", v.getWeightKg(), "unit", "kg", "system", "http://unitsofmeasure.org", "code", "kg")
-            ));
-        }
-
-        if (v.getHeightCm() != null) {
-            components.add(Map.of(
-                "code", Map.of("coding", List.of(Map.of("system", "http://loinc.org", "code", "8302-2", "display", "Body height")), "text", "Height"),
-                "valueQuantity", Map.of("value", v.getHeightCm(), "unit", "cm", "system", "http://unitsofmeasure.org", "code", "cm")
-            ));
-        }
-
-        if (v.getBmi() != null) {
-            components.add(Map.of(
-                "code", Map.of("coding", List.of(Map.of("system", "http://loinc.org", "code", "39156-5", "display", "Body mass index")), "text", "BMI"),
-                "valueQuantity", Map.of("value", v.getBmi(), "unit", "kg/m2", "system", "http://unitsofmeasure.org", "code", "kg/m2")
-            ));
-        }
-
-        if (v.getBloodGlucose() != null) {
-            components.add(Map.of(
-                "code", Map.of("coding", List.of(Map.of("system", "http://loinc.org", "code", "15074-8", "display", "Glucose in Blood")), "text", "Blood Glucose"),
-                "valueQuantity", Map.of("value", v.getBloodGlucose(), "unit", "mg/dL", "system", "http://unitsofmeasure.org", "code", "mg/dL")
-            ));
-        }
-
-        r.put("component", components);
-        return r;
-    }
-
-    public Map<String, Object> buildBundle(String resourceType, List<Map<String, Object>> resources) {
-        Map<String, Object> bundle = new LinkedHashMap<>();
-        bundle.put("resourceType", "Bundle");
-        bundle.put("id", "bundle-" + UUID.randomUUID());
-        bundle.put("type", "searchset");
-        bundle.put("total", resources.size());
-        bundle.put("entry", resources.stream().map(res -> {
-            Map<String, Object> entry = new LinkedHashMap<>();
-            entry.put("fullUrl", "http://localhost:8080/fhir/v1/" + res.get("resourceType") + "/" + res.get("id"));
-            entry.put("resource", res);
-            return entry;
-        }).collect(Collectors.toList()));
-        return bundle;
-    }
-
-    public Map<String, Object> buildOperationOutcome(String severity, String code, String message) {
-        Map<String, Object> outcome = new LinkedHashMap<>();
-        outcome.put("resourceType", "OperationOutcome");
-        outcome.put("issue", List.of(Map.of(
-            "severity", severity,
-            "code", code,
-            "diagnostics", message
-        )));
-        return outcome;
-    }
-
-    public Map<String, Object> getPatientEverythingBundle(Long patientId) {
-        Patient patient = patientRepository.findById(patientId).orElse(null);
-        if (patient == null) {
-            return buildOperationOutcome("error", "not-found", "Patient record with ID " + patientId + " was not found.");
-        }
-
-        List<Map<String, Object>> allResources = new ArrayList<>();
-        allResources.add(toPatientResource(patient));
-
-        encounterRepository.findByPatientIdOrderByEncounterDateDesc(patientId)
-                .forEach(e -> allResources.add(toEncounterResource(e)));
-
-        allergyRepository.findByPatientIdOrderByRecordedAtDesc(patientId)
-                .forEach(a -> allResources.add(toAllergyResource(a)));
-
-        diagnosisRepository.findByPatientIdOrderByRecordedAtDesc(patientId)
-                .forEach(d -> allResources.add(toConditionResource(d)));
-
-        prescriptionRepository.findByPatientIdOrderByPrescribedAtDesc(patientId)
-                .forEach(p -> allResources.add(toMedicationRequestResource(p)));
-
-        vitalsRepository.findByPatientIdOrderByRecordedAtDesc(patientId)
-                .forEach(v -> allResources.add(toObservationResource(v)));
-
-        Map<String, Object> bundle = new LinkedHashMap<>();
-        bundle.put("resourceType", "Bundle");
-        bundle.put("id", "everything-patient-" + patientId);
-        bundle.put("type", "collection");
-        bundle.put("total", allResources.size());
-        bundle.put("entry", allResources.stream().map(res -> Map.of(
-            "fullUrl", "http://localhost:8080/fhir/v1/" + res.get("resourceType") + "/" + res.get("id"),
-            "resource", res
-        )).collect(Collectors.toList()));
-
-        return bundle;
-    }
-
-    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public List<Patient> searchPatients(String name, String gender, String identifier) {
-        if ((name == null || name.trim().isEmpty()) && 
-            (gender == null || gender.trim().isEmpty()) && 
-            (identifier == null || identifier.trim().isEmpty())) {
-            return patientRepository.findAll();
-        } else {
-            return patientRepository.searchFhirPatients(
-                    (name != null && !name.trim().isEmpty()) ? name.trim() : null,
-                    (gender != null && !gender.trim().isEmpty()) ? gender.trim() : null,
-                    (identifier != null && !identifier.trim().isEmpty()) ? identifier.trim() : null
-            );
-        }
+        return patientRepository.findAll().stream()
+                .filter(p -> name == null || (p.getFullName() != null && p.getFullName().toLowerCase().contains(name.toLowerCase())))
+                .filter(p -> gender == null || (p.getGender() != null && p.getGender().equalsIgnoreCase(gender)))
+                .filter(p -> identifier == null || (p.getPatientCode() != null && p.getPatientCode().equalsIgnoreCase(identifier)) || (p.getAbhaId() != null && p.getAbhaId().equalsIgnoreCase(identifier)))
+                .collect(Collectors.toList());
     }
 
-    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public Optional<Patient> getPatientEntityById(Long id) {
         return patientRepository.findById(id);
     }
 
-    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public boolean patientExists(Long id) {
         return patientRepository.existsById(id);
     }
 
-    @org.springframework.transaction.annotation.Transactional
     public void deletePatientById(Long id) {
         patientRepository.deleteById(id);
     }
 
-    @org.springframework.transaction.annotation.Transactional(readOnly = true)
-    public List<Encounter> searchEncounters(Long patientId) {
-        if (patientId != null) {
-            return encounterRepository.findByPatientIdOrderByEncounterDateDesc(patientId);
+    public Patient createPatientFromFhir(org.hl7.fhir.r4.model.Patient fhirPatient) {
+        Patient entity = new Patient();
+        if (fhirPatient.hasName()) {
+            entity.setFullName(fhirPatient.getNameFirstRep().getNameAsSingleString());
+        } else {
+            entity.setFullName("Unknown Patient");
         }
-        return encounterRepository.findAll();
+
+        if (fhirPatient.hasGender()) {
+            entity.setGender(fhirPatient.getGender().toCode().toUpperCase());
+        }
+
+        if (fhirPatient.hasBirthDate()) {
+            entity.setDateOfBirth(fhirPatient.getBirthDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate());
+        }
+
+        entity.setPatientCode("MRN-" + System.currentTimeMillis());
+        return patientRepository.save(entity);
     }
 
-    @org.springframework.transaction.annotation.Transactional(readOnly = true)
+    public Bundle getPatientEverythingBundle(Long patientId) {
+        Bundle bundle = new Bundle();
+        bundle.setId("bundle-patient-" + patientId);
+        bundle.setType(Bundle.BundleType.SEARCHSET);
+        bundle.setTimestamp(new Date());
+
+        Optional<Patient> patientOpt = patientRepository.findById(patientId);
+        if (patientOpt.isEmpty()) {
+            return bundle;
+        }
+
+        Patient patient = patientOpt.get();
+        bundle.addEntry().setResource(patient.toFhirResource());
+
+        List<Encounter> encounters = encounterRepository.findByPatientId(patientId);
+        for (Encounter e : encounters) {
+            bundle.addEntry().setResource(e.toFhirResource());
+        }
+
+        List<Diagnosis> diagnoses = diagnosisRepository.findByPatientId(patientId);
+        for (Diagnosis d : diagnoses) {
+            bundle.addEntry().setResource(d.toFhirResource());
+        }
+
+        List<Prescription> prescriptions = prescriptionRepository.findByPatientId(patientId);
+        for (Prescription p : prescriptions) {
+            bundle.addEntry().setResource(p.toFhirResource());
+        }
+
+        List<Vitals> vitals = vitalsRepository.findByPatientId(patientId);
+        for (Vitals v : vitals) {
+            bundle.addEntry().setResource(v.toFhirResource());
+        }
+
+        List<Allergy> allergies = allergyRepository.findByPatientId(patientId);
+        for (Allergy a : allergies) {
+            bundle.addEntry().setResource(a.toFhirResource());
+        }
+
+        return bundle;
+    }
+
+    public List<Encounter> searchEncounters(Long patientId) {
+        return patientId != null ? encounterRepository.findByPatientId(patientId) : encounterRepository.findAll();
+    }
+
     public Optional<Encounter> getEncounterById(Long id) {
         return encounterRepository.findById(id);
     }
 
-    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public List<Allergy> searchAllergies(Long patientId) {
-        if (patientId != null) {
-            return allergyRepository.findByPatientIdOrderByRecordedAtDesc(patientId);
-        }
-        return allergyRepository.findAll();
+        return patientId != null ? allergyRepository.findByPatientId(patientId) : allergyRepository.findAll();
     }
 
-    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public Optional<Allergy> getAllergyEntityById(Long id) {
         return allergyRepository.findById(id);
     }
 
-    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public List<Diagnosis> searchConditions(Long patientId) {
-        if (patientId != null) {
-            return diagnosisRepository.findByPatientIdOrderByRecordedAtDesc(patientId);
-        }
-        return diagnosisRepository.findAll();
+        return patientId != null ? diagnosisRepository.findByPatientId(patientId) : diagnosisRepository.findAll();
     }
 
-    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public Optional<Diagnosis> getConditionById(Long id) {
         return diagnosisRepository.findById(id);
     }
 
-    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public List<Prescription> searchMedications(Long patientId) {
-        if (patientId != null) {
-            return prescriptionRepository.findByPatientIdOrderByPrescribedAtDesc(patientId);
-        }
-        return prescriptionRepository.findAll();
+        return patientId != null ? prescriptionRepository.findByPatientId(patientId) : prescriptionRepository.findAll();
     }
 
-    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public Optional<Prescription> getMedicationById(Long id) {
         return prescriptionRepository.findById(id);
     }
 
-    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public List<Vitals> searchObservations(Long patientId) {
-        if (patientId != null) {
-            return vitalsRepository.findByPatientIdOrderByRecordedAtDesc(patientId);
-        }
-        return vitalsRepository.findAll();
+        return patientId != null ? vitalsRepository.findByPatientId(patientId) : vitalsRepository.findAll();
     }
 
-    @org.springframework.transaction.annotation.Transactional(readOnly = true)
     public Optional<Vitals> getObservationById(Long id) {
         return vitalsRepository.findById(id);
     }
 
-    @org.springframework.transaction.annotation.Transactional
-    public Patient createPatientFromFhir(Map<String, Object> fhirJson) {
-        Patient p = new Patient();
-
-        if (fhirJson.containsKey("identifier")) {
-            List<Map<String, Object>> identifiers = (List<Map<String, Object>>) fhirJson.get("identifier");
-            for (Map<String, Object> idMap : identifiers) {
-                String val = (String) idMap.get("value");
-                String sys = (String) idMap.get("system");
-                if ("https://healthid.ndhm.gov.in".equalsIgnoreCase(sys)) {
-                    p.setAbhaId(val);
-                } else if ("https://uidai.gov.in".equalsIgnoreCase(sys) || "urn:oid:2.16.356.1.1".equalsIgnoreCase(sys)) {
-                    p.setNationalId(val);
-                } else if (val != null && !val.isEmpty()) {
-                    p.setPatientCode(val);
-                }
-            }
+    public Bundle buildBundle(String resourceType, List<? extends Resource> resources) {
+        Bundle bundle = new Bundle();
+        bundle.setType(Bundle.BundleType.SEARCHSET);
+        bundle.setTotal(resources.size());
+        for (Resource r : resources) {
+            bundle.addEntry().setResource(r);
         }
-        if (p.getPatientCode() == null) {
-            p.setPatientCode("MRN-" + (100000 + new Random().nextInt(900000)));
-        }
-
-        if (fhirJson.containsKey("name")) {
-            List<Map<String, Object>> names = (List<Map<String, Object>>) fhirJson.get("name");
-            if (!names.isEmpty()) {
-                String text = (String) names.get(0).get("text");
-                if (text != null) {
-                    p.setFullName(text);
-                } else {
-                    String family = (String) names.get(0).get("family");
-                    List<String> given = (List<String>) names.get(0).get("given");
-                    p.setFullName((given != null ? String.join(" ", given) : "") + " " + (family != null ? family : ""));
-                }
-            }
-        }
-        if (p.getFullName() == null || p.getFullName().trim().isEmpty()) {
-            p.setFullName("FHIR Ingested Patient");
-        }
-
-        if (fhirJson.containsKey("gender")) {
-            p.setGender((String) fhirJson.get("gender"));
-        }
-        if (fhirJson.containsKey("birthDate")) {
-            try {
-                p.setDateOfBirth(LocalDate.parse((String) fhirJson.get("birthDate")));
-            } catch (Exception ignored) {}
-        }
-        if (fhirJson.containsKey("telecom")) {
-            List<Map<String, Object>> telecoms = (List<Map<String, Object>>) fhirJson.get("telecom");
-            for (Map<String, Object> tel : telecoms) {
-                String sys = (String) tel.get("system");
-                String val = (String) tel.get("value");
-                if ("phone".equalsIgnoreCase(sys)) p.setPhone(val);
-                if ("email".equalsIgnoreCase(sys)) p.setEmail(val);
-            }
-        }
-        if (fhirJson.containsKey("address")) {
-            List<Map<String, Object>> addrs = (List<Map<String, Object>>) fhirJson.get("address");
-            if (!addrs.isEmpty()) {
-                p.setAddress((String) addrs.get(0).get("text"));
-            }
-        }
-
-        return patientRepository.save(p);
+        return bundle;
     }
 }
-

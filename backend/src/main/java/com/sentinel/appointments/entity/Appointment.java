@@ -179,4 +179,51 @@ public class Appointment {
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
+
+    public org.hl7.fhir.r4.model.Appointment toFhirResource() {
+        org.hl7.fhir.r4.model.Appointment appt = new org.hl7.fhir.r4.model.Appointment();
+        if (id != null) {
+            appt.setId("Appointment/" + id);
+        }
+
+        if ("COMPLETED".equalsIgnoreCase(status)) {
+            appt.setStatus(org.hl7.fhir.r4.model.Appointment.AppointmentStatus.FULFILLED);
+        } else if ("CANCELLED".equalsIgnoreCase(status)) {
+            appt.setStatus(org.hl7.fhir.r4.model.Appointment.AppointmentStatus.CANCELLED);
+        } else if ("ARRIVED".equalsIgnoreCase(status) || "CHECKED_IN".equalsIgnoreCase(status) || "IN_CONSULTATION".equalsIgnoreCase(status)) {
+            appt.setStatus(org.hl7.fhir.r4.model.Appointment.AppointmentStatus.ARRIVED);
+        } else {
+            appt.setStatus(org.hl7.fhir.r4.model.Appointment.AppointmentStatus.BOOKED);
+        }
+
+        if (reason != null && !reason.isBlank()) {
+            org.hl7.fhir.r4.model.CodeableConcept reasonConcept = new org.hl7.fhir.r4.model.CodeableConcept();
+            reasonConcept.setText(reason);
+            appt.addReasonCode(reasonConcept);
+        }
+
+        if (patient != null && patient.getId() != null) {
+            org.hl7.fhir.r4.model.Appointment.AppointmentParticipantComponent pPart = appt.addParticipant();
+            pPart.setActor(new org.hl7.fhir.r4.model.Reference("Patient/" + patient.getId()));
+            pPart.setStatus(org.hl7.fhir.r4.model.Appointment.ParticipationStatus.ACCEPTED);
+        }
+
+        if (doctor != null && doctor.getId() != null) {
+            org.hl7.fhir.r4.model.Appointment.AppointmentParticipantComponent dPart = appt.addParticipant();
+            dPart.setActor(new org.hl7.fhir.r4.model.Reference("Practitioner/" + doctor.getId()));
+            dPart.setStatus(org.hl7.fhir.r4.model.Appointment.ParticipationStatus.ACCEPTED);
+        }
+
+        if (appointmentDate != null) {
+            appt.setStart(java.sql.Timestamp.valueOf(appointmentDate));
+            appt.setEnd(java.sql.Timestamp.valueOf(appointmentDate.plusMinutes(30)));
+        }
+
+        if (notes != null && !notes.isBlank()) {
+            appt.setComment(notes);
+        }
+
+        return appt;
+    }
 }
+
