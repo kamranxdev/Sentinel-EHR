@@ -31,14 +31,9 @@ public class AuditTrailService {
         String username = "SYSTEM";
         String primaryRole = "ROLE_SYSTEM";
 
-        if (authentication != null && authentication.isAuthenticated()) {
+        if (authentication != null && authentication.isAuthenticated() && !"anonymousUser".equals(authentication.getName())) {
             username = authentication.getName();
-            List<String> authorities = authentication.getAuthorities().stream()
-                    .map(GrantedAuthority::getAuthority)
-                    .toList();
-            if (!authorities.isEmpty()) {
-                primaryRole = authorities.get(0);
-            }
+            primaryRole = resolvePrimaryRole(authentication);
         }
 
         return logAction(username, primaryRole, action, entityName, resourceId, details);
@@ -54,16 +49,57 @@ public class AuditTrailService {
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public CompletableFuture<AuditLog> logAction(String username, String userRole, String action, String entityName, String resourceId, String details) {
         try {
+            String clientIp = org.slf4j.MDC.get(com.sentinel.common.logging.MDCLoggingFilter.CLIENT_IP_MDC_KEY);
+            if (clientIp == null || clientIp.isBlank()) {
+                clientIp = "127.0.0.1";
+            }
+            String traceId = org.slf4j.MDC.get(com.sentinel.common.logging.MDCLoggingFilter.TRACE_ID_MDC_KEY);
+            if (traceId == null || traceId.isBlank()) {
+                traceId = "N/A";
+            }
+
             AuditLog log = new AuditLog(username, userRole, action, entityName, resourceId, details);
+            log.setIpAddress(clientIp);
+
             AuditLog saved = auditLogRepository.save(log);
-            logger.info("AUDIT LOG RECORDED: [{}] by user '{}' ({}) on entity '{}' (ID: {}) - {}", 
-                    action, username, userRole, entityName, resourceId, details);
+            logger.info("[AUDIT] status=SUCCESS action={} entity={} entityId={} user='{}' role='{}' ip={} traceId={} details=\"{}\"",
+                    action, entityName, resourceId != null ? resourceId : "N/A", username, userRole, clientIp, traceId, details);
             return CompletableFuture.completedFuture(saved);
         } catch (Exception ex) {
-            logger.error("AUDIT LOG FAILURE: Failed to save audit trail for action '{}' on entity '{}' (resource ID: {}) by user '{}': {}", 
+            logger.error("[AUDIT_FAILURE] action={} entity={} entityId={} user='{}' error=\"{}\"", 
                     action, entityName, resourceId, username, ex.getMessage(), ex);
             return CompletableFuture.completedFuture(null);
         }
+    }
+
+    public static String resolvePrimaryRole(Authentication auth) {
+        if (auth == null || !auth.isAuthenticated() || "anonymousUser".equals(auth.getName())) {
+            return "ROLE_SYSTEM";
+        }
+
+        if (auth.getPrincipal() instanceof com.sentinel.authorization.security.UserPrincipal principal) {
+            if (principal.getRoles() != null && !principal.getRoles().isEmpty()) {
+                return String.join(",", principal.getRoles());
+            }
+        }
+
+        List<String> roles = auth.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .filter(a -> a.startsWith("ROLE_"))
+                .toList();
+
+        if (!roles.isEmpty()) {
+            return String.join(",", roles);
+        }
+
+        List<String> authorities = auth.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .toList();
+        if (!authorities.isEmpty()) {
+            return authorities.get(0);
+        }
+
+        return "ROLE_USER";
     }
 
     public List<AuditLog> getRecentAuditLogs() {

@@ -44,6 +44,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+            org.slf4j.MDC.put(com.sentinel.common.logging.MDCLoggingFilter.USER_ID_MDC_KEY, username);
         }
 
         filterChain.doFilter(request, response);

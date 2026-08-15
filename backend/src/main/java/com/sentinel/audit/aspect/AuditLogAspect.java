@@ -41,19 +41,10 @@ public class AuditLogAspect {
 
         try {
             String username = auth.getName();
-            String roles = formatAuthorities(auth);
+            String role = com.sentinel.audit.service.AuditTrailService.resolvePrimaryRole(auth);
 
-            AuditLog log = new AuditLog();
-            log.setUsername(username);
-            log.setUserRole(roles);
-            log.setAction("AUTHORIZED_API_ACCESS");
-            log.setEntityName(joinPoint.getSignature().getDeclaringType().getSimpleName());
-            log.setDetails("Successfully executed endpoint: " + joinPoint.getSignature().toShortString());
-            log.setTimestamp(LocalDateTime.now());
-
-            auditLogRepository.save(log);
-            logger.info("AOP AUDIT LOG (AUTHORIZED): [{}] by user '{}' ({}) on endpoint '{}'", 
-                    log.getAction(), username, roles, joinPoint.getSignature().toShortString());
+            logger.debug("[API_ACCESS] endpoint={} user='{}' role='{}' status=AUTHORIZED", 
+                    joinPoint.getSignature().toShortString(), username, role);
         } catch (Exception ex) {
             logger.error("AOP AUDIT LOG ERROR: Failed to log authorized access: {}", ex.getMessage());
         }
@@ -65,33 +56,27 @@ public class AuditLogAspect {
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = (auth != null && auth.isAuthenticated()) ? auth.getName() : "ANONYMOUS";
-        String roles = (auth != null && auth.isAuthenticated()) ? formatAuthorities(auth) : "NONE";
+        String role = (auth != null && auth.isAuthenticated()) ? com.sentinel.audit.service.AuditTrailService.resolvePrimaryRole(auth) : "NONE";
+        String clientIp = org.slf4j.MDC.get(com.sentinel.common.logging.MDCLoggingFilter.CLIENT_IP_MDC_KEY);
+        if (clientIp == null || clientIp.isBlank()) {
+            clientIp = "127.0.0.1";
+        }
 
         try {
             AuditLog log = new AuditLog();
             log.setUsername(username);
-            log.setUserRole(roles);
+            log.setUserRole(role);
             log.setAction("ACCESS_DENIED");
             log.setEntityName(joinPoint.getSignature().getDeclaringType().getSimpleName());
+            log.setIpAddress(clientIp);
             log.setDetails("Security violation / access denied on endpoint: " + joinPoint.getSignature().toShortString() + " - " + ex.getMessage());
             log.setTimestamp(LocalDateTime.now());
 
             auditLogRepository.save(log);
-            logger.warn("AOP AUDIT LOG (DENIED): User '{}' ({}) attempted unauthorized access to endpoint '{}'", 
-                    username, roles, joinPoint.getSignature().toShortString());
+            logger.warn("[SECURITY_AUDIT] status=DENIED action=ACCESS_DENIED endpoint={} user='{}' role='{}' ip={} details=\"{}\"", 
+                    joinPoint.getSignature().toShortString(), username, role, clientIp, ex.getMessage());
         } catch (Exception loggingEx) {
             logger.error("AOP AUDIT LOG ERROR: Failed to log access denial: {}", loggingEx.getMessage());
         }
-    }
-
-    private String formatAuthorities(Authentication auth) {
-        if (auth == null) return "NONE";
-        String str = auth.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .toList().toString();
-        if (str.length() > 950) {
-            return str.substring(0, 940) + "...]";
-        }
-        return str;
     }
 }

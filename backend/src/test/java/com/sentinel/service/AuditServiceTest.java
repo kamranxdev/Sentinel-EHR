@@ -56,6 +56,29 @@ public class AuditServiceTest {
     }
 
     @Test
+    public void testLogActionWithMixedPermissions_ResolvesRolePrefix() {
+        Authentication auth = mock(Authentication.class);
+        when(auth.isAuthenticated()).thenReturn(true);
+        when(auth.getName()).thenReturn("patient");
+        doReturn(List.of(
+                new SimpleGrantedAuthority("APPOINTMENT_CANCEL"),
+                new SimpleGrantedAuthority("APPOINTMENT_CREATE"),
+                new SimpleGrantedAuthority("ROLE_PATIENT"),
+                new SimpleGrantedAuthority("VITALS_READ")
+        )).when(auth).getAuthorities();
+
+        when(auditLogRepository.save(any(AuditLog.class))).thenAnswer(i -> i.getArgument(0));
+
+        AuditLog log = auditService.logAction(auth, "READ", "ALLERGY", "1", "Accessed allergy profile").join();
+
+        assertNotNull(log);
+        assertEquals("patient", log.getUsername());
+        assertEquals("ROLE_PATIENT", log.getUserRole());
+        assertEquals("READ", log.getAction());
+        assertEquals("ALLERGY", log.getEntityName());
+    }
+
+    @Test
     public void testLogActionRepositoryException_SwallowsAndReturnsNull() {
         when(auditLogRepository.save(any(AuditLog.class))).thenThrow(new RuntimeException("Database error"));
 
