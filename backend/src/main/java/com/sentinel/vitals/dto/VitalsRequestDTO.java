@@ -1,7 +1,9 @@
 package com.sentinel.vitals.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.constraints.NotNull;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class VitalsRequestDTO {
 
     @NotNull(message = "Patient ID is required")

@@ -1,11 +1,14 @@
 package com.sentinel.patients.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import java.time.LocalDate;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class PatientRequestDTO {
 
+    private Long id;
     private String patientCode;
     private String abhaId;
     private String nationalId;
@@ -47,6 +50,14 @@ public class PatientRequestDTO {
     private Long userId;
 
     public PatientRequestDTO() {}
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getPatientCode() {
         return patientCode;

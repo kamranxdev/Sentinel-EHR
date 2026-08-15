@@ -1,9 +1,11 @@
 package com.sentinel.diagnoses.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class DiagnosisRequestDTO {
 
     @NotNull(message = "Patient ID is required")
