@@ -1,7 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
-import { JwtAuthResponse } from '../models/models';
+import { JwtAuthResponse } from '../models/auth-user.model';
 import { Capability, ROLE_CAPABILITY_MAP, UserRole } from '../models/permissions.model';
 
 @Injectable({

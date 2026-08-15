@@ -2,7 +2,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../core/services/api.service';
-import { Prescription } from '../../core/models/models';
+import { Prescription } from '../../core/models/clinical.model';
 import { toast } from '@spartan-ng/brain/sonner';
 
 import { HlmCardImports } from '@spartan-ng/helm/card';

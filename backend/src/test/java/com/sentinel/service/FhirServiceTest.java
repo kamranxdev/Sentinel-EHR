@@ -6,6 +6,7 @@ import com.sentinel.diagnoses.entity.Diagnosis;
 import com.sentinel.diagnoses.repository.DiagnosisRepository;
 import com.sentinel.encounters.entity.Encounter;
 import com.sentinel.encounters.repository.EncounterRepository;
+import com.sentinel.encounters.repository.LabOrderRepository;
 import com.sentinel.fhir.service.FhirService;
 import com.sentinel.patients.entity.Patient;
 import com.sentinel.patients.repository.PatientRepository;
@@ -34,6 +35,7 @@ public class FhirServiceTest {
     private PrescriptionRepository prescriptionRepository;
     private VitalsRepository vitalsRepository;
     private UserRepository userRepository;
+    private LabOrderRepository labOrderRepository;
 
     private FhirService fhirService;
 
@@ -46,9 +48,10 @@ public class FhirServiceTest {
         prescriptionRepository = mock(PrescriptionRepository.class);
         vitalsRepository = mock(VitalsRepository.class);
         userRepository = mock(UserRepository.class);
+        labOrderRepository = mock(LabOrderRepository.class);
 
         fhirService = new FhirService(patientRepository, encounterRepository, allergyRepository,
-                diagnosisRepository, prescriptionRepository, vitalsRepository, userRepository);
+                diagnosisRepository, prescriptionRepository, vitalsRepository, userRepository, labOrderRepository);
     }
 
     @Test

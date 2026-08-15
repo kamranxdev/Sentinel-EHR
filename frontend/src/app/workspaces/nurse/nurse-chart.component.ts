@@ -4,7 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { PatientContextService } from '../../core/services/patient-context.service';
 import { ApiService } from '../../core/services/api.service';
-import { Patient, Vitals, Prescription, Allergy } from '../../core/models/models';
+import { Patient } from '../../core/models/patient.model';
+import { Vitals, Prescription, Allergy } from '../../core/models/clinical.model';
 
 import { HlmCardImports } from '@spartan-ng/helm/card';
 import { HlmTableImports } from '@spartan-ng/helm/table';

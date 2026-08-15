@@ -183,13 +183,12 @@ export class LabTechWorklistComponent implements OnInit {
   }
 
   loadOrders(): void {
-    this.apiService.get<any[]>('/lab-orders').subscribe({
+    this.apiService.getLabOrdersList().subscribe({
       next: (data) => this.labOrders.set(data),
-      error: () => {
-        this.labOrders.set([
-          { id: 8801, patient: { fullName: 'Kamran Khan' }, testName: 'HbA1c Glycated Hemoglobin', loincCode: '4548-4', specimenBarcode: 'BC-8801', status: 'ORDERED' },
-          { id: 8802, patient: { fullName: 'Aarav Patel' }, testName: 'Comprehensive Metabolic Panel', loincCode: '24323-8', specimenBarcode: 'BC-8802', status: 'SPECIMEN_COLLECTED' },
-        ]);
+      error: (err) => {
+        console.error('Failed to load lab orders:', err);
+        this.labOrders.set([]);
+        toast.error('Failed to load lab orders from server.');
       },
     });
   }
@@ -198,7 +197,9 @@ export class LabTechWorklistComponent implements OnInit {
     switch (status) {
       case 'ORDERED': return 'outline';
       case 'SPECIMEN_COLLECTED': return 'secondary';
+      case 'IN_ANALYSIS':
       case 'IN_PROCESS': return 'default';
+      case 'COMPLETED':
       case 'RESULTED': return 'secondary';
       default: return 'outline';
     }
@@ -212,7 +213,7 @@ export class LabTechWorklistComponent implements OnInit {
 
   submitCollect(): void {
     if (!this.activeOrder || !this.barcodeInput) return;
-    this.apiService.patch(`/lab-orders/${this.activeOrder.id}/status`, { status: 'SPECIMEN_COLLECTED', barcode: this.barcodeInput }).subscribe({
+    this.apiService.updateLabOrderStatus(this.activeOrder.id, 'SPECIMEN_COLLECTED', this.barcodeInput).subscribe({
       next: () => {
         toast.success(`Specimen barcode ${this.barcodeInput} recorded. Status updated to SPECIMEN_COLLECTED.`);
         this.isCollectModalOpen.set(false);
@@ -223,7 +224,7 @@ export class LabTechWorklistComponent implements OnInit {
   }
 
   updateStatus(order: any, status: string): void {
-    this.apiService.patch(`/lab-orders/${order.id}/status`, { status }).subscribe({
+    this.apiService.updateLabOrderStatus(order.id, status).subscribe({
       next: () => {
         toast.success(`Order status updated to ${status}.`);
         this.loadOrders();
@@ -242,8 +243,8 @@ export class LabTechWorklistComponent implements OnInit {
 
   submitResult(): void {
     if (!this.activeOrder) return;
-    const body = { parameterName: this.resultParam, resultValue: this.resultVal, unit: this.resultUnit };
-    this.apiService.post(`/lab-orders/${this.activeOrder.id}/results`, body).subscribe({
+    const body = { testName: this.resultParam, resultValue: this.resultVal, unit: this.resultUnit };
+    this.apiService.addLabResult(this.activeOrder.id, body).subscribe({
       next: () => {
         toast.success(`Lab result published for Order #LAB-${this.activeOrder.id}.`);
         this.isResultModalOpen.set(false);
@@ -253,3 +254,4 @@ export class LabTechWorklistComponent implements OnInit {
     });
   }
 }
+

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
-import { User } from '../../core/models/models';
+import { User } from '../../core/models/auth-user.model';
 import { ActionButtonComponent } from '../../shared/ui/action-button.component';
 
 import { HlmCardImports } from '@spartan-ng/helm/card';

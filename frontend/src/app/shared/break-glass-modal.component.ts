@@ -148,7 +148,7 @@ export class BreakGlassModalComponent {
       justification: this.justification,
     };
 
-    this.apiService.post('/break-glass/request', body).subscribe({
+    this.apiService.requestBreakGlass(body).subscribe({
       next: (res: any) => {
         this.isSubmitting.set(false);
         toast.success(`Emergency Break-Glass Override Activated (4-Hour Lease).`);
@@ -162,3 +162,4 @@ export class BreakGlassModalComponent {
     });
   }
 }
+

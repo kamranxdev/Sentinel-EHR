@@ -6,6 +6,7 @@ import com.sentinel.diagnoses.entity.Diagnosis;
 import com.sentinel.diagnoses.repository.DiagnosisRepository;
 import com.sentinel.encounters.entity.Encounter;
 import com.sentinel.encounters.repository.EncounterRepository;
+import com.sentinel.encounters.repository.LabOrderRepository;
 import com.sentinel.patients.entity.Patient;
 import com.sentinel.patients.repository.PatientRepository;
 import com.sentinel.prescriptions.entity.Prescription;
@@ -29,14 +30,16 @@ public class FhirService {
     private final PrescriptionRepository prescriptionRepository;
     private final VitalsRepository vitalsRepository;
     private final UserRepository userRepository;
+    private final LabOrderRepository labOrderRepository;
 
     public FhirService(PatientRepository patientRepository,
-                       EncounterRepository encounterRepository,
-                       AllergyRepository allergyRepository,
-                       DiagnosisRepository diagnosisRepository,
-                       PrescriptionRepository prescriptionRepository,
-                       VitalsRepository vitalsRepository,
-                       UserRepository userRepository) {
+            EncounterRepository encounterRepository,
+            AllergyRepository allergyRepository,
+            DiagnosisRepository diagnosisRepository,
+            PrescriptionRepository prescriptionRepository,
+            VitalsRepository vitalsRepository,
+            UserRepository userRepository,
+            LabOrderRepository labOrderRepository) {
         this.patientRepository = patientRepository;
         this.encounterRepository = encounterRepository;
         this.allergyRepository = allergyRepository;
@@ -44,6 +47,7 @@ public class FhirService {
         this.prescriptionRepository = prescriptionRepository;
         this.vitalsRepository = vitalsRepository;
         this.userRepository = userRepository;
+        this.labOrderRepository = labOrderRepository;
     }
 
     public CapabilityStatement getCapabilityStatement() {
@@ -89,9 +93,12 @@ public class FhirService {
 
     public List<Patient> searchPatients(String name, String gender, String identifier) {
         return patientRepository.findAll().stream()
-                .filter(p -> name == null || (p.getFullName() != null && p.getFullName().toLowerCase().contains(name.toLowerCase())))
+                .filter(p -> name == null
+                        || (p.getFullName() != null && p.getFullName().toLowerCase().contains(name.toLowerCase())))
                 .filter(p -> gender == null || (p.getGender() != null && p.getGender().equalsIgnoreCase(gender)))
-                .filter(p -> identifier == null || (p.getPatientCode() != null && p.getPatientCode().equalsIgnoreCase(identifier)) || (p.getAbhaId() != null && p.getAbhaId().equalsIgnoreCase(identifier)))
+                .filter(p -> identifier == null
+                        || (p.getPatientCode() != null && p.getPatientCode().equalsIgnoreCase(identifier))
+                        || (p.getAbhaId() != null && p.getAbhaId().equalsIgnoreCase(identifier)))
                 .collect(Collectors.toList());
     }
 
@@ -120,7 +127,8 @@ public class FhirService {
         }
 
         if (fhirPatient.hasBirthDate()) {
-            entity.setDateOfBirth(fhirPatient.getBirthDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate());
+            entity.setDateOfBirth(
+                    fhirPatient.getBirthDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate());
         }
 
         entity.setPatientCode("MRN-" + System.currentTimeMillis());

@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../core/services/api.service';
 import { PatientContextService } from '../../core/services/patient-context.service';
-import { Appointment } from '../../core/models/models';
+import { Appointment } from '../../core/models/appointment.model';
 import { toast } from '@spartan-ng/brain/sonner';
 
 import { HlmCardImports } from '@spartan-ng/helm/card';

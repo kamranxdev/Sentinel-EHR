@@ -3,7 +3,9 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
-import { Appointment, AppointmentRequestDTO, DoctorRecommendationDTO, Patient, User } from '../../core/models/models';
+import { User } from '../../core/models/auth-user.model';
+import { Patient } from '../../core/models/patient.model';
+import { Appointment, AppointmentRequestDTO, DoctorRecommendationDTO } from '../../core/models/appointment.model';
 import { toast } from '@spartan-ng/brain/sonner';
 
 import { HlmCardImports } from '@spartan-ng/helm/card';

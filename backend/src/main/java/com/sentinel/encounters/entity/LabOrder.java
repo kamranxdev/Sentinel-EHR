@@ -204,4 +204,39 @@ public class LabOrder {
     public void setResults(List<LabResult> results) {
         this.results = results;
     }
+
+    public org.hl7.fhir.r4.model.DiagnosticReport toFhirResource() {
+        org.hl7.fhir.r4.model.DiagnosticReport report = new org.hl7.fhir.r4.model.DiagnosticReport();
+        if (id != null) {
+            report.setId("DiagnosticReport/" + id);
+        }
+
+        report.setStatus(org.hl7.fhir.r4.model.DiagnosticReport.DiagnosticReportStatus.FINAL);
+
+        org.hl7.fhir.r4.model.CodeableConcept codeConcept = new org.hl7.fhir.r4.model.CodeableConcept();
+        if (loincCode != null && !loincCode.isBlank()) {
+            codeConcept.addCoding(new org.hl7.fhir.r4.model.Coding(
+                    "http://loinc.org",
+                    loincCode,
+                    testName
+            ));
+        }
+        codeConcept.setText(testName);
+        report.setCode(codeConcept);
+
+        if (patient != null && patient.getId() != null) {
+            report.setSubject(new org.hl7.fhir.r4.model.Reference("Patient/" + patient.getId()));
+        }
+
+        if (encounter != null && encounter.getId() != null) {
+            report.setEncounter(new org.hl7.fhir.r4.model.Reference("Encounter/" + encounter.getId()));
+        }
+
+        if (orderedAt != null) {
+            report.setEffective(new org.hl7.fhir.r4.model.DateTimeType(java.sql.Timestamp.valueOf(orderedAt)));
+        }
+
+        return report;
+    }
 }
+

@@ -241,18 +241,14 @@ export class InpatientAdmissionModalComponent implements OnInit, OnChanges {
 
     const payload = {
       patientId: Number(this.selectedPatientId),
-      patient: { id: Number(this.selectedPatientId) },
       encounterType: 'INPATIENT',
-      admissionType: this.admissionType,
-      admissionSource: this.admissionSource,
-      department: this.targetDepartment,
-      acuityScore: this.acuityScore,
+      location: this.targetDepartment,
       chiefComplaint: this.chiefComplaint,
-      clinicalNotes: this.clinicalNotes,
+      clinicalNotes: `[Acuity: ${this.acuityScore} | Source: ${this.admissionSource}] ${this.clinicalNotes}`,
       status: 'ADMITTED',
     };
 
-    this.apiService.post('/encounters', payload).subscribe({
+    this.apiService.createEncounter(payload).subscribe({
       next: (res: any) => {
         this.isSubmitting.set(false);
         toast.success(`Inpatient Admission registered successfully. Encounter #ENC-${res.id || 'NEW'} status set to ADMITTED.`);
@@ -266,3 +262,4 @@ export class InpatientAdmissionModalComponent implements OnInit, OnChanges {
     });
   }
 }
+

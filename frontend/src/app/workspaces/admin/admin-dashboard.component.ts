@@ -3,7 +3,9 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
-import { User, Patient, Appointment } from '../../core/models/models';
+import { User } from '../../core/models/auth-user.model';
+import { Patient } from '../../core/models/patient.model';
+import { Appointment } from '../../core/models/appointment.model';
 
 import { HlmCardImports } from '@spartan-ng/helm/card';
 import { HlmBadgeImports } from '@spartan-ng/helm/badge';

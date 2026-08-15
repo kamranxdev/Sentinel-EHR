@@ -4,15 +4,9 @@ import { RouterModule } from '@angular/router';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
 import { PatientContextService } from '../../core/services/patient-context.service';
-import {
-  Patient,
-  Vitals,
-  Prescription,
-  Appointment,
-  Allergy,
-  Diagnosis,
-  Encounter,
-} from '../../core/models/models';
+import { Patient } from '../../core/models/patient.model';
+import { Vitals, Prescription, Allergy, Diagnosis, Encounter } from '../../core/models/clinical.model';
+import { Appointment } from '../../core/models/appointment.model';
 
 import { HlmCardImports } from '@spartan-ng/helm/card';
 import { HlmBadgeImports } from '@spartan-ng/helm/badge';

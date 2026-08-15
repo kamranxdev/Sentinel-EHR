@@ -4,7 +4,7 @@ import { RouterModule } from '@angular/router';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
 import { StatCardComponent } from '../../shared/ui/stat-card.component';
-import { Patient } from '../../core/models/models';
+import { Patient } from '../../core/models/patient.model';
 
 import { HlmCardImports } from '@spartan-ng/helm/card';
 import { HlmBadgeImports } from '@spartan-ng/helm/badge';

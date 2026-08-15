@@ -171,13 +171,14 @@ import {
                   </span>
                 </td>
                 <td hlmTableCell>
-                  <div class="font-bold text-foreground text-xs">{{ candidate.patient.fullName }}</div>
-                  <div class="text-[10px] font-mono text-muted-foreground">MRN: {{ candidate.patient.patientCode }} (ID: {{ candidate.patient.id }})</div>
+                  <div class="font-bold text-foreground text-xs">{{ candidate.fullName || candidate.patient?.fullName }}</div>
+                  <div class="text-[10px] font-mono text-muted-foreground">MRN: {{ candidate.patientCode || candidate.patient?.patientCode }} (ID: {{ candidate.patientId || candidate.patient?.id }})</div>
                 </td>
                 <td hlmTableCell class="text-xs text-muted-foreground">
-                  <div>DOB: {{ candidate.patient.dateOfBirth || 'N/A' }} ({{ candidate.patient.gender }})</div>
-                  <div>Ph: {{ candidate.patient.phone || 'N/A' }}</div>
+                  <div>DOB: {{ candidate.dateOfBirth || candidate.patient?.dateOfBirth || 'N/A' }} ({{ candidate.gender || candidate.patient?.gender }})</div>
+                  <div>Ph: {{ candidate.phone || candidate.patient?.phone || 'N/A' }}</div>
                 </td>
+
                 <td hlmTableCell>
                   <div class="flex flex-wrap gap-1">
                     <span *ngFor="let f of candidate.matchingFields" class="px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-600 text-[10px] font-medium border border-emerald-500/20">

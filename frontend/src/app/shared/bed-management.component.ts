@@ -2,6 +2,7 @@ import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../core/services/api.service';
+import { Bed } from '../core/models/bed.model';
 import { toast } from '@spartan-ng/brain/sonner';
 
 import { HlmCardImports } from '@spartan-ng/helm/card';
@@ -10,19 +11,6 @@ import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmTableImports } from '@spartan-ng/helm/table';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucideBed, lucideArrowRightLeft, lucideRefreshCw, lucideCheckCircle2, lucideAlertTriangle, lucideSparkles, lucideUser } from '@ng-icons/lucide';
-
-interface Bed {
-  id: number;
-  bedCode: string;
-  facilityName: string;
-  departmentName: string;
-  wardName: string;
-  roomNumber: string;
-  bedNumber: string;
-  status: 'AVAILABLE' | 'OCCUPIED' | 'RESERVED' | 'MAINTENANCE' | 'CLEANING_REQUIRED';
-  features?: string;
-  currentEncounter?: any;
-}
 
 @Component({
   selector: 'app-bed-management',
@@ -109,7 +97,7 @@ interface Bed {
             <div *ngIf="bed.currentEncounter" class="mt-3 p-2.5 bg-muted/40 rounded-lg border border-border/60 text-xs space-y-1">
               <div class="font-semibold text-foreground flex items-center gap-1">
                 <ng-icon name="lucideUser" class="text-xs text-primary"></ng-icon>
-                {{ bed.currentEncounter.patient?.fullName }}
+                {{ bed.currentEncounter.patient.fullName }}
               </div>
               <div class="text-[11px] text-muted-foreground">
                 Encounter #ENC-{{ bed.currentEncounter.id }} | {{ bed.currentEncounter.acuityScore || 'Level 3' }}
@@ -131,7 +119,7 @@ interface Bed {
             </button>
 
             <button
-              *ngIf="bed.status === 'CLEANING_REQUIRED'"
+              *ngIf="bed.status === 'CLEANING_REQUIRED' || bed.status === 'CLEANING'"
               hlmBtn
               variant="secondary"
               size="xs"
@@ -200,7 +188,7 @@ export class BedManagementComponent implements OnInit {
   }
 
   loadBeds() {
-    this.apiService.get<Bed[]>('/beds').subscribe({
+    this.apiService.getBeds().subscribe({
       next: (data) => {
         if (data && data.length > 0) {
           this.beds.set(data);
@@ -216,11 +204,11 @@ export class BedManagementComponent implements OnInit {
 
   setFallbackBeds() {
     this.beds.set([
-      { id: 1, facilityName: 'Main Campus', departmentName: 'Cardiology', wardName: 'Cardiac ICU', roomNumber: 'ICU-101', bedNumber: 'A', bedCode: 'CARD-ICU-01', status: 'OCCUPIED' },
-      { id: 2, facilityName: 'Main Campus', departmentName: 'Cardiology', wardName: 'Cardiac Ward', roomNumber: '201', bedNumber: 'A', bedCode: 'CARD-WARD-01-A', status: 'AVAILABLE' },
-      { id: 3, facilityName: 'Main Campus', departmentName: 'General Medical', wardName: 'Med-Surg Ward', roomNumber: '302', bedNumber: 'B', bedCode: 'MED-SURG-102', status: 'OCCUPIED' },
-      { id: 4, facilityName: 'Main Campus', departmentName: 'Emergency', wardName: 'Acute Care Unit', roomNumber: 'ED-05', bedNumber: '1', bedCode: 'ED-ACUTE-05', status: 'CLEANING_REQUIRED' },
-      { id: 5, facilityName: 'Main Campus', departmentName: 'Neurology', wardName: 'Neuro Ward', roomNumber: '405', bedNumber: 'A', bedCode: 'NEURO-WARD-05', status: 'AVAILABLE' },
+      { id: 1, departmentName: 'Cardiology', wardName: 'Cardiac ICU', roomNumber: 'ICU-101', bedNumber: 'A', bedCode: 'CARD-ICU-01', status: 'OCCUPIED' },
+      { id: 2, departmentName: 'Cardiology', wardName: 'Cardiac Ward', roomNumber: '201', bedNumber: 'A', bedCode: 'CARD-WARD-01-A', status: 'AVAILABLE' },
+      { id: 3, departmentName: 'General Medical', wardName: 'Med-Surg Ward', roomNumber: '302', bedNumber: 'B', bedCode: 'MED-SURG-102', status: 'OCCUPIED' },
+      { id: 4, departmentName: 'Emergency', wardName: 'Acute Care Unit', roomNumber: 'ED-05', bedNumber: '1', bedCode: 'ED-ACUTE-05', status: 'CLEANING_REQUIRED' },
+      { id: 5, departmentName: 'Neurology', wardName: 'Neuro Ward', roomNumber: '405', bedNumber: 'A', bedCode: 'NEURO-WARD-05', status: 'AVAILABLE' },
     ]);
   }
 
@@ -256,12 +244,12 @@ export class BedManagementComponent implements OnInit {
     }
 
     const body = {
-      encounterId: this.selectedBedForTransfer.currentEncounter.id,
-      newBedId: this.destinationBedId,
+      encounterId: Number(this.selectedBedForTransfer.currentEncounter.id),
+      newBedId: Number(this.destinationBedId),
       transferReason: this.transferReason,
     };
 
-    this.apiService.post('/beds/transfer', body).subscribe({
+    this.apiService.transferBed(body).subscribe({
       next: () => {
         toast.success('9-Step Bed Transfer completed successfully. Previous bed released to CLEANING_REQUIRED.');
         this.isTransferOpen.set(false);
@@ -272,7 +260,8 @@ export class BedManagementComponent implements OnInit {
   }
 
   markClean(bed: Bed) {
-    this.apiService.patch(`/beds/${bed.id}/status`, { status: 'AVAILABLE' }).subscribe({
+    if (!bed.id) return;
+    this.apiService.updateBedStatus(bed.id, 'AVAILABLE').subscribe({
       next: () => {
         toast.success(`Bed ${bed.bedCode} sanitation verified and marked AVAILABLE.`);
         this.loadBeds();
@@ -281,3 +270,4 @@ export class BedManagementComponent implements OnInit {
     });
   }
 }
+

@@ -1,7 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { ApiService } from './api.service';
 import { AuthService } from './auth.service';
-import { Patient } from '../models/models';
+import { Patient } from '../models/patient.model';
 
 @Injectable({
   providedIn: 'root',

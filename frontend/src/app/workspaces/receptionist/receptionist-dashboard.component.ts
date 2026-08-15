@@ -5,7 +5,7 @@ import { RouterModule } from '@angular/router';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
 import { StatCardComponent } from '../../shared/ui/stat-card.component';
-import { Appointment } from '../../core/models/models';
+import { Appointment } from '../../core/models/appointment.model';
 import { ReceptionistIntakeComponent } from './receptionist-intake.component';
 import { ReceptionistEligibilityComponent } from './receptionist-eligibility.component';
 

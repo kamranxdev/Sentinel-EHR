@@ -5,7 +5,7 @@ import { Router, RouterModule } from '@angular/router';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
 import { PatientContextService } from '../../core/services/patient-context.service';
-import { Patient } from '../../core/models/models';
+import { Patient } from '../../core/models/patient.model';
 import { ActionButtonComponent } from '../../shared/ui/action-button.component';
 import { toast } from '@spartan-ng/brain/sonner';
 
