@@ -108,6 +108,10 @@ public class DoctorMatchingService {
     }
 
     public List<DoctorRecommendationDTO> recommendDoctorsForPatient(Long patientId, String visitReason) {
+        return recommendDoctorsForPatient(patientId, visitReason, null);
+    }
+
+    public List<DoctorRecommendationDTO> recommendDoctorsForPatient(Long patientId, String visitReason, String targetDateStr) {
         Patient patient = patientId != null ? patientRepository.findById(patientId).orElse(null) : null;
         List<Diagnosis> activeDiagnoses = patientId != null ? diagnosisRepository.findByPatientIdAndStatus(patientId, "ACTIVE") : Collections.emptyList();
         List<Appointment> pastAppointments = patientId != null ? appointmentRepository.findByPatientIdOrderByAppointmentDateDesc(patientId) : Collections.emptyList();
@@ -189,7 +193,7 @@ public class DoctorMatchingService {
             int finalMatchScore = (int) Math.round(composite);
 
             String matchReasonStr = String.join(" • ", rationaleList);
-            List<String> recommendedSlots = generateSmartTimeSlots(targetSpecialty, triageLevel);
+            List<String> recommendedSlots = generateSmartTimeSlots(targetSpecialty, triageLevel, doc, targetDateStr, allAppointments);
 
             DoctorRecommendationDTO dto = new DoctorRecommendationDTO(
                     doc, finalMatchScore, specialtyFitScore, continuityScore, workloadScore, urgencyScore,
@@ -242,24 +246,53 @@ public class DoctorMatchingService {
         return "General Practice";
     }
 
-    private List<String> generateSmartTimeSlots(String specialty, String triageLevel) {
-        List<String> slots = new ArrayList<>();
+    private List<String> generateSmartTimeSlots(String specialty, String triageLevel, User doc, String targetDateStr, List<Appointment> allAppointments) {
+        List<String> baseSlots = new ArrayList<>();
         if ("EMERGENT".equals(triageLevel)) {
-            slots.add("08:30 AM (Priority Emergency)");
-            slots.add("09:15 AM (Immediate Slot)");
-            slots.add("10:00 AM (Priority Slot)");
-            slots.add("11:30 AM (Same-day Priority)");
+            baseSlots.add("08:30 AM");
+            baseSlots.add("09:15 AM");
+            baseSlots.add("10:00 AM");
+            baseSlots.add("11:30 AM");
         } else if ("Cardiology".equalsIgnoreCase(specialty) || "Endocrinology".equalsIgnoreCase(specialty)) {
-            slots.add("09:00 AM (Fasting Blood Work Preferred)");
-            slots.add("10:30 AM (Morning Consult)");
-            slots.add("02:15 PM (Afternoon Consult)");
-            slots.add("04:00 PM (Late Afternoon)");
+            baseSlots.add("09:00 AM");
+            baseSlots.add("10:30 AM");
+            baseSlots.add("02:15 PM");
+            baseSlots.add("04:00 PM");
         } else {
-            slots.add("09:30 AM (Morning Slot)");
-            slots.add("11:15 AM (Pre-Lunch Slot)");
-            slots.add("02:30 PM (Afternoon Slot)");
-            slots.add("04:15 PM (Evening Slot)");
+            baseSlots.add("09:30 AM");
+            baseSlots.add("11:15 AM");
+            baseSlots.add("02:30 PM");
+            baseSlots.add("04:15 PM");
         }
-        return slots;
+
+        if (targetDateStr == null || targetDateStr.trim().isEmpty() || doc == null) {
+            return baseSlots;
+        }
+
+        Set<String> bookedTimes = new HashSet<>();
+        for (Appointment apt : allAppointments) {
+            if (apt.getDoctor() != null && apt.getDoctor().getId().equals(doc.getId())
+                    && apt.getAppointmentDate() != null && !"CANCELLED".equalsIgnoreCase(apt.getStatus())) {
+                String aptDate = apt.getAppointmentDate().toLocalDate().toString();
+                if (aptDate.equals(targetDateStr.trim())) {
+                    int hour = apt.getAppointmentDate().getHour();
+                    int min = apt.getAppointmentDate().getMinute();
+                    String ampm = hour >= 12 ? "PM" : "AM";
+                    int h12 = hour % 12;
+                    if (h12 == 0) h12 = 12;
+                    String formattedTime = String.format("%02d:%02d %s", h12, min, ampm);
+                    bookedTimes.add(formattedTime);
+                }
+            }
+        }
+
+        List<String> availableSlots = new ArrayList<>();
+        for (String slot : baseSlots) {
+            if (!bookedTimes.contains(slot)) {
+                availableSlots.add(slot);
+            }
+        }
+
+        return availableSlots;
     }
 }

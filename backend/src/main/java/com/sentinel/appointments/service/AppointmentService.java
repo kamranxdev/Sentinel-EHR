@@ -87,6 +87,19 @@ public class AppointmentService {
         User doctor = userRepository.findById(appointment.getDoctor().getId())
                 .orElseThrow(() -> new ResourceNotFoundException("Doctor with ID " + appointment.getDoctor().getId() + " not found"));
 
+        // Slot conflict validation
+        if (appointment.getAppointmentDate() != null) {
+            List<Appointment> existing = appointmentRepository.findByDoctorIdOrderByAppointmentDateDesc(doctor.getId());
+            boolean isBooked = existing.stream().anyMatch(a ->
+                    !"CANCELLED".equalsIgnoreCase(a.getStatus()) &&
+                    a.getAppointmentDate() != null &&
+                    a.getAppointmentDate().equals(appointment.getAppointmentDate())
+            );
+            if (isBooked) {
+                throw new IllegalStateException("Doctor " + (doctor.getFullName() != null ? doctor.getFullName() : "") + " is already booked for the selected date and time.");
+            }
+        }
+
         appointment.setPatient(patient);
         appointment.setDoctor(doctor);
         if (appointment.getStage() == null) {

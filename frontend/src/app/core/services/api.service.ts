@@ -310,11 +310,12 @@ export class ApiService {
     return this.http.get<Appointment[]>(`${this.baseUrl}/appointments/patient/${patientId}`);
   }
 
-  getRecommendedDoctors(patientId?: number, reason?: string): Observable<any[]> {
+  getRecommendedDoctors(patientId?: number, reason?: string, date?: string): Observable<any[]> {
     let query = '';
     const params: string[] = [];
     if (patientId) params.push(`patientId=${patientId}`);
     if (reason) params.push(`reason=${encodeURIComponent(reason)}`);
+    if (date) params.push(`date=${encodeURIComponent(date)}`);
     if (params.length > 0) query = '?' + params.join('&');
     return this.http.get<any[]>(`${this.baseUrl}/appointments/recommended-doctors${query}`);
   }

@@ -57,10 +57,11 @@ public class AppointmentController {
     public List<DoctorRecommendationDTO> getRecommendedDoctors(
             @RequestParam(value = "patientId", required = false) Long patientId,
             @RequestParam(value = "reason", required = false) String reason,
+            @RequestParam(value = "date", required = false) String date,
             Authentication auth) {
         auditService.logAction(auth, "READ", "DOCTOR_MATCHING", patientId != null ? String.valueOf(patientId) : null,
-                "Queried AI doctor recommendation matching engine for reason: " + reason);
-        return doctorMatchingService.recommendDoctorsForPatient(patientId, reason);
+                "Queried doctor recommendation matching engine for reason: " + reason);
+        return doctorMatchingService.recommendDoctorsForPatient(patientId, reason, date);
     }
 
     @GetMapping

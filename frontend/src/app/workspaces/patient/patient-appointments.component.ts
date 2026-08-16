@@ -94,7 +94,7 @@ import {
               <span hlmBadge variant="outline" class="text-[10px]">Patient Portal</span>
             </div>
             <p class="text-xs text-muted-foreground mt-0.5">
-              Book new clinical consultations with AI doctor matching, view schedule, and manage visits.
+              Book new clinical consultations with Smart Doctor Match, view schedule, and manage visits.
             </p>
           </div>
         </div>
@@ -290,7 +290,7 @@ import {
               [class.text-muted-foreground]="bookingStep() !== 2"
             >
               <span class="size-5 rounded-full text-[10px] flex items-center justify-center" [class.bg-primary]="bookingStep() === 2" [class.text-primary-foreground]="bookingStep() === 2" [class.bg-muted]="bookingStep() !== 2">2</span>
-              <span>AI Doctor Match</span>
+              <span>Smart Doctor Match</span>
             </div>
             <div
               class="py-2.5 px-3 transition-colors flex items-center justify-center gap-1.5"
@@ -375,7 +375,7 @@ import {
                 </div>
                 <div>
                   <div class="flex items-center gap-2">
-                    <h3 class="text-xs font-bold text-foreground">AI Clinical Doctor Match Engine</h3>
+                    <h3 class="text-xs font-bold text-foreground">Smart Doctor Match Engine</h3>
                     <span hlmBadge variant="outline" class="text-[9px] border-purple-500/40 text-purple-600 dark:text-purple-400">Match Score Active</span>
                   </div>
                   <p class="text-[11px] text-muted-foreground mt-0.5">
@@ -406,7 +406,7 @@ import {
                       </div>
                       <div>
                         <div class="flex items-center gap-2">
-                          <h4 class="text-xs font-bold text-foreground">Dr. {{ rec.doctor.fullName }}</h4>
+                          <h4 class="text-xs font-bold text-foreground">{{ formatDoctorName(rec.doctor) }}</h4>
                           <span *ngIf="rec.verifiedLicense" hlmBadge variant="secondary" class="text-[9px] gap-1 bg-emerald-500/10 text-emerald-600 border-emerald-500/20">
                             <ng-icon name="lucideShieldCheck" size="11" /> Verified
                           </span>
@@ -432,18 +432,19 @@ import {
 
                   <!-- Recommended Smart Slots -->
                   <div *ngIf="rec.recommendedSlots && rec.recommendedSlots.length > 0" class="pt-1">
-                    <span class="text-[10px] font-semibold text-muted-foreground block mb-1">AI Recommended Time Slots:</span>
+                    <span class="text-[10px] font-semibold text-muted-foreground block mb-1">Available Doctor Time Slots:</span>
                     <div class="flex flex-wrap gap-1.5">
                       <button
-                        *ngFor="let slot of rec.recommendedSlots"
+                        *ngFor="let slot of getFormattedSlots(rec.recommendedSlots)"
                         type="button"
                         (click)="selectDoctorAndSlot(rec.doctor, slot, $event)"
-                        [class.bg-primary]="selectedDoctor?.id === rec.doctor.id && selectedSlot === slot"
-                        [class.text-primary-foreground]="selectedDoctor?.id === rec.doctor.id && selectedSlot === slot"
-                        [class.bg-background]="selectedDoctor?.id !== rec.doctor.id || selectedSlot !== slot"
-                        class="px-2 py-1 rounded-md text-[10px] font-medium border border-border hover:border-primary transition-all"
+                        [class.bg-primary]="selectedDoctor?.id === rec.doctor.id && cleanSlot(selectedSlot) === cleanSlot(slot)"
+                        [class.text-primary-foreground]="selectedDoctor?.id === rec.doctor.id && cleanSlot(selectedSlot) === cleanSlot(slot)"
+                        [class.bg-background]="selectedDoctor?.id !== rec.doctor.id || cleanSlot(selectedSlot) !== cleanSlot(slot)"
+                        class="px-2.5 py-1 rounded-md text-[11px] font-medium border border-border hover:border-primary transition-all flex items-center gap-1.5"
                       >
-                        {{ slot }}
+                        <ng-icon name="lucideClock" size="12" />
+                        <span>{{ cleanSlot(slot) }}</span>
                       </button>
                     </div>
                   </div>
@@ -467,7 +468,7 @@ import {
                 >
                   <option [value]="undefined" disabled>-- Select Doctor --</option>
                   <option *ngFor="let doc of allDoctors()" [value]="doc.id">
-                    Dr. {{ doc.fullName }} ({{ doc.specialization || 'General Practice' }})
+                    {{ formatDoctorName(doc) }} ({{ doc.specialization || 'General Practice' }})
                   </option>
                 </select>
               </div>
@@ -482,7 +483,7 @@ import {
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                   <div>
                     <span class="text-muted-foreground block text-[11px]">Attending Physician</span>
-                    <span class="font-bold text-foreground">Dr. {{ selectedDoctor?.fullName || 'Not Selected' }}</span>
+                    <span class="font-bold text-foreground">{{ selectedDoctor ? formatDoctorName(selectedDoctor) : 'Not Selected' }}</span>
                     <span class="text-[10px] text-muted-foreground block" *ngIf="selectedDoctor?.specialization">
                       {{ selectedDoctor?.specialization }}
                     </span>
@@ -490,7 +491,7 @@ import {
 
                   <div>
                     <span class="text-muted-foreground block text-[11px]">Scheduled Date & Time</span>
-                    <span class="font-bold text-primary">{{ bookingDate }} • {{ selectedSlot || bookingTime }}</span>
+                    <span class="font-bold text-primary">{{ bookingDate }} • {{ getFormattedSelectedSlot() }}</span>
                   </div>
 
                   <div class="sm:col-span-2">
@@ -684,10 +685,18 @@ export class PatientAppointmentsComponent implements OnInit {
     'Blood Pressure Consultation',
   ];
 
+  formatDoctorName(nameOrUser?: string | User | null): string {
+    if (!nameOrUser) return '';
+    const rawName = typeof nameOrUser === 'string' ? nameOrUser : nameOrUser.fullName;
+    if (!rawName) return '';
+    const cleaned = rawName.trim().replace(/^(Dr\.?\s*)+/i, '');
+    return `Dr. ${cleaned}`;
+  }
+
   getDoctorDisplayName(apt: Appointment): string {
     const rawName = apt.doctorName || apt.doctor?.fullName;
     if (!rawName) return 'Assigned Physician';
-    return rawName.startsWith('Dr.') ? rawName : `Dr. ${rawName}`;
+    return this.formatDoctorName(rawName);
   }
 
   getDoctorSpecialization(apt: Appointment): string {
@@ -781,7 +790,7 @@ export class PatientAppointmentsComponent implements OnInit {
       case 1:
         return 'Enter Reason & Preferred Date';
       case 2:
-        return 'AI Doctor Recommendation & Slot';
+        return 'Smart Doctor Match & Slot';
       case 3:
         return 'Review & Confirm';
       default:
@@ -804,7 +813,7 @@ export class PatientAppointmentsComponent implements OnInit {
         return;
       }
 
-      // Transition to Step 2 & trigger AI Doctor Recommendation Engine
+      // Transition to Step 2 & trigger Smart Doctor Match Engine
       this.bookingStep.set(2);
       this.fetchRecommendations();
     } else if (this.bookingStep() === 2) {
@@ -827,7 +836,7 @@ export class PatientAppointmentsComponent implements OnInit {
   fetchRecommendations(): void {
     const patientId = this.patientProfile()?.id;
     this.loadingRecommendations.set(true);
-    this.apiService.getRecommendedDoctors(patientId, this.bookingReason).subscribe({
+    this.apiService.getRecommendedDoctors(patientId, this.bookingReason, this.bookingDate).subscribe({
       next: (recs) => {
         this.recommendedDoctors.set(recs);
         this.loadingRecommendations.set(false);
@@ -906,8 +915,7 @@ export class PatientAppointmentsComponent implements OnInit {
         this.bookingInProgress.set(false);
         this.closeBookingModal();
 
-        const rawDocName = this.selectedDoctor?.fullName || '';
-        const docDisplayName = rawDocName.startsWith('Dr.') ? rawDocName : `Dr. ${rawDocName}`;
+        const docDisplayName = this.formatDoctorName(this.selectedDoctor?.fullName);
 
         toast.success('Consultation Scheduled Successfully!', {
           description: `Appointment with ${docDisplayName} set for ${this.bookingDate}.`,
@@ -926,13 +934,74 @@ export class PatientAppointmentsComponent implements OnInit {
     });
   }
 
-  private extractTimeFromSlot(slot: string): string {
-    // Converts slot string like "09:00 AM (Fasting...)" to "09:00"
-    const match = slot.match(/(\d{2}:\d{2})/);
-    if (match) {
-      return match[1];
+  cleanSlot(slot?: string): string {
+    if (!slot) return '';
+    return slot.replace(/\s*\(.*?\)/g, '').trim();
+  }
+
+  formatTime12h(time24?: string): string {
+    if (!time24) return '';
+    if (time24.includes('AM') || time24.includes('PM')) return this.cleanSlot(time24);
+    const parts = time24.split(':');
+    if (parts.length < 2) return time24;
+    let hours = parseInt(parts[0], 10);
+    const minutes = parts[1];
+    const ampm = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+    const strHours = hours < 10 ? '0' + hours : '' + hours;
+    return `${strHours}:${minutes} ${ampm}`;
+  }
+
+  isPreferredSlot(slot: string): boolean {
+    if (!slot || !this.bookingTime) return false;
+    const pref12 = this.formatTime12h(this.bookingTime);
+    return this.cleanSlot(slot) === pref12;
+  }
+
+  getFormattedSlots(rawSlots?: string[]): string[] {
+    if (!rawSlots || rawSlots.length === 0) {
+      return [];
     }
-    return this.bookingTime;
+
+    const set = new Set<string>();
+    for (const s of rawSlots) {
+      const cleaned = this.cleanSlot(s);
+      if (cleaned) set.add(cleaned);
+    }
+
+    return Array.from(set).sort((a, b) => {
+      const tA = this.extractTimeFromSlot(a);
+      const tB = this.extractTimeFromSlot(b);
+      return tA.localeCompare(tB);
+    });
+  }
+
+  getFormattedSelectedSlot(): string {
+    if (this.selectedSlot) {
+      return this.cleanSlot(this.selectedSlot);
+    }
+    if (this.bookingTime) {
+      return this.formatTime12h(this.bookingTime);
+    }
+    return '09:30 AM';
+  }
+
+  public extractTimeFromSlot(slot: string): string {
+    if (!slot) return this.bookingTime || '09:30';
+    const match = slot.match(/(\d{1,2}):(\d{2})\s*(AM|PM)?/i);
+    if (match) {
+      let hours = parseInt(match[1], 10);
+      const minutes = match[2];
+      const ampm = match[3];
+      if (ampm) {
+        if (ampm.toUpperCase() === 'PM' && hours < 12) hours += 12;
+        if (ampm.toUpperCase() === 'AM' && hours === 12) hours = 0;
+      }
+      const hh = hours < 10 ? '0' + hours : '' + hours;
+      return `${hh}:${minutes}`;
+    }
+    return this.bookingTime || '09:30';
   }
 
   // =========================================================
