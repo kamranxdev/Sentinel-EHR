@@ -24,15 +24,15 @@ export class OrganizationService {
     return this.http.get<Organization[]>(`${this.sysAdminUrl}/organizations`);
   }
 
-  getOrganizationById(id: number): Observable<Organization> {
+  getOrganizationById(id: string): Observable<Organization> {
     return this.http.get<Organization>(`${this.apiUrl}/${id}`);
   }
 
-  updateOrganizationStatus(id: number, statusPayload: OrganizationStatusUpdate): Observable<Organization> {
+  updateOrganizationStatus(id: string, statusPayload: OrganizationStatusUpdate): Observable<Organization> {
     return this.http.patch<Organization>(`${this.sysAdminUrl}/organizations/${id}/status`, statusPayload);
   }
 
-  updateOrganization(id: number, organization: Partial<Organization>): Observable<Organization> {
+  updateOrganization(id: string, organization: Partial<Organization>): Observable<Organization> {
     return this.http.put<Organization>(`${this.apiUrl}/${id}`, organization);
   }
 
@@ -67,19 +67,19 @@ export class OrganizationService {
     return this.http.post<User>(`${this.orgAdminUrl}/users`, user);
   }
 
-  updateOrgAdminStaff(id: number, user: any): Observable<User> {
+  updateOrgAdminStaff(id: string, user: any): Observable<User> {
     return this.http.put<User>(`${this.orgAdminUrl}/users/${id}`, user);
   }
 
-  updateOrgAdminStaffStatus(id: number, status: string): Observable<any> {
+  updateOrgAdminStaffStatus(id: string, status: string): Observable<any> {
     return this.http.patch<any>(`${this.orgAdminUrl}/users/${id}/status`, { status });
   }
 
-  resetOrgAdminStaffPassword(id: number, newPassword?: string): Observable<any> {
+  resetOrgAdminStaffPassword(id: string, newPassword?: string): Observable<any> {
     return this.http.post<any>(`${this.orgAdminUrl}/users/${id}/reset-password`, { newPassword });
   }
 
-  deleteOrgAdminStaff(id: number): Observable<any> {
+  deleteOrgAdminStaff(id: string): Observable<any> {
     return this.http.delete<any>(`${this.orgAdminUrl}/users/${id}`);
   }
 

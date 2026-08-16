@@ -85,7 +85,7 @@ export class PharmacistDispenseComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.apiService.getPrescriptionsByPatient(1).subscribe((rxs) => this.prescriptions.set(rxs));
+    this.apiService.getPrescriptionsByPatient('pat-001').subscribe((rxs) => this.prescriptions.set(rxs));
   }
 
   dispense(rx: Prescription): void {

@@ -1,28 +1,55 @@
 package com.sentinel.audit.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.util.UUID;
 
 @Entity
-@Table(name = "audit_logs")
+@Table(name = "audit_events", schema = "audit")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class AuditLog {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private UUID id;
+
+    private UUID organizationId;
+    private UUID facilityId;
+    private UUID userId;
+    private UUID patientId;
+    private UUID encounterId;
+
+    @Column(nullable = false, length = 100)
+    private String action;
+
+    @Column(nullable = false, length = 100)
+    private String resourceType = "GENERAL";
+
+    private UUID resourceId;
+    private String purposeOfUse;
+    private String result = "SUCCESS";
+
+    @Column(columnDefinition = "TEXT")
+    private String ipAddress = "127.0.0.1";
+
+    @Column(columnDefinition = "TEXT")
+    private String userAgent;
+
+    @Column(nullable = false)
+    private OffsetDateTime occurredAt = OffsetDateTime.now();
+
+    @Transient
     private String username;
 
-    @Column(name = "user_role", length = 1000)
+    @Transient
     private String userRole;
-    private String action; // CREATE, READ, UPDATE, DELETE, LOGIN, ERX_ALERT
-    private String entityName;
-    private String resourceId;
-    private String ipAddress = "127.0.0.1";
-    
-    @Column(length = 2000)
-    private String details;
 
-    private LocalDateTime timestamp = LocalDateTime.now();
+    @Transient
+    private String entityName;
+
+    @Transient
+    private String details;
 
     public AuditLog() {}
 
@@ -31,6 +58,7 @@ public class AuditLog {
         this.userRole = userRole;
         this.action = action;
         this.entityName = entityName;
+        this.resourceType = entityName != null ? entityName : "GENERAL";
         this.details = details;
     }
 
@@ -39,79 +67,67 @@ public class AuditLog {
         this.userRole = userRole;
         this.action = action;
         this.entityName = entityName;
-        this.resourceId = resourceId;
+        this.resourceType = entityName != null ? entityName : "GENERAL";
         this.details = details;
+        try {
+            if (resourceId != null) this.resourceId = UUID.fromString(resourceId);
+        } catch (Exception ignored) {}
     }
 
-    public Long getId() {
-        return id;
-    }
+    public UUID getId() { return id; }
+    public void setId(UUID id) { this.id = id; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public UUID getOrganizationId() { return organizationId; }
+    public void setOrganizationId(UUID organizationId) { this.organizationId = organizationId; }
 
-    public String getUsername() {
-        return username;
-    }
+    public UUID getFacilityId() { return facilityId; }
+    public void setFacilityId(UUID facilityId) { this.facilityId = facilityId; }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
+    public UUID getUserId() { return userId; }
+    public void setUserId(UUID userId) { this.userId = userId; }
 
-    public String getUserRole() {
-        return userRole;
-    }
+    public UUID getPatientId() { return patientId; }
+    public void setPatientId(UUID patientId) { this.patientId = patientId; }
 
-    public void setUserRole(String userRole) {
-        this.userRole = userRole;
-    }
+    public UUID getEncounterId() { return encounterId; }
+    public void setEncounterId(UUID encounterId) { this.encounterId = encounterId; }
 
-    public String getAction() {
-        return action;
-    }
+    public String getAction() { return action; }
+    public void setAction(String action) { this.action = action; }
 
-    public void setAction(String action) {
-        this.action = action;
-    }
+    public String getResourceType() { return resourceType; }
+    public void setResourceType(String resourceType) { this.resourceType = resourceType; }
 
-    public String getEntityName() {
-        return entityName;
-    }
+    public UUID getResourceId() { return resourceId; }
+    public void setResourceId(UUID resourceId) { this.resourceId = resourceId; }
 
+    public String getPurposeOfUse() { return purposeOfUse; }
+    public void setPurposeOfUse(String purposeOfUse) { this.purposeOfUse = purposeOfUse; }
+
+    public String getResult() { return result; }
+    public void setResult(String result) { this.result = result; }
+
+    public String getIpAddress() { return ipAddress; }
+    public void setIpAddress(String ipAddress) { this.ipAddress = ipAddress; }
+
+    public String getUserAgent() { return userAgent; }
+    public void setUserAgent(String userAgent) { this.userAgent = userAgent; }
+
+    public OffsetDateTime getOccurredAt() { return occurredAt; }
+    public void setOccurredAt(OffsetDateTime occurredAt) { this.occurredAt = occurredAt; }
+
+    public String getUsername() { return username; }
+    public void setUsername(String username) { this.username = username; }
+
+    public String getUserRole() { return userRole; }
+    public void setUserRole(String userRole) { this.userRole = userRole; }
+
+    public String getEntityName() { return entityName != null ? entityName : resourceType; }
     public void setEntityName(String entityName) {
         this.entityName = entityName;
+        this.resourceType = entityName;
     }
 
-    public String getResourceId() {
-        return resourceId;
-    }
-
-    public void setResourceId(String resourceId) {
-        this.resourceId = resourceId;
-    }
-
-    public String getIpAddress() {
-        return ipAddress;
-    }
-
-    public void setIpAddress(String ipAddress) {
-        this.ipAddress = ipAddress;
-    }
-
-    public String getDetails() {
-        return details;
-    }
-
-    public void setDetails(String details) {
-        this.details = details;
-    }
-
-    public LocalDateTime getTimestamp() {
-        return timestamp;
-    }
-
-    public void setTimestamp(LocalDateTime timestamp) {
-        this.timestamp = timestamp;
-    }
+    public String getDetails() { return details; }
+    public void setDetails(String details) { this.details = details; }
 }

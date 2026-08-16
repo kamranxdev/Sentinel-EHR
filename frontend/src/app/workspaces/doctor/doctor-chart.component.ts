@@ -767,18 +767,17 @@ export class DoctorChartComponent implements OnInit {
     }
   }
 
-  loadPatientClinicalData(patientId: number | string): void {
-    const pId = Number(patientId);
-    if (!pId) return;
+  loadPatientClinicalData(patientId: string): void {
+    if (!patientId) return;
 
     const active = this.patientContext.activePatient() as any;
 
-    this.apiService.getEncountersByPatient(pId).subscribe({
+    this.apiService.getEncountersByPatient(patientId).subscribe({
       next: (res) => this.encounters.set(res || []),
       error: () => this.encounters.set([]),
     });
 
-    this.apiService.getDiagnosesByPatient(pId).subscribe({
+    this.apiService.getDiagnosesByPatient(patientId).subscribe({
       next: (res) => {
         if (res && res.length > 0) {
           this.diagnoses.set(res);
@@ -794,7 +793,7 @@ export class DoctorChartComponent implements OnInit {
       },
     });
 
-    this.apiService.getPrescriptionsByPatient(pId).subscribe({
+    this.apiService.getPrescriptionsByPatient(patientId).subscribe({
       next: (res) => {
         if (res && res.length > 0) {
           this.prescriptions.set(res);
@@ -810,7 +809,7 @@ export class DoctorChartComponent implements OnInit {
       },
     });
 
-    this.apiService.getAllergiesByPatient(pId).subscribe({
+    this.apiService.getAllergiesByPatient(patientId).subscribe({
       next: (res) => {
         if (res && res.length > 0) {
           this.allergies.set(res);
@@ -826,7 +825,7 @@ export class DoctorChartComponent implements OnInit {
       },
     });
 
-    this.apiService.getVitalsByPatient(pId).subscribe({
+    this.apiService.getVitalsByPatient(patientId).subscribe({
       next: (res) => {
         if (res && res.length > 0) {
           this.vitals.set(res);
@@ -842,7 +841,7 @@ export class DoctorChartComponent implements OnInit {
       },
     });
 
-    this.apiService.getPatientClinicalHistory(pId).subscribe({
+    this.apiService.getPatientClinicalHistory(patientId).subscribe({
       next: (dto: any) => {
         if (dto) {
           if (dto.vitals?.length && this.vitals().length === 0) this.vitals.set(dto.vitals);
@@ -855,7 +854,7 @@ export class DoctorChartComponent implements OnInit {
     });
   }
 
-  onPatientSelect(patientId: number | string): void {
+  onPatientSelect(patientId: string): void {
     if (!patientId) return;
     this.patientContext.selectPatientById(patientId);
   }
@@ -873,7 +872,7 @@ export class DoctorChartComponent implements OnInit {
     this.isBreakGlassModalOpen.set(true);
   }
 
-  finalizeEncounter(id?: number): void {
+  finalizeEncounter(id?: string): void {
     if (!id) return;
     this.apiService.updateEncounter(id, { status: 'FINISHED' }).subscribe({
       next: () => {
@@ -888,10 +887,9 @@ export class DoctorChartComponent implements OnInit {
     const active = this.patientContext.activePatient();
     if (!active?.id || !this.newDiagnosis.icdCode || !this.newDiagnosis.conditionName || this.savingDiagnosis()) return;
 
-    this.savingDiagnosis.set(true);
     this.apiService
       .createDiagnosis({
-        patient: { id: Number(active.id) } as Patient,
+        patient: { id: active.id } as Patient,
         icdCode: this.newDiagnosis.icdCode,
         conditionName: this.newDiagnosis.conditionName,
         status: 'ACTIVE',
@@ -918,7 +916,7 @@ export class DoctorChartComponent implements OnInit {
     this.savingErx.set(true);
     this.apiService
       .createPrescription({
-        patient: { id: Number(active.id) } as Patient,
+        patient: { id: active.id } as Patient,
         medicationName: this.newErx.medicationName,
         dosage: this.newErx.dosage,
         route: this.newErx.route,
@@ -948,7 +946,7 @@ export class DoctorChartComponent implements OnInit {
     this.savingAllergy.set(true);
     this.apiService
       .createAllergy({
-        patient: { id: Number(active.id) } as Patient,
+        patient: { id: active.id } as Patient,
         allergenName: this.newAllergy.allergenName,
         category: this.newAllergy.category,
         severity: this.newAllergy.severity,
@@ -986,7 +984,7 @@ export class DoctorChartComponent implements OnInit {
 
     this.apiService
       .recordVitals({
-        patient: { id: Number(active.id) } as Patient,
+        patient: { id: active.id } as Patient,
         systolicBp: this.newVitals.systolicBp ? Number(this.newVitals.systolicBp) : undefined,
         diastolicBp: this.newVitals.diastolicBp ? Number(this.newVitals.diastolicBp) : undefined,
         heartRate: this.newVitals.heartRate ? Number(this.newVitals.heartRate) : undefined,

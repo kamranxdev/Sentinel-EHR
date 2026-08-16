@@ -214,8 +214,8 @@ export class SysAdminOrganizationsComponent implements OnInit {
     if (query) {
       list = list.filter(o =>
         o.name.toLowerCase().includes(query) ||
-        o.orgCode.toLowerCase().includes(query) ||
-        o.licenseNumber.toLowerCase().includes(query)
+        (o.orgCode || o.code || '').toLowerCase().includes(query) ||
+        (o.licenseNumber || '').toLowerCase().includes(query)
       );
     }
 

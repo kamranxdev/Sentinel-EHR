@@ -4,14 +4,14 @@ import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import com.sentinel.prescriptions.entity.Prescription;
-import com.sentinel.prescriptions.repository.PrescriptionRepository;
+import com.sentinel.pharmacy.entity.Prescription;
+import com.sentinel.pharmacy.repository.PrescriptionRepository;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.UUID;
 
 @Component
 public class MedicationRequestResourceProvider implements IResourceProvider {
@@ -29,10 +29,13 @@ public class MedicationRequestResourceProvider implements IResourceProvider {
 
     @Read
     public org.hl7.fhir.r4.model.MedicationRequest getMedicationRequestById(@IdParam IdType id) {
-        Long rxId = id.getIdPartAsLong();
+        UUID rxId = UUID.fromString(id.getIdPart());
         Prescription rx = prescriptionRepository.findById(rxId)
                 .orElseThrow(() -> new ResourceNotFoundException("MedicationRequest/" + rxId + " not found"));
-        return rx.toFhirResource();
+        
+        org.hl7.fhir.r4.model.MedicationRequest req = new org.hl7.fhir.r4.model.MedicationRequest();
+        req.setId(rx.getId().toString());
+        return req;
     }
 
     @Search
@@ -41,14 +44,16 @@ public class MedicationRequestResourceProvider implements IResourceProvider {
 
         List<Prescription> list;
         if (patientParam != null) {
-            Long patientId = Long.parseLong(patientParam.getIdPart());
+            UUID patientId = UUID.fromString(patientParam.getIdPart());
             list = prescriptionRepository.findByPatientId(patientId);
         } else {
             list = prescriptionRepository.findAll();
         }
 
-        return list.stream()
-                .map(Prescription::toFhirResource)
-                .collect(Collectors.toList());
+        return list.stream().map(rx -> {
+            org.hl7.fhir.r4.model.MedicationRequest req = new org.hl7.fhir.r4.model.MedicationRequest();
+            req.setId(rx.getId().toString());
+            return req;
+        }).toList();
     }
 }

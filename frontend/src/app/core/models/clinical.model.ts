@@ -2,26 +2,35 @@ import { User } from './auth-user.model';
 import { Patient } from './patient.model';
 
 export interface Encounter {
-  id?: number;
-  patient: Patient;
+  id?: string;
+  patient?: Patient;
+  patientId?: string;
   attendingProvider?: User;
+  attendingProviderId?: string;
   encounterType: 'INPATIENT' | 'OUTPATIENT' | 'EMERGENCY' | 'TELEHEALTH' | string;
+  classCode?: string;
   location?: string;
   acuityScore?: string;
   chiefComplaint?: string;
   clinicalNotes?: string;
   dischargeSummary?: string;
+  reasonCode?: string;
+  reasonText?: string;
+  startTime?: string;
+  endTime?: string;
   status: 'ACTIVE' | 'COMPLETED' | 'DISCHARGED' | string;
   encounterDate?: string;
 }
 
 export interface Allergy {
-  id?: number;
-  patient: Patient;
+  id?: string;
+  patient?: Patient;
+  patientId?: string;
   allergenName: string;
   allergenCode?: string;
   category: 'DRUG' | 'FOOD' | 'ENVIRONMENTAL' | 'OTHER' | string;
-  severity: 'MILD' | 'MODERATE' | 'SEVERE' | 'LIFE_THREATENING' | string;
+  severity?: 'MILD' | 'MODERATE' | 'SEVERE' | 'LIFE_THREATENING' | string;
+  criticality?: string;
   reactionDescription?: string;
   status: 'ACTIVE' | 'INACTIVE' | 'RESOLVED' | string;
   recordedBy?: User;
@@ -29,36 +38,50 @@ export interface Allergy {
 }
 
 export interface Diagnosis {
-  id?: number;
-  patient: Patient;
+  id?: string;
+  patient?: Patient;
+  patientId?: string;
   doctor?: User;
   conditionName: string;
+  diagnosisName?: string;
+  diagnosisCode?: string;
   icdCode?: string;
   snomedCode?: string;
+  diagnosisType?: string;
+  verificationStatus?: string;
   onsetDate?: string;
+  resolvedDate?: string;
   status: 'ACTIVE' | 'RESOLVED' | 'CHRONIC' | string;
   notes?: string;
   recordedAt?: string;
 }
 
 export interface MedicalRecord {
-  id?: number;
-  patient: Patient;
+  id?: string;
+  patient?: Patient;
+  patientId?: string;
+  encounterId?: string;
+  authorId?: string;
   doctor?: User;
-  diagnosis: string;
+  recordType?: string;
+  title?: string;
+  diagnosis?: string;
   icdCode?: string;
   symptoms?: string;
+  content?: string;
   treatmentPlan?: string;
   notes?: string;
+  isConfidential?: boolean;
   createdAt?: string;
 }
 
 export interface Vitals {
-  id?: number;
+  id?: string;
   patient?: Patient;
-  patientId?: number;
+  patientId?: string;
+  encounterId?: string;
   recordedBy?: User;
-  recordedById?: number;
+  recordedById?: string;
   recordedByName?: string;
   systolicBp?: number;
   diastolicBp?: number;
@@ -71,25 +94,37 @@ export interface Vitals {
   bmi?: number;
   bloodGlucose?: number;
   painScore?: number;
+  news2Score?: number;
+  triageCategory?: string;
   fluidIntakeMl?: number;
   fluidOutputMl?: number;
+  status?: string;
   recordedAt?: string;
 }
 
 export interface Prescription {
-  id?: number;
-  patient: Patient;
+  id?: string;
+  patient?: Patient;
+  patientId?: string;
+  practitionerId?: string;
   doctor?: User;
   medicationName: string;
+  medicationCode?: string;
   rxNormCode?: string;
-  dosage: string;
+  dosage?: string;
+  dose?: string;
+  unit?: string;
   route?: string;
-  frequency: string;
-  durationDays: number;
+  frequency?: string;
+  durationDays?: number;
+  durationUnit?: string;
+  quantity?: number;
   refills?: number;
   instructions?: string;
   status: string;
   prescribedAt?: string;
+  startDate?: string;
+  endDate?: string;
 }
 
 export interface SafetyCheckResult {

@@ -19,19 +19,23 @@ export interface DoctorRecommendationDTO {
 }
 
 export interface Appointment {
-  id?: number;
-  patientId?: number;
+  id?: string;
+  patientId?: string;
   patientName?: string;
   patientCode?: string;
   patient?: Patient;
-  doctorId?: number;
+  doctorId?: string;
   doctorName?: string;
   doctorSpecialization?: string;
   doctor?: User;
   appointmentDate: string;
+  startTime?: string;
+  endTime?: string;
+  appointmentType?: string;
   status: string;
   stage?: string;
   reason?: string;
+  priority?: string;
   notes?: string;
   insuranceVerified?: boolean;
   insuranceDetails?: string;
@@ -43,19 +47,21 @@ export interface Appointment {
 }
 
 export interface AppointmentRequestDTO {
-  patientId: number;
-  doctorId: number;
+  patientId: string;
+  doctorId: string;
   appointmentDate: string;
+  appointmentType?: string;
   status?: string;
   stage?: string;
   reason?: string;
+  priority?: string;
   notes?: string;
 }
 
 export interface AppointmentNote {
-  id?: number;
-  appointmentId?: number;
-  authorId?: number;
+  id?: string;
+  appointmentId?: string;
+  authorId?: string;
   authorName: string;
   authorRole: string;
   noteType:
@@ -72,9 +78,9 @@ export interface AppointmentNote {
 }
 
 export interface AppointmentCancellation {
-  id?: number;
+  id?: string;
   appointment?: Appointment;
-  appointmentId?: number;
+  appointmentId?: string;
   cancelledByUser?: User;
   cancelledByRole: 'PATIENT' | 'DOCTOR' | 'RECEPTIONIST' | 'ADMIN' | string;
   cancellationReason: string;
@@ -84,8 +90,8 @@ export interface AppointmentCancellation {
 }
 
 export interface AppointmentLabOrder {
-  id?: number;
-  appointmentId?: number;
+  id?: string;
+  appointmentId?: string;
   testName: string;
   priority: 'ROUTINE' | 'URGENT' | 'STAT' | string;
   clinicalIndications?: string;
@@ -94,8 +100,8 @@ export interface AppointmentLabOrder {
 }
 
 export interface AppointmentBilling {
-  id?: number;
-  appointmentId?: number;
+  id?: string;
+  appointmentId?: string;
   consultationFee: number;
   triageFee: number;
   labFee: number;

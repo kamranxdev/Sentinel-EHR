@@ -278,7 +278,7 @@ interface ToastAlert {
             <ng-icon name="lucideShieldCheck" size="16" class="text-purple-600" />
             Facility Compliance & Quick Navigation
           </h2>
-          <span hlmBadge variant="secondary" class="text-[10px]">ROLE_ORG_ADMIN Authorized</span>
+          <span hlmBadge variant="secondary" class="text-[10px]">ORGANIZATION_ADMIN Authorized</span>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">

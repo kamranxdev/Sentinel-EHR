@@ -119,7 +119,7 @@ import { lucideShieldAlert, lucideZap, lucideX, lucideAlertTriangle, lucideLock 
 })
 export class BreakGlassModalComponent {
   @Input() isOpen = false;
-  @Input() patientId: number | null = null;
+  @Input() patientId: string | null = null;
   @Input() patientName: string = '';
   @Output() closed = new EventEmitter<void>();
   @Output() granted = new EventEmitter<any>();

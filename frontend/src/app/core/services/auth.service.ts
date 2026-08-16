@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap } from 'rxjs';
+import { Observable, map, tap } from 'rxjs';
 import { JwtAuthResponse } from '../models/auth-user.model';
 import { Capability, ROLE_CAPABILITY_MAP, UserRole } from '../models/permissions.model';
 
@@ -15,7 +15,7 @@ export class AuthService {
   constructor(private http: HttpClient) {}
 
   isTokenExpired(token: string | null, offsetSeconds = 5): boolean {
-    if (!token) return true;
+    if (!token || token === 'undefined' || token === 'null') return true;
     try {
       const parts = token.split('.');
       if (parts.length !== 3) return true;
@@ -51,17 +51,18 @@ export class AuthService {
   }
 
   login(credentials: { username: string; password: string }): Observable<JwtAuthResponse> {
-    return this.http.post<JwtAuthResponse>(`${this.apiUrl}/login`, credentials).pipe(
-      tap((res) => {
-        const raw = res.userId ?? res.id;
-        const uid = raw != null ? Number(raw) : NaN;
-        if (!isNaN(uid) && uid > 0) {
-          res.userId = uid;
-          res.id = uid;
+    return this.http.post<any>(`${this.apiUrl}/login`, credentials).pipe(
+      map((res: any) => {
+        const authData: JwtAuthResponse = res && res.data ? res.data : res;
+        const raw = authData.userId ?? authData.id;
+        if (raw != null) {
+          authData.userId = raw;
+          authData.id = raw;
         }
-        localStorage.setItem('sentinel_token', res.accessToken);
-        localStorage.setItem('sentinel_user', JSON.stringify(res));
-        this.currentUser.set(res);
+        localStorage.setItem('sentinel_token', authData.accessToken);
+        localStorage.setItem('sentinel_user', JSON.stringify(authData));
+        this.currentUser.set(authData);
+        return authData;
       }),
     );
   }
@@ -72,7 +73,9 @@ export class AuthService {
     email: string;
     fullName: string;
   }): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/register`, userData);
+    return this.http.post<any>(`${this.apiUrl}/register`, userData).pipe(
+      map((res: any) => (res && res.data ? res.data : res)),
+    );
   }
 
   logout(): void {
@@ -98,18 +101,17 @@ export class AuthService {
       return null;
     }
     const data = localStorage.getItem('sentinel_user');
-    if (!data) return null;
+    if (!data || data === 'undefined' || data === 'null') return null;
     try {
-      const user = JSON.parse(data);
+      let user = JSON.parse(data);
+      if (user && user.data) {
+        user = user.data;
+      }
       if (user) {
         const raw = user.userId ?? user.id;
-        const uid = raw != null ? Number(raw) : NaN;
-        if (!isNaN(uid) && uid > 0) {
-          user.userId = uid;
-          user.id = uid;
-        } else {
-          delete user.userId;
-          delete user.id;
+        if (raw != null) {
+          user.userId = raw;
+          user.id = raw;
         }
       }
       return user;
@@ -119,21 +121,23 @@ export class AuthService {
     }
   }
 
-  getValidUserId(): number | null {
+  getValidUserId(): string | null {
     const user = this.currentUser();
     if (!user) return null;
     const raw = user.userId ?? user.id;
-    if (raw == null) return null;
-    const num = Number(raw);
-    return !isNaN(num) && num > 0 ? num : null;
+    return raw ? String(raw) : null;
   }
 
+  /**
+   * RBAC: Check if the current user has an exact role match.
+   * Compares case-insensitively against canonical role names in security.roles.
+   */
   hasRole(role: string): boolean {
     if (!this.isLoggedIn()) return false;
     const user = this.currentUser();
-    if (!user) return false;
-    const target = role.startsWith('ROLE_') ? role : 'ROLE_' + role.toUpperCase();
-    return user.roles.includes(target);
+    if (!user || !user.roles || !Array.isArray(user.roles)) return false;
+    const target = role.toUpperCase();
+    return user.roles.some((r) => r.toUpperCase() === target);
   }
 
   hasAnyRole(roles: string[]): boolean {
@@ -145,8 +149,7 @@ export class AuthService {
     const user = this.currentUser();
     if (!user || !user.roles) return false;
     return user.roles.some((roleStr) => {
-      const role = roleStr as UserRole;
-      const capabilities = ROLE_CAPABILITY_MAP[role];
+      const capabilities = ROLE_CAPABILITY_MAP[roleStr as UserRole];
       return capabilities ? capabilities.includes(capability) : false;
     });
   }
@@ -161,11 +164,11 @@ export class AuthService {
 
   /**
    * ABAC: Checks if authenticated user has an active care team relationship with the patient.
-   * Admin/Auditors bypass relationship checks; clinicians match against assigned patient IDs.
+   * SUPER_ADMIN and ORGANIZATION_ADMIN bypass patient-level checks.
    */
-  hasActiveRelationship(patientId: number): boolean {
+  hasActiveRelationship(patientId: string): boolean {
     if (!this.isLoggedIn()) return false;
-    if (this.hasAnyRole(['ROLE_SYS_ADMIN', 'ROLE_ORG_ADMIN', 'ROLE_ADMIN', 'ROLE_AUDITOR'])) {
+    if (this.hasAnyRole(['SUPER_ADMIN', 'ORGANIZATION_ADMIN', 'AUDITOR'])) {
       return true;
     }
     const user = this.currentUser();
@@ -179,48 +182,73 @@ export class AuthService {
   /**
    * Combined RBAC + ABAC: Checks permission AND patient context.
    * Frontend ABAC is advisory — backend enforces the real access decision.
-   * Admin/Auditor roles bypass patient-level ABAC on frontend.
    */
-  canAccessPatient(patientId: number, permissionCode: string): boolean {
+  canAccessPatient(patientId: string, permissionCode: string): boolean {
     if (!this.hasPermission(permissionCode)) return false;
     return this.hasActiveRelationship(patientId);
   }
 
-  isReceptionist(): boolean {
-    return this.hasRole('ROLE_RECEPTIONIST') || this.hasRole('ROLE_ADMIN');
+  isSysAdmin(): boolean {
+    return this.hasRole('SUPER_ADMIN');
   }
 
-  isNurse(): boolean {
-    return this.hasRole('ROLE_NURSE') || this.hasRole('ROLE_ADMIN');
-  }
-
-  isDoctor(): boolean {
-    return this.hasRole('ROLE_DOCTOR') || this.hasRole('ROLE_ADMIN');
+  isOrgAdmin(): boolean {
+    return this.hasRole('ORGANIZATION_ADMIN');
   }
 
   isAdmin(): boolean {
-    return this.hasRole('ROLE_ADMIN');
+    return this.isSysAdmin() || this.isOrgAdmin();
   }
 
-  isPatient(): boolean {
-    return this.hasRole('ROLE_PATIENT');
+  isDoctor(): boolean {
+    return this.hasRole('PHYSICIAN');
+  }
+
+  isNurse(): boolean {
+    return this.hasRole('NURSE');
+  }
+
+  isReceptionist(): boolean {
+    return this.hasRole('RECEPTIONIST');
+  }
+
+  isLabTech(): boolean {
+    return this.hasRole('LAB_TECHNICIAN');
+  }
+
+  isPharmacist(): boolean {
+    return this.hasRole('PHARMACIST');
+  }
+
+  isBilling(): boolean {
+    return this.hasRole('BILLING_STAFF');
   }
 
   isAuditor(): boolean {
-    return this.hasRole('ROLE_AUDITOR');
+    return this.hasRole('AUDITOR');
   }
 
-  getPrimaryRole(): 'Patient' | 'Doctor' | 'Nurse' | 'Receptionist' | 'Admin' | 'Auditor' {
-    if (this.hasRole('ROLE_ADMIN')) return 'Admin';
-    if (this.hasRole('ROLE_RECEPTIONIST')) return 'Receptionist';
-    if (this.hasRole('ROLE_DOCTOR')) return 'Doctor';
-    if (this.hasRole('ROLE_NURSE')) return 'Nurse';
-    if (this.hasRole('ROLE_AUDITOR')) return 'Auditor';
+  isPatient(): boolean {
+    return this.hasRole('PATIENT');
+  }
+
+  getPrimaryRole(): 'Patient' | 'Doctor' | 'Nurse' | 'Receptionist' | 'Admin' | 'Auditor' | 'LabTech' | 'Pharmacist' | 'Billing' {
+    if (this.isAdmin()) return 'Admin';
+    if (this.isDoctor()) return 'Doctor';
+    if (this.isNurse()) return 'Nurse';
+    if (this.isReceptionist()) return 'Receptionist';
+    if (this.isAuditor()) return 'Auditor';
+    if (this.isLabTech()) return 'LabTech';
+    if (this.isPharmacist()) return 'Pharmacist';
+    if (this.isBilling()) return 'Billing';
     return 'Patient';
   }
 
   createStaffUser(payload: any): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/admin/create-user`, payload);
+    return this.http.post<any>(`${this.apiUrl}/admin/create-user`, payload).pipe(
+      map((res: any) => (res && res.data ? res.data : res)),
+    );
   }
 }
+
 

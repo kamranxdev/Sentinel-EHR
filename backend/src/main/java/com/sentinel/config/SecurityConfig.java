@@ -1,7 +1,7 @@
 package com.sentinel.config;
 
-import com.sentinel.auth.security.JwtAuthenticationEntryPoint;
-import com.sentinel.auth.security.JwtAuthenticationFilter;
+import com.sentinel.security.auth.security.JwtAuthenticationEntryPoint;
+import com.sentinel.security.auth.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -54,7 +54,7 @@ public class SecurityConfig {
             .exceptionHandling(exception -> exception.authenticationEntryPoint(authenticationEntryPoint))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authorize -> authorize
-                .requestMatchers("/api/v1/auth/**", "/fhir/**").permitAll()
+                .requestMatchers("/api/v1/auth/login", "/api/v1/auth/register", "/fhir/**").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
                 .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
                 .anyRequest().authenticated()

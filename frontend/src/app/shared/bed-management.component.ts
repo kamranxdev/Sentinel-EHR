@@ -97,7 +97,7 @@ import { lucideBed, lucideArrowRightLeft, lucideRefreshCw, lucideCheckCircle2, l
             <div *ngIf="bed.currentEncounter" class="mt-3 p-2.5 bg-muted/40 rounded-lg border border-border/60 text-xs space-y-1">
               <div class="font-semibold text-foreground flex items-center gap-1">
                 <ng-icon name="lucideUser" class="text-xs text-primary"></ng-icon>
-                {{ bed.currentEncounter.patient.fullName }}
+                {{ bed.currentEncounter.patient?.fullName || 'Patient' }}
               </div>
               <div class="text-[11px] text-muted-foreground">
                 Encounter #ENC-{{ bed.currentEncounter.id }} | {{ bed.currentEncounter.acuityScore || 'Level 3' }}
@@ -178,8 +178,8 @@ export class BedManagementComponent implements OnInit {
   selectedDept = signal('ALL');
   isTransferOpen = signal(false);
   selectedBedForTransfer: Bed | null = null;
-  destinationBedId: number | null = null;
-  transferReason = '';
+  destinationBedId: string = '';
+  transferReason = 'Clinical Acuity Escalation / ICU Admission Required';
 
   constructor(private apiService: ApiService) {}
 
@@ -189,13 +189,7 @@ export class BedManagementComponent implements OnInit {
 
   loadBeds() {
     this.apiService.getBeds().subscribe({
-      next: (data) => {
-        if (data && data.length > 0) {
-          this.beds.set(data);
-        } else {
-          this.setFallbackBeds();
-        }
-      },
+      next: (data) => this.beds.set(data),
       error: () => {
         this.setFallbackBeds();
       },
@@ -204,11 +198,11 @@ export class BedManagementComponent implements OnInit {
 
   setFallbackBeds() {
     this.beds.set([
-      { id: 1, departmentName: 'Cardiology', wardName: 'Cardiac ICU', roomNumber: 'ICU-101', bedNumber: 'A', bedCode: 'CARD-ICU-01', status: 'OCCUPIED' },
-      { id: 2, departmentName: 'Cardiology', wardName: 'Cardiac Ward', roomNumber: '201', bedNumber: 'A', bedCode: 'CARD-WARD-01-A', status: 'AVAILABLE' },
-      { id: 3, departmentName: 'General Medical', wardName: 'Med-Surg Ward', roomNumber: '302', bedNumber: 'B', bedCode: 'MED-SURG-102', status: 'OCCUPIED' },
-      { id: 4, departmentName: 'Emergency', wardName: 'Acute Care Unit', roomNumber: 'ED-05', bedNumber: '1', bedCode: 'ED-ACUTE-05', status: 'CLEANING_REQUIRED' },
-      { id: 5, departmentName: 'Neurology', wardName: 'Neuro Ward', roomNumber: '405', bedNumber: 'A', bedCode: 'NEURO-WARD-05', status: 'AVAILABLE' },
+      { id: 'bed-101', departmentName: 'Cardiology', wardName: 'Cardiac ICU', roomNumber: 'ICU-101', bedNumber: 'A', bedCode: 'CARD-ICU-01', status: 'OCCUPIED' },
+      { id: 'bed-102', departmentName: 'Cardiology', wardName: 'Cardiac Ward', roomNumber: '201', bedNumber: 'A', bedCode: 'CARD-WARD-01-A', status: 'AVAILABLE' },
+      { id: 'bed-103', departmentName: 'General Medical', wardName: 'Med-Surg Ward', roomNumber: '302', bedNumber: 'B', bedCode: 'MED-SURG-102', status: 'OCCUPIED' },
+      { id: 'bed-104', departmentName: 'Emergency', wardName: 'Acute Care Unit', roomNumber: 'ED-05', bedNumber: '1', bedCode: 'ED-ACUTE-05', status: 'CLEANING_REQUIRED' },
+      { id: 'bed-105', departmentName: 'Neurology', wardName: 'Neuro Ward', roomNumber: '405', bedNumber: 'A', bedCode: 'NEURO-WARD-05', status: 'AVAILABLE' },
     ]);
   }
 
@@ -233,7 +227,7 @@ export class BedManagementComponent implements OnInit {
 
   openTransferModal(bed: Bed) {
     this.selectedBedForTransfer = bed;
-    this.destinationBedId = null;
+    this.destinationBedId = '';
     this.transferReason = '';
     this.isTransferOpen.set(true);
   }
@@ -244,8 +238,8 @@ export class BedManagementComponent implements OnInit {
     }
 
     const body = {
-      encounterId: Number(this.selectedBedForTransfer.currentEncounter.id),
-      newBedId: Number(this.destinationBedId),
+      encounterId: this.selectedBedForTransfer.currentEncounter.id,
+      newBedId: this.destinationBedId,
       transferReason: this.transferReason,
     };
 

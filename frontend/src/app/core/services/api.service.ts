@@ -56,11 +56,11 @@ export class ApiService {
     );
   }
 
-  getPatientById(id: number): Observable<Patient> {
+  getPatientById(id: string): Observable<Patient> {
     return this.http.get<Patient>(`${this.baseUrl}/patients/${id}`);
   }
 
-  getPatientClinicalHistory(id: number): Observable<any> {
+  getPatientClinicalHistory(id: string): Observable<any> {
     return this.http.get<any>(`${this.baseUrl}/patients/${id}/clinical-history`);
   }
 
@@ -68,12 +68,11 @@ export class ApiService {
     return this.http.get<Patient>(`${this.baseUrl}/patients/me`);
   }
 
-  getPatientByUserId(userId: number): Observable<Patient> {
-    const numId = Number(userId);
-    if (!userId || isNaN(numId) || numId <= 0) {
+  getPatientByUserId(userId: string): Observable<Patient> {
+    if (!userId) {
       return this.getMyPatientProfile();
     }
-    return this.http.get<Patient>(`${this.baseUrl}/patients/user/${numId}`);
+    return this.http.get<Patient>(`${this.baseUrl}/patients/user/${userId}`);
   }
 
   createPatient(patient: Partial<Patient>): Observable<Patient> {
@@ -84,7 +83,7 @@ export class ApiService {
     return this.http.post<Patient>(`${this.baseUrl}/patients/intake`, patient);
   }
 
-  updatePatient(id: number, patient: Partial<Patient>): Observable<Patient> {
+  updatePatient(id: string, patient: Partial<Patient>): Observable<Patient> {
     return this.http.put<Patient>(`${this.baseUrl}/patients/${id}`, patient);
   }
 
@@ -120,7 +119,7 @@ export class ApiService {
   }
 
   // Appointment Stage Transitions & Resource Grid
-  updateAppointmentStage(id: number, stage: string): Observable<Appointment> {
+  updateAppointmentStage(id: string, stage: string): Observable<Appointment> {
     return this.http.patch<Appointment>(`${this.baseUrl}/appointments/${id}/stage`, { stage });
   }
 
@@ -129,7 +128,7 @@ export class ApiService {
   }
 
   // Encounters & Visits
-  getEncountersByPatient(patientId: number): Observable<Encounter[]> {
+  getEncountersByPatient(patientId: string): Observable<Encounter[]> {
     return this.http.get<Encounter[]>(`${this.baseUrl}/encounters/patient/${patientId}`);
   }
 
@@ -137,7 +136,7 @@ export class ApiService {
     return this.http.post<Encounter>(`${this.baseUrl}/encounters`, encounter);
   }
 
-  updateEncounter(id: number, encounter: Partial<Encounter>): Observable<Encounter> {
+  updateEncounter(id: string, encounter: Partial<Encounter>): Observable<Encounter> {
     return this.http.put<Encounter>(`${this.baseUrl}/encounters/${id}`, encounter);
   }
 
@@ -152,7 +151,7 @@ export class ApiService {
     return this.http.get<Bed[]>(`${this.baseUrl}/beds/available${query}`);
   }
 
-  getBedById(id: number): Observable<Bed> {
+  getBedById(id: string): Observable<Bed> {
     return this.http.get<Bed>(`${this.baseUrl}/beds/${id}`);
   }
 
@@ -160,15 +159,15 @@ export class ApiService {
     return this.http.post<Bed>(`${this.baseUrl}/beds`, bed);
   }
 
-  updateBedStatus(id: number, status: string): Observable<Bed> {
+  updateBedStatus(id: string, status: string): Observable<Bed> {
     return this.http.patch<Bed>(`${this.baseUrl}/beds/${id}/status`, { status });
   }
 
-  transferBed(payload: { encounterId: number; newBedId: number; transferReason?: string }): Observable<LocationHistory> {
+  transferBed(payload: { encounterId: string; newBedId: string; transferReason?: string }): Observable<LocationHistory> {
     return this.http.post<LocationHistory>(`${this.baseUrl}/beds/transfer`, payload);
   }
 
-  getLocationHistory(encounterId: number): Observable<LocationHistory[]> {
+  getLocationHistory(encounterId: string): Observable<LocationHistory[]> {
     return this.http.get<LocationHistory[]>(`${this.baseUrl}/beds/encounters/${encounterId}/location-history`);
   }
 
@@ -177,7 +176,7 @@ export class ApiService {
     return this.http.post<BreakGlassRecord>(`${this.baseUrl}/break-glass/request`, payload);
   }
 
-  getBreakGlassByPatient(patientId: number): Observable<BreakGlassRecord[]> {
+  getBreakGlassByPatient(patientId: string): Observable<BreakGlassRecord[]> {
     return this.http.get<BreakGlassRecord[]>(`${this.baseUrl}/break-glass/patient/${patientId}`);
   }
 
@@ -186,7 +185,7 @@ export class ApiService {
   }
 
   // Laboratory Orders & Results Tracking
-  getLabOrdersList(patientId?: number, encounterId?: number): Observable<LabOrder[]> {
+  getLabOrdersList(patientId?: string, encounterId?: string): Observable<LabOrder[]> {
     const params: string[] = [];
     if (patientId) params.push(`patientId=${patientId}`);
     if (encounterId) params.push(`encounterId=${encounterId}`);
@@ -194,7 +193,7 @@ export class ApiService {
     return this.http.get<LabOrder[]>(`${this.baseUrl}/lab-orders${query}`);
   }
 
-  getLabOrderById(id: number): Observable<LabOrder> {
+  getLabOrderById(id: string): Observable<LabOrder> {
     return this.http.get<LabOrder>(`${this.baseUrl}/lab-orders/${id}`);
   }
 
@@ -202,16 +201,16 @@ export class ApiService {
     return this.http.post<LabOrder>(`${this.baseUrl}/lab-orders`, order);
   }
 
-  updateLabOrderStatus(id: number, status: string, barcode?: string): Observable<LabOrder> {
+  updateLabOrderStatus(id: string, status: string, barcode?: string): Observable<LabOrder> {
     return this.http.patch<LabOrder>(`${this.baseUrl}/lab-orders/${id}/status`, { status, barcode });
   }
 
-  addLabResult(id: number, result: any): Observable<LabResult> {
+  addLabResult(id: string, result: any): Observable<LabResult> {
     return this.http.post<LabResult>(`${this.baseUrl}/lab-orders/${id}/results`, result);
   }
 
   // Allergies & Contraindications
-  getAllergiesByPatient(patientId: number): Observable<Allergy[]> {
+  getAllergiesByPatient(patientId: string): Observable<Allergy[]> {
     return this.http.get<Allergy[]>(`${this.baseUrl}/allergies/patient/${patientId}`);
   }
 
@@ -219,12 +218,12 @@ export class ApiService {
     return this.http.post<Allergy>(`${this.baseUrl}/allergies`, allergy);
   }
 
-  updateAllergyStatus(id: number, status: string): Observable<Allergy> {
+  updateAllergyStatus(id: string, status: string): Observable<Allergy> {
     return this.http.patch<Allergy>(`${this.baseUrl}/allergies/${id}/status`, { status });
   }
 
   // Diagnoses & Problem Lists
-  getDiagnosesByPatient(patientId: number): Observable<Diagnosis[]> {
+  getDiagnosesByPatient(patientId: string): Observable<Diagnosis[]> {
     return this.http.get<Diagnosis[]>(`${this.baseUrl}/diagnoses/patient/${patientId}`);
   }
 
@@ -232,12 +231,12 @@ export class ApiService {
     return this.http.post<Diagnosis>(`${this.baseUrl}/diagnoses`, diagnosis);
   }
 
-  updateDiagnosisStatus(id: number, status: string): Observable<Diagnosis> {
+  updateDiagnosisStatus(id: string, status: string): Observable<Diagnosis> {
     return this.http.patch<Diagnosis>(`${this.baseUrl}/diagnoses/${id}/status`, { status });
   }
 
   // Medical Records (EHR Legacy Notes)
-  getRecordsByPatient(patientId: number): Observable<MedicalRecord[]> {
+  getRecordsByPatient(patientId: string): Observable<MedicalRecord[]> {
     return this.http.get<MedicalRecord[]>(`${this.baseUrl}/clinical-records/patient/${patientId}`);
   }
 
@@ -246,7 +245,7 @@ export class ApiService {
   }
 
   // Vitals & Observations
-  getVitalsByPatient(patientId: number): Observable<Vitals[]> {
+  getVitalsByPatient(patientId: string): Observable<Vitals[]> {
     return this.http.get<Vitals[]>(`${this.baseUrl}/vitals/patient/${patientId}`);
   }
 
@@ -255,12 +254,12 @@ export class ApiService {
   }
 
   // Prescriptions & Smart Safety Engine
-  getPrescriptionsByPatient(patientId: number): Observable<Prescription[]> {
+  getPrescriptionsByPatient(patientId: string): Observable<Prescription[]> {
     return this.http.get<Prescription[]>(`${this.baseUrl}/prescriptions/patient/${patientId}`);
   }
 
   checkPrescriptionSafety(
-    patientId: number,
+    patientId: string,
     medicationName: string,
   ): Observable<SafetyCheckResult> {
     return this.http.post<SafetyCheckResult>(`${this.baseUrl}/prescriptions/safety-check`, {
@@ -270,7 +269,7 @@ export class ApiService {
   }
 
   validatePrescriptionSafety(
-    patientId: number,
+    patientId: string,
     medicationName: string,
     dosage?: string,
     instructions?: string,
@@ -293,7 +292,7 @@ export class ApiService {
     });
   }
 
-  updatePrescriptionStatus(id: number, status: string): Observable<Prescription> {
+  updatePrescriptionStatus(id: string, status: string): Observable<Prescription> {
     return this.http.patch<Prescription>(`${this.baseUrl}/prescriptions/${id}/status`, { status });
   }
 
@@ -302,15 +301,15 @@ export class ApiService {
     return this.http.get<Appointment[]>(`${this.baseUrl}/appointments`);
   }
 
-  getAppointmentById(id: number): Observable<Appointment> {
+  getAppointmentById(id: string): Observable<Appointment> {
     return this.http.get<Appointment>(`${this.baseUrl}/appointments/${id}`);
   }
 
-  getAppointmentsByPatient(patientId: number): Observable<Appointment[]> {
+  getAppointmentsByPatient(patientId: string): Observable<Appointment[]> {
     return this.http.get<Appointment[]>(`${this.baseUrl}/appointments/patient/${patientId}`);
   }
 
-  getRecommendedDoctors(patientId?: number, reason?: string, date?: string): Observable<any[]> {
+  getRecommendedDoctors(patientId?: string, reason?: string, date?: string): Observable<any[]> {
     let query = '';
     const params: string[] = [];
     if (patientId) params.push(`patientId=${patientId}`);
@@ -324,12 +323,12 @@ export class ApiService {
     return this.http.post<Appointment>(`${this.baseUrl}/appointments`, appointment);
   }
 
-  updateAppointmentStatus(id: number, status: string): Observable<Appointment> {
+  updateAppointmentStatus(id: string, status: string): Observable<Appointment> {
     return this.http.patch<Appointment>(`${this.baseUrl}/appointments/${id}/status`, { status });
   }
 
   checkInPatient(
-    id: number,
+    id: string,
     payload: {
       insuranceVerified?: boolean;
       insuranceDetails?: string;
@@ -340,40 +339,40 @@ export class ApiService {
     return this.http.post<Appointment>(`${this.baseUrl}/appointments/${id}/check-in`, payload);
   }
 
-  recordTriageVitals(id: number, payload: any): Observable<Appointment> {
+  recordTriageVitals(id: string, payload: any): Observable<Appointment> {
     return this.http.post<Appointment>(`${this.baseUrl}/appointments/${id}/triage-vitals`, payload);
   }
 
-  startConsultation(id: number): Observable<Appointment> {
+  startConsultation(id: string): Observable<Appointment> {
     return this.http.post<Appointment>(`${this.baseUrl}/appointments/${id}/start-consultation`, {});
   }
 
-  recordDoctorConsultation(id: number, payload: any): Observable<Appointment> {
+  recordDoctorConsultation(id: string, payload: any): Observable<Appointment> {
     return this.http.post<Appointment>(
       `${this.baseUrl}/appointments/${id}/doctor-consultation`,
       payload,
     );
   }
 
-  getAppointmentNotes(id: number): Observable<AppointmentNote[]> {
+  getAppointmentNotes(id: string): Observable<AppointmentNote[]> {
     return this.http.get<AppointmentNote[]>(`${this.baseUrl}/appointments/${id}/notes`);
   }
 
-  addAppointmentNote(id: number, noteType: string, content: string): Observable<AppointmentNote> {
+  addAppointmentNote(id: string, noteType: string, content: string): Observable<AppointmentNote> {
     return this.http.post<AppointmentNote>(`${this.baseUrl}/appointments/${id}/notes`, {
       noteType,
       content,
     });
   }
 
-  editAppointmentNote(noteId: number, content: string): Observable<AppointmentNote> {
+  editAppointmentNote(noteId: string, content: string): Observable<AppointmentNote> {
     return this.http.patch<AppointmentNote>(`${this.baseUrl}/appointments/notes/${noteId}`, {
       content,
     });
   }
 
   cancelAppointment(
-    id: number,
+    id: string,
     reason: string,
     comment?: string,
   ): Observable<AppointmentCancellation> {
@@ -383,24 +382,24 @@ export class ApiService {
     });
   }
 
-  getCancellationDetails(id: number): Observable<AppointmentCancellation> {
+  getCancellationDetails(id: string): Observable<AppointmentCancellation> {
     return this.http.get<AppointmentCancellation>(
       `${this.baseUrl}/appointments/${id}/cancellation`,
     );
   }
 
-  generateBilling(id: number, payload: any): Observable<AppointmentBilling> {
+  generateBilling(id: string, payload: any): Observable<AppointmentBilling> {
     return this.http.post<AppointmentBilling>(
       `${this.baseUrl}/appointments/${id}/billing`,
       payload,
     );
   }
 
-  getBillingDetails(id: number): Observable<AppointmentBilling> {
+  getBillingDetails(id: string): Observable<AppointmentBilling> {
     return this.http.get<AppointmentBilling>(`${this.baseUrl}/appointments/${id}/billing`);
   }
 
-  getLabOrders(id: number): Observable<AppointmentLabOrder[]> {
+  getLabOrders(id: string): Observable<AppointmentLabOrder[]> {
     return this.http.get<AppointmentLabOrder[]>(`${this.baseUrl}/appointments/${id}/lab-orders`);
   }
 
@@ -413,19 +412,19 @@ export class ApiService {
     return this.http.get<User[]>(`${this.baseUrl}/admin/users`);
   }
 
-  updateUser(id: number, payload: any): Observable<User> {
+  updateUser(id: string, payload: any): Observable<User> {
     return this.http.put<User>(`${this.baseUrl}/admin/users/${id}`, payload);
   }
 
-  updateUserStatus(id: number, status: string): Observable<any> {
+  updateUserStatus(id: string, status: string): Observable<any> {
     return this.http.patch<any>(`${this.baseUrl}/admin/users/${id}/status`, { status });
   }
 
-  resetUserPassword(id: number, newPassword?: string): Observable<any> {
+  resetUserPassword(id: string, newPassword?: string): Observable<any> {
     return this.http.post<any>(`${this.baseUrl}/admin/users/${id}/reset-password`, { newPassword });
   }
 
-  deleteUser(id: number): Observable<any> {
+  deleteUser(id: string): Observable<any> {
     return this.http.delete<any>(`${this.baseUrl}/admin/users/${id}`);
   }
 
@@ -453,7 +452,7 @@ export class ApiService {
     return this.http.get<any>(`${this.fhirUrl}/Patient${query}`);
   }
 
-  getFhirResource(resourceType: string, patientId?: number): Observable<any> {
+  getFhirResource(resourceType: string, patientId?: string): Observable<any> {
     const query = patientId ? `?patientId=${patientId}` : '';
     return this.http.get<any>(`${this.fhirUrl}/${resourceType}${query}`);
   }
@@ -462,7 +461,7 @@ export class ApiService {
     return this.http.get<any>(`${this.fhirUrl}/${resourceType}/${id}`);
   }
 
-  getFhirPatientEverything(patientId: number): Observable<any> {
+  getFhirPatientEverything(patientId: string): Observable<any> {
     return this.http.get<any>(`${this.fhirUrl}/Patient/${patientId}/$everything`);
   }
 
@@ -475,7 +474,7 @@ export class ApiService {
     return this.http.post<TriageEwsResponseDTO>(`${this.baseUrl}/nursing/triage`, record);
   }
 
-  getTriageRecordsForPatient(patientId: number): Observable<TriageEwsResponseDTO[]> {
+  getTriageRecordsForPatient(patientId: string): Observable<TriageEwsResponseDTO[]> {
     return this.http.get<TriageEwsResponseDTO[]>(`${this.baseUrl}/nursing/triage/patient/${patientId}`);
   }
 
@@ -483,7 +482,7 @@ export class ApiService {
     return this.http.post<EmarRecordResponseDTO>(`${this.baseUrl}/nursing/emar/administer`, emar);
   }
 
-  getEmarHistoryForPatient(patientId: number): Observable<EmarRecordResponseDTO[]> {
+  getEmarHistoryForPatient(patientId: string): Observable<EmarRecordResponseDTO[]> {
     return this.http.get<EmarRecordResponseDTO[]>(`${this.baseUrl}/nursing/emar/patient/${patientId}`);
   }
 }

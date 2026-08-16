@@ -32,7 +32,7 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./workspaces/patient/patient-profile.component').then((m) => m.PatientProfileComponent),
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ROLE_PATIENT'] },
+    data: { roles: ['PATIENT'] },
   },
   {
     path: 'dashboard',
@@ -47,14 +47,14 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./workspaces/doctor/doctor-dashboard.component').then((m) => m.DoctorDashboardComponent),
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ROLE_DOCTOR'] },
+    data: { roles: ['PHYSICIAN'] },
   },
   {
     path: 'doctor/chart',
     loadComponent: () =>
       import('./workspaces/doctor/doctor-chart.component').then((m) => m.DoctorChartComponent),
     canActivate: [authGuard, roleGuard, clinicalAccessGuard],
-    data: { roles: ['ROLE_DOCTOR'] },
+    data: { roles: ['PHYSICIAN'] },
   },
   {
     path: 'doctor/patients',
@@ -66,7 +66,7 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./workspaces/doctor/doctor-appointments.component').then((m) => m.DoctorAppointmentsComponent),
     canActivate: [authGuard, roleGuard, clinicalAccessGuard],
-    data: { roles: ['ROLE_DOCTOR'], permission: 'APPOINTMENT_READ' },
+    data: { roles: ['PHYSICIAN'], permission: 'APPOINTMENT_READ' },
   },
   {
     path: 'doctor/encounters',
@@ -100,14 +100,14 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./workspaces/nurse/nurse-dashboard.component').then((m) => m.NurseDashboardComponent),
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ROLE_NURSE'] },
+    data: { roles: ['NURSE'] },
   },
   {
     path: 'nurse/chart',
     loadComponent: () =>
       import('./workspaces/nurse/nurse-chart.component').then((m) => m.NurseChartComponent),
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ROLE_NURSE'] },
+    data: { roles: ['NURSE'] },
   },
   {
     path: 'nurse/vitals',
@@ -129,7 +129,7 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./workspaces/nurse/nurse-appointments.component').then((m) => m.NurseAppointmentsComponent),
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ROLE_NURSE'] },
+    data: { roles: ['NURSE'] },
   },
   {
     path: 'nurse/allergies',
@@ -141,7 +141,7 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./workspaces/nurse/nurse-beds.component').then((m) => m.NurseBedsComponent),
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ROLE_NURSE', 'ROLE_SYS_ADMIN', 'ROLE_ORG_ADMIN'] },
+    data: { roles: ['NURSE', 'SUPER_ADMIN', 'ORGANIZATION_ADMIN'] },
   },
 
   {
@@ -157,35 +157,35 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./workspaces/sys-admin/sys-admin-dashboard.component').then((m) => m.SysAdminDashboardComponent),
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ROLE_SYS_ADMIN'] },
+    data: { roles: ['SUPER_ADMIN'] },
   },
   {
     path: 'sys-admin/organizations',
     loadComponent: () =>
       import('./workspaces/sys-admin/sys-admin-organizations.component').then((m) => m.SysAdminOrganizationsComponent),
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ROLE_SYS_ADMIN'] },
+    data: { roles: ['SUPER_ADMIN'] },
   },
   {
     path: 'sys-admin/users',
     loadComponent: () =>
       import('./workspaces/sys-admin/sys-admin-users.component').then((m) => m.SysAdminUsersComponent),
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ROLE_SYS_ADMIN'] },
+    data: { roles: ['SUPER_ADMIN'] },
   },
   {
     path: 'sys-admin/patients',
     loadComponent: () =>
       import('./workspaces/sys-admin/sys-admin-patients.component').then((m) => m.SysAdminPatientsComponent),
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ROLE_SYS_ADMIN'] },
+    data: { roles: ['SUPER_ADMIN'] },
   },
   {
     path: 'sys-admin/schedule-analytics',
     loadComponent: () =>
       import('./workspaces/sys-admin/sys-admin-schedule-analytics.component').then((m) => m.SysAdminScheduleAnalyticsComponent),
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ROLE_SYS_ADMIN'] },
+    data: { roles: ['SUPER_ADMIN'] },
   },
 
   // --- ORGANIZATION ADMIN WORKSPACE ROUTES ---
@@ -194,35 +194,35 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./workspaces/org-admin/org-admin-dashboard.component').then((m) => m.OrgAdminDashboardComponent),
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ROLE_ORG_ADMIN'] },
+    data: { roles: ['ORGANIZATION_ADMIN'] },
   },
   {
     path: 'org-admin/facility-settings',
     loadComponent: () =>
       import('./workspaces/org-admin/org-admin-facility-settings.component').then((m) => m.OrgAdminFacilitySettingsComponent),
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ROLE_ORG_ADMIN'] },
+    data: { roles: ['ORGANIZATION_ADMIN'] },
   },
   {
     path: 'org-admin/users',
     loadComponent: () =>
       import('./workspaces/org-admin/org-admin-users.component').then((m) => m.OrgAdminUsersComponent),
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ROLE_ORG_ADMIN'] },
+    data: { roles: ['ORGANIZATION_ADMIN'] },
   },
   {
     path: 'org-admin/patients',
     loadComponent: () =>
       import('./workspaces/org-admin/org-admin-patients.component').then((m) => m.OrgAdminPatientsComponent),
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ROLE_ORG_ADMIN'] },
+    data: { roles: ['ORGANIZATION_ADMIN'] },
   },
   {
     path: 'org-admin/schedule-analytics',
     loadComponent: () =>
       import('./workspaces/org-admin/org-admin-schedule-analytics.component').then((m) => m.OrgAdminScheduleAnalyticsComponent),
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ROLE_ORG_ADMIN'] },
+    data: { roles: ['ORGANIZATION_ADMIN'] },
   },
 
   // Legacy Redirects for backwards compatibility
@@ -240,42 +240,42 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./workspaces/patient/patient-dashboard.component').then((m) => m.PatientDashboardComponent),
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ROLE_PATIENT'] },
+    data: { roles: ['PATIENT'] },
   },
   {
     path: 'patient/profile',
     loadComponent: () =>
       import('./workspaces/patient/patient-profile.component').then((m) => m.PatientProfileComponent),
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ROLE_PATIENT'] },
+    data: { roles: ['PATIENT'] },
   },
   {
     path: 'patient/appointments',
     loadComponent: () =>
       import('./workspaces/patient/patient-appointments.component').then((m) => m.PatientAppointmentsComponent),
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ROLE_PATIENT'] },
+    data: { roles: ['PATIENT'] },
   },
   {
     path: 'patient/prescriptions',
     loadComponent: () =>
       import('./workspaces/patient/patient-prescriptions.component').then((m) => m.PatientPrescriptionsComponent),
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ROLE_PATIENT'] },
+    data: { roles: ['PATIENT'] },
   },
   {
     path: 'patient/vitals',
     loadComponent: () =>
       import('./workspaces/patient/patient-vitals.component').then((m) => m.PatientVitalsComponent),
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ROLE_PATIENT'] },
+    data: { roles: ['PATIENT'] },
   },
   {
     path: 'patient/allergies',
     loadComponent: () =>
       import('./workspaces/patient/patient-allergies.component').then((m) => m.PatientAllergiesComponent),
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ROLE_PATIENT'] },
+    data: { roles: ['PATIENT'] },
   },
 
   // --- RECEPTIONIST WORKSPACE ROUTES ---
@@ -284,21 +284,21 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./workspaces/receptionist/receptionist-dashboard.component').then((m) => m.ReceptionistDashboardComponent),
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ROLE_RECEPTIONIST'] },
+    data: { roles: ['RECEPTIONIST'] },
   },
   {
     path: 'receptionist/mpi',
     loadComponent: () =>
       import('./workspaces/receptionist/receptionist-mpi.component').then((m) => m.ReceptionistMPIComponent),
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ROLE_RECEPTIONIST'] },
+    data: { roles: ['RECEPTIONIST'] },
   },
   {
     path: 'receptionist/appointments',
     loadComponent: () =>
       import('./workspaces/receptionist/receptionist-appointments.component').then((m) => m.ReceptionistAppointmentsComponent),
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ROLE_RECEPTIONIST'] },
+    data: { roles: ['RECEPTIONIST'] },
   },
 
   // --- LAB TECH WORKSPACE ROUTES ---
@@ -307,21 +307,21 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./workspaces/labtech/labtech-dashboard.component').then((m) => m.LabTechDashboardComponent),
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ROLE_LAB_TECH'] },
+    data: { roles: ['LAB_TECHNICIAN'] },
   },
   {
     path: 'labtech/worklist',
     loadComponent: () =>
       import('./workspaces/labtech/labtech-worklist.component').then((m) => m.LabTechWorklistComponent),
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ROLE_LAB_TECH'] },
+    data: { roles: ['LAB_TECHNICIAN'] },
   },
   {
     path: 'labtech/results',
     loadComponent: () =>
       import('./workspaces/labtech/labtech-results.component').then((m) => m.LabTechResultsComponent),
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ROLE_LAB_TECH'] },
+    data: { roles: ['LAB_TECHNICIAN'] },
   },
 
   // --- PHARMACIST WORKSPACE ROUTES ---
@@ -330,21 +330,21 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./workspaces/pharmacist/pharmacist-dashboard.component').then((m) => m.PharmacistDashboardComponent),
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ROLE_PHARMACIST'] },
+    data: { roles: ['PHARMACIST'] },
   },
   {
     path: 'pharmacist/erx',
     loadComponent: () =>
       import('./workspaces/pharmacist/pharmacist-erx.component').then((m) => m.PharmacistErxComponent),
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ROLE_PHARMACIST'] },
+    data: { roles: ['PHARMACIST'] },
   },
   {
     path: 'pharmacist/dispense',
     loadComponent: () =>
       import('./workspaces/pharmacist/pharmacist-dispense.component').then((m) => m.PharmacistDispenseComponent),
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ROLE_PHARMACIST'] },
+    data: { roles: ['PHARMACIST'] },
   },
 
   // --- BILLING WORKSPACE ROUTES ---
@@ -353,21 +353,21 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./workspaces/billing/billing-dashboard.component').then((m) => m.BillingDashboardComponent),
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ROLE_BILLING'] },
+    data: { roles: ['BILLING_STAFF'] },
   },
   {
     path: 'billing/invoices',
     loadComponent: () =>
       import('./workspaces/billing/billing-invoices.component').then((m) => m.BillingInvoicesComponent),
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ROLE_BILLING'] },
+    data: { roles: ['BILLING_STAFF'] },
   },
   {
     path: 'billing/claims',
     loadComponent: () =>
       import('./workspaces/billing/billing-claims.component').then((m) => m.BillingClaimsComponent),
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ROLE_BILLING'] },
+    data: { roles: ['BILLING_STAFF'] },
   },
 
   // --- AUDITOR WORKSPACE ROUTES ---
@@ -376,14 +376,14 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./workspaces/auditor/auditor-dashboard.component').then((m) => m.AuditorDashboardComponent),
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ROLE_AUDITOR'] },
+    data: { roles: ['AUDITOR'] },
   },
   {
     path: 'auditor/ledger',
     loadComponent: () =>
       import('./workspaces/auditor/auditor-ledger.component').then((m) => m.AuditorLedgerComponent),
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['ROLE_AUDITOR', 'ROLE_SYS_ADMIN', 'ROLE_ORG_ADMIN'] },
+    data: { roles: ['AUDITOR', 'SUPER_ADMIN', 'ORGANIZATION_ADMIN'] },
   },
 
   // Public Static Routes

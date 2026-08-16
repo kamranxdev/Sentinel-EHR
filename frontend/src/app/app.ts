@@ -59,7 +59,7 @@ interface NavGroup {
 }
 
 interface PatientOption {
-  id: number;
+  id: string | number;
   fullName: string;
   patientCode: string;
 }
@@ -305,62 +305,61 @@ export class App implements OnInit, OnDestroy {
     this.theme.toggle();
   }
 
-  onPatientContextChange(patientId: number | string | undefined): void {
-    if (patientId !== undefined && patientId !== null) {
-      this.patientContext.selectPatientById(Number(patientId));
+  onPatientContextChange(patientId: string | undefined): void {
+    if (patientId) {
+      this.patientContext.selectPatientById(patientId);
     }
   }
 
-  patientItemToString = (id: number): string => {
+  patientItemToString = (id: string): string => {
     const patient = this.patientContext.patientList().find((p: PatientOption) => p.id === id);
     return patient ? `${patient.fullName} (MRN: ${patient.patientCode})` : '';
   };
 
   isDoctor(): boolean {
-    return this.authService.hasRole('ROLE_DOCTOR');
+    return this.authService.isDoctor();
   }
   isNurse(): boolean {
-    return this.authService.hasRole('ROLE_NURSE');
+    return this.authService.isNurse();
   }
   isSysAdmin(): boolean {
-    return this.authService.hasRole('ROLE_SYS_ADMIN');
+    return this.authService.isSysAdmin();
   }
   isOrgAdmin(): boolean {
-    return this.authService.hasRole('ROLE_ORG_ADMIN');
+    return this.authService.isOrgAdmin();
   }
   isAdmin(): boolean {
-    return this.isSysAdmin() || this.isOrgAdmin();
+    return this.authService.isAdmin();
   }
   isReceptionist(): boolean {
-    return this.authService.hasRole('ROLE_RECEPTIONIST');
+    return this.authService.isReceptionist();
   }
   isLabTech(): boolean {
-    return this.authService.hasRole('ROLE_LAB_TECH');
+    return this.authService.isLabTech();
   }
   isPharmacist(): boolean {
-    return this.authService.hasRole('ROLE_PHARMACIST');
+    return this.authService.isPharmacist();
   }
   isBilling(): boolean {
-    return this.authService.hasRole('ROLE_BILLING');
+    return this.authService.isBilling();
   }
   isAuditor(): boolean {
-    return this.authService.hasRole('ROLE_AUDITOR');
+    return this.authService.isAuditor();
   }
   isPatient(): boolean {
-    return this.authService.hasRole('ROLE_PATIENT');
+    return this.authService.isPatient();
   }
 
   primaryRole(): string {
-    const roles = this.authService.currentUser()?.roles || [];
-    if (roles.includes('ROLE_SYS_ADMIN')) return 'System Admin';
-    if (roles.includes('ROLE_ORG_ADMIN')) return 'Org Admin';
-    if (roles.includes('ROLE_DOCTOR')) return 'Physician / Clinician';
-    if (roles.includes('ROLE_NURSE')) return 'Clinical Nurse';
-    if (roles.includes('ROLE_RECEPTIONIST')) return 'Front Desk Receptionist';
-    if (roles.includes('ROLE_LAB_TECH')) return 'Laboratory Specialist';
-    if (roles.includes('ROLE_PHARMACIST')) return 'Clinical Pharmacist';
-    if (roles.includes('ROLE_BILLING')) return 'Billing Officer';
-    if (roles.includes('ROLE_AUDITOR')) return 'Compliance Auditor';
+    if (this.isSysAdmin()) return 'System Admin';
+    if (this.isOrgAdmin()) return 'Org Admin';
+    if (this.isDoctor()) return 'Physician / Clinician';
+    if (this.isNurse()) return 'Clinical Nurse';
+    if (this.isReceptionist()) return 'Front Desk Receptionist';
+    if (this.isLabTech()) return 'Laboratory Specialist';
+    if (this.isPharmacist()) return 'Clinical Pharmacist';
+    if (this.isBilling()) return 'Billing Officer';
+    if (this.isAuditor()) return 'Compliance Auditor';
     return 'Patient Portal';
   }
 

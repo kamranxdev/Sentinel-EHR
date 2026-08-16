@@ -76,7 +76,7 @@ import {
                 Facility Capacity & Schedule Analytics
               </h1>
               <span hlmBadge variant="secondary" class="text-[10px] uppercase font-mono tracking-wider">
-                ROLE_ORG_ADMIN
+                ORGANIZATION_ADMIN
               </span>
             </div>
             <p class="text-xs text-muted-foreground mt-0.5 flex items-center gap-2">

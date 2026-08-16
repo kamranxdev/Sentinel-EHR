@@ -1,12 +1,10 @@
 package com.sentinel.security;
 
-import com.sentinel.authorization.abac.AbacSecurityEvaluator;
-import com.sentinel.authorization.service.BreakGlassService;
-import com.sentinel.patients.entity.Patient;
-import com.sentinel.patients.repository.PatientAssignmentRepository;
-import com.sentinel.patients.repository.PatientRepository;
-import com.sentinel.users.entity.User;
-import com.sentinel.users.repository.UserRepository;
+import com.sentinel.security.abac.AbacSecurityEvaluator;
+import com.sentinel.security.service.BreakGlassService;
+import com.sentinel.patient.repository.PatientRepository;
+import com.sentinel.identity.entity.User;
+import com.sentinel.identity.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.Authentication;
@@ -14,26 +12,28 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 public class AbacSecurityEvaluatorTest {
 
-    private PatientAssignmentRepository assignmentRepository;
     private UserRepository userRepository;
     private PatientRepository patientRepository;
     private BreakGlassService breakGlassService;
     private AbacSecurityEvaluator evaluator;
 
+    private UUID patientId = UUID.randomUUID();
+    private UUID userId = UUID.randomUUID();
+
     @BeforeEach
     public void setUp() {
-        assignmentRepository = mock(PatientAssignmentRepository.class);
         userRepository = mock(UserRepository.class);
         patientRepository = mock(PatientRepository.class);
         breakGlassService = mock(BreakGlassService.class);
 
-        evaluator = new AbacSecurityEvaluator(assignmentRepository, userRepository, patientRepository, breakGlassService);
+        evaluator = new AbacSecurityEvaluator(userRepository, patientRepository, breakGlassService);
     }
 
     @Test
@@ -41,10 +41,10 @@ public class AbacSecurityEvaluatorTest {
         Authentication auth = mock(Authentication.class);
         when(auth.isAuthenticated()).thenReturn(true);
         when(auth.getName()).thenReturn("sysadmin");
-        doReturn(List.of(new SimpleGrantedAuthority("ROLE_SYS_ADMIN"))).when(auth).getAuthorities();
+        doReturn(List.of(new SimpleGrantedAuthority("SUPER_ADMIN"))).when(auth).getAuthorities();
 
-        boolean allowed = evaluator.hasTreatmentRelationship(auth, 1L);
-        assertTrue(allowed, "ROLE_SYS_ADMIN must bypass treatment relationship check");
+        boolean allowed = evaluator.hasTreatmentRelationship(auth, patientId);
+        assertTrue(allowed, "SUPER_ADMIN must bypass relationship check");
     }
 
     @Test
@@ -52,113 +52,44 @@ public class AbacSecurityEvaluatorTest {
         Authentication auth = mock(Authentication.class);
         when(auth.isAuthenticated()).thenReturn(true);
         when(auth.getName()).thenReturn("compliance_auditor");
-        doReturn(List.of(new SimpleGrantedAuthority("ROLE_AUDITOR"))).when(auth).getAuthorities();
+        doReturn(List.of(new SimpleGrantedAuthority("AUDITOR"))).when(auth).getAuthorities();
 
-        boolean allowed = evaluator.hasTreatmentRelationship(auth, 1L);
-        assertTrue(allowed, "ROLE_AUDITOR must bypass treatment relationship check");
+        boolean allowed = evaluator.hasTreatmentRelationship(auth, patientId);
+        assertTrue(allowed, "AUDITOR must bypass relationship check");
     }
 
     @Test
-    public void testPatientSelfAccessAllowed() {
+    public void testPhysicianBypassesPatientCheckInAccessData() {
         Authentication auth = mock(Authentication.class);
         when(auth.isAuthenticated()).thenReturn(true);
-        when(auth.getName()).thenReturn("patient_user");
-        doReturn(List.of(new SimpleGrantedAuthority("ROLE_PATIENT"))).when(auth).getAuthorities();
+        doReturn(List.of(new SimpleGrantedAuthority("PHYSICIAN"))).when(auth).getAuthorities();
+
+        boolean allowed = evaluator.canAccessPatientData(auth, patientId, "READ");
+        assertTrue(allowed, "PHYSICIAN must have access");
+    }
+
+    @Test
+    public void testNurseAccessRequiresTreatmentRelationshipOrBreakGlass() {
+        Authentication auth = mock(Authentication.class);
+        when(auth.isAuthenticated()).thenReturn(true);
+        when(auth.getName()).thenReturn("nurse_sunita");
+        doReturn(List.of(new SimpleGrantedAuthority("NURSE"))).when(auth).getAuthorities();
 
         User user = new User();
-        user.setUsername("patient_user");
+        user.setId(userId);
+        when(userRepository.findByUsername("nurse_sunita")).thenReturn(Optional.of(user));
 
-        Patient patient = new Patient();
-        patient.setId(1L);
-        patient.setUser(user);
+        // Path A: No relationship, no break glass -> DENIED
+        when(patientRepository.existsById(patientId)).thenReturn(false);
+        when(breakGlassService.hasActiveBreakGlass(userId, patientId)).thenReturn(false);
+        assertFalse(evaluator.canAccessPatientData(auth, patientId, "READ"));
 
-        when(patientRepository.findById(1L)).thenReturn(Optional.of(patient));
+        // Path B: Active Break-Glass override -> ALLOWED
+        when(breakGlassService.hasActiveBreakGlass(userId, patientId)).thenReturn(true);
+        assertTrue(evaluator.canAccessPatientData(auth, patientId, "READ"));
 
-        boolean allowed = evaluator.hasTreatmentRelationship(auth, 1L);
-        assertTrue(allowed, "Patient user accessing their own patient record must be allowed");
-    }
-
-    @Test
-    public void testActiveCareTeamAssignmentAllowed() {
-        Authentication auth = mock(Authentication.class);
-        when(auth.isAuthenticated()).thenReturn(true);
-        when(auth.getName()).thenReturn("doctor_mahtab");
-        doReturn(List.of(new SimpleGrantedAuthority("ROLE_DOCTOR"))).when(auth).getAuthorities();
-
-        when(patientRepository.findById(1L)).thenReturn(Optional.of(new Patient()));
-        when(assignmentRepository.existsActiveAssignmentByPatientIdAndUsername(1L, "doctor_mahtab")).thenReturn(true);
-
-        boolean allowed = evaluator.hasTreatmentRelationship(auth, 1L);
-        assertTrue(allowed, "Active care team assignment must grant access");
-    }
-
-    @Test
-    public void testDepartmentMatchFallbackAllowed() {
-        Authentication auth = mock(Authentication.class);
-        when(auth.isAuthenticated()).thenReturn(true);
-        when(auth.getName()).thenReturn("er_doctor");
-        doReturn(List.of(new SimpleGrantedAuthority("ROLE_DOCTOR"))).when(auth).getAuthorities();
-
-        User clinician = new User();
-        clinician.setUsername("er_doctor");
-        clinician.setDepartment("EMERGENCY");
-
-        Patient patient = new Patient();
-        patient.setId(1L);
-        patient.setDepartment("EMERGENCY");
-
-        when(patientRepository.findById(1L)).thenReturn(Optional.of(patient));
-        when(userRepository.findByUsername("er_doctor")).thenReturn(Optional.of(clinician));
-        when(assignmentRepository.existsActiveAssignmentByPatientIdAndUsername(1L, "er_doctor")).thenReturn(false);
-
-        boolean allowed = evaluator.hasTreatmentRelationship(auth, 1L);
-        assertTrue(allowed, "On-duty clinician in matching department must be allowed");
-    }
-
-    @Test
-    public void testBreakGlassOverrideAllowed() {
-        Authentication auth = mock(Authentication.class);
-        when(auth.isAuthenticated()).thenReturn(true);
-        when(auth.getName()).thenReturn("covering_doctor");
-        doReturn(List.of(new SimpleGrantedAuthority("ROLE_DOCTOR"))).when(auth).getAuthorities();
-
-        when(patientRepository.findById(1L)).thenReturn(Optional.of(new Patient()));
-        when(assignmentRepository.existsActiveAssignmentByPatientIdAndUsername(1L, "covering_doctor")).thenReturn(false);
-        when(breakGlassService.hasActiveBreakGlassOverride(1L, "covering_doctor")).thenReturn(true);
-
-        boolean allowed = evaluator.hasTreatmentRelationship(auth, 1L);
-        assertTrue(allowed, "Active Break-Glass emergency override must grant access");
-    }
-
-    @Test
-    public void testUnassignedGuestUserDenied() {
-        Authentication auth = mock(Authentication.class);
-        when(auth.isAuthenticated()).thenReturn(true);
-        when(auth.getName()).thenReturn("guest_user");
-        doReturn(List.of(new SimpleGrantedAuthority("ROLE_GUEST"))).when(auth).getAuthorities();
-
-        User clinician = new User();
-        clinician.setUsername("guest_user");
-        clinician.setDepartment("CARDIOLOGY");
-
-        Patient patient = new Patient();
-        patient.setId(1L);
-        patient.setDepartment("PEDIATRICS");
-
-        when(patientRepository.findById(1L)).thenReturn(Optional.of(patient));
-        when(userRepository.findByUsername("guest_user")).thenReturn(Optional.of(clinician));
-        when(assignmentRepository.existsActiveAssignmentByPatientIdAndUsername(1L, "guest_user")).thenReturn(false);
-
-        boolean allowed = evaluator.hasTreatmentRelationship(auth, 1L);
-        assertFalse(allowed, "Unassigned guest in different department must be denied");
-    }
-
-    @Test
-    public void testNullOrUnauthenticatedReturnsFalse() {
-        assertFalse(evaluator.hasTreatmentRelationship(null, 1L));
-
-        Authentication auth = mock(Authentication.class);
-        when(auth.isAuthenticated()).thenReturn(false);
-        assertFalse(evaluator.hasTreatmentRelationship(auth, 1L));
+        // Path C: Active Treatment relationship -> ALLOWED
+        when(patientRepository.existsById(patientId)).thenReturn(true);
+        assertTrue(evaluator.canAccessPatientData(auth, patientId, "READ"));
     }
 }

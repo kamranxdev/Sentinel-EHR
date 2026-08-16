@@ -1,24 +1,22 @@
 package com.sentinel.fhir.service;
 
-import com.sentinel.allergies.entity.Allergy;
-import com.sentinel.allergies.repository.AllergyRepository;
-import com.sentinel.diagnoses.entity.Diagnosis;
-import com.sentinel.diagnoses.repository.DiagnosisRepository;
-import com.sentinel.encounters.entity.Encounter;
-import com.sentinel.encounters.repository.EncounterRepository;
-import com.sentinel.encounters.repository.LabOrderRepository;
-import com.sentinel.patients.entity.Patient;
-import com.sentinel.patients.repository.PatientRepository;
-import com.sentinel.prescriptions.entity.Prescription;
-import com.sentinel.prescriptions.repository.PrescriptionRepository;
-import com.sentinel.users.repository.UserRepository;
-import com.sentinel.vitals.entity.Vitals;
-import com.sentinel.vitals.repository.VitalsRepository;
+import com.sentinel.clinical.entity.Allergy;
+import com.sentinel.clinical.repository.AllergyRepository;
+import com.sentinel.clinical.entity.Diagnosis;
+import com.sentinel.clinical.repository.DiagnosisRepository;
+import com.sentinel.clinical.entity.Encounter;
+import com.sentinel.clinical.repository.EncounterRepository;
+import com.sentinel.identity.entity.Person;
+import com.sentinel.patient.entity.Patient;
+import com.sentinel.patient.repository.PatientRepository;
+import com.sentinel.pharmacy.entity.Prescription;
+import com.sentinel.pharmacy.repository.PrescriptionRepository;
+import com.sentinel.clinical.entity.Vitals;
+import com.sentinel.clinical.repository.VitalsRepository;
 import org.hl7.fhir.r4.model.*;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 public class FhirService {
@@ -29,25 +27,19 @@ public class FhirService {
     private final DiagnosisRepository diagnosisRepository;
     private final PrescriptionRepository prescriptionRepository;
     private final VitalsRepository vitalsRepository;
-    private final UserRepository userRepository;
-    private final LabOrderRepository labOrderRepository;
 
     public FhirService(PatientRepository patientRepository,
-            EncounterRepository encounterRepository,
-            AllergyRepository allergyRepository,
-            DiagnosisRepository diagnosisRepository,
-            PrescriptionRepository prescriptionRepository,
-            VitalsRepository vitalsRepository,
-            UserRepository userRepository,
-            LabOrderRepository labOrderRepository) {
+                       EncounterRepository encounterRepository,
+                       AllergyRepository allergyRepository,
+                       DiagnosisRepository diagnosisRepository,
+                       PrescriptionRepository prescriptionRepository,
+                       VitalsRepository vitalsRepository) {
         this.patientRepository = patientRepository;
         this.encounterRepository = encounterRepository;
         this.allergyRepository = allergyRepository;
         this.diagnosisRepository = diagnosisRepository;
         this.prescriptionRepository = prescriptionRepository;
         this.vitalsRepository = vitalsRepository;
-        this.userRepository = userRepository;
-        this.labOrderRepository = labOrderRepository;
     }
 
     public CapabilityStatement getCapabilityStatement() {
@@ -58,84 +50,35 @@ public class FhirService {
         statement.setKind(CapabilityStatement.CapabilityStatementKind.INSTANCE);
         statement.setPublisher("Sentinel Health Systems Engine");
         statement.setFhirVersion(Enumerations.FHIRVersion._4_0_1);
-
-        CapabilityStatement.CapabilityStatementSoftwareComponent software = new CapabilityStatement.CapabilityStatementSoftwareComponent();
-        software.setName("Sentinel Interoperability Core Engine (Spring Boot + Embedded HAPI FHIR)");
-        software.setVersion("1.0.0-GOLD-STANDARD");
-        statement.setSoftware(software);
-
         return statement;
     }
 
-    public org.hl7.fhir.r4.model.Patient toPatientResource(Patient patient) {
-        return patient != null ? patient.toFhirResource() : null;
-    }
-
-    public org.hl7.fhir.r4.model.Encounter toEncounterResource(Encounter encounter) {
-        return encounter != null ? encounter.toFhirResource() : null;
-    }
-
-    public org.hl7.fhir.r4.model.AllergyIntolerance toAllergyResource(Allergy allergy) {
-        return allergy != null ? allergy.toFhirResource() : null;
-    }
-
-    public org.hl7.fhir.r4.model.Condition toConditionResource(Diagnosis diagnosis) {
-        return diagnosis != null ? diagnosis.toFhirResource() : null;
-    }
-
-    public org.hl7.fhir.r4.model.MedicationRequest toMedicationRequestResource(Prescription prescription) {
-        return prescription != null ? prescription.toFhirResource() : null;
-    }
-
-    public org.hl7.fhir.r4.model.Observation toObservationResource(Vitals vitals) {
-        return vitals != null ? vitals.toFhirResource() : null;
-    }
-
-    public List<Patient> searchPatients(String name, String gender, String identifier) {
-        return patientRepository.findAll().stream()
-                .filter(p -> name == null
-                        || (p.getFullName() != null && p.getFullName().toLowerCase().contains(name.toLowerCase())))
-                .filter(p -> gender == null || (p.getGender() != null && p.getGender().equalsIgnoreCase(gender)))
-                .filter(p -> identifier == null
-                        || (p.getPatientCode() != null && p.getPatientCode().equalsIgnoreCase(identifier))
-                        || (p.getAbhaId() != null && p.getAbhaId().equalsIgnoreCase(identifier)))
-                .collect(Collectors.toList());
-    }
-
-    public Optional<Patient> getPatientEntityById(Long id) {
+    public Optional<Patient> getPatientEntityById(UUID id) {
         return patientRepository.findById(id);
     }
 
-    public boolean patientExists(Long id) {
+    public boolean patientExists(UUID id) {
         return patientRepository.existsById(id);
     }
 
-    public void deletePatientById(Long id) {
+    public void deletePatientById(UUID id) {
         patientRepository.deleteById(id);
     }
 
     public Patient createPatientFromFhir(org.hl7.fhir.r4.model.Patient fhirPatient) {
-        Patient entity = new Patient();
+        Person person = new Person();
         if (fhirPatient.hasName()) {
-            entity.setFullName(fhirPatient.getNameFirstRep().getNameAsSingleString());
+            person.setFirstName(fhirPatient.getNameFirstRep().getNameAsSingleString());
         } else {
-            entity.setFullName("Unknown Patient");
+            person.setFirstName("Unknown Patient");
         }
 
-        if (fhirPatient.hasGender()) {
-            entity.setGender(fhirPatient.getGender().toCode().toUpperCase());
-        }
-
-        if (fhirPatient.hasBirthDate()) {
-            entity.setDateOfBirth(
-                    fhirPatient.getBirthDate().toInstant().atZone(java.time.ZoneId.systemDefault()).toLocalDate());
-        }
-
+        Patient entity = new Patient(person);
         entity.setPatientCode("MRN-" + System.currentTimeMillis());
         return patientRepository.save(entity);
     }
 
-    public Bundle getPatientEverythingBundle(Long patientId) {
+    public Bundle getPatientEverythingBundle(UUID patientId) {
         Bundle bundle = new Bundle();
         bundle.setId("bundle-patient-" + patientId);
         bundle.setType(Bundle.BundleType.SEARCHSET);
@@ -146,84 +89,46 @@ public class FhirService {
             return bundle;
         }
 
-        Patient patient = patientOpt.get();
-        bundle.addEntry().setResource(patient.toFhirResource());
-
-        List<Encounter> encounters = encounterRepository.findByPatientId(patientId);
-        for (Encounter e : encounters) {
-            bundle.addEntry().setResource(e.toFhirResource());
-        }
-
-        List<Diagnosis> diagnoses = diagnosisRepository.findByPatientId(patientId);
-        for (Diagnosis d : diagnoses) {
-            bundle.addEntry().setResource(d.toFhirResource());
-        }
-
-        List<Prescription> prescriptions = prescriptionRepository.findByPatientId(patientId);
-        for (Prescription p : prescriptions) {
-            bundle.addEntry().setResource(p.toFhirResource());
-        }
-
-        List<Vitals> vitals = vitalsRepository.findByPatientId(patientId);
-        for (Vitals v : vitals) {
-            bundle.addEntry().setResource(v.toFhirResource());
-        }
-
-        List<Allergy> allergies = allergyRepository.findByPatientId(patientId);
-        for (Allergy a : allergies) {
-            bundle.addEntry().setResource(a.toFhirResource());
-        }
-
         return bundle;
     }
 
-    public List<Encounter> searchEncounters(Long patientId) {
-        return patientId != null ? encounterRepository.findByPatientId(patientId) : encounterRepository.findAll();
+    public List<Encounter> searchEncounters(UUID patientId) {
+        return patientId != null ? encounterRepository.findByPatientIdOrderByStartedAtDesc(patientId) : encounterRepository.findAll();
     }
 
-    public Optional<Encounter> getEncounterById(Long id) {
+    public Optional<Encounter> getEncounterById(UUID id) {
         return encounterRepository.findById(id);
     }
 
-    public List<Allergy> searchAllergies(Long patientId) {
-        return patientId != null ? allergyRepository.findByPatientId(patientId) : allergyRepository.findAll();
+    public List<Allergy> searchAllergies(UUID patientId) {
+        return patientId != null ? allergyRepository.findByPatientIdOrderByRecordedAtDesc(patientId) : allergyRepository.findAll();
     }
 
-    public Optional<Allergy> getAllergyEntityById(Long id) {
+    public Optional<Allergy> getAllergyEntityById(UUID id) {
         return allergyRepository.findById(id);
     }
 
-    public List<Diagnosis> searchConditions(Long patientId) {
-        return patientId != null ? diagnosisRepository.findByPatientId(patientId) : diagnosisRepository.findAll();
+    public List<Diagnosis> searchConditions(UUID patientId) {
+        return patientId != null ? diagnosisRepository.findByPatientIdOrderByRecordedAtDesc(patientId) : diagnosisRepository.findAll();
     }
 
-    public Optional<Diagnosis> getConditionById(Long id) {
+    public Optional<Diagnosis> getConditionById(UUID id) {
         return diagnosisRepository.findById(id);
     }
 
-    public List<Prescription> searchMedications(Long patientId) {
-        return patientId != null ? prescriptionRepository.findByPatientId(patientId) : prescriptionRepository.findAll();
+    public List<Prescription> searchMedications(UUID patientId) {
+        return patientId != null ? prescriptionRepository.findByPatientIdOrderByPrescribedAtDesc(patientId) : prescriptionRepository.findAll();
     }
 
-    public Optional<Prescription> getMedicationById(Long id) {
+    public Optional<Prescription> getMedicationById(UUID id) {
         return prescriptionRepository.findById(id);
     }
 
-    public List<Vitals> searchObservations(Long patientId) {
-        return patientId != null ? vitalsRepository.findByPatientId(patientId) : vitalsRepository.findAll();
+    public List<Vitals> searchObservations(UUID patientId) {
+        return patientId != null ? vitalsRepository.findByPatientIdOrderByRecordedAtDesc(patientId) : vitalsRepository.findAll();
     }
 
-    public Optional<Vitals> getObservationById(Long id) {
+    public Optional<Vitals> getObservationById(UUID id) {
         return vitalsRepository.findById(id);
-    }
-
-    public Bundle buildBundle(String resourceType, List<? extends Resource> resources) {
-        Bundle bundle = new Bundle();
-        bundle.setType(Bundle.BundleType.SEARCHSET);
-        bundle.setTotal(resources.size());
-        for (Resource r : resources) {
-            bundle.addEntry().setResource(r);
-        }
-        return bundle;
     }
 }

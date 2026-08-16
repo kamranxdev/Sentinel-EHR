@@ -2,26 +2,39 @@ import { User } from './auth-user.model';
 import { Allergy, Diagnosis, MedicalRecord, Prescription, Vitals } from './clinical.model';
 
 export interface EmergencyContact {
-  id?: number;
+  id?: string;
   name?: string;
   relationship?: string;
   phone?: string;
+  alternatePhone?: string;
   email?: string;
   address?: string;
+  isPrimary?: boolean;
+  canMakeMedicalDecisions?: boolean;
+  notes?: string;
 }
 
 export interface Patient {
-  id: number;
+  id: string;
   patientCode: string;
+  mrn?: string;
   abhaId?: string;
   nationalId?: string;
   fullName: string;
+  firstName?: string;
+  lastName?: string;
   dateOfBirth: string;
   gender: string;
-  bloodType: string;
+  sexAtBirth?: string;
+  genderIdentity?: string;
+  bloodType?: string;
+  bloodGroup?: string;
   phone: string;
   email: string;
   address: string;
+  district?: string;
+  state?: string;
+  countryCode?: string;
   pinCode?: string;
   emergencyContact?: EmergencyContact;
   insuranceProvider?: string;
@@ -40,6 +53,7 @@ export interface Patient {
   familyMedicalHistory?: string;
   user?: User;
   createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface PatientClinicalHistoryDTO {
@@ -57,29 +71,36 @@ export interface PatientClinicalHistoryDTO {
 
 // Master Patient Index (MPI) Search & Merge
 export interface MPIMatchCandidateDTO {
-  patientId: number;
+  id?: string;
+  patientId?: string;
   patientCode: string;
   fullName: string;
   dateOfBirth?: string;
   gender?: string;
+  phone?: string;
+  email?: string;
+  address?: string;
   matchScore: number;
+  matchClassification?: string;
+  matchReason?: string;
   matchDetails?: string;
 }
 
 export interface MPIMergeRequestDTO {
-  primaryPatientId: number;
-  duplicatePatientId: number;
+  primaryPatientId: string;
+  duplicatePatientId: string;
   mergeReason: string;
 }
 
 export interface BreakGlassRequestDTO {
-  patientId: number;
+  patientId: string;
   category?: string;
   justification: string;
 }
 
 export interface BreakGlassRecord {
-  id?: number;
+  id?: string;
+  patientId?: string;
   patient?: Patient;
   user?: User;
   category: string;
@@ -89,4 +110,5 @@ export interface BreakGlassRecord {
   status?: string;
   clientIp?: string;
 }
+
 

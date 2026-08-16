@@ -109,7 +109,7 @@ export class PharmacistErxComponent implements OnInit {
   }
 
   loadPrescriptions(): void {
-    this.apiService.getPrescriptionsByPatient(1).subscribe({
+    this.apiService.getPrescriptionsByPatient('pat-001').subscribe({
       next: (rxs) => this.prescriptions.set(rxs),
       error: () => {
         this.prescriptions.set([

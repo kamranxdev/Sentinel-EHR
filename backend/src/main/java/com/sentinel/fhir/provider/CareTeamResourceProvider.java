@@ -3,8 +3,8 @@ package com.sentinel.fhir.provider;
 import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import com.sentinel.patients.entity.Patient;
-import com.sentinel.patients.repository.PatientRepository;
+import com.sentinel.patient.entity.Patient;
+import com.sentinel.patient.repository.PatientRepository;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CareTeam;
 import org.hl7.fhir.r4.model.IdType;
@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Component
 public class CareTeamResourceProvider implements IResourceProvider {
@@ -30,7 +31,7 @@ public class CareTeamResourceProvider implements IResourceProvider {
 
     @Read
     public CareTeam getCareTeamById(@IdParam IdType id) {
-        Long patientId = id.getIdPartAsLong();
+        UUID patientId = UUID.fromString(id.getIdPart());
         Patient p = patientRepository.findById(patientId).orElse(null);
 
         CareTeam team = new CareTeam();

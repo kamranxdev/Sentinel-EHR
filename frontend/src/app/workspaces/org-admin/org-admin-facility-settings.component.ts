@@ -163,7 +163,7 @@ import {
 })
 export class OrgAdminFacilitySettingsComponent implements OnInit {
   facility: Organization = {
-    id: 1,
+    id: 'org-1001',
     orgCode: 'ORG-1001',
     name: 'Sentinel General Hospital Network',
     licenseNumber: 'LIC-MH-450912',
@@ -184,7 +184,7 @@ export class OrgAdminFacilitySettingsComponent implements OnInit {
   }
 
   loadFacility(): void {
-    this.orgService.getOrganizationById(1).subscribe({
+    this.orgService.getOrgAdminFacility().subscribe({
       next: (data) => {
         if (data) this.facility = data;
       },

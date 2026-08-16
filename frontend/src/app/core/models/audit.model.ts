@@ -1,5 +1,5 @@
 export interface AuditLog {
-  id: number;
+  id: string;
   username: string;
   userRole: string;
   action: string;

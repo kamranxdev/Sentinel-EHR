@@ -5,7 +5,7 @@ spring:
   application:
     name: sentinel-backend
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:h2:mem:sentineldb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=PostgreSQL}
+    url: ${SPRING_DATASOURCE_URL:jdbc:h2:mem:sentineldb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;INIT=CREATE SCHEMA IF NOT EXISTS tenancy\;CREATE SCHEMA IF NOT EXISTS identity\;CREATE SCHEMA IF NOT EXISTS patient\;CREATE SCHEMA IF NOT EXISTS clinical\;CREATE SCHEMA IF NOT EXISTS pharmacy\;CREATE SCHEMA IF NOT EXISTS scheduling\;CREATE SCHEMA IF NOT EXISTS documents\;CREATE SCHEMA IF NOT EXISTS insurance\;CREATE SCHEMA IF NOT EXISTS billing\;CREATE SCHEMA IF NOT EXISTS consent\;CREATE SCHEMA IF NOT EXISTS security\;CREATE SCHEMA IF NOT EXISTS terminology\;CREATE SCHEMA IF NOT EXISTS audit\;CREATE SCHEMA IF NOT EXISTS imaging\;CREATE SCHEMA IF NOT EXISTS laboratory\;CREATE SCHEMA IF NOT EXISTS procedures}
     driverClassName: ${SPRING_DATASOURCE_DRIVER:org.h2.Driver}
     username: ${SPRING_DATASOURCE_USERNAME:sa}
     password: ${SPRING_DATASOURCE_PASSWORD:}
@@ -14,16 +14,10 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: false
-    defer-datasource-initialization: true
   h2:
     console:
       enabled: true
       path: /h2-console
-  sql:
-    init:
-      data-locations: classpath:seed.sql
-      mode: always
-      continue-on-error: true
 
 app:
   jwt-secret: ${JWT_SECRET:9a2f8c4e7b1a3d6f8e5c2b0a4f6e8d1c3b5a7f9e2d4c6b8a0f2e4d6c8b0a1f3}
@@ -41,6 +35,3 @@ springdoc:
 logging:
   pattern:
     console: "%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX} %5p ${PID:- } --- [%15.15t] %-40.40logger{36} : %m%n"
-
-
-

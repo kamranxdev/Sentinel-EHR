@@ -2,8 +2,8 @@ import { Patient } from './patient.model';
 import { Encounter } from './clinical.model';
 
 export interface LabResult {
-  id?: number;
-  labOrderId?: number;
+  id?: string;
+  labOrderId?: string;
   testName?: string;
   resultValue: string;
   unit?: string;
@@ -15,9 +15,9 @@ export interface LabResult {
 }
 
 export interface LabOrder {
-  id?: number;
-  patientId?: number;
-  encounterId?: number;
+  id?: string;
+  patientId?: string;
+  encounterId?: string;
   patient?: Patient;
   encounter?: Encounter;
   testName: string;
@@ -31,8 +31,8 @@ export interface LabOrder {
 }
 
 export interface LabOrderRequestDTO {
-  patientId: number;
-  encounterId?: number;
+  patientId: string;
+  encounterId?: string;
   testName: string;
   loincCode?: string;
   notes?: string;

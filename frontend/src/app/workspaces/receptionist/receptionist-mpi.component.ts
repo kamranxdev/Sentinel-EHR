@@ -335,8 +335,8 @@ export class ReceptionistMPIComponent implements OnInit {
     this.merging.set(true);
     this.apiService
       .requestMPIMerge({
-        primaryPatientId: Number(this.primaryPatientId),
-        duplicatePatientId: dup.id,
+        primaryPatientId: String(this.primaryPatientId),
+        duplicatePatientId: String(dup.id || dup.patientId),
         mergeReason: this.mergeReason,
       })
       .subscribe({

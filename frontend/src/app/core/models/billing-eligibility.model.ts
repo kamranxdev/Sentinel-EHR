@@ -1,5 +1,5 @@
 export interface EligibilityInquiryDTO {
-  patientId?: number;
+  patientId?: string;
   payerName?: string;
   subscriberId?: string;
   groupNumber?: string;
@@ -17,8 +17,9 @@ export interface EligibilityResponseDTO {
 }
 
 export interface CopayCollectionDTO {
-  appointmentId?: number;
-  patientId?: number;
+  id?: string;
+  appointmentId?: string;
+  patientId?: string;
   amountCollected: number;
   paymentMethod: string;
   receiptNumber?: string;

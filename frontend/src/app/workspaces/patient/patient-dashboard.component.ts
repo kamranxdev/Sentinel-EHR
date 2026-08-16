@@ -648,7 +648,7 @@ export class PatientDashboardComponent implements OnInit {
     });
   }
 
-  private loadPatientHealthData(patientId: number): void {
+  private loadPatientHealthData(patientId: string): void {
     this.apiService.getAppointmentsByPatient(patientId).subscribe({
       next: (apps) => this.appointments.set(apps),
       error: (err) => console.warn('Error loading appointments', err),

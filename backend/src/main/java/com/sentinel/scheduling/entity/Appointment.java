@@ -1,0 +1,136 @@
+package com.sentinel.scheduling.entity;
+
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.sentinel.patient.entity.Patient;
+import com.sentinel.tenancy.entity.Department;
+import com.sentinel.tenancy.entity.Facility;
+import com.sentinel.tenancy.entity.Organization;
+import com.sentinel.identity.entity.User;
+import com.sentinel.clinical.entity.Vitals;
+import jakarta.persistence.*;
+import java.time.OffsetDateTime;
+import java.util.UUID;
+
+@Entity
+@Table(name = "appointments", schema = "scheduling")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+public class Appointment {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private UUID id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "organization_id", nullable = false)
+    private Organization organization;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "facility_id", nullable = false)
+    private Facility facility;
+
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "patient_id", nullable = false)
+    private Patient patient;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by")
+    private User createdBy;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "department_id")
+    private Department department;
+
+    @Column(nullable = false)
+    private OffsetDateTime startsAt = OffsetDateTime.now();
+
+    @Column(nullable = false)
+    private OffsetDateTime endsAt = OffsetDateTime.now().plusMinutes(30);
+
+    @Column(nullable = false, length = 30)
+    private String status = "SCHEDULED";
+
+    @Column(columnDefinition = "TEXT")
+    private String reason;
+
+    @Column(columnDefinition = "TEXT")
+    private String notes;
+
+    private OffsetDateTime checkedInAt;
+    private OffsetDateTime arrivedAt;
+    private OffsetDateTime completedAt;
+
+    @Column(nullable = false)
+    private OffsetDateTime createdAt = OffsetDateTime.now();
+
+    @Column(nullable = false)
+    private OffsetDateTime updatedAt = OffsetDateTime.now();
+
+    @Transient
+    private Vitals vitals;
+
+    @Transient
+    private String stage = "SCHEDULED";
+
+    public Appointment() {}
+
+    public UUID getId() { return id; }
+    public void setId(UUID id) { this.id = id; }
+
+    public Organization getOrganization() { return organization; }
+    public void setOrganization(Organization organization) { this.organization = organization; }
+
+    public Facility getFacility() { return facility; }
+    public void setFacility(Facility facility) { this.facility = facility; }
+
+    public Patient getPatient() { return patient; }
+    public void setPatient(Patient patient) { this.patient = patient; }
+
+    public User getCreatedBy() { return createdBy; }
+    public void setCreatedBy(User createdBy) { this.createdBy = createdBy; }
+
+    public Department getDepartment() { return department; }
+    public void setDepartment(Department department) { this.department = department; }
+
+    public OffsetDateTime getStartsAt() { return startsAt; }
+    public void setStartsAt(OffsetDateTime startsAt) { this.startsAt = startsAt; }
+
+    public OffsetDateTime getEndsAt() { return endsAt; }
+    public void setEndsAt(OffsetDateTime endsAt) { this.endsAt = endsAt; }
+
+    public String getStatus() { return status; }
+    public void setStatus(String status) {
+        this.status = status;
+        this.stage = status;
+    }
+
+    public String getReason() { return reason; }
+    public void setReason(String reason) { this.reason = reason; }
+
+    public String getNotes() { return notes; }
+    public void setNotes(String notes) { this.notes = notes; }
+
+    public OffsetDateTime getCheckedInAt() { return checkedInAt; }
+    public void setCheckedInAt(OffsetDateTime checkedInAt) { this.checkedInAt = checkedInAt; }
+
+    public OffsetDateTime getArrivedAt() { return arrivedAt; }
+    public void setArrivedAt(OffsetDateTime arrivedAt) { this.arrivedAt = arrivedAt; }
+
+    public OffsetDateTime getCompletedAt() { return completedAt; }
+    public void setCompletedAt(OffsetDateTime completedAt) { this.completedAt = completedAt; }
+
+    public OffsetDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(OffsetDateTime createdAt) { this.createdAt = createdAt; }
+
+    public OffsetDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(OffsetDateTime updatedAt) { this.updatedAt = updatedAt; }
+
+    public Vitals getVitals() { return vitals; }
+    public void setVitals(Vitals vitals) { this.vitals = vitals; }
+
+    public String getStage() { return stage != null ? stage : status; }
+    public void setStage(String stage) { this.stage = stage; }
+
+    // Legacy getter helpers
+    public User getDoctor() { return createdBy; }
+    public void setDoctor(User doctor) { this.createdBy = doctor; }
+}

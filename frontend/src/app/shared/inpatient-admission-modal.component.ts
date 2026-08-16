@@ -171,13 +171,13 @@ import { lucideHospital, lucideUserPlus, lucideX, lucideUser, lucideStethoscope,
 })
 export class InpatientAdmissionModalComponent implements OnInit, OnChanges {
   @Input() isOpen = false;
-  @Input() targetPatientId: number | string | null | undefined = null;
+  @Input() targetPatientId: string | null | undefined = null;
   @Input() lockPatient = false;
   @Output() closed = new EventEmitter<void>();
   @Output() admitted = new EventEmitter<any>();
 
   patientList = signal<any[]>([]);
-  selectedPatientId: number | null = null;
+  selectedPatientId: string | null = null;
   isPatientLocked = signal(false);
 
   admissionType = 'EMERGENCY';
@@ -200,11 +200,6 @@ export class InpatientAdmissionModalComponent implements OnInit, OnChanges {
         this.syncPatientContext();
       },
       error: () => {
-        this.patientList.set([
-          { id: 1, fullName: 'Kamran Khan', patientCode: 'PAT-1001' },
-          { id: 2, fullName: 'Aarav Patel', patientCode: 'PAT-1002' },
-          { id: 3, fullName: 'Ananya Sharma', patientCode: 'PAT-1003' },
-        ]);
         this.syncPatientContext();
       },
     });
@@ -219,7 +214,7 @@ export class InpatientAdmissionModalComponent implements OnInit, OnChanges {
   private syncPatientContext(): void {
     const active = this.targetPatientId || this.patientContext.activePatient()?.id;
     if (active) {
-      this.selectedPatientId = Number(active);
+      this.selectedPatientId = String(active);
       this.isPatientLocked.set(true);
     } else {
       this.isPatientLocked.set(this.lockPatient);
@@ -240,7 +235,7 @@ export class InpatientAdmissionModalComponent implements OnInit, OnChanges {
     this.isSubmitting.set(true);
 
     const payload = {
-      patientId: Number(this.selectedPatientId),
+      patientId: this.selectedPatientId,
       encounterType: 'INPATIENT',
       location: this.targetDepartment,
       chiefComplaint: this.chiefComplaint,

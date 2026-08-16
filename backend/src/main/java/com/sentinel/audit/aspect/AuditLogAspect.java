@@ -11,11 +11,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
-
-import java.time.LocalDateTime;
 
 @Aspect
 @Component
@@ -57,24 +54,12 @@ public class AuditLogAspect {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String username = (auth != null && auth.isAuthenticated()) ? auth.getName() : "ANONYMOUS";
         String role = (auth != null && auth.isAuthenticated()) ? com.sentinel.audit.service.AuditTrailService.resolvePrimaryRole(auth) : "NONE";
-        String clientIp = org.slf4j.MDC.get(com.sentinel.common.logging.MDCLoggingFilter.CLIENT_IP_MDC_KEY);
-        if (clientIp == null || clientIp.isBlank()) {
-            clientIp = "127.0.0.1";
-        }
 
         try {
-            AuditLog log = new AuditLog();
-            log.setUsername(username);
-            log.setUserRole(role);
-            log.setAction("ACCESS_DENIED");
-            log.setEntityName(joinPoint.getSignature().getDeclaringType().getSimpleName());
-            log.setIpAddress(clientIp);
-            log.setDetails("Security violation / access denied on endpoint: " + joinPoint.getSignature().toShortString() + " - " + ex.getMessage());
-            log.setTimestamp(LocalDateTime.now());
-
+            AuditLog log = new AuditLog(username, role, "ACCESS_DENIED", joinPoint.getSignature().getDeclaringType().getSimpleName(), "127.0.0.1", "Access denied on endpoint: " + joinPoint.getSignature().toShortString());
             auditLogRepository.save(log);
-            logger.warn("[SECURITY_AUDIT] status=DENIED action=ACCESS_DENIED endpoint={} user='{}' role='{}' ip={} details=\"{}\"", 
-                    joinPoint.getSignature().toShortString(), username, role, clientIp, ex.getMessage());
+            logger.warn("[SECURITY_AUDIT] status=DENIED action=ACCESS_DENIED endpoint={} user='{}' role='{}'", 
+                    joinPoint.getSignature().toShortString(), username, role);
         } catch (Exception loggingEx) {
             logger.error("AOP AUDIT LOG ERROR: Failed to log access denial: {}", loggingEx.getMessage());
         }

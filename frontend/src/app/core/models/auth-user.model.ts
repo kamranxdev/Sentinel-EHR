@@ -1,5 +1,6 @@
 export interface User {
-  id: number;
+  id: string;
+  personId?: string;
   username: string;
   fullName: string;
   email?: string;
@@ -10,6 +11,8 @@ export interface User {
   yearsOfExperience?: number;
   medicalBoardState?: string;
   verificationStatus?: string;
+  status?: string;
+  mfaEnabled?: boolean;
   roles: string[];
 }
 
@@ -18,10 +21,12 @@ export interface JwtAuthResponse {
   tokenType: string;
   username: string;
   fullName: string;
+  email?: string;
   roles: string[];
-  userId: number;
-  id?: number;
-  assignedPatientIds?: number[];
+  permissions?: string[];
+  userId?: string;
+  id?: string;
+  assignedPatientIds?: string[];
 }
 
 export interface UserUpdateRequestDTO {

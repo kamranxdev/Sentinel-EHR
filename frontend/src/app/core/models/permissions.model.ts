@@ -1,44 +1,59 @@
+/**
+ * Canonical user roles — exactly as stored in security.roles table.
+ * DO NOT add aliases here. The DB inserts only these 10 names.
+ */
 export type UserRole =
-  | 'ROLE_SYS_ADMIN'
-  | 'ROLE_ORG_ADMIN'
-  | 'ROLE_DOCTOR'
-  | 'ROLE_NURSE'
-  | 'ROLE_RECEPTIONIST'
-  | 'ROLE_LAB_TECH'
-  | 'ROLE_PHARMACIST'
-  | 'ROLE_BILLING'
-  | 'ROLE_PATIENT'
-  | 'ROLE_AUDITOR'
-  | 'ROLE_ADMIN';
+  | 'SUPER_ADMIN'
+  | 'ORGANIZATION_ADMIN'
+  | 'PHYSICIAN'
+  | 'NURSE'
+  | 'RECEPTIONIST'
+  | 'LAB_TECHNICIAN'
+  | 'PHARMACIST'
+  | 'BILLING_STAFF'
+  | 'AUDITOR'
+  | 'PATIENT';
 
 export enum Capability {
   // Patient / MPI Operations
   PATIENT_READ = 'PATIENT_READ',
   PATIENT_CREATE = 'PATIENT_CREATE',
+  PATIENT_UPDATE = 'PATIENT_UPDATE',
   PATIENT_UPDATE_DEMOGRAPHICS = 'PATIENT_UPDATE_DEMOGRAPHICS',
   PATIENT_UPDATE_CLINICAL = 'PATIENT_UPDATE_CLINICAL',
+
+  MPI_SEARCH = 'MPI_SEARCH',
+  MPI_MERGE_REQUEST = 'MPI_MERGE_REQUEST',
 
   // Clinical Operations
   ALLERGY_READ = 'ALLERGY_READ',
   ALLERGY_CREATE = 'ALLERGY_CREATE',
+  ALLERGY_UPDATE = 'ALLERGY_UPDATE',
   ALLERGY_UPDATE_STATUS = 'ALLERGY_UPDATE_STATUS',
 
   DIAGNOSIS_READ = 'DIAGNOSIS_READ',
   DIAGNOSIS_CREATE = 'DIAGNOSIS_CREATE',
-
-  PRESCRIPTION_READ = 'PRESCRIPTION_READ',
-  PRESCRIPTION_CREATE = 'PRESCRIPTION_CREATE',
-  PRESCRIPTION_UPDATE_STATUS = 'PRESCRIPTION_UPDATE_STATUS',
-  MEDICATION_DISPENSE = 'MEDICATION_DISPENSE',
+  DIAGNOSIS_UPDATE = 'DIAGNOSIS_UPDATE',
 
   VITALS_READ = 'VITALS_READ',
   VITALS_CREATE = 'VITALS_CREATE',
 
   ENCOUNTER_READ = 'ENCOUNTER_READ',
   ENCOUNTER_CREATE = 'ENCOUNTER_CREATE',
+  ENCOUNTER_UPDATE = 'ENCOUNTER_UPDATE',
 
-  MEDICAL_RECORD_READ = 'MEDICAL_RECORD_READ',
-  MEDICAL_RECORD_CREATE = 'MEDICAL_RECORD_CREATE',
+  // Clinical Documents (replaces legacy MEDICAL_RECORD_*)
+  CLINICAL_NOTE_READ = 'CLINICAL_NOTE_READ',
+  CLINICAL_NOTE_CREATE = 'CLINICAL_NOTE_CREATE',
+
+  // Pharmacy & MAR
+  PRESCRIPTION_READ = 'PRESCRIPTION_READ',
+  PRESCRIPTION_CREATE = 'PRESCRIPTION_CREATE',
+  PRESCRIPTION_UPDATE = 'PRESCRIPTION_UPDATE',
+  PRESCRIPTION_UPDATE_STATUS = 'PRESCRIPTION_UPDATE_STATUS',
+  MEDICATION_DISPENSE = 'MEDICATION_DISPENSE',
+  MAR_READ = 'MAR_READ',
+  MAR_ADMINISTER = 'MAR_ADMINISTER',
 
   // Lab & Diagnostic Operations
   LAB_ORDER_CREATE = 'LAB_ORDER_CREATE',
@@ -47,6 +62,8 @@ export enum Capability {
 
   // Appointment & Workflow Operations
   APPOINTMENT_READ = 'APPOINTMENT_READ',
+  APPOINTMENT_CREATE = 'APPOINTMENT_CREATE',
+  APPOINTMENT_UPDATE = 'APPOINTMENT_UPDATE',
   APPOINTMENT_SCHEDULE = 'APPOINTMENT_SCHEDULE',
   APPOINTMENT_STATUS_UPDATE = 'APPOINTMENT_STATUS_UPDATE',
   APPOINTMENT_CHECKIN = 'APPOINTMENT_CHECKIN',
@@ -59,148 +76,187 @@ export enum Capability {
   // Billing Operations
   INVOICE_CREATE = 'INVOICE_CREATE',
   INVOICE_READ = 'INVOICE_READ',
+  BILLING_READ = 'BILLING_READ',
+  BILLING_WRITE = 'BILLING_WRITE',
 
-  // Administrative & Audit Operations
+  // Administrative & Tenancy
+  TENANCY_READ = 'TENANCY_READ',
+  TENANCY_WRITE = 'TENANCY_WRITE',
+  PRACTITIONER_READ = 'PRACTITIONER_READ',
+  PRACTITIONER_WRITE = 'PRACTITIONER_WRITE',
   ADMIN_USER_MANAGE = 'ADMIN_USER_MANAGE',
   ADMIN_FHIR_INGEST = 'ADMIN_FHIR_INGEST',
   AUDIT_LOG_READ = 'AUDIT_LOG_READ',
   FHIR_QUERY = 'FHIR_QUERY',
 }
 
+
+const doctorCapabilities: Capability[] = [
+  Capability.PATIENT_READ,
+  Capability.PATIENT_UPDATE_DEMOGRAPHICS,
+  Capability.PATIENT_UPDATE_CLINICAL,
+  Capability.MPI_SEARCH,
+  Capability.ALLERGY_READ,
+  Capability.ALLERGY_CREATE,
+  Capability.ALLERGY_UPDATE,
+  Capability.ALLERGY_UPDATE_STATUS,
+  Capability.DIAGNOSIS_READ,
+  Capability.DIAGNOSIS_CREATE,
+  Capability.DIAGNOSIS_UPDATE,
+  Capability.VITALS_READ,
+  Capability.VITALS_CREATE,
+  Capability.ENCOUNTER_READ,
+  Capability.ENCOUNTER_CREATE,
+  Capability.ENCOUNTER_UPDATE,
+  Capability.CLINICAL_NOTE_READ,
+  Capability.CLINICAL_NOTE_CREATE,
+  Capability.PRESCRIPTION_READ,
+  Capability.PRESCRIPTION_CREATE,
+  Capability.PRESCRIPTION_UPDATE,
+  Capability.PRESCRIPTION_UPDATE_STATUS,
+  Capability.MAR_READ,
+  Capability.LAB_ORDER_CREATE,
+  Capability.LAB_RESULT_READ,
+  Capability.APPOINTMENT_READ,
+  Capability.APPOINTMENT_SCHEDULE,
+  Capability.APPOINTMENT_STATUS_UPDATE,
+  Capability.APPOINTMENT_DOCTOR_CONSULT,
+  Capability.APPOINTMENT_NOTES_ADD,
+  Capability.APPOINTMENT_CANCEL,
+  Capability.PRACTITIONER_READ,
+  Capability.FHIR_QUERY,
+];
+
+const nurseCapabilities: Capability[] = [
+  Capability.PATIENT_READ,
+  Capability.PATIENT_UPDATE_DEMOGRAPHICS,
+  Capability.PATIENT_UPDATE_CLINICAL,
+  Capability.ALLERGY_READ,
+  Capability.ALLERGY_CREATE,
+  Capability.ALLERGY_UPDATE_STATUS,
+  Capability.DIAGNOSIS_READ,
+  Capability.VITALS_READ,
+  Capability.VITALS_CREATE,
+  Capability.ENCOUNTER_READ,
+  Capability.ENCOUNTER_CREATE,
+  Capability.ENCOUNTER_UPDATE,
+  Capability.CLINICAL_NOTE_READ,
+  Capability.CLINICAL_NOTE_CREATE,
+  Capability.PRESCRIPTION_READ,
+  Capability.PRESCRIPTION_UPDATE_STATUS,
+  Capability.MAR_READ,
+  Capability.MAR_ADMINISTER,
+  Capability.LAB_RESULT_READ,
+  Capability.APPOINTMENT_READ,
+  Capability.APPOINTMENT_TRIAGE,
+  Capability.APPOINTMENT_NOTES_ADD,
+  Capability.APPOINTMENT_CANCEL,
+  Capability.FHIR_QUERY,
+];
+
+const receptionistCapabilities: Capability[] = [
+  Capability.PATIENT_READ,
+  Capability.PATIENT_CREATE,
+  Capability.PATIENT_UPDATE_DEMOGRAPHICS,
+  Capability.MPI_SEARCH,
+  Capability.APPOINTMENT_READ,
+  Capability.APPOINTMENT_CREATE,
+  Capability.APPOINTMENT_SCHEDULE,
+  Capability.APPOINTMENT_STATUS_UPDATE,
+  Capability.APPOINTMENT_CHECKIN,
+  Capability.APPOINTMENT_BILLING_GENERATE,
+  Capability.APPOINTMENT_NOTES_ADD,
+  Capability.APPOINTMENT_CANCEL,
+  Capability.INVOICE_READ,
+  Capability.BILLING_READ,
+  Capability.FHIR_QUERY,
+];
+
+const labTechCapabilities: Capability[] = [
+  Capability.PATIENT_READ,
+  Capability.LAB_ORDER_CREATE,
+  Capability.LAB_RESULT_CREATE,
+  Capability.LAB_RESULT_READ,
+  Capability.APPOINTMENT_READ,
+  Capability.FHIR_QUERY,
+];
+
+const pharmacistCapabilities: Capability[] = [
+  Capability.PATIENT_READ,
+  Capability.PRESCRIPTION_READ,
+  Capability.PRESCRIPTION_UPDATE_STATUS,
+  Capability.MEDICATION_DISPENSE,
+  Capability.ALLERGY_READ,
+  Capability.DIAGNOSIS_READ,
+  Capability.MAR_READ,
+  Capability.FHIR_QUERY,
+];
+
+const billingCapabilities: Capability[] = [
+  Capability.PATIENT_READ,
+  Capability.INVOICE_CREATE,
+  Capability.INVOICE_READ,
+  Capability.BILLING_READ,
+  Capability.BILLING_WRITE,
+  Capability.APPOINTMENT_READ,
+  Capability.APPOINTMENT_BILLING_GENERATE,
+  Capability.FHIR_QUERY,
+];
+
+const patientCapabilities: Capability[] = [
+  Capability.PATIENT_READ,
+  Capability.PATIENT_UPDATE_DEMOGRAPHICS,
+  Capability.ALLERGY_READ,
+  Capability.DIAGNOSIS_READ,
+  Capability.PRESCRIPTION_READ,
+  Capability.VITALS_READ,
+  Capability.ENCOUNTER_READ,
+  Capability.CLINICAL_NOTE_READ,
+  Capability.LAB_RESULT_READ,
+  Capability.INVOICE_READ,
+  Capability.APPOINTMENT_READ,
+  Capability.APPOINTMENT_SCHEDULE,
+  Capability.APPOINTMENT_CREATE,
+  Capability.APPOINTMENT_NOTES_ADD,
+  Capability.APPOINTMENT_CANCEL,
+  Capability.FHIR_QUERY,
+];
+
+const auditorCapabilities: Capability[] = [
+  Capability.PATIENT_READ,
+  Capability.MPI_SEARCH,
+  Capability.ALLERGY_READ,
+  Capability.DIAGNOSIS_READ,
+  Capability.PRESCRIPTION_READ,
+  Capability.VITALS_READ,
+  Capability.ENCOUNTER_READ,
+  Capability.CLINICAL_NOTE_READ,
+  Capability.LAB_RESULT_READ,
+  Capability.INVOICE_READ,
+  Capability.BILLING_READ,
+  Capability.APPOINTMENT_READ,
+  Capability.PRACTITIONER_READ,
+  Capability.AUDIT_LOG_READ,
+  Capability.FHIR_QUERY,
+];
+
+
+
+
 /**
- * Mapping of User Roles to Authorized Capabilities across all 10 roles.
+ * Maps each canonical role to its allowed capabilities.
+ * Must match exactly the 10 role names in security.roles table.
  */
 export const ROLE_CAPABILITY_MAP: Record<UserRole, Capability[]> = {
-  ROLE_SYS_ADMIN: Object.values(Capability),
-  ROLE_ORG_ADMIN: Object.values(Capability),
-  ROLE_ADMIN: Object.values(Capability),
-
-  ROLE_DOCTOR: [
-    Capability.PATIENT_READ,
-    Capability.PATIENT_UPDATE_DEMOGRAPHICS,
-    Capability.PATIENT_UPDATE_CLINICAL,
-    Capability.ALLERGY_READ,
-    Capability.ALLERGY_CREATE,
-    Capability.ALLERGY_UPDATE_STATUS,
-    Capability.DIAGNOSIS_READ,
-    Capability.DIAGNOSIS_CREATE,
-    Capability.PRESCRIPTION_READ,
-    Capability.PRESCRIPTION_CREATE,
-    Capability.PRESCRIPTION_UPDATE_STATUS,
-    Capability.VITALS_READ,
-    Capability.VITALS_CREATE,
-    Capability.ENCOUNTER_READ,
-    Capability.ENCOUNTER_CREATE,
-    Capability.MEDICAL_RECORD_READ,
-    Capability.MEDICAL_RECORD_CREATE,
-    Capability.LAB_ORDER_CREATE,
-    Capability.LAB_RESULT_READ,
-    Capability.APPOINTMENT_READ,
-    Capability.APPOINTMENT_SCHEDULE,
-    Capability.APPOINTMENT_STATUS_UPDATE,
-    Capability.APPOINTMENT_DOCTOR_CONSULT,
-    Capability.APPOINTMENT_NOTES_ADD,
-    Capability.APPOINTMENT_CANCEL,
-    Capability.FHIR_QUERY,
-  ],
-
-  ROLE_NURSE: [
-    Capability.PATIENT_READ,
-    Capability.PATIENT_UPDATE_DEMOGRAPHICS,
-    Capability.PATIENT_UPDATE_CLINICAL,
-    Capability.ALLERGY_READ,
-    Capability.ALLERGY_CREATE,
-    Capability.ALLERGY_UPDATE_STATUS,
-    Capability.DIAGNOSIS_READ,
-    Capability.PRESCRIPTION_READ,
-    Capability.PRESCRIPTION_UPDATE_STATUS,
-    Capability.VITALS_READ,
-    Capability.VITALS_CREATE,
-    Capability.ENCOUNTER_READ,
-    Capability.ENCOUNTER_CREATE,
-    Capability.MEDICAL_RECORD_READ,
-    Capability.MEDICAL_RECORD_CREATE,
-    Capability.LAB_RESULT_READ,
-    Capability.APPOINTMENT_READ,
-    Capability.APPOINTMENT_TRIAGE,
-    Capability.APPOINTMENT_NOTES_ADD,
-    Capability.APPOINTMENT_CANCEL,
-    Capability.FHIR_QUERY,
-  ],
-
-  ROLE_RECEPTIONIST: [
-    Capability.PATIENT_READ,
-    Capability.PATIENT_CREATE,
-    Capability.PATIENT_UPDATE_DEMOGRAPHICS,
-    Capability.APPOINTMENT_READ,
-    Capability.APPOINTMENT_SCHEDULE,
-    Capability.APPOINTMENT_STATUS_UPDATE,
-    Capability.APPOINTMENT_CHECKIN,
-    Capability.APPOINTMENT_BILLING_GENERATE,
-    Capability.APPOINTMENT_NOTES_ADD,
-    Capability.APPOINTMENT_CANCEL,
-    Capability.INVOICE_READ,
-    Capability.FHIR_QUERY,
-  ],
-
-  ROLE_LAB_TECH: [
-    Capability.PATIENT_READ,
-    Capability.LAB_ORDER_CREATE,
-    Capability.LAB_RESULT_CREATE,
-    Capability.LAB_RESULT_READ,
-    Capability.APPOINTMENT_READ,
-    Capability.FHIR_QUERY,
-  ],
-
-  ROLE_PHARMACIST: [
-    Capability.PATIENT_READ,
-    Capability.PRESCRIPTION_READ,
-    Capability.PRESCRIPTION_UPDATE_STATUS,
-    Capability.MEDICATION_DISPENSE,
-    Capability.ALLERGY_READ,
-    Capability.DIAGNOSIS_READ,
-    Capability.FHIR_QUERY,
-  ],
-
-  ROLE_BILLING: [
-    Capability.PATIENT_READ,
-    Capability.INVOICE_CREATE,
-    Capability.INVOICE_READ,
-    Capability.APPOINTMENT_READ,
-    Capability.APPOINTMENT_BILLING_GENERATE,
-    Capability.FHIR_QUERY,
-  ],
-
-  ROLE_PATIENT: [
-    Capability.PATIENT_READ,
-    Capability.PATIENT_UPDATE_DEMOGRAPHICS,
-    Capability.ALLERGY_READ,
-    Capability.DIAGNOSIS_READ,
-    Capability.PRESCRIPTION_READ,
-    Capability.VITALS_READ,
-    Capability.ENCOUNTER_READ,
-    Capability.MEDICAL_RECORD_READ,
-    Capability.LAB_RESULT_READ,
-    Capability.INVOICE_READ,
-    Capability.APPOINTMENT_READ,
-    Capability.APPOINTMENT_SCHEDULE,
-    Capability.APPOINTMENT_NOTES_ADD,
-    Capability.APPOINTMENT_CANCEL,
-    Capability.FHIR_QUERY,
-  ],
-
-  ROLE_AUDITOR: [
-    Capability.PATIENT_READ,
-    Capability.ALLERGY_READ,
-    Capability.DIAGNOSIS_READ,
-    Capability.PRESCRIPTION_READ,
-    Capability.VITALS_READ,
-    Capability.ENCOUNTER_READ,
-    Capability.MEDICAL_RECORD_READ,
-    Capability.LAB_RESULT_READ,
-    Capability.INVOICE_READ,
-    Capability.APPOINTMENT_READ,
-    Capability.AUDIT_LOG_READ,
-    Capability.FHIR_QUERY,
-  ],
+  SUPER_ADMIN:       Object.values(Capability),
+  ORGANIZATION_ADMIN: Object.values(Capability),
+  PHYSICIAN:         doctorCapabilities,
+  NURSE:             nurseCapabilities,
+  RECEPTIONIST:      receptionistCapabilities,
+  LAB_TECHNICIAN:    labTechCapabilities,
+  PHARMACIST:        pharmacistCapabilities,
+  BILLING_STAFF:     billingCapabilities,
+  AUDITOR:           auditorCapabilities,
+  PATIENT:           patientCapabilities,
 };
+

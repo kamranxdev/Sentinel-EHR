@@ -410,7 +410,7 @@ export class ReceptionistIntakeComponent implements OnInit {
   // Today's Appointment Scheduling for First Visit
   scheduleTodayAppointment = true;
   doctors = signal<any[]>([]);
-  selectedDoctorId: number = 1;
+  selectedDoctorId: string = 'doc-001';
   appointmentTime: string = '10:30';
   consultationReason: string = 'First Visit General Consultation & Clinical Assessment';
   initialStage: string = 'ARRIVED';
@@ -434,7 +434,7 @@ export class ReceptionistIntakeComponent implements OnInit {
       next: (docs) => {
         if (docs && docs.length > 0) {
           this.doctors.set(docs);
-          this.selectedDoctorId = docs[0].id;
+          this.selectedDoctorId = String(docs[0].id);
         } else {
           this.setFallbackDoctors();
         }
@@ -445,11 +445,11 @@ export class ReceptionistIntakeComponent implements OnInit {
 
   setFallbackDoctors(): void {
     this.doctors.set([
-      { id: 1, fullName: 'Ananya Deshmukh', specialty: 'General Internal Medicine' },
-      { id: 2, fullName: 'Vikramaditya Verma', specialty: 'Cardiology' },
-      { id: 3, fullName: 'Meera Kulkarni', specialty: 'Pediatrics' },
+      { id: 'doc-001', fullName: 'Ananya Deshmukh', specialty: 'General Internal Medicine' },
+      { id: 'doc-002', fullName: 'Vikramaditya Verma', specialty: 'Cardiology' },
+      { id: 'doc-003', fullName: 'Meera Kulkarni', specialty: 'Pediatrics' },
     ]);
-    this.selectedDoctorId = 1;
+    this.selectedDoctorId = 'doc-001';
   }
 
   dismissModal(): void {
@@ -502,7 +502,7 @@ export class ReceptionistIntakeComponent implements OnInit {
             this.apiService
               .scheduleAppointment({
                 patientId: savedPatient.id,
-                doctorId: Number(this.selectedDoctorId),
+                doctorId: this.selectedDoctorId,
                 appointmentDate: dateTimeIso,
                 reason: this.consultationReason,
                 status: this.initialStage,

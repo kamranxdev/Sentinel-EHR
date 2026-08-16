@@ -403,7 +403,7 @@ export class ReceptionistAppointmentsComponent implements OnInit {
 
   showIntakeModal = signal(false);
   showRteModal = signal(false);
-  rtePatientId = signal<number | null>(null);
+  rtePatientId = signal<string | null>(null);
 
   dateFilterMode = signal<'TODAY' | 'TOMORROW' | 'CUSTOM' | 'ALL'>('TODAY');
   selectedDate = signal<string>(this.getLocalDateString(new Date()));
@@ -493,7 +493,7 @@ export class ReceptionistAppointmentsComponent implements OnInit {
     this.showIntakeModal.set(true);
   }
 
-  openRteModal(patientId?: number): void {
+  openRteModal(patientId?: string): void {
     this.rtePatientId.set(patientId || null);
     this.showRteModal.set(true);
   }

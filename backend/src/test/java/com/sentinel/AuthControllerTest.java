@@ -1,19 +1,16 @@
 package com.sentinel;
 
-import com.sentinel.auth.dto.LoginRequest;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -24,26 +21,26 @@ public class AuthControllerTest {
     private MockMvc mockMvc;
 
     @Test
-    public void testUserKamranLogin() throws Exception {
-        String jsonRequest = "{\"username\":\"patient.kamran\",\"password\":\"patient123\"}";
+    public void testPhysicianLogin() throws Exception {
+        String jsonRequest = "{\"usernameOrEmail\":\"arjun.sharma\",\"password\":\"Sentinel@123\"}";
 
         mockMvc.perform(post("/api/v1/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jsonRequest))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.username").value("patient.kamran"))
-                .andExpect(jsonPath("$.accessToken").exists());
+                .andExpect(jsonPath("$.data.username").value("arjun.sharma"))
+                .andExpect(jsonPath("$.data.accessToken").exists());
     }
 
     @Test
     public void testAdminLogin() throws Exception {
-        String jsonRequest = "{\"username\":\"sysadmin.vikram\",\"password\":\"admin123\"}";
+        String jsonRequest = "{\"usernameOrEmail\":\"admin\",\"password\":\"Sentinel@123\"}";
 
         mockMvc.perform(post("/api/v1/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jsonRequest))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.username").value("sysadmin.vikram"))
-                .andExpect(jsonPath("$.accessToken").exists());
+                .andExpect(jsonPath("$.data.username").value("admin"))
+                .andExpect(jsonPath("$.data.accessToken").exists());
     }
 }

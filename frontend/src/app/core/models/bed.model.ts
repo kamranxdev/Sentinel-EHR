@@ -1,7 +1,7 @@
 import { Encounter } from './clinical.model';
 
 export interface Bed {
-  id?: number;
+  id?: string;
   bedCode?: string;
   bedNumber: string;
   wardName?: string;
@@ -14,6 +14,7 @@ export interface Bed {
 }
 
 export interface BedRequestDTO {
+  id?: string;
   bedNumber: string;
   ward?: string;
   department?: string;
@@ -26,7 +27,7 @@ export interface BedStatusUpdateDTO {
 }
 
 export interface LocationHistory {
-  id?: number;
+  id?: string;
   encounter?: Encounter;
   bed?: Bed;
   assignedAt?: string;

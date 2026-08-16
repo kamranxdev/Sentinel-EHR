@@ -1,6 +1,6 @@
 package com.sentinel.security;
 
-import com.sentinel.auth.security.JwtTokenProvider;
+import com.sentinel.security.auth.security.JwtTokenProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.Authentication;

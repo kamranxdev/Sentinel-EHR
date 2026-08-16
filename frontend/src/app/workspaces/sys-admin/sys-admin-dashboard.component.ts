@@ -240,7 +240,7 @@ interface ToastAlert {
           </div>
           <div class="pt-3 border-t border-border/60 flex items-center justify-between text-[11px] font-mono text-muted-foreground">
             <span>Provisioned Staff: {{ staffCount() }}</span>
-            <span class="text-primary font-semibold">ROLE_SYS_ADMIN Authorized</span>
+            <span class="text-primary font-semibold">SUPER_ADMIN Authorized</span>
           </div>
         </a>
 

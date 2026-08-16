@@ -2,8 +2,8 @@ import { Patient } from './patient.model';
 import { Prescription } from './clinical.model';
 
 export interface TriageEwsRecord {
-  id?: number;
-  patientId?: number;
+  id?: string;
+  patientId?: string;
   patient?: Patient;
   ewsScore: number;
   triagePriority: 'ROUTINE' | 'URGENT' | 'EMERGENT' | 'RESUSCITATION' | string;
@@ -18,7 +18,7 @@ export interface TriageEwsRecord {
 }
 
 export interface TriageEwsRequestDTO {
-  patientId: number;
+  patientId: string;
   systolicBp?: number;
   heartRate?: number;
   respiratoryRate?: number;
@@ -28,8 +28,8 @@ export interface TriageEwsRequestDTO {
 }
 
 export interface TriageEwsResponseDTO {
-  id: number;
-  patientId: number;
+  id: string;
+  patientId: string;
   ewsScore: number;
   triagePriority: string;
   recordedBy: string;
@@ -37,37 +37,45 @@ export interface TriageEwsResponseDTO {
 }
 
 export interface EmarRecord {
-  id?: number;
-  patientId?: number;
-  prescriptionId?: number;
+  id?: string;
+  patientId?: string;
+  prescriptionId?: string;
   patient?: Patient;
   prescription?: Prescription;
   medicationName: string;
   dose: string;
+  unit?: string;
+  site?: string;
   route?: string;
   administeredBy?: string;
+  scheduledAt?: string;
   administeredAt?: string;
   status?: string;
   notes?: string;
 }
 
 export interface EmarRecordRequestDTO {
-  patientId: number;
-  prescriptionId?: number;
+  patientId: string;
+  prescriptionId?: string;
   medicationName: string;
   dose: string;
+  unit?: string;
+  site?: string;
   route?: string;
   notes?: string;
 }
 
 export interface EmarRecordResponseDTO {
-  id: number;
-  patientId: number;
-  prescriptionId?: number;
+  id: string;
+  patientId: string;
+  prescriptionId?: string;
   medicationName: string;
   dose: string;
+  unit?: string;
+  site?: string;
   route?: string;
   administeredBy: string;
+  scheduledAt?: string;
   administeredAt: string;
   status: string;
 }

@@ -749,7 +749,7 @@ export class PatientAppointmentsComponent implements OnInit {
     });
   }
 
-  fetchAppointments(patientId: number): void {
+  fetchAppointments(patientId: string): void {
     this.apiService.getAppointmentsByPatient(patientId).subscribe({
       next: (apts) => this.appointments.set(apts),
       error: (err) => console.warn('Error fetching patient appointments', err),
@@ -871,7 +871,7 @@ export class PatientAppointmentsComponent implements OnInit {
   }
 
   onManualDoctorChange(docId: any): void {
-    const found = this.allDoctors().find((d) => d.id === Number(docId));
+    const found = this.allDoctors().find((d) => d.id === docId);
     if (found) {
       this.selectedDoctor = found;
       this.selectedSlot = '';

@@ -480,7 +480,7 @@ export class PatientVitalsComponent implements OnInit {
     return this.calculateBmiVal(v.weightKg, v.heightCm);
   });
 
-  patientId: number | null = null;
+  patientId: string | null = null;
   now = new Date();
 
   // Modal State & Form inputs
@@ -514,7 +514,7 @@ export class PatientVitalsComponent implements OnInit {
     this.apiService.getMyPatientProfile().subscribe({
       next: (p) => {
         if (p?.id) {
-          this.patientId = Number(p.id);
+          this.patientId = p.id;
           this.apiService.getVitalsByPatient(p.id).subscribe((v) => this.vitals.set(v));
         }
       },

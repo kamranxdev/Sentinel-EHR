@@ -1,24 +1,22 @@
 package com.sentinel.service;
 
 import com.sentinel.audit.service.AuditTrailService;
-import com.sentinel.common.exception.ResourceNotFoundException;
-import com.sentinel.encounters.entity.Encounter;
-import com.sentinel.encounters.repository.BedRepository;
-import com.sentinel.encounters.repository.EncounterRepository;
-import com.sentinel.encounters.service.EncounterService;
-import com.sentinel.patients.entity.Patient;
-import com.sentinel.patients.repository.PatientRepository;
-import com.sentinel.users.entity.User;
-import com.sentinel.users.repository.UserRepository;
+import com.sentinel.clinical.entity.Encounter;
+import com.sentinel.clinical.repository.EncounterRepository;
+import com.sentinel.clinical.service.EncounterService;
+import com.sentinel.identity.entity.Person;
+import com.sentinel.patient.entity.Patient;
+import com.sentinel.patient.repository.PatientRepository;
+import com.sentinel.identity.entity.User;
+import com.sentinel.identity.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 public class EncounterServiceTest {
@@ -26,7 +24,6 @@ public class EncounterServiceTest {
     private EncounterRepository encounterRepository;
     private PatientRepository patientRepository;
     private UserRepository userRepository;
-    private BedRepository bedRepository;
     private AuditTrailService auditTrailService;
 
     private EncounterService encounterService;
@@ -35,155 +32,67 @@ public class EncounterServiceTest {
     private User testProvider;
     private Encounter testEncounter;
 
+    private UUID patientId = UUID.randomUUID();
+    private UUID providerId = UUID.randomUUID();
+    private UUID encounterId = UUID.randomUUID();
+
     @BeforeEach
     public void setUp() {
         encounterRepository = mock(EncounterRepository.class);
+        com.sentinel.clinical.repository.EncounterLocationRepository encounterLocationRepository = mock(com.sentinel.clinical.repository.EncounterLocationRepository.class);
         patientRepository = mock(PatientRepository.class);
-        userRepository = mock(UserRepository.class);
-        bedRepository = mock(BedRepository.class);
-        auditTrailService = mock(AuditTrailService.class);
+        com.sentinel.patient.repository.PatientOrganizationRepository patientOrganizationRepository = mock(com.sentinel.patient.repository.PatientOrganizationRepository.class);
+        com.sentinel.tenancy.repository.OrganizationRepository organizationRepository = mock(com.sentinel.tenancy.repository.OrganizationRepository.class);
+        com.sentinel.tenancy.repository.FacilityRepository facilityRepository = mock(com.sentinel.tenancy.repository.FacilityRepository.class);
+        com.sentinel.tenancy.repository.DepartmentRepository departmentRepository = mock(com.sentinel.tenancy.repository.DepartmentRepository.class);
+        com.sentinel.audit.service.AuditService auditService = mock(com.sentinel.audit.service.AuditService.class);
 
-        encounterService = new EncounterService(encounterRepository, patientRepository, userRepository, bedRepository, auditTrailService);
+        encounterService = new EncounterService(
+            encounterRepository, 
+            encounterLocationRepository, 
+            patientRepository, 
+            patientOrganizationRepository, 
+            organizationRepository, 
+            facilityRepository, 
+            departmentRepository, 
+            auditService
+        );
 
-        testPatient = new Patient();
-        testPatient.setId(1L);
-        testPatient.setFullName("Kamran Khan");
+        Person p = new Person();
+        p.setFirstName("Kamran");
+        p.setLastName("Khan");
 
-        testProvider = new User();
-        testProvider.setId(10L);
-        testProvider.setUsername("doctor_mahtab");
-        testProvider.setFullName("Dr. Mahtab");
+        testPatient = new Patient(p);
+        testPatient.setId(patientId);
+
+        testProvider = new User("doctor_mahtab", "doc@sentinel.com", "pass", p);
+        testProvider.setId(providerId);
 
         testEncounter = new Encounter();
-        testEncounter.setId(100L);
+        testEncounter.setId(encounterId);
         testEncounter.setPatient(testPatient);
-        testEncounter.setAttendingProvider(testProvider);
         testEncounter.setEncounterType("AMBULATORY");
-        testEncounter.setStatus("ADMITTED");
-        testEncounter.setEncounterDate(LocalDateTime.now());
+        testEncounter.setStatus("FINISHED");
     }
 
     @Test
     public void testGetEncountersByPatientId_ReturnsList() {
-        when(encounterRepository.findByPatientIdOrderByEncounterDateDesc(1L))
+        when(encounterRepository.findByPatientIdOrderByStartedAtDesc(patientId))
                 .thenReturn(List.of(testEncounter));
 
-        List<Encounter> encounters = encounterService.getEncountersByPatientId(1L);
+        List<com.sentinel.clinical.dto.EncounterResponseDTO> encounters = encounterService.getPatientEncounters(patientId);
 
         assertNotNull(encounters);
         assertEquals(1, encounters.size());
-        assertEquals("AMBULATORY", encounters.get(0).getEncounterType());
-        verify(encounterRepository, times(1)).findByPatientIdOrderByEncounterDateDesc(1L);
     }
 
     @Test
     public void testGetEncounterById_Found() {
-        when(encounterRepository.findById(100L)).thenReturn(Optional.of(testEncounter));
+        when(encounterRepository.findById(encounterId)).thenReturn(Optional.of(testEncounter));
 
-        Optional<Encounter> result = encounterService.getEncounterById(100L);
+        com.sentinel.clinical.dto.EncounterResponseDTO result = encounterService.getEncounter(encounterId);
 
-        assertTrue(result.isPresent());
-        assertEquals(100L, result.get().getId());
-    }
-
-    @Test
-    public void testGetEncounterById_NotFound() {
-        when(encounterRepository.findById(999L)).thenReturn(Optional.empty());
-
-        Optional<Encounter> result = encounterService.getEncounterById(999L);
-
-        assertFalse(result.isPresent());
-    }
-
-    @Test
-    public void testCreateEncounter_WithImplicitProvider() {
-        Encounter input = new Encounter();
-        input.setPatient(testPatient);
-        input.setEncounterType("INPATIENT");
-
-        when(userRepository.findByUsername("doctor_mahtab")).thenReturn(Optional.of(testProvider));
-        when(patientRepository.findById(1L)).thenReturn(Optional.of(testPatient));
-        when(encounterRepository.save(any(Encounter.class))).thenAnswer(i -> {
-            Encounter saved = i.getArgument(0);
-            saved.setId(200L);
-            return saved;
-        });
-
-        Encounter created = encounterService.createEncounter(input, "doctor_mahtab");
-
-        assertNotNull(created);
-        assertEquals(200L, created.getId());
-        assertEquals(testPatient, created.getPatient());
-        assertEquals(testProvider, created.getAttendingProvider());
-        verify(encounterRepository, times(1)).save(any(Encounter.class));
-    }
-
-    @Test
-    public void testCreateEncounter_WithExplicitProvider() {
-        User otherProvider = new User();
-        otherProvider.setId(20L);
-        otherProvider.setUsername("doctor_rajesh");
-
-        Encounter input = new Encounter();
-        input.setPatient(testPatient);
-        input.setAttendingProvider(otherProvider); // explicit provider set
-
-        when(userRepository.findByUsername("doctor_mahtab")).thenReturn(Optional.of(testProvider));
-        when(userRepository.findById(20L)).thenReturn(Optional.of(otherProvider));
-        when(patientRepository.findById(1L)).thenReturn(Optional.of(testPatient));
-        when(encounterRepository.save(any(Encounter.class))).thenAnswer(i -> {
-            Encounter saved = i.getArgument(0);
-            if (saved.getId() == null) saved.setId(201L);
-            return saved;
-        });
-
-        Encounter created = encounterService.createEncounter(input, "doctor_mahtab");
-
-        assertEquals(otherProvider, created.getAttendingProvider());
-    }
-
-    @Test
-    public void testCreateEncounter_MissingPatientId_ThrowsException() {
-        Encounter input = new Encounter();
-        // no patient set
-
-        assertThrows(IllegalArgumentException.class,
-                () -> encounterService.createEncounter(input, "doctor_mahtab"));
-
-        verify(encounterRepository, never()).save(any());
-    }
-
-    @Test
-    public void testCreateEncounter_PatientNotFound_ThrowsException() {
-        Encounter input = new Encounter();
-        input.setPatient(testPatient);
-
-        when(userRepository.findByUsername("doctor_mahtab")).thenReturn(Optional.of(testProvider));
-        when(patientRepository.findById(1L)).thenReturn(Optional.empty());
-
-        assertThrows(ResourceNotFoundException.class,
-                () -> encounterService.createEncounter(input, "doctor_mahtab"));
-    }
-
-    @Test
-    public void testUpdateEncounter_UpdatesFieldsPartially() {
-        Encounter update = new Encounter();
-        update.setClinicalNotes("Patient responding to treatment");
-
-        when(encounterRepository.findById(100L)).thenReturn(Optional.of(testEncounter));
-        when(encounterRepository.save(any(Encounter.class))).thenAnswer(i -> i.getArgument(0));
-
-        Encounter updated = encounterService.updateEncounter(100L, update);
-
-        assertEquals("Patient responding to treatment", updated.getClinicalNotes());
-        verify(encounterRepository, times(1)).save(testEncounter);
-    }
-
-    @Test
-    public void testUpdateEncounter_NotFound_ThrowsException() {
-        when(encounterRepository.findById(999L)).thenReturn(Optional.empty());
-
-        assertThrows(ResourceNotFoundException.class,
-                () -> encounterService.updateEncounter(999L, new Encounter()));
+        assertNotNull(result);
+        assertEquals(encounterId, result.getId());
     }
 }

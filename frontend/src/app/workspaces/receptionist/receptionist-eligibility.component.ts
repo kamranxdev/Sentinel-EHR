@@ -290,10 +290,10 @@ import {
 })
 export class ReceptionistEligibilityComponent implements OnInit, OnChanges {
   @Input() isModal: boolean = false;
-  @Input() patientIdInput: number | null = null;
+  @Input() patientIdInput: string | null = null;
   @Output() close = new EventEmitter<void>();
 
-  patientId: number | null = null;
+  patientId: string | null = null;
   subscriberId = 'POL-887102';
   payerName = 'Star Health & Allied Insurance';
   groupNumber = 'GRP-9910';
@@ -327,12 +327,12 @@ export class ReceptionistEligibilityComponent implements OnInit, OnChanges {
     this.loadPatientDirectory();
 
     if (this.patientIdInput) {
-      this.patientId = Number(this.patientIdInput);
+      this.patientId = this.patientIdInput;
       this.loadPatientAndRun();
     } else {
       this.route.queryParams.subscribe((params) => {
         if (params['patientId']) {
-          this.patientId = Number(params['patientId']);
+          this.patientId = params['patientId'];
           this.loadPatientAndRun();
         } else {
           this.onRunRTE();
@@ -343,7 +343,7 @@ export class ReceptionistEligibilityComponent implements OnInit, OnChanges {
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['patientIdInput'] && changes['patientIdInput'].currentValue) {
-      this.patientId = Number(changes['patientIdInput'].currentValue);
+      this.patientId = changes['patientIdInput'].currentValue;
       this.loadPatientAndRun();
     }
   }
@@ -357,7 +357,7 @@ export class ReceptionistEligibilityComponent implements OnInit, OnChanges {
       next: (list) => {
         this.allPatients.set(list || []);
         if (this.patientId) {
-          const match = list.find((p) => p.id === Number(this.patientId));
+          const match = list.find((p) => p.id === this.patientId);
           if (match) this.selectedPatient.set(match);
         }
       },
@@ -366,12 +366,11 @@ export class ReceptionistEligibilityComponent implements OnInit, OnChanges {
   }
 
   onPatientSelectChange(): void {
-    const pId = Number(this.patientId);
-    if (!pId) {
+    if (!this.patientId) {
       this.selectedPatient.set(null);
       return;
     }
-    const match = this.allPatients().find((p) => p.id === pId);
+    const match = this.allPatients().find((p) => p.id === this.patientId);
     if (match) {
       this.selectedPatient.set(match);
       if (match.insurancePolicyNumber) this.subscriberId = match.insurancePolicyNumber;

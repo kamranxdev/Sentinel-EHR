@@ -26,7 +26,7 @@ export class PatientContextService {
 
     this.loading.set(true);
 
-    if (this.authService.hasRole('ROLE_PATIENT')) {
+    if (this.authService.hasRole('PATIENT')) {
       // Patient user: strictly bind to own record via RESTful getMyPatientProfile
       this.apiService.getMyPatientProfile().subscribe({
         next: (patient) => {
@@ -48,7 +48,7 @@ export class PatientContextService {
           const current = this.activePatient();
           // Retain currently selected patient if still in list
           if (current) {
-            const found = patients.find((p) => p.id === current.id);
+            const found = patients.find((p) => String(p.id) === String(current.id));
             this.activePatient.set(found || null);
           }
           this.loading.set(false);
@@ -69,17 +69,16 @@ export class PatientContextService {
     this.activePatient.set(null);
   }
 
-  selectPatientById(id: number | string | null): void {
+  selectPatientById(id: string | null): void {
     if (!id) {
       this.activePatient.set(null);
       return;
     }
-    const numericId = Number(id);
-    const found = this.patientList().find((p) => p.id === numericId);
+    const found = this.patientList().find((p) => p.id === id);
     if (found) {
       this.activePatient.set(found);
     } else {
-      this.apiService.getPatientById(numericId).subscribe((p) => this.activePatient.set(p));
+      this.apiService.getPatientById(id).subscribe((p) => this.activePatient.set(p));
     }
   }
 

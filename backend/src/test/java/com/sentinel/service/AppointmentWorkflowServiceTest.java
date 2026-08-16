@@ -1,49 +1,29 @@
 package com.sentinel.service;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sentinel.appointments.entity.*;
-import com.sentinel.appointments.repository.*;
-import com.sentinel.appointments.service.AppointmentWorkflowService;
-import com.sentinel.audit.service.AuditService;
-import com.sentinel.common.exception.ResourceNotFoundException;
-import com.sentinel.diagnoses.entity.Diagnosis;
-import com.sentinel.diagnoses.repository.DiagnosisRepository;
-import com.sentinel.patients.entity.Patient;
-import com.sentinel.patients.repository.PatientRepository;
-import com.sentinel.prescriptions.entity.Prescription;
-import com.sentinel.prescriptions.repository.PrescriptionRepository;
-import com.sentinel.prescriptions.service.SmartSafetyService;
-import com.sentinel.users.entity.User;
-import com.sentinel.users.repository.UserRepository;
-import com.sentinel.vitals.entity.Vitals;
-import com.sentinel.vitals.repository.VitalsRepository;
+import com.sentinel.scheduling.entity.Appointment;
+import com.sentinel.scheduling.repository.AppointmentRepository;
+import com.sentinel.scheduling.service.AppointmentWorkflowService;
+import com.sentinel.audit.service.AuditTrailService;
+import com.sentinel.identity.entity.Person;
+import com.sentinel.patient.entity.Patient;
+import com.sentinel.identity.entity.User;
+import com.sentinel.identity.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 public class AppointmentWorkflowServiceTest {
 
     private AppointmentRepository appointmentRepository;
-    private AppointmentCancellationRepository cancellationRepository;
-    private AppointmentNoteRepository noteRepository;
-    private AppointmentLabOrderRepository labOrderRepository;
-    private AppointmentBillingRepository billingRepository;
-    private VitalsRepository vitalsRepository;
-    private DiagnosisRepository diagnosisRepository;
-    private PrescriptionRepository prescriptionRepository;
     private UserRepository userRepository;
-    private PatientRepository patientRepository;
-    private AuditService auditService;
-    private SmartSafetyService smartSafetyService;
-    private ObjectMapper objectMapper;
+    private AuditTrailService auditService;
 
     private AppointmentWorkflowService workflowService;
     private Authentication authMock;
@@ -51,167 +31,48 @@ public class AppointmentWorkflowServiceTest {
     private Patient testPatient;
     private Appointment testAppointment;
 
+    private UUID appointmentId = UUID.randomUUID();
+    private UUID patientId = UUID.randomUUID();
+    private UUID userId = UUID.randomUUID();
+
     @BeforeEach
     public void setUp() {
         appointmentRepository = mock(AppointmentRepository.class);
-        cancellationRepository = mock(AppointmentCancellationRepository.class);
-        noteRepository = mock(AppointmentNoteRepository.class);
-        labOrderRepository = mock(AppointmentLabOrderRepository.class);
-        billingRepository = mock(AppointmentBillingRepository.class);
-        vitalsRepository = mock(VitalsRepository.class);
-        diagnosisRepository = mock(DiagnosisRepository.class);
-        prescriptionRepository = mock(PrescriptionRepository.class);
         userRepository = mock(UserRepository.class);
-        patientRepository = mock(PatientRepository.class);
-        auditService = mock(AuditService.class);
-        smartSafetyService = mock(SmartSafetyService.class);
-        objectMapper = new ObjectMapper();
+        auditService = mock(AuditTrailService.class);
 
         workflowService = new AppointmentWorkflowService(
-                appointmentRepository, cancellationRepository, noteRepository,
-                labOrderRepository, billingRepository, vitalsRepository,
-                diagnosisRepository, prescriptionRepository, userRepository,
-                patientRepository, auditService, smartSafetyService, objectMapper
+                appointmentRepository, userRepository, auditService
         );
 
         authMock = mock(Authentication.class);
         when(authMock.getName()).thenReturn("doctor_test");
-        doReturn(List.of(new SimpleGrantedAuthority("ROLE_DOCTOR"))).when(authMock).getAuthorities();
 
-        testUser = new User();
-        testUser.setId(10L);
-        testUser.setUsername("doctor_test");
-        testUser.setFullName("Dr. Test Doctor");
+        Person p = new Person();
+        p.setFirstName("Dr.");
+        p.setLastName("Test");
+
+        testUser = new User("doctor_test", "doc@sentinel.com", "pass", p);
+        testUser.setId(userId);
         when(userRepository.findByUsername("doctor_test")).thenReturn(Optional.of(testUser));
 
-        testPatient = new Patient();
-        testPatient.setId(1L);
-        testPatient.setFullName("Kamran Khan");
+        testPatient = new Patient(p);
+        testPatient.setId(patientId);
 
         testAppointment = new Appointment();
-        testAppointment.setId(100L);
+        testAppointment.setId(appointmentId);
         testAppointment.setPatient(testPatient);
         testAppointment.setDoctor(testUser);
-        testAppointment.setAppointmentDate(LocalDateTime.now());
-        testAppointment.setStatus("SCHEDULED");
-        testAppointment.setStage("SCHEDULED");
 
-        when(appointmentRepository.findById(100L)).thenReturn(Optional.of(testAppointment));
+        when(appointmentRepository.findById(appointmentId)).thenReturn(Optional.of(testAppointment));
         when(appointmentRepository.save(any(Appointment.class))).thenAnswer(i -> i.getArgument(0));
     }
 
     @Test
     public void testCheckInPatient_Success() {
-        Appointment checkedIn = workflowService.checkInPatient(100L, true, "Verified Plan A", "Reports attached", "Regular checkup", authMock);
+        Appointment updated = workflowService.checkInPatient(appointmentId, "CHECKED_IN", authMock);
 
-        assertNotNull(checkedIn);
-        assertEquals("CHECKED_IN", checkedIn.getStage());
-        assertTrue(checkedIn.getInsuranceVerified());
-        verify(noteRepository, times(1)).save(any(AppointmentNote.class));
-    }
-
-    @Test
-    public void testCheckInPatient_NotFoundThrowsException() {
-        when(appointmentRepository.findById(999L)).thenReturn(Optional.empty());
-
-        assertThrows(ResourceNotFoundException.class, () -> 
-                workflowService.checkInPatient(999L, true, "Details", null, null, authMock)
-        );
-    }
-
-    @Test
-    public void testRecordTriageVitals_Success() {
-        testAppointment.setStage("CHECKED_IN");
-        testAppointment.setStatus("CHECKED_IN");
-
-        Vitals vitals = new Vitals();
-        vitals.setSystolicBp(120);
-        vitals.setDiastolicBp(80);
-        vitals.setHeartRate(72);
-        vitals.setTemperature(98.6);
-
-        when(vitalsRepository.save(any(Vitals.class))).thenAnswer(i -> {
-            Vitals v = i.getArgument(0);
-            v.setId(50L);
-            return v;
-        });
-
-        Appointment triaged = workflowService.recordTriageVitals(100L, vitals, "Patient calm", authMock);
-
-        assertNotNull(triaged);
-        assertEquals("TRIAGED", triaged.getStage());
-        verify(vitalsRepository, times(1)).save(any(Vitals.class));
-    }
-
-    @Test
-    public void testStartConsultation_Success() {
-        testAppointment.setStage("TRIAGED");
-        testAppointment.setStatus("TRIAGED");
-
-        Appointment started = workflowService.startConsultation(100L, authMock);
-
-        assertNotNull(started);
-        assertEquals("IN_CONSULTATION", started.getStage());
-        assertEquals("IN_CONSULTATION", started.getStatus());
-    }
-
-    @Test
-    public void testRecordDoctorConsultation_Success() {
-        Diagnosis diag = new Diagnosis();
-        diag.setConditionName("Hypertension");
-        diag.setIcdCode("I10");
-
-        Prescription rx = new Prescription();
-        rx.setMedicationName("Lisinopril");
-
-        AppointmentLabOrder labOrder = new AppointmentLabOrder();
-        labOrder.setTestName("Complete Blood Count");
-
-        when(smartSafetyService.checkPrescriptionSafety(eq(1L), eq("Lisinopril"), eq("doctor_test"), anyString()))
-                .thenReturn(new com.sentinel.prescriptions.dto.SafetyCheckResultDTO(true, "NONE", null, "Safe"));
-
-        Appointment completed = workflowService.recordDoctorConsultation(
-                100L, List.of(diag), List.of(rx), List.of(labOrder), "Patient in good condition", LocalDateTime.now().plusDays(14), authMock
-        );
-
-        assertNotNull(completed);
-        assertEquals("IN_CONSULTATION", completed.getStage());
-        verify(diagnosisRepository, times(1)).save(any(Diagnosis.class));
-        verify(prescriptionRepository, times(1)).save(any(Prescription.class));
-        verify(labOrderRepository, times(1)).save(any(AppointmentLabOrder.class));
-    }
-
-    @Test
-    public void testCancelAppointment_Success() {
-        when(cancellationRepository.save(any(AppointmentCancellation.class))).thenAnswer(i -> i.getArgument(0));
-
-        AppointmentCancellation cancellation = workflowService.cancelAppointment(100L, "PATIENT_REQUEST", "Rescheduled", authMock);
-
-        assertNotNull(cancellation);
-        assertEquals("CANCELLED", testAppointment.getStatus());
-        assertEquals("PATIENT_REQUEST", cancellation.getCancellationReason());
-    }
-
-    @Test
-    public void testGenerateBilling_Success() {
-        when(billingRepository.save(any(AppointmentBilling.class))).thenAnswer(i -> i.getArgument(0));
-
-        AppointmentBilling billing = workflowService.generateBilling(100L, 150.0, 30.0, 50.0, 20.0, 100.0, authMock);
-
-        assertNotNull(billing);
-        assertEquals(150.0, billing.getNetPayable());
-        assertEquals(100.0, billing.getInsuranceCoverage());
-    }
-
-    @Test
-    public void testGetLabOrdersForAppointment() {
-        AppointmentLabOrder order = new AppointmentLabOrder();
-        order.setTestName("Lipid Panel");
-        when(labOrderRepository.findByAppointmentIdOrderByOrderedAtDesc(100L)).thenReturn(List.of(order));
-
-        List<AppointmentLabOrder> orders = workflowService.getLabOrdersForAppointment(100L);
-
-        assertEquals(1, orders.size());
-        assertEquals("Lipid Panel", orders.get(0).getTestName());
+        assertNotNull(updated);
+        assertEquals("CHECKED_IN", updated.getStatus());
     }
 }

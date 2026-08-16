@@ -577,14 +577,14 @@ export class NurseChartComponent implements OnInit {
     }
   }
 
-  loadPatientClinicalData(patientId: number): void {
+  loadPatientClinicalData(patientId: string): void {
     this.apiService.getVitalsByPatient(patientId).subscribe((res) => this.vitals.set(res));
     this.apiService.getPrescriptionsByPatient(patientId).subscribe((res) => this.prescriptions.set(res));
     this.apiService.getEmarHistoryForPatient(patientId).subscribe((res) => this.emarHistory.set(res));
     this.apiService.getAllergiesByPatient(patientId).subscribe((res) => this.allergies.set(res));
   }
 
-  onPatientSelect(patientId: number | string): void {
+  onPatientSelect(patientId: string): void {
     if (!patientId) return;
     this.patientContext.selectPatientById(patientId);
   }
@@ -614,7 +614,7 @@ export class NurseChartComponent implements OnInit {
 
     this.apiService
       .recordVitals({
-        patient: { id: Number(active.id) } as Patient,
+        patient: { id: active.id } as Patient,
         systolicBp: this.newVitals.systolicBp ? Number(this.newVitals.systolicBp) : undefined,
         diastolicBp: this.newVitals.diastolicBp ? Number(this.newVitals.diastolicBp) : undefined,
         heartRate: Number(this.newVitals.heartRate),
@@ -664,7 +664,7 @@ export class NurseChartComponent implements OnInit {
     this.savingAllergy.set(true);
     this.apiService
       .createAllergy({
-        patient: { id: Number(active.id) } as Patient,
+        patient: { id: active.id } as Patient,
         allergenName: this.newAllergy.allergenName,
         category: this.newAllergy.category,
         severity: this.newAllergy.severity,

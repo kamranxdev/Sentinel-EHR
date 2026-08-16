@@ -23,25 +23,25 @@ export class DashboardComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    if (this.authService.hasRole('ROLE_SYS_ADMIN')) {
+    if (this.authService.isSysAdmin()) {
       this.router.navigate(['/sys-admin/dashboard']);
-    } else if (this.authService.hasRole('ROLE_ORG_ADMIN')) {
+    } else if (this.authService.isOrgAdmin()) {
       this.router.navigate(['/org-admin/dashboard']);
-    } else if (this.authService.hasRole('ROLE_DOCTOR')) {
+    } else if (this.authService.isDoctor()) {
       this.router.navigate(['/doctor/dashboard']);
-    } else if (this.authService.hasRole('ROLE_NURSE')) {
+    } else if (this.authService.isNurse()) {
       this.router.navigate(['/nurse/dashboard']);
-    } else if (this.authService.hasRole('ROLE_RECEPTIONIST')) {
+    } else if (this.authService.isReceptionist()) {
       this.router.navigate(['/receptionist/dashboard']);
-    } else if (this.authService.hasRole('ROLE_LAB_TECH')) {
+    } else if (this.authService.isLabTech()) {
       this.router.navigate(['/labtech/dashboard']);
-    } else if (this.authService.hasRole('ROLE_PHARMACIST')) {
+    } else if (this.authService.isPharmacist()) {
       this.router.navigate(['/pharmacist/dashboard']);
-    } else if (this.authService.hasRole('ROLE_BILLING')) {
+    } else if (this.authService.isBilling()) {
       this.router.navigate(['/billing/dashboard']);
-    } else if (this.authService.hasRole('ROLE_AUDITOR')) {
+    } else if (this.authService.isAuditor()) {
       this.router.navigate(['/auditor/dashboard']);
-    } else if (this.authService.hasRole('ROLE_PATIENT')) {
+    } else if (this.authService.isPatient()) {
       this.router.navigate(['/patient/dashboard']);
     } else {
       this.router.navigate(['/login']);

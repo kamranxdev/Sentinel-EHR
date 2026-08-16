@@ -112,7 +112,7 @@ interface ToastAlert {
                 Master Patient Index (MPI Governance)
               </h1>
               <span hlmBadge variant="secondary" class="text-[10px] uppercase font-mono tracking-wider">
-                ROLE_SYS_ADMIN
+                SUPER_ADMIN
               </span>
             </div>
             <p class="text-xs text-muted-foreground mt-0.5 flex items-center gap-2">

@@ -1,12 +1,18 @@
 export interface Organization {
-  id: number;
-  orgCode: string;
+  id: string;
+  code?: string;
+  orgCode?: string;
   name: string;
-  licenseNumber: string;
+  legalName?: string;
+  organizationType?: string;
+  licenseNumber?: string;
   email?: string;
   phone?: string;
   address?: string;
-  status: 'PENDING_VERIFICATION' | 'VERIFIED' | 'SUSPENDED';
+  website?: string;
+  timezone?: string;
+  countryCode?: string;
+  status: 'ACTIVE' | 'PENDING_VERIFICATION' | 'VERIFIED' | 'SUSPENDED' | string;
   createdAt: string;
   updatedAt?: string;
 }
@@ -24,6 +30,6 @@ export interface OrganizationRegistrationRequest {
 }
 
 export interface OrganizationStatusUpdate {
-  status: 'PENDING_VERIFICATION' | 'VERIFIED' | 'SUSPENDED';
+  status: 'ACTIVE' | 'PENDING_VERIFICATION' | 'VERIFIED' | 'SUSPENDED' | string;
   notes?: string;
 }

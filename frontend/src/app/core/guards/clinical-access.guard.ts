@@ -17,7 +17,7 @@ export const clinicalAccessGuard: CanActivateFn = (route, state) => {
 
   const requiredPermission = route.data?.['permission'] as string;
   const patientIdParam = route.paramMap.get('id') || route.paramMap.get('patientId');
-  const patientId = patientIdParam ? Number(patientIdParam) : null;
+  const patientId = patientIdParam || null;
 
   const hasPerm = requiredPermission ? authService.hasPermission(requiredPermission) : true;
   const hasRel = patientId ? authService.hasActiveRelationship(patientId) : true;

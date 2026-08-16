@@ -109,7 +109,7 @@ type RoleCategoryTab = 'ALL' | 'DOCTOR' | 'NURSE' | 'STAFF' | 'PATIENT';
         <div>
           <h1 class="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
             System User Identity & Access Management
-            <span hlmBadge variant="secondary" class="text-[10px]">ROLE_SYS_ADMIN</span>
+            <span hlmBadge variant="secondary" class="text-[10px]">SUPER_ADMIN</span>
           </h1>
           <p class="text-xs text-muted-foreground mt-0.5">
             Provision staff credentials, role-based access control, medical licenses, and patient account management across all tenants.
@@ -135,7 +135,7 @@ type RoleCategoryTab = 'ALL' | 'DOCTOR' | 'NURSE' | 'STAFF' | 'PATIENT';
             hlmBtn
             variant="default"
             size="sm"
-            (click)="openCreateModal('ROLE_DOCTOR')"
+            (click)="openCreateModal('PHYSICIAN')"
             class="gap-1.5 text-xs font-semibold h-9 px-3 bg-blue-600 hover:bg-blue-700 text-white"
           >
             <ng-icon name="lucideStethoscope" size="14" /> + Doctor User
@@ -145,7 +145,7 @@ type RoleCategoryTab = 'ALL' | 'DOCTOR' | 'NURSE' | 'STAFF' | 'PATIENT';
             hlmBtn
             variant="default"
             size="sm"
-            (click)="openCreateModal('ROLE_NURSE')"
+            (click)="openCreateModal('NURSE')"
             class="gap-1.5 text-xs font-semibold h-9 px-3 bg-emerald-600 hover:bg-emerald-700 text-white"
           >
             <ng-icon name="lucideUserPlus" size="14" /> + Nurse User
@@ -155,7 +155,7 @@ type RoleCategoryTab = 'ALL' | 'DOCTOR' | 'NURSE' | 'STAFF' | 'PATIENT';
             hlmBtn
             variant="default"
             size="sm"
-            (click)="openCreateModal('ROLE_ADMIN')"
+            (click)="openCreateModal('ORGANIZATION_ADMIN')"
             class="gap-1.5 text-xs font-semibold h-9 px-3 bg-purple-600 hover:bg-purple-700 text-white"
           >
             <ng-icon name="lucideShieldCheck" size="14" /> + Staff / Admin
@@ -165,7 +165,7 @@ type RoleCategoryTab = 'ALL' | 'DOCTOR' | 'NURSE' | 'STAFF' | 'PATIENT';
             hlmBtn
             variant="outline"
             size="sm"
-            (click)="openCreateModal('ROLE_PATIENT')"
+            (click)="openCreateModal('PATIENT')"
             class="gap-1.5 text-xs font-semibold h-9 px-3 border-cyan-600/40 hover:bg-cyan-500/10 text-cyan-700 dark:text-cyan-300"
           >
             <ng-icon name="lucideUser" size="14" /> + Patient Account
@@ -524,7 +524,7 @@ export class SysAdminUsersComponent implements OnInit {
     username: '',
     email: '',
     password: '',
-    role: 'ROLE_DOCTOR',
+    role: 'PHYSICIAN',
     department: '',
     specialization: '',
     licenseNumber: '',
@@ -532,7 +532,7 @@ export class SysAdminUsersComponent implements OnInit {
   };
 
   editUserForm: {
-    id: number;
+    id: string | number;
     fullName: string;
     email: string;
     department: string;
@@ -554,26 +554,26 @@ export class SysAdminUsersComponent implements OnInit {
   };
 
   availableRoleOptions = [
-    { value: 'ROLE_SYS_ADMIN', label: 'System Admin' },
-    { value: 'ROLE_ORG_ADMIN', label: 'Organization Admin' },
-    { value: 'ROLE_DOCTOR', label: 'Doctor' },
-    { value: 'ROLE_NURSE', label: 'Nurse' },
-    { value: 'ROLE_RECEPTIONIST', label: 'Receptionist' },
-    { value: 'ROLE_PHARMACIST', label: 'Pharmacist' },
-    { value: 'ROLE_LAB_TECH', label: 'Lab Tech' },
-    { value: 'ROLE_BILLING', label: 'Billing Officer' },
-    { value: 'ROLE_AUDITOR', label: 'Auditor' },
-    { value: 'ROLE_PATIENT', label: 'Patient' },
+    { value: 'SUPER_ADMIN', label: 'System Admin' },
+    { value: 'ORGANIZATION_ADMIN', label: 'Organization Admin' },
+    { value: 'PHYSICIAN', label: 'Doctor' },
+    { value: 'NURSE', label: 'Nurse' },
+    { value: 'RECEPTIONIST', label: 'Receptionist' },
+    { value: 'PHARMACIST', label: 'Pharmacist' },
+    { value: 'LAB_TECHNICIAN', label: 'Lab Tech' },
+    { value: 'BILLING_STAFF', label: 'Billing Officer' },
+    { value: 'AUDITOR', label: 'Auditor' },
+    { value: 'PATIENT', label: 'Patient' },
   ];
 
   totalUsersCount = computed(() => this.users().length);
-  doctorsCount = computed(() => this.users().filter((u) => this.getUserRoleNames(u).includes('ROLE_DOCTOR')).length);
-  nursesCount = computed(() => this.users().filter((u) => this.getUserRoleNames(u).includes('ROLE_NURSE')).length);
+  doctorsCount = computed(() => this.users().filter((u) => this.getUserRoleNames(u).includes('PHYSICIAN')).length);
+  nursesCount = computed(() => this.users().filter((u) => this.getUserRoleNames(u).includes('NURSE')).length);
   staffCount = computed(() => this.users().filter((u) => {
     const roles = this.getUserRoleNames(u);
-    return roles.includes('ROLE_ADMIN') || roles.includes('ROLE_SYS_ADMIN') || roles.includes('ROLE_ORG_ADMIN') || roles.includes('ROLE_RECEPTIONIST');
+    return roles.includes('ORGANIZATION_ADMIN') || roles.includes('SUPER_ADMIN') || roles.includes('ORGANIZATION_ADMIN') || roles.includes('RECEPTIONIST');
   }).length);
-  patientsCount = computed(() => this.users().filter((u) => this.getUserRoleNames(u).includes('ROLE_PATIENT')).length);
+  patientsCount = computed(() => this.users().filter((u) => this.getUserRoleNames(u).includes('PATIENT')).length);
 
   filteredUsers = computed(() => {
     let list = this.users();
@@ -581,13 +581,13 @@ export class SysAdminUsersComponent implements OnInit {
     const tab = this.selectedRoleTab();
     const status = this.selectedStatusFilter();
 
-    if (tab === 'DOCTOR') list = list.filter((u) => this.getUserRoleNames(u).includes('ROLE_DOCTOR'));
-    else if (tab === 'NURSE') list = list.filter((u) => this.getUserRoleNames(u).includes('ROLE_NURSE'));
+    if (tab === 'DOCTOR') list = list.filter((u) => this.getUserRoleNames(u).includes('PHYSICIAN'));
+    else if (tab === 'NURSE') list = list.filter((u) => this.getUserRoleNames(u).includes('NURSE'));
     else if (tab === 'STAFF') list = list.filter((u) => {
       const r = this.getUserRoleNames(u);
-      return r.includes('ROLE_ADMIN') || r.includes('ROLE_SYS_ADMIN') || r.includes('ROLE_ORG_ADMIN') || r.includes('ROLE_RECEPTIONIST');
+      return r.includes('ORGANIZATION_ADMIN') || r.includes('SUPER_ADMIN') || r.includes('ORGANIZATION_ADMIN') || r.includes('RECEPTIONIST');
     });
-    else if (tab === 'PATIENT') list = list.filter((u) => this.getUserRoleNames(u).includes('ROLE_PATIENT'));
+    else if (tab === 'PATIENT') list = list.filter((u) => this.getUserRoleNames(u).includes('PATIENT'));
 
     if (status !== 'ALL') {
       list = list.filter((u) => (u.verificationStatus || 'VERIFIED') === status);
@@ -626,7 +626,7 @@ export class SysAdminUsersComponent implements OnInit {
 
   getUserRoleNames(u: User): string[] {
     if (Array.isArray(u.roles) && u.roles.length > 0) return u.roles;
-    return ['ROLE_PATIENT'];
+    return ['PATIENT'];
   }
 
   formatRoleName(role: string): string {
@@ -649,9 +649,9 @@ export class SysAdminUsersComponent implements OnInit {
 
   getUserAvatarBg(u: User): string {
     const roles = this.getUserRoleNames(u);
-    if (roles.includes('ROLE_DOCTOR')) return 'bg-blue-500/20 text-blue-600';
-    if (roles.includes('ROLE_NURSE')) return 'bg-emerald-500/20 text-emerald-600';
-    if (roles.includes('ROLE_SYS_ADMIN')) return 'bg-purple-500/20 text-purple-600';
+    if (roles.includes('PHYSICIAN')) return 'bg-blue-500/20 text-blue-600';
+    if (roles.includes('NURSE')) return 'bg-emerald-500/20 text-emerald-600';
+    if (roles.includes('SUPER_ADMIN')) return 'bg-purple-500/20 text-purple-600';
     return 'bg-secondary text-secondary-foreground';
   }
 
@@ -666,7 +666,7 @@ export class SysAdminUsersComponent implements OnInit {
     return u.verificationStatus === 'VERIFIED' || !u.verificationStatus;
   }
 
-  openCreateModal(defaultRole = 'ROLE_DOCTOR'): void {
+  openCreateModal(defaultRole = 'PHYSICIAN'): void {
     this.newUserForm = {
       fullName: '',
       username: '',
@@ -683,7 +683,7 @@ export class SysAdminUsersComponent implements OnInit {
 
   onFormRoleChange(): void {}
   isDoctorRole(role: string): boolean {
-    return role === 'ROLE_DOCTOR';
+    return role === 'PHYSICIAN';
   }
 
   getPresetRoleLabel(): string {

@@ -4,14 +4,14 @@ import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import com.sentinel.vitals.entity.Vitals;
-import com.sentinel.vitals.repository.VitalsRepository;
+import com.sentinel.clinical.entity.Vitals;
+import com.sentinel.clinical.repository.VitalsRepository;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.UUID;
 
 @Component
 public class ObservationResourceProvider implements IResourceProvider {
@@ -29,10 +29,14 @@ public class ObservationResourceProvider implements IResourceProvider {
 
     @Read
     public org.hl7.fhir.r4.model.Observation getObservationById(@IdParam IdType id) {
-        Long vitalsId = id.getIdPartAsLong();
+        UUID vitalsId = UUID.fromString(id.getIdPart());
         Vitals vitals = vitalsRepository.findById(vitalsId)
                 .orElseThrow(() -> new ResourceNotFoundException("Observation/" + vitalsId + " not found"));
-        return vitals.toFhirResource();
+        
+        org.hl7.fhir.r4.model.Observation obs = new org.hl7.fhir.r4.model.Observation();
+        obs.setId(vitals.getId().toString());
+        obs.setStatus(org.hl7.fhir.r4.model.Observation.ObservationStatus.FINAL);
+        return obs;
     }
 
     @Search
@@ -41,14 +45,17 @@ public class ObservationResourceProvider implements IResourceProvider {
 
         List<Vitals> list;
         if (patientParam != null) {
-            Long patientId = Long.parseLong(patientParam.getIdPart());
-            list = vitalsRepository.findByPatientId(patientId);
+            UUID patientId = UUID.fromString(patientParam.getIdPart());
+            list = vitalsRepository.findByPatientIdOrderByRecordedAtDesc(patientId);
         } else {
             list = vitalsRepository.findAll();
         }
 
-        return list.stream()
-                .map(Vitals::toFhirResource)
-                .collect(Collectors.toList());
+        return list.stream().map(v -> {
+            org.hl7.fhir.r4.model.Observation obs = new org.hl7.fhir.r4.model.Observation();
+            obs.setId(v.getId().toString());
+            obs.setStatus(org.hl7.fhir.r4.model.Observation.ObservationStatus.FINAL);
+            return obs;
+        }).toList();
     }
 }

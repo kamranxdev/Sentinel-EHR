@@ -16,10 +16,10 @@ public class AuditLogMapper {
         dto.setUserRole(entity.getUserRole());
         dto.setAction(entity.getAction());
         dto.setEntityName(entity.getEntityName());
-        dto.setResourceId(entity.getResourceId());
+        dto.setResourceId(entity.getResourceId() != null ? entity.getResourceId().toString() : null);
         dto.setIpAddress(entity.getIpAddress());
         dto.setDetails(entity.getDetails());
-        dto.setTimestamp(entity.getTimestamp());
+        dto.setTimestamp(entity.getOccurredAt());
         return dto;
     }
 }

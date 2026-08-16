@@ -91,7 +91,7 @@ export class FhirExplorerComponent implements OnInit {
     this.rawResult = null;
     this.totalEntries = 0;
 
-    const patientId = this.patientIdFilter ? parseInt(this.patientIdFilter, 10) : undefined;
+    const patientId = this.patientIdFilter && this.patientIdFilter.trim() ? this.patientIdFilter.trim() : undefined;
 
     if (this.isEverythingQuery && patientId) {
       this.apiService.getFhirPatientEverything(patientId).subscribe({

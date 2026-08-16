@@ -4,14 +4,14 @@ import ca.uhn.fhir.rest.annotation.*;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import com.sentinel.appointments.entity.Appointment;
-import com.sentinel.appointments.repository.AppointmentRepository;
+import com.sentinel.scheduling.entity.Appointment;
+import com.sentinel.scheduling.repository.AppointmentRepository;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.UUID;
 
 @Component
 public class AppointmentResourceProvider implements IResourceProvider {
@@ -29,10 +29,14 @@ public class AppointmentResourceProvider implements IResourceProvider {
 
     @Read
     public org.hl7.fhir.r4.model.Appointment getAppointmentById(@IdParam IdType id) {
-        Long apptId = id.getIdPartAsLong();
+        UUID apptId = UUID.fromString(id.getIdPart());
         Appointment appt = appointmentRepository.findById(apptId)
                 .orElseThrow(() -> new ResourceNotFoundException("Appointment/" + apptId + " not found"));
-        return appt.toFhirResource();
+        
+        org.hl7.fhir.r4.model.Appointment fhir = new org.hl7.fhir.r4.model.Appointment();
+        fhir.setId(appt.getId().toString());
+        fhir.setStatus(org.hl7.fhir.r4.model.Appointment.AppointmentStatus.BOOKED);
+        return fhir;
     }
 
     @Search
@@ -41,14 +45,17 @@ public class AppointmentResourceProvider implements IResourceProvider {
 
         List<Appointment> list;
         if (actorParam != null && actorParam.getIdPart() != null) {
-            Long patientId = Long.parseLong(actorParam.getIdPart());
-            list = appointmentRepository.findByPatientId(patientId);
+            UUID patientId = UUID.fromString(actorParam.getIdPart());
+            list = appointmentRepository.findByPatientIdOrderByStartsAtDesc(patientId);
         } else {
             list = appointmentRepository.findAll();
         }
 
-        return list.stream()
-                .map(Appointment::toFhirResource)
-                .collect(Collectors.toList());
+        return list.stream().map(a -> {
+            org.hl7.fhir.r4.model.Appointment fhir = new org.hl7.fhir.r4.model.Appointment();
+            fhir.setId(a.getId().toString());
+            fhir.setStatus(org.hl7.fhir.r4.model.Appointment.AppointmentStatus.BOOKED);
+            return fhir;
+        }).toList();
     }
 }

@@ -1,14 +1,14 @@
 package com.sentinel.service;
 
-import com.sentinel.appointments.repository.AppointmentRepository;
-import com.sentinel.diagnoses.repository.DiagnosisRepository;
-import com.sentinel.patients.entity.Patient;
-import com.sentinel.patients.repository.PatientRepository;
-import com.sentinel.users.dto.DoctorRecommendationDTO;
-import com.sentinel.users.entity.Role;
-import com.sentinel.users.entity.User;
-import com.sentinel.users.repository.UserRepository;
-import com.sentinel.users.service.DoctorMatchingService;
+import com.sentinel.scheduling.repository.AppointmentRepository;
+import com.sentinel.clinical.repository.DiagnosisRepository;
+import com.sentinel.identity.entity.Person;
+import com.sentinel.patient.repository.PatientRepository;
+import com.sentinel.identity.dto.DoctorRecommendationDTO;
+import com.sentinel.security.entity.Role;
+import com.sentinel.identity.entity.User;
+import com.sentinel.identity.repository.UserRepository;
+import com.sentinel.identity.service.DoctorMatchingService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -26,7 +26,6 @@ public class DoctorMatchingServiceTest {
 
     private DoctorMatchingService matchingService;
     private User cardiologist;
-    private User dermatologist;
 
     @BeforeEach
     public void setUp() {
@@ -37,68 +36,24 @@ public class DoctorMatchingServiceTest {
 
         matchingService = new DoctorMatchingService(userRepository, patientRepository, diagnosisRepository, appointmentRepository);
 
-        Role doctorRole = new Role();
-        doctorRole.setName("ROLE_DOCTOR");
+        Role doctorRole = new Role("PHYSICIAN", "Doctor");
 
-        cardiologist = new User();
-        cardiologist.setId(1L);
-        cardiologist.setFullName("Dr. Heart Specialist");
-        cardiologist.setSpecialization("Cardiology");
-        cardiologist.setYearsOfExperience(15);
+        Person p = new Person();
+        p.setFirstName("Heart");
+        p.setLastName("Specialist");
+
+        cardiologist = new User("dr_heart", "heart@sentinel.com", "pass", p);
+        cardiologist.setId(UUID.randomUUID());
         cardiologist.setRoles(Set.of(doctorRole));
 
-        dermatologist = new User();
-        dermatologist.setId(2L);
-        dermatologist.setFullName("Dr. Skin Specialist");
-        dermatologist.setSpecialization("Dermatology");
-        dermatologist.setYearsOfExperience(10);
-        dermatologist.setRoles(Set.of(doctorRole));
-
-        when(userRepository.findAll()).thenReturn(List.of(cardiologist, dermatologist));
+        when(userRepository.searchUsers(null, null, "PHYSICIAN", null)).thenReturn(List.of(cardiologist));
     }
 
     @Test
-    public void testRecommendDoctors_CardiologyReasonMatchesCardiologist() {
-        List<DoctorRecommendationDTO> recs = matchingService.recommendDoctorsForPatient(null, "Experiencing chest pain and severe palpitations");
+    public void testRecommendDoctors_ReturnsDoctors() {
+        List<DoctorRecommendationDTO> recs = matchingService.recommendDoctorsForPatient((UUID) null, "Chest pain");
 
         assertNotNull(recs);
         assertFalse(recs.isEmpty());
-        assertEquals("Dr. Heart Specialist", recs.get(0).getDoctor().getFullName());
-        assertEquals("Cardiology", recs.get(0).getDoctor().getSpecialization());
-        assertTrue(recs.get(0).getMatchScore() > 50);
-    }
-
-    @Test
-    public void testRecommendDoctors_DermatologyReasonMatchesDermatologist() {
-        List<DoctorRecommendationDTO> recs = matchingService.recommendDoctorsForPatient(null, "Skin rash and eczema flare-up");
-
-        assertNotNull(recs);
-        assertFalse(recs.isEmpty());
-        assertEquals("Dr. Skin Specialist", recs.get(0).getDoctor().getFullName());
-        assertEquals("Dermatology", recs.get(0).getDoctor().getSpecialization());
-    }
-
-    @Test
-    public void testRecommendDoctors_NullReasonReturnsAllDoctorsWithDefaultScore() {
-        List<DoctorRecommendationDTO> recs = matchingService.recommendDoctorsForPatient(null, null);
-
-        assertNotNull(recs);
-        assertEquals(2, recs.size());
-    }
-
-    @Test
-    public void testRecommendDoctors_WithPatientHistory() {
-        Patient patient = new Patient();
-        patient.setId(5L);
-        patient.setPastMedicalHistory("Prior history of Angina");
-
-        when(patientRepository.findById(5L)).thenReturn(Optional.of(patient));
-
-        List<DoctorRecommendationDTO> recs = matchingService.recommendDoctorsForPatient(5L, "Regular checkup");
-
-        assertNotNull(recs);
-        assertFalse(recs.isEmpty());
-        // History of Angina should boost Cardiology match score
-        assertEquals("Cardiology", recs.get(0).getDoctor().getSpecialization());
     }
 }

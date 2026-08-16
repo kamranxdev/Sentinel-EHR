@@ -75,7 +75,7 @@ import {
           <div>
             <h1 class="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
               Front Desk Command Center
-              <span hlmBadge variant="secondary" class="text-[11px] bg-sky-500/10 text-sky-600 border border-sky-500/20">ROLE_RECEPTIONIST</span>
+              <span hlmBadge variant="secondary" class="text-[11px] bg-sky-500/10 text-sky-600 border border-sky-500/20">RECEPTIONIST</span>
             </h1>
             <p class="text-xs text-muted-foreground mt-0.5">Demographic registration, stage check-ins, MPI identity matching & ABHA/TPA insurance verification.</p>
           </div>
@@ -326,7 +326,7 @@ export class ReceptionistDashboardComponent implements OnInit {
 
   showIntakeModal = signal(false);
   showRteModal = signal(false);
-  rtePatientId = signal<number | null>(null);
+  rtePatientId = signal<string | null>(null);
 
   todayDateStr = new Date();
   selectedDate = signal<string>(this.getLocalDateString(new Date()));
@@ -375,7 +375,7 @@ export class ReceptionistDashboardComponent implements OnInit {
     this.showIntakeModal.set(true);
   }
 
-  openRteModal(patientId?: number): void {
+  openRteModal(patientId?: string): void {
     this.rtePatientId.set(patientId || null);
     this.showRteModal.set(true);
   }
