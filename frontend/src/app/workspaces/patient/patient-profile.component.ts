@@ -5,7 +5,7 @@ import { Router, RouterModule } from '@angular/router';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
 import { PatientContextService } from '../../core/services/patient-context.service';
-import { Patient } from '../../core/models/patient.model';
+import { Patient, EmergencyContact } from '../../core/models/patient.model';
 import { ActionButtonComponent } from '../../shared/ui/action-button.component';
 import { toast } from '@spartan-ng/brain/sonner';
 
@@ -801,14 +801,14 @@ type ProfileTab = 'demographics' | 'contact' | 'insurance' | 'allergies' | 'hist
             <div class="space-y-2">
               <div class="space-y-1">
                 <span class="text-[11px] text-muted-foreground block">Emergency Contact (Next of Kin):</span>
-                <div *ngIf="emergencyContactName" class="p-2 rounded-lg bg-muted/40 border border-border space-y-0.5">
+                <div *ngIf="profileForm.emergencyContact?.name || emergencyContactName" class="p-2 rounded-lg bg-muted/40 border border-border space-y-0.5">
                   <div class="flex items-center justify-between">
-                    <span class="font-bold text-foreground">{{ emergencyContactName }}</span>
-                    <span hlmBadge variant="outline" class="text-[9px] py-0 px-1">{{ emergencyContactRelationship }}</span>
+                    <span class="font-bold text-foreground">{{ profileForm.emergencyContact?.name || emergencyContactName }}</span>
+                    <span hlmBadge variant="outline" class="text-[9px] py-0 px-1">{{ profileForm.emergencyContact?.relationship || emergencyContactRelationship }}</span>
                   </div>
-                  <span *ngIf="emergencyContactPhone" class="font-mono text-muted-foreground text-[11px] block">{{ emergencyContactPhone }}</span>
+                  <span *ngIf="profileForm.emergencyContact?.phone || emergencyContactPhone" class="font-mono text-muted-foreground text-[11px] block">{{ profileForm.emergencyContact?.phone || emergencyContactPhone }}</span>
                 </div>
-                <span *ngIf="!emergencyContactName" class="font-semibold text-foreground block">{{ profileForm.emergencyContact || 'Not Specified' }}</span>
+                <span *ngIf="!profileForm.emergencyContact?.name && !emergencyContactName" class="font-semibold text-foreground block">Not Specified</span>
               </div>
 
               <div class="space-y-0.5 pt-2 border-t border-border">
@@ -915,40 +915,46 @@ export class PatientProfileComponent implements OnInit {
         if (p) {
           this.patient.set(p);
           this.profileForm = { ...p };
-          this.parseEmergencyContact(p.emergencyContact);
+          this.loadEmergencyContact(p.emergencyContact);
         }
       },
       error: (err) => console.warn('Could not load profile', err),
     });
   }
 
-  parseEmergencyContact(contactStr?: string): void {
-    if (!contactStr) {
+  loadEmergencyContact(contact?: EmergencyContact): void {
+    if (!contact) {
       this.emergencyContactName = '';
       this.emergencyContactRelationship = 'Spouse';
       this.emergencyContactPhone = '';
       return;
     }
-    const match = contactStr.match(/^(.*?)\s*(?:\((.*?)\))?\s*(?:-\s*(.*))?$/);
-    if (match) {
-      this.emergencyContactName = match[1]?.trim() || contactStr;
-      this.emergencyContactRelationship = match[2]?.trim() || 'Spouse';
-      this.emergencyContactPhone = match[3]?.trim() || '';
-    } else {
-      this.emergencyContactName = contactStr;
-      this.emergencyContactRelationship = 'Spouse';
-      this.emergencyContactPhone = '';
+    this.emergencyContactName = contact.name || '';
+    this.emergencyContactRelationship = contact.relationship || 'Spouse';
+    this.emergencyContactPhone = contact.phone || '';
+  }
+
+  parseEmergencyContact(contact?: any): void {
+    if (!contact) {
+      this.loadEmergencyContact();
+      return;
+    }
+    if (typeof contact === 'object') {
+      this.loadEmergencyContact(contact);
     }
   }
 
   syncEmergencyContact(): void {
     if (!this.emergencyContactName && !this.emergencyContactPhone) {
-      this.profileForm.emergencyContact = '';
+      this.profileForm.emergencyContact = undefined;
       return;
     }
-    const rel = this.emergencyContactRelationship ? ` (${this.emergencyContactRelationship})` : '';
-    const phone = this.emergencyContactPhone ? ` - ${this.emergencyContactPhone}` : '';
-    this.profileForm.emergencyContact = `${this.emergencyContactName}${rel}${phone}`.trim();
+    this.profileForm.emergencyContact = {
+      ...(this.profileForm.emergencyContact?.id ? { id: this.profileForm.emergencyContact.id } : {}),
+      name: this.emergencyContactName,
+      relationship: this.emergencyContactRelationship,
+      phone: this.emergencyContactPhone,
+    };
   }
 
   getCompletenessScore(): number {
@@ -964,7 +970,7 @@ export class PatientProfileComponent implements OnInit {
     if (p.email) score += 5;
     if (p.address) score += 10;
 
-    if (this.emergencyContactName || p.emergencyContact) score += 15;
+    if (this.emergencyContactName || p.emergencyContact?.name) score += 15;
 
     if (p.insuranceProvider) score += 10;
     if (p.insurancePolicyNumber) score += 5;
@@ -980,7 +986,7 @@ export class PatientProfileComponent implements OnInit {
   }
 
   hasContact(): boolean {
-    return !!(this.profileForm.phone && this.profileForm.address && (this.emergencyContactName || this.profileForm.emergencyContact));
+    return !!(this.profileForm.phone && this.profileForm.address && (this.emergencyContactName || this.profileForm.emergencyContact?.name));
   }
 
   hasInsurance(): boolean {
@@ -1030,7 +1036,7 @@ export class PatientProfileComponent implements OnInit {
         this.saving.set(false);
         this.patient.set(updated);
         this.profileForm = { ...updated };
-        this.parseEmergencyContact(updated.emergencyContact);
+        this.loadEmergencyContact(updated.emergencyContact);
         this.patientContext.loadContext();
         this.saveSuccess.set(true);
         toast.success('Health Profile Saved Successfully', {

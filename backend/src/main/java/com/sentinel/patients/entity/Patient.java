@@ -30,7 +30,10 @@ public class Patient {
     private String email;
     private String address;
     private String pinCode;
-    private String emergencyContact;
+
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @JoinColumn(name = "emergency_contact_id")
+    private EmergencyContact emergencyContact;
 
     private String insuranceProvider;
     private String insurancePolicyNumber;
@@ -168,11 +171,11 @@ public class Patient {
         this.pinCode = pinCode;
     }
 
-    public String getEmergencyContact() {
+    public EmergencyContact getEmergencyContact() {
         return emergencyContact;
     }
 
-    public void setEmergencyContact(String emergencyContact) {
+    public void setEmergencyContact(EmergencyContact emergencyContact) {
         this.emergencyContact = emergencyContact;
     }
 

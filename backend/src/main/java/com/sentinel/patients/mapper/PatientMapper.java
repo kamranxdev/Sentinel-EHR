@@ -1,12 +1,38 @@
 package com.sentinel.patients.mapper;
 
+import com.sentinel.patients.dto.EmergencyContactDTO;
 import com.sentinel.patients.dto.PatientRequestDTO;
 import com.sentinel.patients.dto.PatientResponseDTO;
+import com.sentinel.patients.entity.EmergencyContact;
 import com.sentinel.patients.entity.Patient;
 import org.springframework.stereotype.Component;
 
 @Component
 public class PatientMapper {
+
+    public EmergencyContact toEmergencyContactEntity(EmergencyContactDTO dto) {
+        if (dto == null) return null;
+        EmergencyContact contact = new EmergencyContact();
+        contact.setId(dto.getId());
+        contact.setName(dto.getName());
+        contact.setRelationship(dto.getRelationship());
+        contact.setPhone(dto.getPhone());
+        contact.setEmail(dto.getEmail());
+        contact.setAddress(dto.getAddress());
+        return contact;
+    }
+
+    public EmergencyContactDTO toEmergencyContactDTO(EmergencyContact entity) {
+        if (entity == null) return null;
+        EmergencyContactDTO dto = new EmergencyContactDTO();
+        dto.setId(entity.getId());
+        dto.setName(entity.getName());
+        dto.setRelationship(entity.getRelationship());
+        dto.setPhone(entity.getPhone());
+        dto.setEmail(entity.getEmail());
+        dto.setAddress(entity.getAddress());
+        return dto;
+    }
 
     public Patient toEntity(PatientRequestDTO dto) {
         if (dto == null) return null;
@@ -23,7 +49,7 @@ public class PatientMapper {
         patient.setEmail(dto.getEmail());
         patient.setAddress(dto.getAddress());
         patient.setPinCode(dto.getPinCode());
-        patient.setEmergencyContact(dto.getEmergencyContact());
+        patient.setEmergencyContact(toEmergencyContactEntity(dto.getEmergencyContact()));
         patient.setInsuranceProvider(dto.getInsuranceProvider());
         patient.setInsurancePolicyNumber(dto.getInsurancePolicyNumber());
         patient.setInsuranceGroupNumber(dto.getInsuranceGroupNumber());
@@ -55,7 +81,20 @@ public class PatientMapper {
         if (dto.getEmail() != null) patient.setEmail(dto.getEmail());
         if (dto.getAddress() != null) patient.setAddress(dto.getAddress());
         if (dto.getPinCode() != null) patient.setPinCode(dto.getPinCode());
-        if (dto.getEmergencyContact() != null) patient.setEmergencyContact(dto.getEmergencyContact());
+        
+        if (dto.getEmergencyContact() != null) {
+            if (patient.getEmergencyContact() == null) {
+                patient.setEmergencyContact(toEmergencyContactEntity(dto.getEmergencyContact()));
+            } else {
+                EmergencyContact contact = patient.getEmergencyContact();
+                if (dto.getEmergencyContact().getName() != null) contact.setName(dto.getEmergencyContact().getName());
+                if (dto.getEmergencyContact().getRelationship() != null) contact.setRelationship(dto.getEmergencyContact().getRelationship());
+                if (dto.getEmergencyContact().getPhone() != null) contact.setPhone(dto.getEmergencyContact().getPhone());
+                if (dto.getEmergencyContact().getEmail() != null) contact.setEmail(dto.getEmergencyContact().getEmail());
+                if (dto.getEmergencyContact().getAddress() != null) contact.setAddress(dto.getEmergencyContact().getAddress());
+            }
+        }
+
         if (dto.getInsuranceProvider() != null) patient.setInsuranceProvider(dto.getInsuranceProvider());
         if (dto.getInsurancePolicyNumber() != null) patient.setInsurancePolicyNumber(dto.getInsurancePolicyNumber());
         if (dto.getInsuranceGroupNumber() != null) patient.setInsuranceGroupNumber(dto.getInsuranceGroupNumber());
@@ -89,7 +128,7 @@ public class PatientMapper {
         dto.setEmail(entity.getEmail());
         dto.setAddress(entity.getAddress());
         dto.setPinCode(entity.getPinCode());
-        dto.setEmergencyContact(entity.getEmergencyContact());
+        dto.setEmergencyContact(toEmergencyContactDTO(entity.getEmergencyContact()));
         dto.setInsuranceProvider(entity.getInsuranceProvider());
         dto.setInsurancePolicyNumber(entity.getInsurancePolicyNumber());
         dto.setInsuranceGroupNumber(entity.getInsuranceGroupNumber());

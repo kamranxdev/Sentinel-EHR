@@ -505,7 +505,7 @@ import {
             <div class="space-y-2">
               <div class="flex justify-between items-center">
                 <span class="text-muted-foreground">Emergency Contact:</span>
-                <span class="font-semibold text-foreground">{{ patient()?.emergencyContact || 'Not Specified' }}</span>
+                <span class="font-semibold text-foreground">{{ formatEmergencyContact() }}</span>
               </div>
               <div class="flex justify-between items-center">
                 <span class="text-muted-foreground">Insurance Carrier:</span>
@@ -700,10 +700,18 @@ export class PatientDashboardComponent implements OnInit {
     return age > 0 ? `${age} yrs` : '';
   }
 
+  formatEmergencyContact(): string {
+    const ec = this.patient()?.emergencyContact;
+    if (!ec || !ec.name) return 'Not Specified';
+    const rel = ec.relationship ? ` (${ec.relationship})` : '';
+    const phone = ec.phone ? ` - ${ec.phone}` : '';
+    return `${ec.name}${rel}${phone}`;
+  }
+
   isProfileIncomplete(): boolean {
     const p = this.patient();
     if (!p) return true;
-    return !p.phone || !p.address || !p.emergencyContact || !p.insuranceProvider;
+    return !p.phone || !p.address || !p.emergencyContact || !p.emergencyContact?.name || !p.insuranceProvider;
   }
 
   hasCriticalSafetyAlert(): boolean {

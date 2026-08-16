@@ -139,7 +139,19 @@ public class PatientService {
         if (updated.getPhone() != null) patient.setPhone(updated.getPhone());
         if (updated.getEmail() != null) patient.setEmail(updated.getEmail());
         if (updated.getAddress() != null) patient.setAddress(updated.getAddress());
-        if (updated.getEmergencyContact() != null) patient.setEmergencyContact(updated.getEmergencyContact());
+        if (updated.getEmergencyContact() != null) {
+            if (patient.getEmergencyContact() == null) {
+                patient.setEmergencyContact(updated.getEmergencyContact());
+            } else {
+                com.sentinel.patients.entity.EmergencyContact ec = patient.getEmergencyContact();
+                com.sentinel.patients.entity.EmergencyContact updatedEc = updated.getEmergencyContact();
+                if (updatedEc.getName() != null) ec.setName(updatedEc.getName());
+                if (updatedEc.getRelationship() != null) ec.setRelationship(updatedEc.getRelationship());
+                if (updatedEc.getPhone() != null) ec.setPhone(updatedEc.getPhone());
+                if (updatedEc.getEmail() != null) ec.setEmail(updatedEc.getEmail());
+                if (updatedEc.getAddress() != null) ec.setAddress(updatedEc.getAddress());
+            }
+        }
         if (updated.getInsuranceProvider() != null) patient.setInsuranceProvider(updated.getInsuranceProvider());
         if (updated.getInsurancePolicyNumber() != null) patient.setInsurancePolicyNumber(updated.getInsurancePolicyNumber());
         if (updated.getInsuranceGroupNumber() != null) patient.setInsuranceGroupNumber(updated.getInsuranceGroupNumber());

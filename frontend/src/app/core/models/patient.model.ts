@@ -1,6 +1,15 @@
 import { User } from './auth-user.model';
 import { Allergy, Diagnosis, MedicalRecord, Prescription, Vitals } from './clinical.model';
 
+export interface EmergencyContact {
+  id?: number;
+  name?: string;
+  relationship?: string;
+  phone?: string;
+  email?: string;
+  address?: string;
+}
+
 export interface Patient {
   id: number;
   patientCode: string;
@@ -14,7 +23,7 @@ export interface Patient {
   email: string;
   address: string;
   pinCode?: string;
-  emergencyContact: string;
+  emergencyContact?: EmergencyContact;
   insuranceProvider?: string;
   insurancePolicyNumber?: string;
   insuranceGroupNumber?: string;
@@ -63,21 +72,21 @@ export interface MPIMergeRequestDTO {
   mergeReason: string;
 }
 
-// Emergency Access Break-Glass
-export interface BreakGlassRecord {
-  id?: number;
-  patientId: number;
-  requestedBy: string;
-  accessCategory: string;
-  justification: string;
-  grantedAt?: string;
-  expiresAt?: string;
-  ipAddress?: string;
-  status?: string;
-}
-
 export interface BreakGlassRequestDTO {
   patientId: number;
-  category: string;
+  category?: string;
   justification: string;
 }
+
+export interface BreakGlassRecord {
+  id?: number;
+  patient?: Patient;
+  user?: User;
+  category: string;
+  justification: string;
+  requestedAt?: string;
+  expiresAt?: string;
+  status?: string;
+  clientIp?: string;
+}
+

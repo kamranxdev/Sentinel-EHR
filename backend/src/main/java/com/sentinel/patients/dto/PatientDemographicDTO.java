@@ -20,7 +20,7 @@ public class PatientDemographicDTO {
     private String email;
     private String address;
     private String pinCode;
-    private String emergencyContact;
+    private EmergencyContactDTO emergencyContact;
     private String insuranceProvider;
     private String insurancePolicyNumber;
     private String insuranceGroupNumber;
@@ -66,8 +66,8 @@ public class PatientDemographicDTO {
     public String getPinCode() { return pinCode; }
     public void setPinCode(String pinCode) { this.pinCode = pinCode; }
 
-    public String getEmergencyContact() { return emergencyContact; }
-    public void setEmergencyContact(String emergencyContact) { this.emergencyContact = emergencyContact; }
+    public EmergencyContactDTO getEmergencyContact() { return emergencyContact; }
+    public void setEmergencyContact(EmergencyContactDTO emergencyContact) { this.emergencyContact = emergencyContact; }
 
     public String getInsuranceProvider() { return insuranceProvider; }
     public void setInsuranceProvider(String insuranceProvider) { this.insuranceProvider = insuranceProvider; }

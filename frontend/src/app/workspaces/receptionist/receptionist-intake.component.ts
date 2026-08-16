@@ -170,9 +170,19 @@ import {
               <label class="font-medium text-foreground">Email Address</label>
               <input hlmInput type="email" [(ngModel)]="email" placeholder="patient@example.com" class="w-full text-xs" />
             </div>
-            <div class="space-y-1.5 sm:col-span-2">
-              <label class="font-medium text-foreground">Emergency Contact (Name & Phone)</label>
-              <input hlmInput type="text" [(ngModel)]="emergencyContact" placeholder="Sita Kumar (Spouse) - +91 98765 12345" class="w-full text-xs" />
+            <div class="space-y-1.5 sm:col-span-2 grid grid-cols-3 gap-2">
+              <div>
+                <label class="font-medium text-foreground text-[11px] block">Emergency Contact Name</label>
+                <input hlmInput type="text" [(ngModel)]="emergencyContactName" placeholder="Vikram Sharma" class="w-full text-xs" />
+              </div>
+              <div>
+                <label class="font-medium text-foreground text-[11px] block">Relationship</label>
+                <input hlmInput type="text" [(ngModel)]="emergencyContactRelationship" placeholder="Husband" class="w-full text-xs" />
+              </div>
+              <div>
+                <label class="font-medium text-foreground text-[11px] block">Phone</label>
+                <input hlmInput type="text" [(ngModel)]="emergencyContactPhone" placeholder="+91 98450 99887" class="w-full text-xs" />
+              </div>
             </div>
           </div>
 
@@ -384,7 +394,9 @@ export class ReceptionistIntakeComponent implements OnInit {
   address = '402 Sunrise Apartments, MG Road, Ward 12, City 560001';
   phone = '+91 98450 11223';
   email = 'sunita.sharma@example.com';
-  emergencyContact = 'Vikram Sharma (Husband) - +91 98450 99887';
+  emergencyContactName = 'Vikram Sharma';
+  emergencyContactRelationship = 'Husband';
+  emergencyContactPhone = '+91 98450 99887';
 
   insuranceProvider = 'Star Health & Allied Insurance';
   insurancePolicyNumber = 'POL-887102';
@@ -471,7 +483,11 @@ export class ReceptionistIntakeComponent implements OnInit {
         address: this.address,
         phone: this.phone,
         email: this.email,
-        emergencyContact: this.emergencyContact,
+        emergencyContact: {
+          name: this.emergencyContactName,
+          relationship: this.emergencyContactRelationship,
+          phone: this.emergencyContactPhone,
+        },
         insuranceProvider: this.insuranceProvider,
         insurancePolicyNumber: this.insurancePolicyNumber,
         insuranceGroupNumber: this.insuranceGroupNumber,

@@ -26,7 +26,7 @@ public class PatientRequestDTO {
 
     private String address;
     private String pinCode;
-    private String emergencyContact;
+    private EmergencyContactDTO emergencyContact;
 
     private String insuranceProvider;
     private String insurancePolicyNumber;
@@ -147,11 +147,11 @@ public class PatientRequestDTO {
         this.pinCode = pinCode;
     }
 
-    public String getEmergencyContact() {
+    public EmergencyContactDTO getEmergencyContact() {
         return emergencyContact;
     }
 
-    public void setEmergencyContact(String emergencyContact) {
+    public void setEmergencyContact(EmergencyContactDTO emergencyContact) {
         this.emergencyContact = emergencyContact;
     }
 

@@ -335,7 +335,7 @@ public class MPISearchService {
         if (isStringEmpty(primary.getEmail()) && !isStringEmpty(duplicate.getEmail())) primary.setEmail(duplicate.getEmail());
         if (isStringEmpty(primary.getAddress()) && !isStringEmpty(duplicate.getAddress())) primary.setAddress(duplicate.getAddress());
         if (isStringEmpty(primary.getPinCode()) && !isStringEmpty(duplicate.getPinCode())) primary.setPinCode(duplicate.getPinCode());
-        if (isStringEmpty(primary.getEmergencyContact()) && !isStringEmpty(duplicate.getEmergencyContact())) primary.setEmergencyContact(duplicate.getEmergencyContact());
+        if (primary.getEmergencyContact() == null && duplicate.getEmergencyContact() != null) primary.setEmergencyContact(duplicate.getEmergencyContact());
         if (isStringEmpty(primary.getBloodType()) && !isStringEmpty(duplicate.getBloodType())) primary.setBloodType(duplicate.getBloodType());
         if (isStringEmpty(primary.getGender()) && !isStringEmpty(duplicate.getGender())) primary.setGender(duplicate.getGender());
 
