@@ -24,14 +24,25 @@
         hlmTooltip="Toggle theme" (click)="toggleTheme()">
         <ng-icon [name]="theme.mode() === 'dark' ? 'lucideSun' : 'lucideMoon'" size="16" />
       </button>
-      <a routerLink="/login" hlmBtn variant="outline" size="sm" class="gap-1.5 text-xs">
-        <span>Sign In</span>
-        <ng-icon name="lucideLogIn" size="14" />
-      </a>
-      <a routerLink="/register" hlmBtn variant="default" size="sm" class="gap-1.5 text-xs font-bold shadow-xs">
-        <ng-icon name="lucideUserPlus" size="14" />
-        <span>Sign Up / Portal</span>
-      </a>
+      <ng-container *ngIf="!authService.isLoggedIn(); else navbarDashboard">
+        <a routerLink="/login" hlmBtn variant="outline" size="sm" class="gap-1.5 text-xs">
+          <span>Sign In</span>
+          <ng-icon name="lucideLogIn" size="14" />
+        </a>
+        <a routerLink="/register" hlmBtn variant="default" size="sm" class="gap-1.5 text-xs font-bold shadow-xs">
+          <ng-icon name="lucideUserPlus" size="14" />
+          <span>Sign Up / Portal</span>
+        </a>
+      </ng-container>
+      <ng-template #navbarDashboard>
+        <a routerLink="/dashboard" hlmBtn variant="default" size="sm" class="gap-1.5 text-xs font-bold shadow-xs">
+          <ng-icon name="lucideLayoutDashboard" size="14" />
+          <span>Dashboard</span>
+        </a>
+        <button hlmBtn variant="ghost" size="icon" class="size-8 text-destructive hover:text-destructive hover:bg-destructive/10" hlmTooltip="Sign Out" (click)="logout()">
+          <ng-icon name="lucideLogOut" size="16" />
+        </button>
+      </ng-template>
     </div>
   </header>
 
@@ -56,14 +67,22 @@
         </p>
 
         <div class="flex items-center gap-3 pt-2">
-          <a routerLink="/register" hlmBtn variant="default" class="gap-2 font-bold text-xs shadow-sm">
-            <ng-icon name="lucideUserPlus" size="16" />
-            <span>Create Patient Account</span>
-          </a>
-          <a routerLink="/login" hlmBtn variant="outline" class="gap-2 text-xs">
-            <span>Sign In to Workspace</span>
-            <ng-icon name="lucideArrowRight" size="15" />
-          </a>
+          <ng-container *ngIf="!authService.isLoggedIn(); else heroDashboard">
+            <a routerLink="/register" hlmBtn variant="default" class="gap-2 font-bold text-xs shadow-sm">
+              <ng-icon name="lucideUserPlus" size="16" />
+              <span>Create Patient Account</span>
+            </a>
+            <a routerLink="/login" hlmBtn variant="outline" class="gap-2 text-xs">
+              <span>Sign In to Workspace</span>
+              <ng-icon name="lucideArrowRight" size="15" />
+            </a>
+          </ng-container>
+          <ng-template #heroDashboard>
+            <a routerLink="/dashboard" hlmBtn variant="default" class="gap-2 font-bold text-xs shadow-sm">
+              <ng-icon name="lucideLayoutDashboard" size="16" />
+              <span>Go to Dashboard</span>
+            </a>
+          </ng-template>
         </div>
 
         <!-- Metrics bar -->
@@ -433,10 +452,18 @@
           <span>Terms of Service</span>
         </a>
         <span>&bull;</span>
-        <a routerLink="/login" class="hover:text-foreground transition-colors flex items-center gap-1">
-          <span>Sign In</span>
-          <ng-icon name="lucideChevronRight" size="14" />
-        </a>
+        <ng-container *ngIf="!authService.isLoggedIn(); else footerLogout">
+          <a routerLink="/login" class="hover:text-foreground transition-colors flex items-center gap-1">
+            <span>Sign In</span>
+            <ng-icon name="lucideChevronRight" size="14" />
+          </a>
+        </ng-container>
+        <ng-template #footerLogout>
+          <button (click)="logout()" class="hover:text-foreground transition-colors flex items-center gap-1 cursor-pointer">
+            <span>Sign Out</span>
+            <ng-icon name="lucideLogOut" size="14" />
+          </button>
+        </ng-template>
       </div>
     </div>
   </footer>
