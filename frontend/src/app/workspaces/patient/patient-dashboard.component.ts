@@ -216,9 +216,9 @@ import {
             <ng-icon name="lucideHeartPulse" size="16" class="text-rose-500" />
           </div>
           <div class="flex items-baseline justify-between">
-            <span class="text-xl font-bold font-mono text-foreground">{{ latestVitals()?.bloodPressure || 'N/A' }}</span>
-            <span *ngIf="latestVitals()" hlmBadge [variant]="getBpCategoryBadgeVariant(latestVitals()?.bloodPressure)" class="text-[10px]">
-              {{ getBpCategoryText(latestVitals()?.bloodPressure) }}
+            <span class="text-xl font-bold font-mono text-foreground">{{ latestVitals()?.systolicBp && latestVitals()?.diastolicBp ? latestVitals()!.systolicBp + '/' + latestVitals()!.diastolicBp : 'N/A' }}</span>
+            <span *ngIf="latestVitals()" hlmBadge [variant]="getBpCategoryBadgeVariant(latestVitals())" class="text-[10px]">
+              {{ getBpCategoryText(latestVitals()) }}
             </span>
           </div>
           <div class="text-[11px] text-muted-foreground">
@@ -425,10 +425,10 @@ import {
                 <div class="p-3 rounded-xl bg-muted/40 border border-border flex items-center justify-between">
                   <div class="space-y-0.5">
                     <span class="text-muted-foreground block text-[11px]">Blood Pressure</span>
-                    <span class="font-bold font-mono text-foreground text-base">{{ latestVitals()?.bloodPressure }}</span>
+                    <span class="font-bold font-mono text-foreground text-base">{{ latestVitals()?.systolicBp && latestVitals()?.diastolicBp ? latestVitals()!.systolicBp + '/' + latestVitals()!.diastolicBp : 'N/A' }}</span>
                   </div>
-                  <span hlmBadge [variant]="getBpCategoryBadgeVariant(latestVitals()?.bloodPressure)" class="text-[10px]">
-                    {{ getBpCategoryText(latestVitals()?.bloodPressure) }}
+                  <span hlmBadge [variant]="getBpCategoryBadgeVariant(latestVitals())" class="text-[10px]">
+                    {{ getBpCategoryText(latestVitals()) }}
                   </span>
                 </div>
 
@@ -728,12 +728,10 @@ export class PatientDashboardComponent implements OnInit {
     return `Severe Allergy Alert: ${severe.map((s) => `${s.allergenName} (${s.reactionDescription || s.severity})`).join(', ')}`;
   }
 
-  getBpCategoryText(bp?: string): string {
-    if (!bp || !bp.includes('/')) return 'Standard';
-    const parts = bp.split('/');
-    const sys = parseInt(parts[0], 10);
-    const dia = parseInt(parts[1], 10);
-    if (isNaN(sys) || isNaN(dia)) return 'Standard';
+  getBpCategoryText(v?: Vitals | null): string {
+    if (!v || v.systolicBp == null || v.diastolicBp == null) return 'Standard';
+    const sys = v.systolicBp;
+    const dia = v.diastolicBp;
 
     if (sys < 120 && dia < 80) return 'Normal';
     if (sys >= 120 && sys <= 129 && dia < 80) return 'Elevated';
@@ -742,8 +740,8 @@ export class PatientDashboardComponent implements OnInit {
     return 'Observed';
   }
 
-  getBpCategoryBadgeVariant(bp?: string): 'secondary' | 'outline' | 'destructive' | 'default' {
-    const cat = this.getBpCategoryText(bp);
+  getBpCategoryBadgeVariant(v?: Vitals | null): 'secondary' | 'outline' | 'destructive' | 'default' {
+    const cat = this.getBpCategoryText(v);
     if (cat === 'Normal') return 'secondary';
     if (cat === 'Elevated') return 'outline';
     if (cat.includes('HTN')) return 'destructive';

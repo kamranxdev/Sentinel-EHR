@@ -104,7 +104,8 @@ public class FhirResourceProviderTest {
         Vitals vitals = new Vitals();
         vitals.setId(501L);
         vitals.setPatient(patient);
-        vitals.setBloodPressure("120/80");
+        vitals.setSystolicBp(120);
+        vitals.setDiastolicBp(80);
         vitals.setHeartRate(72);
         vitals.setOxygenSaturation(98);
         vitals.setTemperature(37.0);

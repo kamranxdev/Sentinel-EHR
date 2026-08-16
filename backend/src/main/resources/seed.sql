@@ -226,17 +226,17 @@ INSERT INTO medical_records (id, patient_id, doctor_id, diagnosis, icd_code, sym
 -- ------------------------------------------------------------------------------
 -- 16. VITALS
 -- ------------------------------------------------------------------------------
-INSERT INTO vitals (id, patient_id, recorded_by_id, blood_pressure, heart_rate, temperature, oxygen_saturation, respiratory_rate, weight_kg, height_cm, bmi, blood_glucose, recorded_at) VALUES 
-(1, 1, 5, '134/86', 78, 36.7, 98, 16, 70.0, 165.0, 25.7, 135, CURRENT_TIMESTAMP),
-(2, 1, 5, '128/82', 74, 36.8, 98, 16, 68.5, 165.0, 25.2, 118, CURRENT_TIMESTAMP),
-(3, 2, 5, '142/90', 85, 37.1, 97, 18, 86.0, 178.0, 27.1, 105, CURRENT_TIMESTAMP),
-(4, 2, 5, '130/84', 78, 36.9, 98, 16, 84.5, 178.0, 26.7, 98, CURRENT_TIMESTAMP),
-(5, 3, 5, '110/70', 72, 36.6, 99, 14, 55.0, 160.0, 21.5, 92, CURRENT_TIMESTAMP),
-(6, 3, 5, '112/72', 74, 36.7, 98, 14, 55.0, 160.0, 21.5, 95, CURRENT_TIMESTAMP),
-(7, 3, 5, '115/75', 75, 36.8, 99, 15, 55.0, 160.0, 21.5, 96, CURRENT_TIMESTAMP),
-(8, 4, 5, '120/78', 70, 36.6, 99, 15, 75.0, 175.0, 24.5, 92, CURRENT_TIMESTAMP),
-(9, 5, 5, '136/86', 81, 36.9, 100, 20, 69.6, 184.3, 20.5, 100, CURRENT_TIMESTAMP),
-(10, 6, 5, '118/76', 68, 36.5, 99, 14, 58.0, 162.0, 22.1, 95, CURRENT_TIMESTAMP);
+INSERT INTO vitals (id, patient_id, recorded_by_id, systolic_bp, diastolic_bp, heart_rate, temperature, oxygen_saturation, respiratory_rate, weight_kg, height_cm, bmi, blood_glucose, recorded_at) VALUES 
+(1, 1, 5, 134, 86, 78, 36.7, 98, 16, 70.0, 165.0, 25.7, 135, CURRENT_TIMESTAMP),
+(2, 1, 5, 128, 82, 74, 36.8, 98, 16, 68.5, 165.0, 25.2, 118, CURRENT_TIMESTAMP),
+(3, 2, 5, 142, 90, 85, 37.1, 97, 18, 86.0, 178.0, 27.1, 105, CURRENT_TIMESTAMP),
+(4, 2, 5, 130, 84, 78, 36.9, 98, 16, 84.5, 178.0, 26.7, 98, CURRENT_TIMESTAMP),
+(5, 3, 5, 110, 70, 72, 36.6, 99, 14, 55.0, 160.0, 21.5, 92, CURRENT_TIMESTAMP),
+(6, 3, 5, 112, 72, 74, 36.7, 98, 14, 55.0, 160.0, 21.5, 95, CURRENT_TIMESTAMP),
+(7, 3, 5, 115, 75, 75, 36.8, 99, 15, 55.0, 160.0, 21.5, 96, CURRENT_TIMESTAMP),
+(8, 4, 5, 120, 78, 70, 36.6, 99, 15, 75.0, 175.0, 24.5, 92, CURRENT_TIMESTAMP),
+(9, 5, 5, 136, 86, 81, 36.9, 100, 20, 69.6, 184.3, 20.5, 100, CURRENT_TIMESTAMP),
+(10, 6, 5, 118, 76, 68, 36.5, 99, 14, 58.0, 162.0, 22.1, 95, CURRENT_TIMESTAMP);
 
 -- ------------------------------------------------------------------------------
 -- 17. FLOWSHEET ENTRIES (Intensive Care & Nursing Bedside Flowsheet)

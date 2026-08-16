@@ -12,7 +12,9 @@ public class VitalsMapper {
         if (dto == null) return null;
 
         Vitals vitals = new Vitals();
-        vitals.setBloodPressure(dto.getBloodPressure());
+        if (dto.getSystolicBp() != null) vitals.setSystolicBp(dto.getSystolicBp());
+        if (dto.getDiastolicBp() != null) vitals.setDiastolicBp(dto.getDiastolicBp());
+        
         vitals.setHeartRate(dto.getHeartRate());
         vitals.setTemperature(dto.getTemperature());
         vitals.setOxygenSaturation(dto.getOxygenSaturation());
@@ -23,6 +25,9 @@ public class VitalsMapper {
         vitals.setPainScore(dto.getPainScore());
         vitals.setFluidIntakeMl(dto.getFluidIntakeMl());
         vitals.setFluidOutputMl(dto.getFluidOutputMl());
+        if (dto.getRecordedAt() != null) {
+            vitals.setRecordedAt(dto.getRecordedAt());
+        }
         return vitals;
     }
 
@@ -31,7 +36,8 @@ public class VitalsMapper {
 
         VitalsResponseDTO dto = new VitalsResponseDTO();
         dto.setId(entity.getId());
-        dto.setBloodPressure(entity.getBloodPressure());
+        dto.setSystolicBp(entity.getSystolicBp());
+        dto.setDiastolicBp(entity.getDiastolicBp());
         dto.setHeartRate(entity.getHeartRate());
         dto.setTemperature(entity.getTemperature());
         dto.setOxygenSaturation(entity.getOxygenSaturation());

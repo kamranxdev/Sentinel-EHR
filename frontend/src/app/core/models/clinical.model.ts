@@ -55,12 +55,16 @@ export interface MedicalRecord {
 
 export interface Vitals {
   id?: number;
-  patient: Patient;
+  patient?: Patient;
+  patientId?: number;
   recordedBy?: User;
-  bloodPressure: string;
-  heartRate: number;
-  temperature: number;
-  oxygenSaturation: number;
+  recordedById?: number;
+  recordedByName?: string;
+  systolicBp?: number;
+  diastolicBp?: number;
+  heartRate?: number;
+  temperature?: number;
+  oxygenSaturation?: number;
   respiratoryRate?: number;
   weightKg?: number;
   heightCm?: number;

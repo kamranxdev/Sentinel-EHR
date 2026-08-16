@@ -164,7 +164,8 @@ public class AppointmentController {
             @Valid @RequestBody TriageVitalsRequestDTO payload,
             Authentication auth) {
         Vitals vitals = new Vitals();
-        if (payload.getBloodPressure() != null) vitals.setBloodPressure(payload.getBloodPressure());
+        if (payload.getSystolicBp() != null) vitals.setSystolicBp(payload.getSystolicBp());
+        if (payload.getDiastolicBp() != null) vitals.setDiastolicBp(payload.getDiastolicBp());
         if (payload.getHeartRate() != null) vitals.setHeartRate(payload.getHeartRate());
         if (payload.getTemperature() != null) vitals.setTemperature(payload.getTemperature());
         if (payload.getOxygenSaturation() != null) vitals.setOxygenSaturation(payload.getOxygenSaturation());

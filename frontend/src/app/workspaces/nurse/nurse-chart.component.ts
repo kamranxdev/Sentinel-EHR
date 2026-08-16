@@ -200,7 +200,7 @@ import {
               <tbody hlmTableBody class="divide-y divide-border">
                 <tr *ngFor="let v of vitals()" hlmTableRow class="hover:bg-muted/40 transition-colors">
                   <td hlmTableCell class="py-3 px-4 font-mono text-muted-foreground">{{ v.recordedAt | date:'short' }}</td>
-                  <td hlmTableCell class="py-3 px-4 font-semibold text-foreground font-mono">{{ v.bloodPressure }}</td>
+                  <td hlmTableCell class="py-3 px-4 font-semibold text-foreground font-mono">{{ v.systolicBp && v.diastolicBp ? v.systolicBp + '/' + v.diastolicBp : 'N/A' }}</td>
                   <td hlmTableCell class="py-3 px-4 font-mono">{{ v.heartRate }} bpm</td>
                   <td hlmTableCell class="py-3 px-4 font-mono">{{ v.temperature }} °C</td>
                   <td hlmTableCell class="py-3 px-4 font-mono">{{ v.oxygenSaturation }} %</td>
@@ -389,8 +389,13 @@ import {
 
           <div class="grid grid-cols-2 gap-3 text-xs">
             <div>
-              <label class="font-medium text-foreground block mb-1">Blood Pressure (mmHg)</label>
-              <input type="text" [(ngModel)]="newVitals.bloodPressure" placeholder="120/80" class="w-full p-2 rounded-md border border-input bg-background" />
+              <label class="font-medium text-foreground block mb-1">Systolic BP (mmHg)</label>
+              <input type="number" [(ngModel)]="newVitals.systolicBp" placeholder="120" class="w-full p-2 rounded-md border border-input bg-background" />
+            </div>
+
+            <div>
+              <label class="font-medium text-foreground block mb-1">Diastolic BP (mmHg)</label>
+              <input type="number" [(ngModel)]="newVitals.diastolicBp" placeholder="80" class="w-full p-2 rounded-md border border-input bg-background" />
             </div>
 
             <div>
@@ -507,7 +512,8 @@ export class NurseChartComponent implements OnInit {
   showVitalsModal = signal(false);
   savingVitals = signal(false);
   newVitals = {
-    bloodPressure: '120/80',
+    systolicBp: 120,
+    diastolicBp: 80,
     heartRate: 74,
     temperature: 36.8,
     oxygenSaturation: 98,
@@ -515,6 +521,7 @@ export class NurseChartComponent implements OnInit {
     respiratoryRate: 16,
     heightCm: 170,
     weightKg: 70,
+    recordedAt: '',
   };
 
   showAllergyModal = signal(false);
@@ -596,17 +603,29 @@ export class NurseChartComponent implements OnInit {
     if (!active || !active.id || this.savingVitals()) return;
 
     this.savingVitals.set(true);
+
+    const weight = this.newVitals.weightKg ? Number(this.newVitals.weightKg) : undefined;
+    const height = this.newVitals.heightCm ? Number(this.newVitals.heightCm) : undefined;
+    let bmiVal: number | undefined = undefined;
+    if (weight && height && height > 0) {
+      const hM = height / 100.0;
+      bmiVal = Math.round((weight / (hM * hM)) * 10) / 10;
+    }
+
     this.apiService
       .recordVitals({
         patient: { id: Number(active.id) } as Patient,
-        bloodPressure: this.newVitals.bloodPressure,
+        systolicBp: this.newVitals.systolicBp ? Number(this.newVitals.systolicBp) : undefined,
+        diastolicBp: this.newVitals.diastolicBp ? Number(this.newVitals.diastolicBp) : undefined,
         heartRate: Number(this.newVitals.heartRate),
         temperature: Number(this.newVitals.temperature),
         oxygenSaturation: Number(this.newVitals.oxygenSaturation),
         bloodGlucose: Number(this.newVitals.bloodGlucose),
         respiratoryRate: Number(this.newVitals.respiratoryRate),
-        heightCm: Number(this.newVitals.heightCm),
-        weightKg: Number(this.newVitals.weightKg),
+        heightCm: height,
+        weightKg: weight,
+        bmi: bmiVal,
+        recordedAt: this.newVitals.recordedAt ? new Date(this.newVitals.recordedAt).toISOString() : undefined,
       })
       .subscribe({
         next: () => {

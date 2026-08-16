@@ -43,7 +43,8 @@ public class VitalSignService {
                     dto.setId(v.getId());
                     dto.setPatientId(v.getPatient() != null ? v.getPatient().getId() : null);
                     dto.setPatientName(v.getPatient() != null ? v.getPatient().getFullName() : null);
-                    dto.setBloodPressure(v.getBloodPressure());
+                    dto.setSystolicBp(v.getSystolicBp());
+                    dto.setDiastolicBp(v.getDiastolicBp());
                     dto.setHeartRate(v.getHeartRate());
                     dto.setTemperature(v.getTemperature());
                     dto.setOxygenSaturation(v.getOxygenSaturation());

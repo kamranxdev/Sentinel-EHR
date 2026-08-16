@@ -125,7 +125,8 @@ public class AppointmentWorkflowServiceTest {
         testAppointment.setStatus("CHECKED_IN");
 
         Vitals vitals = new Vitals();
-        vitals.setBloodPressure("120/80");
+        vitals.setSystolicBp(120);
+        vitals.setDiastolicBp(80);
         vitals.setHeartRate(72);
         vitals.setTemperature(98.6);
 

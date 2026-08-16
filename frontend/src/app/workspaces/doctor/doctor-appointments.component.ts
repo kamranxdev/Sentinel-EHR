@@ -224,7 +224,7 @@ interface LabOrderItem {
               <div class="space-y-1">
                 <span class="font-semibold text-foreground block">Nurse Recorded Triage Vitals:</span>
                 <div *ngIf="activeApt()?.vitals; else defaultVitals" class="grid grid-cols-2 gap-1.5 p-2 rounded-lg bg-background border border-border font-mono text-[11px]">
-                  <div><span class="text-muted-foreground">BP:</span> <strong class="text-foreground">{{ activeApt()?.vitals?.bloodPressure || '120/80' }} mmHg</strong></div>
+                  <div><span class="text-muted-foreground">BP:</span> <strong class="text-foreground">{{ activeApt()?.vitals?.systolicBp && activeApt()?.vitals?.diastolicBp ? activeApt()!.vitals!.systolicBp + '/' + activeApt()!.vitals!.diastolicBp : '120/80' }} mmHg</strong></div>
                   <div><span class="text-muted-foreground">Heart Rate:</span> <strong class="text-foreground">{{ activeApt()?.vitals?.heartRate || '74' }} bpm</strong></div>
                   <div><span class="text-muted-foreground">Temp:</span> <strong class="text-foreground">{{ activeApt()?.vitals?.temperature || '36.8' }} °C</strong></div>
                   <div><span class="text-muted-foreground">SpO2:</span> <strong class="text-foreground">{{ activeApt()?.vitals?.oxygenSaturation || '98' }}%</strong></div>

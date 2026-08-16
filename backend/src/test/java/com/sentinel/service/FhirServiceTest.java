@@ -136,7 +136,8 @@ public class FhirServiceTest {
     public void testToObservationResource() {
         Vitals vitals = new Vitals();
         vitals.setId(30L);
-        vitals.setBloodPressure("120/80");
+        vitals.setSystolicBp(120);
+        vitals.setDiastolicBp(80);
         vitals.setHeartRate(75);
 
         Observation resource = fhirService.toObservationResource(vitals);

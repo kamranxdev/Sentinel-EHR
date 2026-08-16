@@ -62,7 +62,8 @@ public class AbdmConformanceTest {
         Vitals vitals = new Vitals();
         vitals.setId(701L);
         vitals.setPatient(patient);
-        vitals.setBloodPressure("130/85");
+        vitals.setSystolicBp(130);
+        vitals.setDiastolicBp(85);
 
         Bundle bundle = exporter.createOpConsultRecordBundle(patient, encounter, List.of(diagnosis), List.of(rx), List.of(vitals));
 

@@ -128,7 +128,9 @@ public class AppointmentWorkflowService {
         User user = getAuthenticatedUser(auth);
         vitalsInput.setPatient(apt.getPatient());
         vitalsInput.setRecordedBy(user);
-        vitalsInput.setRecordedAt(LocalDateTime.now());
+        if (vitalsInput.getRecordedAt() == null) {
+            vitalsInput.setRecordedAt(LocalDateTime.now());
+        }
 
         if (vitalsInput.getHeightCm() != null && vitalsInput.getWeightKg() != null && vitalsInput.getHeightCm() > 0) {
             double heightM = vitalsInput.getHeightCm() / 100.0;

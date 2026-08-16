@@ -449,7 +449,7 @@ import {
               <tbody hlmTableBody class="divide-y divide-border">
                 <tr *ngFor="let v of vitals()" hlmTableRow class="hover:bg-muted/40 transition-colors">
                   <td hlmTableCell class="py-3 px-4 font-mono text-muted-foreground">{{ v.recordedAt | date:'short' }}</td>
-                  <td hlmTableCell class="py-3 px-4 font-semibold text-foreground font-mono">{{ v.bloodPressure }}</td>
+                  <td hlmTableCell class="py-3 px-4 font-semibold text-foreground font-mono">{{ v.systolicBp && v.diastolicBp ? v.systolicBp + '/' + v.diastolicBp : 'N/A' }}</td>
                   <td hlmTableCell class="py-3 px-4 font-mono">{{ v.heartRate }} bpm</td>
                   <td hlmTableCell class="py-3 px-4 font-mono">{{ v.temperature }} °C</td>
                   <td hlmTableCell class="py-3 px-4 font-mono">{{ v.oxygenSaturation }} %</td>
@@ -609,7 +609,7 @@ import {
 
       <!-- Modal 4: Log Vitals Modal -->
       <div *ngIf="showVitalsModal()" class="fixed inset-0 z-50 bg-background/80 backdrop-blur-xs flex items-center justify-center p-4">
-        <div class="w-full max-w-lg rounded-xl border border-border bg-card p-6 shadow-lg space-y-5">
+        <div class="w-full max-w-lg rounded-xl border border-border bg-card p-6 shadow-lg space-y-4">
           <div class="flex justify-between items-center border-b border-border pb-3">
             <h3 class="text-sm font-bold text-foreground flex items-center gap-2">
               <ng-icon name="lucideActivity" size="16" class="text-blue-500" />
@@ -622,23 +622,43 @@ import {
 
           <div class="grid grid-cols-2 gap-3 text-xs">
             <div>
-              <label class="font-medium text-foreground block mb-1">Blood Pressure (mmHg)</label>
-              <input type="text" [(ngModel)]="newVitals.bloodPressure" placeholder="120/80" class="w-full p-2 rounded-md border border-input bg-background" />
+              <label class="font-medium text-foreground block mb-1">Systolic BP (mmHg)</label>
+              <input type="number" [(ngModel)]="newVitals.systolicBp" placeholder="120" class="w-full p-2 rounded-md border border-input bg-background font-mono" />
+            </div>
+
+            <div>
+              <label class="font-medium text-foreground block mb-1">Diastolic BP (mmHg)</label>
+              <input type="number" [(ngModel)]="newVitals.diastolicBp" placeholder="80" class="w-full p-2 rounded-md border border-input bg-background font-mono" />
             </div>
 
             <div>
               <label class="font-medium text-foreground block mb-1">Heart Rate (bpm)</label>
-              <input type="number" [(ngModel)]="newVitals.heartRate" class="w-full p-2 rounded-md border border-input bg-background" />
+              <input type="number" [(ngModel)]="newVitals.heartRate" class="w-full p-2 rounded-md border border-input bg-background font-mono" />
             </div>
 
             <div>
               <label class="font-medium text-foreground block mb-1">SpO2 (%)</label>
-              <input type="number" [(ngModel)]="newVitals.oxygenSaturation" class="w-full p-2 rounded-md border border-input bg-background" />
+              <input type="number" [(ngModel)]="newVitals.oxygenSaturation" class="w-full p-2 rounded-md border border-input bg-background font-mono" />
             </div>
 
             <div>
               <label class="font-medium text-foreground block mb-1">Temperature (°C)</label>
-              <input type="number" step="0.1" [(ngModel)]="newVitals.temperature" class="w-full p-2 rounded-md border border-input bg-background" />
+              <input type="number" step="0.1" [(ngModel)]="newVitals.temperature" class="w-full p-2 rounded-md border border-input bg-background font-mono" />
+            </div>
+
+            <div>
+              <label class="font-medium text-foreground block mb-1">Blood Sugar (mg/dL)</label>
+              <input type="number" [(ngModel)]="newVitals.bloodGlucose" placeholder="95" class="w-full p-2 rounded-md border border-input bg-background font-mono" />
+            </div>
+
+            <div>
+              <label class="font-medium text-foreground block mb-1">Weight (kg)</label>
+              <input type="number" step="0.1" [(ngModel)]="newVitals.weightKg" placeholder="70.0" class="w-full p-2 rounded-md border border-input bg-background font-mono" />
+            </div>
+
+            <div>
+              <label class="font-medium text-foreground block mb-1">Height (cm)</label>
+              <input type="number" step="0.5" [(ngModel)]="newVitals.heightCm" placeholder="175" class="w-full p-2 rounded-md border border-input bg-background font-mono" />
             </div>
           </div>
 
@@ -694,7 +714,17 @@ export class DoctorChartComponent implements OnInit {
 
   showVitalsModal = signal(false);
   savingVitals = signal(false);
-  newVitals = { bloodPressure: '120/80', heartRate: 72, temperature: 36.8, oxygenSaturation: 98 };
+  newVitals = {
+    systolicBp: 120,
+    diastolicBp: 80,
+    heartRate: 72,
+    temperature: 36.8,
+    oxygenSaturation: 98,
+    bloodGlucose: 95,
+    weightKg: 70.0,
+    heightCm: 175.0,
+    recordedAt: '',
+  };
 
   constructor(
     public patientContext: PatientContextService,
@@ -945,13 +975,28 @@ export class DoctorChartComponent implements OnInit {
     if (!active?.id || this.savingVitals()) return;
 
     this.savingVitals.set(true);
+
+    const weight = this.newVitals.weightKg ? Number(this.newVitals.weightKg) : undefined;
+    const height = this.newVitals.heightCm ? Number(this.newVitals.heightCm) : undefined;
+    let bmiVal: number | undefined = undefined;
+    if (weight && height && height > 0) {
+      const hM = height / 100.0;
+      bmiVal = Math.round((weight / (hM * hM)) * 10) / 10;
+    }
+
     this.apiService
       .recordVitals({
         patient: { id: Number(active.id) } as Patient,
-        bloodPressure: this.newVitals.bloodPressure,
-        heartRate: Number(this.newVitals.heartRate),
-        temperature: Number(this.newVitals.temperature),
-        oxygenSaturation: Number(this.newVitals.oxygenSaturation),
+        systolicBp: this.newVitals.systolicBp ? Number(this.newVitals.systolicBp) : undefined,
+        diastolicBp: this.newVitals.diastolicBp ? Number(this.newVitals.diastolicBp) : undefined,
+        heartRate: this.newVitals.heartRate ? Number(this.newVitals.heartRate) : undefined,
+        temperature: this.newVitals.temperature ? Number(this.newVitals.temperature) : undefined,
+        oxygenSaturation: this.newVitals.oxygenSaturation ? Number(this.newVitals.oxygenSaturation) : undefined,
+        bloodGlucose: this.newVitals.bloodGlucose ? Number(this.newVitals.bloodGlucose) : undefined,
+        weightKg: weight,
+        heightCm: height,
+        bmi: bmiVal,
+        recordedAt: this.newVitals.recordedAt ? new Date(this.newVitals.recordedAt).toISOString() : undefined,
       })
       .subscribe({
         next: (saved: any) => {

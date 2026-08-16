@@ -1,7 +1,8 @@
 package com.sentinel.appointments.dto;
 
 public class TriageVitalsRequestDTO {
-    private String bloodPressure;
+    private Integer systolicBp;
+    private Integer diastolicBp;
     private Integer heartRate;
     private Double temperature;
     private Integer oxygenSaturation;
@@ -13,12 +14,20 @@ public class TriageVitalsRequestDTO {
 
     public TriageVitalsRequestDTO() {}
 
-    public String getBloodPressure() {
-        return bloodPressure;
+    public Integer getSystolicBp() {
+        return systolicBp;
     }
 
-    public void setBloodPressure(String bloodPressure) {
-        this.bloodPressure = bloodPressure;
+    public void setSystolicBp(Integer systolicBp) {
+        this.systolicBp = systolicBp;
+    }
+
+    public Integer getDiastolicBp() {
+        return diastolicBp;
+    }
+
+    public void setDiastolicBp(Integer diastolicBp) {
+        this.diastolicBp = diastolicBp;
     }
 
     public Integer getHeartRate() {
