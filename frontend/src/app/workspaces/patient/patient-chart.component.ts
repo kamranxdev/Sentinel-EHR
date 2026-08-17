@@ -130,7 +130,7 @@ export type PatientChartTab =
       <div class="rounded-2xl border border-border bg-card p-5 sm:p-6 shadow-xs space-y-5">
         <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 pb-4 border-b border-border">
           <div class="flex items-start sm:items-center gap-3.5">
-            <div class="size-13 rounded-2xl bg-teal-500/10 text-teal-600 dark:text-teal-400 flex items-center justify-center shrink-0 border border-teal-500/20">
+            <div class="size-13 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shrink-0 border border-primary/20">
               <ng-icon name="lucideHeartPulse" size="28" />
             </div>
             <div>
@@ -138,7 +138,7 @@ export type PatientChartTab =
                 <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
                   My Health Records & Clinical Chart
                 </h1>
-                <span hlmBadge variant="secondary" class="text-[10px] bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-500/20">
+                <span hlmBadge variant="secondary" class="text-[10px] bg-primary/10 text-primary border border-primary/20">
                   Verified Patient Chart
                 </span>
               </div>
@@ -165,7 +165,7 @@ export type PatientChartTab =
               variant="default"
               size="sm"
               (click)="downloadFhirHealthRecord()"
-              class="gap-1.5 text-xs bg-teal-600 hover:bg-teal-700 text-white shadow-xs flex-1 sm:flex-initial"
+              class="gap-1.5 text-xs shadow-xs flex-1 sm:flex-initial"
             >
               <ng-icon name="lucideDownload" size="14" />
               <span>Download Health Summary (FHIR)</span>
@@ -219,36 +219,60 @@ export type PatientChartTab =
         </div>
       </div>
 
-      <!-- 2. Interactive Navigation Tabs for Clinical Domains -->
-      <div class="flex items-center gap-1.5 overflow-x-auto pb-2 border-b border-border no-scrollbar">
-        <button
-          *ngFor="let tab of tabs"
-          (click)="selectTab(tab.key)"
-          class="px-3.5 py-2 rounded-xl text-xs font-semibold transition-all flex items-center gap-2 border whitespace-nowrap shrink-0"
-          [class.bg-teal-600]="activeTab() === tab.key"
-          [class.text-white]="activeTab() === tab.key"
-          [class.border-teal-600]="activeTab() === tab.key"
-          [class.bg-card]="activeTab() !== tab.key"
-          [class.text-muted-foreground]="activeTab() !== tab.key"
-          [class.border-border]="activeTab() !== tab.key"
-          [class.hover:text-foreground]="activeTab() !== tab.key"
-        >
-          <ng-icon [name]="tab.icon" size="14" />
-          <span>{{ tab.label }}</span>
-          <span
-            *ngIf="getTabCount(tab.key) !== undefined"
-            class="px-1.5 py-0.2 rounded-full text-[10px] font-mono font-bold"
-            [class.bg-white/20]="activeTab() === tab.key"
-            [class.bg-muted]="activeTab() !== tab.key"
-          >
-            {{ getTabCount(tab.key) }}
+      <!-- 2. Interactive Navigation Tabs for Clinical Domains (Multi-Row Adaptable Grid) -->
+      <div class="p-2.5 sm:p-3 rounded-2xl border border-border bg-card shadow-2xs space-y-2.5">
+        <div class="flex items-center justify-between px-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+          <span class="flex items-center gap-1.5">
+            <ng-icon name="lucideSparkles" size="13" class="text-primary" />
+            <span>Clinical Records & Diagnostic Categories</span>
           </span>
-        </button>
+          <span class="text-[10px] font-medium normal-case text-muted-foreground">12 Comprehensive Health Sections</span>
+        </div>
+
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+          <button
+            *ngFor="let tab of tabs"
+            (click)="selectTab(tab.key)"
+            class="px-3 py-2.5 rounded-xl text-xs font-semibold transition-all flex items-center justify-between gap-1.5 border text-left cursor-pointer"
+            [class.bg-primary]="activeTab() === tab.key"
+            [class.text-primary-foreground]="activeTab() === tab.key"
+            [class.border-primary]="activeTab() === tab.key"
+            [class.shadow-xs]="activeTab() === tab.key"
+            [class.bg-muted/30]="activeTab() !== tab.key"
+            [class.text-foreground]="activeTab() !== tab.key"
+            [class.border-border]="activeTab() !== tab.key"
+            [class.hover:border-primary/50]="activeTab() !== tab.key"
+            [class.hover:bg-muted/70]="activeTab() !== tab.key"
+          >
+            <div class="flex items-center gap-2 truncate min-w-0">
+              <ng-icon
+                [name]="tab.icon"
+                size="14"
+                [class.text-primary]="activeTab() !== tab.key"
+                [class.text-primary-foreground]="activeTab() === tab.key"
+                class="shrink-0"
+              />
+              <span class="truncate">{{ tab.label }}</span>
+            </div>
+            <span
+              *ngIf="getTabCount(tab.key) !== undefined"
+              class="px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold shrink-0"
+              [class.bg-primary-foreground/20]="activeTab() === tab.key"
+              [class.text-primary-foreground]="activeTab() === tab.key"
+              [class.bg-background]="activeTab() !== tab.key"
+              [class.border]="activeTab() !== tab.key"
+              [class.border-border]="activeTab() !== tab.key"
+              [class.text-muted-foreground]="activeTab() !== tab.key"
+            >
+              {{ getTabCount(tab.key) }}
+            </span>
+          </button>
+        </div>
       </div>
 
       <!-- Loading State Indicator -->
       <div *ngIf="loading()" class="p-12 rounded-2xl border border-border bg-card text-center space-y-3">
-        <ng-icon name="lucideHeartPulse" class="animate-spin text-teal-600 mx-auto" size="28" />
+        <ng-icon name="lucideHeartPulse" class="animate-spin text-primary mx-auto" size="28" />
         <p class="text-xs text-muted-foreground font-medium">Retrieving verified clinical records from Sentinel EHR repository...</p>
       </div>
 
@@ -263,11 +287,11 @@ export type PatientChartTab =
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-3.5">
             <div
               (click)="selectTab('labs')"
-              class="p-4 rounded-xl border border-border bg-card hover:border-teal-500/50 hover:bg-muted/30 transition-all cursor-pointer space-y-1.5 group"
+              class="p-4 rounded-xl border border-border bg-card hover:border-primary/50 hover:bg-muted/30 transition-all cursor-pointer space-y-1.5 group"
             >
               <div class="flex items-center justify-between">
-                <span class="text-xs font-semibold text-muted-foreground group-hover:text-teal-600 transition-colors">Lab Results</span>
-                <ng-icon name="lucideMicroscope" size="18" class="text-teal-600" />
+                <span class="text-xs font-semibold text-muted-foreground group-hover:text-primary transition-colors">Lab Results</span>
+                <ng-icon name="lucideMicroscope" size="18" class="text-primary" />
               </div>
               <div class="text-2xl font-extrabold text-foreground">{{ labOrders().length }}</div>
               <div class="text-[11px] text-muted-foreground flex items-center gap-1">
@@ -328,10 +352,10 @@ export type PatientChartTab =
             <div hlmCard class="p-5 space-y-4">
               <div class="flex items-center justify-between pb-3 border-b border-border">
                 <h3 class="text-sm font-bold text-foreground flex items-center gap-2">
-                  <ng-icon name="lucideMicroscope" size="16" class="text-teal-600" />
+                  <ng-icon name="lucideMicroscope" size="16" class="text-primary" />
                   <span>Recent Diagnostic Lab Reports</span>
                 </h3>
-                <button (click)="selectTab('labs')" class="text-xs text-teal-600 hover:underline font-semibold flex items-center gap-1">
+                <button (click)="selectTab('labs')" class="text-xs text-primary hover:underline font-semibold flex items-center gap-1">
                   <span>View all</span>
                   <ng-icon name="lucideChevronRight" size="12" />
                 </button>
@@ -407,7 +431,7 @@ export type PatientChartTab =
           <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-border">
             <div>
               <h2 class="text-base font-bold tracking-tight text-foreground flex items-center gap-2">
-                <ng-icon name="lucideMicroscope" size="18" class="text-teal-600" />
+                <ng-icon name="lucideMicroscope" size="18" class="text-primary" />
                 <span>Laboratory & Diagnostic Test Reports</span>
               </h2>
               <p class="text-xs text-muted-foreground mt-0.5">
@@ -465,7 +489,7 @@ export type PatientChartTab =
                         variant="outline"
                         size="xs"
                         (click)="openLabDetailsModal(lab)"
-                        class="gap-1 text-xs text-teal-600 hover:text-teal-700"
+                        class="gap-1 text-xs text-primary hover:underline font-semibold"
                       >
                         <ng-icon name="lucideFileSpreadsheet" size="12" />
                         <span>View Report</span>
@@ -1198,7 +1222,7 @@ export type PatientChartTab =
       <div *ngIf="selectedLabReport" class="fixed inset-0 z-50 bg-background/80 backdrop-blur-xs flex items-center justify-center p-4">
         <div class="bg-card border border-border rounded-2xl max-w-xl w-full p-6 space-y-4 shadow-xl">
           <div class="flex items-center justify-between pb-3 border-b border-border">
-            <div class="flex items-center gap-2 text-teal-600">
+            <div class="flex items-center gap-2 text-primary">
               <ng-icon name="lucideMicroscope" size="20" />
               <h3 class="text-base font-bold text-foreground">Diagnostic Laboratory Report</h3>
             </div>
@@ -1236,7 +1260,7 @@ export type PatientChartTab =
               <p class="text-muted-foreground leading-relaxed">
                 {{ selectedLabReport.clinicalNotes || 'Results validated by laboratory technologist and verified within biological reference limits.' }}
               </p>
-              <div class="text-[11px] text-teal-600 dark:text-teal-400 font-semibold flex items-center gap-1 pt-1 border-t border-border">
+              <div class="text-[11px] text-primary font-semibold flex items-center gap-1 pt-1 border-t border-border">
                 <ng-icon name="lucideCheckCircle2" size="14" />
                 <span>Digitally signed and released to patient EHR chart</span>
               </div>
@@ -1244,7 +1268,7 @@ export type PatientChartTab =
           </div>
 
           <div class="flex justify-end pt-3 border-t border-border">
-            <button hlmBtn variant="default" size="sm" (click)="selectedLabReport = null" class="bg-teal-600 hover:bg-teal-700 text-white">
+            <button hlmBtn variant="default" size="sm" (click)="selectedLabReport = null">
               Close Report
             </button>
           </div>
