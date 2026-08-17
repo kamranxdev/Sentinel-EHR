@@ -19,7 +19,7 @@ import {
 } from '@ng-icons/lucide';
 
 @Component({
-  selector: 'app-org-admin-facility-settings',
+  selector: 'app-organization-admin-facility-settings',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule, NgIcon],
   providers: [
@@ -161,7 +161,7 @@ import {
     </div>
   `
 })
-export class OrgAdminFacilitySettingsComponent implements OnInit {
+export class OrganizationAdminFacilitySettingsComponent implements OnInit {
   facility: Organization = {
     id: 'org-1001',
     orgCode: 'ORG-1001',

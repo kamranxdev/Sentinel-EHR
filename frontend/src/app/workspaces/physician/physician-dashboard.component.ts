@@ -36,7 +36,7 @@ interface QuickAction {
 }
 
 @Component({
-  selector: 'app-doctor-dashboard',
+  selector: 'app-physician-dashboard',
   standalone: true,
   imports: [
     CommonModule,
@@ -64,7 +64,7 @@ interface QuickAction {
   ],
   template: `
     <div class="space-y-6">
-      <!-- Doctor Header -->
+      <!-- Physician Header -->
       <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-border">
         <div class="flex items-center gap-4">
           <div class="size-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 border border-primary/20">
@@ -185,7 +185,7 @@ interface QuickAction {
     </div>
   `,
 })
-export class DoctorDashboardComponent implements OnInit {
+export class PhysicianDashboardComponent implements OnInit {
   patients = signal<Patient[]>([]);
   searchQuery = signal('');
 
@@ -204,7 +204,7 @@ export class DoctorDashboardComponent implements OnInit {
       label: 'SOAP Notes & Encounters',
       description: 'Progress notes & visit finalization',
       icon: 'lucideStethoscope',
-      route: '/doctor/chart',
+      route: '/physician/chart',
       queryParams: { tab: 'encounters' },
       iconBgClass: 'bg-primary/10',
       iconColorClass: 'text-primary',
@@ -213,7 +213,7 @@ export class DoctorDashboardComponent implements OnInit {
       label: 'Pharmacy & eRx Orders',
       description: 'Issue eRx orders with drug safety check',
       icon: 'lucidePill',
-      route: '/doctor/chart',
+      route: '/physician/chart',
       queryParams: { tab: 'erx' },
       iconBgClass: 'bg-emerald-500/10',
       iconColorClass: 'text-emerald-600 dark:text-emerald-400',
@@ -222,7 +222,7 @@ export class DoctorDashboardComponent implements OnInit {
       label: 'Problem List (ICD-10)',
       description: 'ICD-10 & SNOMED coded conditions',
       icon: 'lucideListChecks',
-      route: '/doctor/chart',
+      route: '/physician/chart',
       queryParams: { tab: 'diagnoses' },
       iconBgClass: 'bg-blue-500/10',
       iconColorClass: 'text-blue-600 dark:text-blue-400',
@@ -231,7 +231,7 @@ export class DoctorDashboardComponent implements OnInit {
       label: 'Consultation Schedule',
       description: 'View appointment calendar & queue',
       icon: 'lucideCalendarClock',
-      route: '/doctor/appointments',
+      route: '/physician/appointments',
       iconBgClass: 'bg-purple-500/10',
       iconColorClass: 'text-purple-600 dark:text-purple-400',
     },
@@ -259,6 +259,6 @@ export class DoctorDashboardComponent implements OnInit {
 
   selectPatient(p: Patient): void {
     this.patientContext.setActivePatient(p);
-    this.router.navigate(['/doctor/chart']);
+    this.router.navigate(['/physician/chart']);
   }
 }

@@ -30,7 +30,7 @@ import {
 } from '@ng-icons/lucide';
 
 @Component({
-  selector: 'app-sys-admin-schedule-analytics',
+  selector: 'app-organization-admin-schedule-analytics',
   standalone: true,
   imports: [
     CommonModule,
@@ -76,7 +76,7 @@ import {
                 Facility Capacity & Schedule Analytics
               </h1>
               <span hlmBadge variant="secondary" class="text-[10px] uppercase font-mono tracking-wider">
-                SUPER_ADMIN
+                ORGANIZATION_ADMIN
               </span>
             </div>
             <p class="text-xs text-muted-foreground mt-0.5 flex items-center gap-2">
@@ -452,7 +452,7 @@ import {
     </div>
   `,
 })
-export class SysAdminScheduleAnalyticsComponent implements OnInit {
+export class OrganizationAdminScheduleAnalyticsComponent implements OnInit {
   appointments = signal<Appointment[]>([]);
   loading = signal<boolean>(false);
   searchQuery = signal<string>('');

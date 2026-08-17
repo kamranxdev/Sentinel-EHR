@@ -43,7 +43,7 @@ import {
 type RoleCategoryTab = 'ALL' | 'DOCTOR' | 'NURSE' | 'STAFF' | 'PATIENT';
 
 @Component({
-  selector: 'app-sys-admin-users',
+  selector: 'app-super-admin-users',
   standalone: true,
   imports: [
     CommonModule,
@@ -483,7 +483,7 @@ type RoleCategoryTab = 'ALL' | 'DOCTOR' | 'NURSE' | 'STAFF' | 'PATIENT';
     </div>
   `,
 })
-export class SysAdminUsersComponent implements OnInit {
+export class SuperAdminUsersComponent implements OnInit {
   users = signal<User[]>([]);
   loading = signal<boolean>(false);
   saving = signal<boolean>(false);
@@ -571,7 +571,7 @@ export class SysAdminUsersComponent implements OnInit {
   nursesCount = computed(() => this.users().filter((u) => this.getUserRoleNames(u).includes('NURSE')).length);
   staffCount = computed(() => this.users().filter((u) => {
     const roles = this.getUserRoleNames(u);
-    return roles.includes('ORGANIZATION_ADMIN') || roles.includes('SUPER_ADMIN') || roles.includes('ORGANIZATION_ADMIN') || roles.includes('RECEPTIONIST');
+    return roles.includes('ORGANIZATION_ADMIN') || roles.includes('SUPER_ADMIN') || roles.includes('RECEPTIONIST');
   }).length);
   patientsCount = computed(() => this.users().filter((u) => this.getUserRoleNames(u).includes('PATIENT')).length);
 
@@ -585,7 +585,7 @@ export class SysAdminUsersComponent implements OnInit {
     else if (tab === 'NURSE') list = list.filter((u) => this.getUserRoleNames(u).includes('NURSE'));
     else if (tab === 'STAFF') list = list.filter((u) => {
       const r = this.getUserRoleNames(u);
-      return r.includes('ORGANIZATION_ADMIN') || r.includes('SUPER_ADMIN') || r.includes('ORGANIZATION_ADMIN') || r.includes('RECEPTIONIST');
+      return r.includes('ORGANIZATION_ADMIN') || r.includes('SUPER_ADMIN') || r.includes('RECEPTIONIST');
     });
     else if (tab === 'PATIENT') list = list.filter((u) => this.getUserRoleNames(u).includes('PATIENT'));
 
@@ -634,8 +634,8 @@ export class SysAdminUsersComponent implements OnInit {
   }
 
   getRoleBadgeClass(role: string): string {
-    if (role.includes('SYS_ADMIN') || role.includes('ADMIN')) return 'bg-purple-500/10 text-purple-600 border-purple-500/30';
-    if (role.includes('DOCTOR')) return 'bg-blue-500/10 text-blue-600 border-blue-500/30';
+    if (role.includes('SUPER_ADMIN') || role.includes('ADMIN')) return 'bg-purple-500/10 text-purple-600 border-purple-500/30';
+    if (role.includes('PHYSICIAN')) return 'bg-blue-500/10 text-blue-600 border-blue-500/30';
     if (role.includes('NURSE')) return 'bg-emerald-500/10 text-emerald-600 border-emerald-500/30';
     if (role.includes('PATIENT')) return 'bg-cyan-500/10 text-cyan-600 border-cyan-500/30';
     return 'bg-secondary text-secondary-foreground border-border';

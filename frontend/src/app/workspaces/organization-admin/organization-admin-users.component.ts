@@ -43,7 +43,7 @@ import {
 type RoleCategoryTab = 'ALL' | 'DOCTOR' | 'NURSE' | 'STAFF' | 'PATIENT';
 
 @Component({
-  selector: 'app-org-admin-users',
+  selector: 'app-organization-admin-users',
   standalone: true,
   imports: [
     CommonModule,
@@ -182,7 +182,7 @@ type RoleCategoryTab = 'ALL' | 'DOCTOR' | 'NURSE' | 'STAFF' | 'PATIENT';
           </div>
           <div class="mt-2 flex items-baseline justify-between">
             <span class="text-xl font-bold text-foreground">{{ totalUsersCount() }}</span>
-            <span class="text-[10px] text-muted-foreground">Database Records</span>
+            <span class="text-[10px] text-muted-foreground">Facility Records</span>
           </div>
         </div>
 
@@ -345,7 +345,7 @@ type RoleCategoryTab = 'ALL' | 'DOCTOR' | 'NURSE' | 'STAFF' | 'PATIENT';
                 <td colspan="5" class="py-8 text-center text-muted-foreground">
                   <div class="flex items-center justify-center gap-2">
                     <ng-icon name="lucideRefreshCw" class="animate-spin" size="16" />
-                    <span>Loading facility staff from database...</span>
+                    <span>Loading users from database...</span>
                   </div>
                 </td>
               </tr>
@@ -483,7 +483,7 @@ type RoleCategoryTab = 'ALL' | 'DOCTOR' | 'NURSE' | 'STAFF' | 'PATIENT';
     </div>
   `,
 })
-export class OrgAdminUsersComponent implements OnInit {
+export class OrganizationAdminUsersComponent implements OnInit {
   users = signal<User[]>([]);
   loading = signal<boolean>(false);
   saving = signal<boolean>(false);
@@ -570,7 +570,7 @@ export class OrgAdminUsersComponent implements OnInit {
   nursesCount = computed(() => this.users().filter((u) => this.getUserRoleNames(u).includes('NURSE')).length);
   staffCount = computed(() => this.users().filter((u) => {
     const roles = this.getUserRoleNames(u);
-    return roles.includes('ORGANIZATION_ADMIN') || roles.includes('ORGANIZATION_ADMIN') || roles.includes('RECEPTIONIST');
+    return roles.includes('ORGANIZATION_ADMIN') || roles.includes('RECEPTIONIST');
   }).length);
   patientsCount = computed(() => this.users().filter((u) => this.getUserRoleNames(u).includes('PATIENT')).length);
 
@@ -584,7 +584,7 @@ export class OrgAdminUsersComponent implements OnInit {
     else if (tab === 'NURSE') list = list.filter((u) => this.getUserRoleNames(u).includes('NURSE'));
     else if (tab === 'STAFF') list = list.filter((u) => {
       const r = this.getUserRoleNames(u);
-      return r.includes('ORGANIZATION_ADMIN') || r.includes('ORGANIZATION_ADMIN') || r.includes('RECEPTIONIST');
+      return r.includes('ORGANIZATION_ADMIN') || r.includes('RECEPTIONIST');
     });
     else if (tab === 'PATIENT') list = list.filter((u) => this.getUserRoleNames(u).includes('PATIENT'));
 
@@ -633,8 +633,8 @@ export class OrgAdminUsersComponent implements OnInit {
   }
 
   getRoleBadgeClass(role: string): string {
-    if (role.includes('ADMIN')) return 'bg-purple-500/10 text-purple-600 border-purple-500/30';
-    if (role.includes('DOCTOR')) return 'bg-blue-500/10 text-blue-600 border-blue-500/30';
+    if (role.includes('ORGANIZATION_ADMIN') || role.includes('ADMIN')) return 'bg-purple-500/10 text-purple-600 border-purple-500/30';
+    if (role.includes('PHYSICIAN')) return 'bg-blue-500/10 text-blue-600 border-blue-500/30';
     if (role.includes('NURSE')) return 'bg-emerald-500/10 text-emerald-600 border-emerald-500/30';
     if (role.includes('PATIENT')) return 'bg-cyan-500/10 text-cyan-600 border-cyan-500/30';
     return 'bg-secondary text-secondary-foreground border-border';

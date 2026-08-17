@@ -12,7 +12,7 @@ import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucideCreditCard, lucideSend, lucideShieldCheck } from '@ng-icons/lucide';
 
 @Component({
-  selector: 'app-billing-claims',
+  selector: 'app-billing-staff-claims',
   standalone: true,
   imports: [
     CommonModule,
@@ -36,7 +36,7 @@ import { lucideCreditCard, lucideSend, lucideShieldCheck } from '@ng-icons/lucid
         <div>
           <h1 class="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
             Insurance Claims Submission & Clearinghouse
-            <span hlmBadge variant="secondary" class="text-[11px]">Billing Officer</span>
+            <span hlmBadge variant="secondary" class="text-[11px]">Billing Staff</span>
           </h1>
           <p class="text-xs text-muted-foreground mt-0.5">Submit 837P electronic claims, review denials, and track payer reimbursements.</p>
         </div>
@@ -105,7 +105,7 @@ import { lucideCreditCard, lucideSend, lucideShieldCheck } from '@ng-icons/lucid
     </div>
   `,
 })
-export class BillingClaimsComponent implements OnInit {
+export class BillingStaffClaimsComponent implements OnInit {
   claims = signal<any[]>([]);
   loading = signal<boolean>(true);
   error = signal<string | null>(null);

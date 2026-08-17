@@ -20,7 +20,7 @@ import {
 } from '@ng-icons/lucide';
 
 @Component({
-  selector: 'app-labtech-dashboard',
+  selector: 'app-lab-technician-dashboard',
   standalone: true,
   imports: [
     CommonModule,
@@ -43,7 +43,7 @@ import {
   ],
   template: `
     <div class="space-y-6">
-      <!-- Lab Tech Header -->
+      <!-- Lab Technician Header -->
       <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-border">
         <div class="flex items-center gap-4">
           <div class="size-12 rounded-lg bg-teal-500/10 text-teal-600 flex items-center justify-center shrink-0">
@@ -143,7 +143,7 @@ import {
     </div>
   `,
 })
-export class LabTechDashboardComponent implements OnInit {
+export class LabTechnicianDashboardComponent implements OnInit {
   labSamples = signal<any[]>([]);
   loading = signal<boolean>(true);
   error = signal<string | null>(null);
@@ -186,6 +186,6 @@ export class LabTechDashboardComponent implements OnInit {
   }
 
   enterResult(sample: any): void {
-    this.router.navigate(['/labtech/worklist']);
+    this.router.navigate(['/lab-technician/worklist']);
   }
 }

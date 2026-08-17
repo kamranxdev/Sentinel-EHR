@@ -37,7 +37,7 @@ import {
 } from '@ng-icons/lucide';
 
 @Component({
-  selector: 'app-doctor-chart',
+  selector: 'app-physician-chart',
   standalone: true,
   imports: [
     CommonModule,
@@ -75,12 +75,12 @@ import {
   ],
   template: `
     <div class="space-y-6">
-      <!-- Doctor Clinical Chart Header & Patient Banner -->
+      <!-- Physician Clinical Chart Header & Patient Banner -->
       <div class="rounded-xl border border-border bg-card p-5 shadow-xs space-y-4">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-border">
           <div>
             <h1 class="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
-              Doctor Clinical Patient Chart
+              Physician Clinical Patient Chart
               <span hlmBadge variant="secondary" class="text-[10px]">Physician EHR Context</span>
             </h1>
             <p class="text-xs text-muted-foreground mt-0.5">Comprehensive physician chart for SOAP notes, ICD-10 diagnoses, eRx orders, allergies, and vitals.</p>
@@ -147,7 +147,7 @@ import {
           </div>
         </ng-template>
 
-        <!-- Doctor Chart Sub-Navigation Tabs -->
+        <!-- Physician Chart Sub-Navigation Tabs -->
         <div class="flex items-center gap-2 border-b border-border pt-1 overflow-x-auto">
           <button
             (click)="selectTab('encounters')"
@@ -685,7 +685,7 @@ import {
     </div>
   `,
 })
-export class DoctorChartComponent implements OnInit {
+export class PhysicianChartComponent implements OnInit {
   activeTab = signal<'encounters' | 'diagnoses' | 'erx' | 'allergies' | 'vitals'>('encounters');
   patients = signal<Patient[]>([]);
 

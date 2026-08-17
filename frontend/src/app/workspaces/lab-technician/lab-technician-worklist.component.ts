@@ -12,7 +12,7 @@ import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucideTestTube, lucideFlaskConical, lucideFileText, lucideBarcode, lucideCheckCircle2, lucideRefreshCw } from '@ng-icons/lucide';
 
 @Component({
-  selector: 'app-labtech-worklist',
+  selector: 'app-lab-technician-worklist',
   standalone: true,
   imports: [
     CommonModule,
@@ -166,7 +166,7 @@ import { lucideTestTube, lucideFlaskConical, lucideFileText, lucideBarcode, luci
     </div>
   `,
 })
-export class LabTechWorklistComponent implements OnInit {
+export class LabTechnicianWorklistComponent implements OnInit {
   labOrders = signal<any[]>([]);
   isCollectModalOpen = signal(false);
   isResultModalOpen = signal(false);
@@ -266,4 +266,3 @@ export class LabTechWorklistComponent implements OnInit {
     });
   }
 }
-

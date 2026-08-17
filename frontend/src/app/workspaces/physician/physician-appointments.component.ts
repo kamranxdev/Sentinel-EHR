@@ -46,7 +46,7 @@ interface LabOrderItem {
 }
 
 @Component({
-  selector: 'app-doctor-appointments',
+  selector: 'app-physician-appointments',
   standalone: true,
   imports: [
     CommonModule,
@@ -463,7 +463,7 @@ interface LabOrderItem {
     </div>
   `,
 })
-export class DoctorAppointmentsComponent implements OnInit {
+export class PhysicianAppointmentsComponent implements OnInit {
   appointments = signal<Appointment[]>([]);
   activeApt = signal<Appointment | null>(null);
   nursingTriageNotes = signal<string>('');

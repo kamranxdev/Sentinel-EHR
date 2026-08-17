@@ -43,7 +43,7 @@ interface ToastAlert {
 }
 
 @Component({
-  selector: 'app-sys-admin-patients',
+  selector: 'app-super-admin-patients',
   standalone: true,
   imports: [
     CommonModule,
@@ -371,7 +371,7 @@ interface ToastAlert {
     </div>
   `,
 })
-export class SysAdminPatientsComponent implements OnInit {
+export class SuperAdminPatientsComponent implements OnInit {
   patients = signal<Patient[]>([]);
   searchQuery = signal<string>('');
   genderFilter = signal<string>('ALL');

@@ -23,22 +23,22 @@ export class DashboardComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    if (this.authService.isSysAdmin()) {
-      this.router.navigate(['/sys-admin/dashboard']);
-    } else if (this.authService.isOrgAdmin()) {
-      this.router.navigate(['/org-admin/dashboard']);
-    } else if (this.authService.isDoctor()) {
-      this.router.navigate(['/doctor/dashboard']);
+    if (this.authService.isSuperAdmin()) {
+      this.router.navigate(['/super-admin/dashboard']);
+    } else if (this.authService.isOrganizationAdmin()) {
+      this.router.navigate(['/organization-admin/dashboard']);
+    } else if (this.authService.isPhysician()) {
+      this.router.navigate(['/physician/dashboard']);
     } else if (this.authService.isNurse()) {
       this.router.navigate(['/nurse/dashboard']);
     } else if (this.authService.isReceptionist()) {
       this.router.navigate(['/receptionist/dashboard']);
-    } else if (this.authService.isLabTech()) {
-      this.router.navigate(['/labtech/dashboard']);
+    } else if (this.authService.isLabTechnician()) {
+      this.router.navigate(['/lab-technician/dashboard']);
     } else if (this.authService.isPharmacist()) {
       this.router.navigate(['/pharmacist/dashboard']);
-    } else if (this.authService.isBilling()) {
-      this.router.navigate(['/billing/dashboard']);
+    } else if (this.authService.isBillingStaff()) {
+      this.router.navigate(['/billing-staff/dashboard']);
     } else if (this.authService.isAuditor()) {
       this.router.navigate(['/auditor/dashboard']);
     } else if (this.authService.isPatient()) {

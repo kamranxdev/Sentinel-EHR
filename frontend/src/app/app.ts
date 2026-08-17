@@ -126,15 +126,15 @@ export class App implements OnInit, OnDestroy {
     }
 
     const roleMap: Record<string, { label: string; url: string; icon: string }> = {
-      doctor: { label: 'Doctor Workspace', url: '/doctor/dashboard', icon: 'lucideHeartPulse' },
+      physician: { label: 'Physician Workspace', url: '/physician/dashboard', icon: 'lucideHeartPulse' },
       nurse: { label: 'Nurse Workspace', url: '/nurse/dashboard', icon: 'lucideActivity' },
-      'sys-admin': { label: 'System Admin Desk', url: '/sys-admin/dashboard', icon: 'lucideSettings' },
-      'org-admin': { label: 'Org Admin Center', url: '/org-admin/dashboard', icon: 'lucideBuilding2' },
+      'super-admin': { label: 'Super Admin Desk', url: '/super-admin/dashboard', icon: 'lucideSettings' },
+      'organization-admin': { label: 'Org Admin Center', url: '/organization-admin/dashboard', icon: 'lucideBuilding2' },
       patient: { label: 'Patient Portal', url: '/patient/dashboard', icon: 'lucideUserRound' },
       receptionist: { label: 'Front Desk', url: '/receptionist/dashboard', icon: 'lucideCalendarClock' },
-      labtech: { label: 'Pathology Lab', url: '/labtech/dashboard', icon: 'lucideMicroscope' },
+      'lab-technician': { label: 'Pathology Lab', url: '/lab-technician/dashboard', icon: 'lucideMicroscope' },
       pharmacist: { label: 'Pharmacy Hub', url: '/pharmacist/dashboard', icon: 'lucidePill' },
-      billing: { label: 'Billing & RCM', url: '/billing/dashboard', icon: 'lucideReceipt' },
+      'billing-staff': { label: 'Billing & RCM', url: '/billing-staff/dashboard', icon: 'lucideReceipt' },
       auditor: { label: 'Compliance & Audit', url: '/auditor/dashboard', icon: 'lucideShieldCheck' },
     };
 
@@ -316,17 +316,17 @@ export class App implements OnInit, OnDestroy {
     return patient ? `${patient.fullName} (MRN: ${patient.patientCode})` : '';
   };
 
-  isDoctor(): boolean {
-    return this.authService.isDoctor();
+  isPhysician(): boolean {
+    return this.authService.isPhysician();
   }
   isNurse(): boolean {
     return this.authService.isNurse();
   }
-  isSysAdmin(): boolean {
-    return this.authService.isSysAdmin();
+  isSuperAdmin(): boolean {
+    return this.authService.isSuperAdmin();
   }
-  isOrgAdmin(): boolean {
-    return this.authService.isOrgAdmin();
+  isOrganizationAdmin(): boolean {
+    return this.authService.isOrganizationAdmin();
   }
   isAdmin(): boolean {
     return this.authService.isAdmin();
@@ -334,14 +334,14 @@ export class App implements OnInit, OnDestroy {
   isReceptionist(): boolean {
     return this.authService.isReceptionist();
   }
-  isLabTech(): boolean {
-    return this.authService.isLabTech();
+  isLabTechnician(): boolean {
+    return this.authService.isLabTechnician();
   }
   isPharmacist(): boolean {
     return this.authService.isPharmacist();
   }
-  isBilling(): boolean {
-    return this.authService.isBilling();
+  isBillingStaff(): boolean {
+    return this.authService.isBillingStaff();
   }
   isAuditor(): boolean {
     return this.authService.isAuditor();
@@ -351,14 +351,14 @@ export class App implements OnInit, OnDestroy {
   }
 
   primaryRole(): string {
-    if (this.isSysAdmin()) return 'System Admin';
-    if (this.isOrgAdmin()) return 'Org Admin';
-    if (this.isDoctor()) return 'Physician / Clinician';
+    if (this.isSuperAdmin()) return 'Super Admin';
+    if (this.isOrganizationAdmin()) return 'Organization Admin';
+    if (this.isPhysician()) return 'Physician / Clinician';
     if (this.isNurse()) return 'Clinical Nurse';
     if (this.isReceptionist()) return 'Front Desk Receptionist';
-    if (this.isLabTech()) return 'Laboratory Specialist';
+    if (this.isLabTechnician()) return 'Laboratory Specialist';
     if (this.isPharmacist()) return 'Clinical Pharmacist';
-    if (this.isBilling()) return 'Billing Officer';
+    if (this.isBillingStaff()) return 'Billing Staff';
     if (this.isAuditor()) return 'Compliance Auditor';
     return 'Patient Portal';
   }
@@ -374,13 +374,13 @@ export class App implements OnInit, OnDestroy {
   }
 
   navGroups = computed<NavGroup[]>(() => {
-    if (this.isDoctor()) {
+    if (this.isPhysician()) {
       return [
         {
           label: 'Physician Desk Workspace',
           items: [
-            { icon: 'lucideLayoutDashboard', label: 'Physician Desk', routerLink: '/doctor/dashboard' },
-            { icon: 'lucideCalendarClock', label: 'Consultation Schedule', routerLink: '/doctor/appointments' },
+            { icon: 'lucideLayoutDashboard', label: 'Physician Desk', routerLink: '/physician/dashboard' },
+            { icon: 'lucideCalendarClock', label: 'Consultation Schedule', routerLink: '/physician/appointments' },
           ],
         },
       ];
@@ -409,14 +409,14 @@ export class App implements OnInit, OnDestroy {
         },
       ];
     }
-    if (this.isLabTech()) {
+    if (this.isLabTechnician()) {
       return [
         {
           label: 'Pathology & Lab Workspace',
           items: [
-            { icon: 'lucideMicroscope', label: 'Lab Dashboard', routerLink: '/labtech/dashboard' },
-            { icon: 'lucideListChecks', label: 'Specimen Worklist Queue', routerLink: '/labtech/worklist' },
-            { icon: 'lucideFileText', label: 'LOINC Result Entry', routerLink: '/labtech/results' },
+            { icon: 'lucideMicroscope', label: 'Lab Dashboard', routerLink: '/lab-technician/dashboard' },
+            { icon: 'lucideListChecks', label: 'Specimen Worklist Queue', routerLink: '/lab-technician/worklist' },
+            { icon: 'lucideFileText', label: 'LOINC Result Entry', routerLink: '/lab-technician/results' },
           ],
         },
       ];
@@ -433,43 +433,43 @@ export class App implements OnInit, OnDestroy {
         },
       ];
     }
-    if (this.isBilling()) {
+    if (this.isBillingStaff()) {
       return [
         {
           label: 'Revenue Cycle Workspace',
           items: [
-            { icon: 'lucideReceipt', label: 'Revenue Dashboard', routerLink: '/billing/dashboard' },
-            { icon: 'lucideFileText', label: 'Patient Invoices', routerLink: '/billing/invoices' },
-            { icon: 'lucideCalendarClock', label: 'Insurance & PM-JAY Claims', routerLink: '/billing/claims' },
+            { icon: 'lucideReceipt', label: 'Revenue Dashboard', routerLink: '/billing-staff/dashboard' },
+            { icon: 'lucideFileText', label: 'Patient Invoices', routerLink: '/billing-staff/invoices' },
+            { icon: 'lucideCalendarClock', label: 'Insurance & PM-JAY Claims', routerLink: '/billing-staff/claims' },
           ],
         },
       ];
     }
-    if (this.isSysAdmin()) {
+    if (this.isSuperAdmin()) {
       return [
         {
           label: 'Platform & Infrastructure',
           items: [
-            { icon: 'lucideLayoutDashboard', label: 'System Admin Command Desk', routerLink: '/sys-admin/dashboard' },
-            { icon: 'lucideBuilding2', label: 'Clinic Onboarding & Network', routerLink: '/sys-admin/organizations' },
-            { icon: 'lucideSettings', label: 'Global RBAC User Management', routerLink: '/sys-admin/users' },
-            { icon: 'lucideHeartPulse', label: 'Master Patient Index (MPI)', routerLink: '/sys-admin/patients' },
-            { icon: 'lucideCalendarClock', label: 'Facility Schedule Analytics', routerLink: '/sys-admin/schedule-analytics' },
+            { icon: 'lucideLayoutDashboard', label: 'Super Admin Command Desk', routerLink: '/super-admin/dashboard' },
+            { icon: 'lucideBuilding2', label: 'Clinic Onboarding & Network', routerLink: '/super-admin/organizations' },
+            { icon: 'lucideSettings', label: 'Global RBAC User Management', routerLink: '/super-admin/users' },
+            { icon: 'lucideHeartPulse', label: 'Master Patient Index (MPI)', routerLink: '/super-admin/patients' },
+            { icon: 'lucideCalendarClock', label: 'Facility Schedule Analytics', routerLink: '/super-admin/schedule-analytics' },
             { icon: 'lucideShieldCheck', label: 'ABDM & DPDP Compliance Ledger', routerLink: '/auditor/ledger' },
           ],
         },
       ];
     }
-    if (this.isOrgAdmin()) {
+    if (this.isOrganizationAdmin()) {
       return [
         {
           label: 'Facility Administration',
           items: [
-            { icon: 'lucideLayoutDashboard', label: 'Org Admin Workspace', routerLink: '/org-admin/dashboard' },
-            { icon: 'lucideBuilding2', label: 'Facility Demographics & Settings', routerLink: '/org-admin/facility-settings' },
-            { icon: 'lucideUsers', label: 'Facility Staff Roster', routerLink: '/org-admin/users' },
-            { icon: 'lucideHeartPulse', label: 'Master Patient Index (MPI)', routerLink: '/org-admin/patients' },
-            { icon: 'lucideCalendarClock', label: 'Facility Schedule Analytics', routerLink: '/org-admin/schedule-analytics' },
+            { icon: 'lucideLayoutDashboard', label: 'Org Admin Workspace', routerLink: '/organization-admin/dashboard' },
+            { icon: 'lucideBuilding2', label: 'Facility Demographics & Settings', routerLink: '/organization-admin/facility-settings' },
+            { icon: 'lucideUsers', label: 'Facility Staff Roster', routerLink: '/organization-admin/users' },
+            { icon: 'lucideHeartPulse', label: 'Master Patient Index (MPI)', routerLink: '/organization-admin/patients' },
+            { icon: 'lucideCalendarClock', label: 'Facility Schedule Analytics', routerLink: '/organization-admin/schedule-analytics' },
           ],
         },
       ];

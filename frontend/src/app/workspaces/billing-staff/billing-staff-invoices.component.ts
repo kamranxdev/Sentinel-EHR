@@ -3,28 +3,20 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
-import { StatCardComponent } from '../../shared/ui/stat-card.component';
 
 import { HlmCardImports } from '@spartan-ng/helm/card';
 import { HlmBadgeImports } from '@spartan-ng/helm/badge';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmTableImports } from '@spartan-ng/helm/table';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import {
-  lucideReceipt,
-  lucideCreditCard,
-  lucideIndianRupee,
-  lucideTrendingUp,
-  lucideFileCheck,
-} from '@ng-icons/lucide';
+import { lucideReceipt, lucideIndianRupee, lucideFileText } from '@ng-icons/lucide';
 
 @Component({
-  selector: 'app-billing-dashboard',
+  selector: 'app-billing-staff-invoices',
   standalone: true,
   imports: [
     CommonModule,
     RouterModule,
-    StatCardComponent,
     HlmCardImports,
     HlmBadgeImports,
     HlmButtonImports,
@@ -34,71 +26,33 @@ import {
   providers: [
     provideIcons({
       lucideReceipt,
-      lucideCreditCard,
       lucideIndianRupee,
-      lucideTrendingUp,
-      lucideFileCheck,
+      lucideFileText,
     }),
   ],
   template: `
     <div class="space-y-6">
-      <!-- Billing Header -->
       <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-border">
-        <div class="flex items-center gap-4">
-          <div class="size-12 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0">
-            <ng-icon name="lucideReceipt" size="24" />
-          </div>
-          <div>
-            <h1 class="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
-              Revenue Cycle & Billing Operations
-              <span hlmBadge variant="secondary" class="text-[11px]">Billing Officer</span>
-            </h1>
-            <p class="text-xs text-muted-foreground mt-0.5">Patient invoicing, insurance claims submission, and financial reconciliation.</p>
-          </div>
+        <div>
+          <h1 class="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
+            Patient Invoices & Accounts Ledger
+            <span hlmBadge variant="secondary" class="text-[11px]">Billing Staff</span>
+          </h1>
+          <p class="text-xs text-muted-foreground mt-0.5">Manage generated patient bills, co-pay statements, and payment tracking.</p>
         </div>
       </div>
 
-      <!-- Quick Metrics -->
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <app-stat-card
-          title="Total Monthly Revenue"
-          value="₹3,42,850"
-          subtitle="Processed Patient Billing (INR)"
-          icon="lucideIndianRupee"
-          iconBgClass="bg-emerald-500/10 text-emerald-600" />
-        <app-stat-card
-          title="Pending Claims"
-          value="14 Claims"
-          subtitle="Awaiting Insurance Settlement"
-          icon="lucideCreditCard"
-          iconBgClass="bg-amber-500/10 text-amber-600" />
-        <app-stat-card
-          title="Clean Claim Rate"
-          value="98.4%"
-          subtitle="First-Pass Compliance Rate"
-          icon="lucideTrendingUp"
-          iconBgClass="bg-sky-500/10 text-sky-600" />
-      </div>
-
-      <!-- Financial Invoices Table -->
       <div hlmCard class="p-6 space-y-4">
-        <div class="flex items-center justify-between">
-          <div>
-            <h2 class="text-base font-semibold text-foreground">Patient Invoices & Insurance Ledger</h2>
-            <p class="text-xs text-muted-foreground">Manage generated appointment billings, co-pays, and insurance claims.</p>
-          </div>
-        </div>
-
         <div class="overflow-x-auto rounded-lg border border-border">
           <table hlmTable class="w-full">
             <thead hlmTableHeader>
               <tr hlmTableRow>
-                <th hlmTableHead class="text-xs font-semibold">Invoice ID</th>
+                <th hlmTableHead class="text-xs font-semibold">Invoice Number</th>
                 <th hlmTableHead class="text-xs font-semibold">Patient Name</th>
-                <th hlmTableHead class="text-xs font-semibold">Insurance Carrier</th>
-                <th hlmTableHead class="text-xs font-semibold">Net Payable</th>
+                <th hlmTableHead class="text-xs font-semibold">Billing Date</th>
+                <th hlmTableHead class="text-xs font-semibold">Total Amount</th>
                 <th hlmTableHead class="text-xs font-semibold">Status</th>
-                <th hlmTableHead class="text-xs font-semibold text-right">Billing Action</th>
+                <th hlmTableHead class="text-xs font-semibold text-right">Invoice Action</th>
               </tr>
             </thead>
             <tbody hlmTableBody>
@@ -106,7 +60,7 @@ import {
                 <td colspan="6" class="py-8 text-center text-xs text-muted-foreground">
                   <div class="flex items-center justify-center gap-2">
                     <ng-icon name="lucideReceipt" class="animate-spin text-emerald-600" size="16" />
-                    <span>Loading revenue records from billing ledger...</span>
+                    <span>Loading patient invoice ledger...</span>
                   </div>
                 </td>
               </tr>
@@ -118,13 +72,13 @@ import {
               </tr>
               <tr *ngIf="!loading() && !error() && invoices().length === 0" hlmTableRow>
                 <td colspan="6" class="py-8 text-center text-xs text-muted-foreground">
-                  No billing invoices or insurance claims pending reconciliation.
+                  No patient invoices generated in the ledger.
                 </td>
               </tr>
               <tr *ngFor="let invoice of invoices()" hlmTableRow>
                 <td hlmTableCell class="font-mono text-xs text-foreground">{{ invoice.id }}</td>
                 <td hlmTableCell class="font-medium text-foreground text-xs">{{ invoice.patientName }}</td>
-                <td hlmTableCell class="text-xs text-muted-foreground">{{ invoice.carrier }}</td>
+                <td hlmTableCell class="text-xs text-muted-foreground">{{ invoice.date }}</td>
                 <td hlmTableCell class="text-xs font-semibold text-emerald-600">₹{{ invoice.amount | number:'1.2-2' }}</td>
                 <td hlmTableCell>
                   <span hlmBadge [variant]="invoice.status === 'PAID' ? 'default' : 'outline'" class="text-[10px]">
@@ -132,14 +86,8 @@ import {
                   </span>
                 </td>
                 <td hlmTableCell class="text-right">
-                  <button
-                    hlmBtn
-                    size="sm"
-                    variant="ghost"
-                    class="text-xs text-emerald-600 hover:text-emerald-700"
-                    [disabled]="invoice.status === 'PAID'"
-                    (click)="processClaim(invoice)">
-                    {{ invoice.status === 'PAID' ? 'Claim Settled' : 'Submit Claim' }}
+                  <button hlmBtn size="sm" variant="ghost" class="text-xs text-emerald-600 hover:text-emerald-700" (click)="printInvoice(invoice)">
+                    Print Receipt
                   </button>
                 </td>
               </tr>
@@ -150,7 +98,7 @@ import {
     </div>
   `,
 })
-export class BillingDashboardComponent implements OnInit {
+export class BillingStaffInvoicesComponent implements OnInit {
   invoices = signal<any[]>([]);
   loading = signal<boolean>(true);
   error = signal<string | null>(null);
@@ -171,9 +119,8 @@ export class BillingDashboardComponent implements OnInit {
       next: (apts) => {
         const list = (Array.isArray(apts) ? apts : []).map((apt, idx) => ({
           id: `INV-${apt.id ? String(apt.id).substring(0, 6).toUpperCase() : (1000 + idx)}`,
-          appointmentId: apt.id,
           patientName: apt.patientName || apt.patient?.fullName || 'Patient',
-          carrier: apt.insuranceDetails || 'PM-JAY / State Health Assurance',
+          date: apt.appointmentDate ? apt.appointmentDate.split('T')[0] : new Date().toISOString().split('T')[0],
           amount: 1500.0,
           status: apt.status === 'COMPLETED' ? 'PAID' : 'PENDING',
         }));
@@ -181,14 +128,14 @@ export class BillingDashboardComponent implements OnInit {
         this.loading.set(false);
       },
       error: (err) => {
-        console.error('Failed to load billing records:', err);
-        this.error.set('Failed to load billing records from ledger server.');
+        console.error('Failed to load appointments for invoices:', err);
+        this.error.set('Failed to load patient invoices from server.');
         this.loading.set(false);
       },
     });
   }
 
-  processClaim(invoice: any): void {
-    invoice.status = 'PAID';
+  printInvoice(invoice: any): void {
+    window.print();
   }
 }

@@ -188,19 +188,19 @@ export class AuthService {
     return this.hasActiveRelationship(patientId);
   }
 
-  isSysAdmin(): boolean {
+  isSuperAdmin(): boolean {
     return this.hasRole('SUPER_ADMIN');
   }
 
-  isOrgAdmin(): boolean {
+  isOrganizationAdmin(): boolean {
     return this.hasRole('ORGANIZATION_ADMIN');
   }
 
   isAdmin(): boolean {
-    return this.isSysAdmin() || this.isOrgAdmin();
+    return this.isSuperAdmin() || this.isOrganizationAdmin();
   }
 
-  isDoctor(): boolean {
+  isPhysician(): boolean {
     return this.hasRole('PHYSICIAN');
   }
 
@@ -212,7 +212,7 @@ export class AuthService {
     return this.hasRole('RECEPTIONIST');
   }
 
-  isLabTech(): boolean {
+  isLabTechnician(): boolean {
     return this.hasRole('LAB_TECHNICIAN');
   }
 
@@ -220,7 +220,7 @@ export class AuthService {
     return this.hasRole('PHARMACIST');
   }
 
-  isBilling(): boolean {
+  isBillingStaff(): boolean {
     return this.hasRole('BILLING_STAFF');
   }
 
@@ -232,15 +232,16 @@ export class AuthService {
     return this.hasRole('PATIENT');
   }
 
-  getPrimaryRole(): 'Patient' | 'Doctor' | 'Nurse' | 'Receptionist' | 'Admin' | 'Auditor' | 'LabTech' | 'Pharmacist' | 'Billing' {
-    if (this.isAdmin()) return 'Admin';
-    if (this.isDoctor()) return 'Doctor';
+  getPrimaryRole(): 'Patient' | 'Physician' | 'Nurse' | 'Receptionist' | 'SuperAdmin' | 'OrganizationAdmin' | 'Auditor' | 'LabTechnician' | 'Pharmacist' | 'BillingStaff' {
+    if (this.isSuperAdmin()) return 'SuperAdmin';
+    if (this.isOrganizationAdmin()) return 'OrganizationAdmin';
+    if (this.isPhysician()) return 'Physician';
     if (this.isNurse()) return 'Nurse';
     if (this.isReceptionist()) return 'Receptionist';
     if (this.isAuditor()) return 'Auditor';
-    if (this.isLabTech()) return 'LabTech';
+    if (this.isLabTechnician()) return 'LabTechnician';
     if (this.isPharmacist()) return 'Pharmacist';
-    if (this.isBilling()) return 'Billing';
+    if (this.isBillingStaff()) return 'BillingStaff';
     return 'Patient';
   }
 

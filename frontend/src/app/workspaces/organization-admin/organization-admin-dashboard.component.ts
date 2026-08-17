@@ -34,7 +34,7 @@ interface ToastAlert {
 }
 
 @Component({
-  selector: 'app-org-admin-dashboard',
+  selector: 'app-organization-admin-dashboard',
   standalone: true,
   imports: [
     CommonModule,
@@ -92,7 +92,7 @@ interface ToastAlert {
                 Organization Operations Center
               </h1>
               <span hlmBadge variant="secondary" class="text-[10px] uppercase font-mono tracking-wider">
-                Org Admin
+                Organization Admin
               </span>
             </div>
             <p class="text-xs text-muted-foreground mt-0.5 flex items-center gap-2 flex-wrap">
@@ -117,13 +117,13 @@ interface ToastAlert {
             <span>Refresh</span>
           </button>
           <a
-            routerLink="/org-admin/facility-settings"
+            routerLink="/organization-admin/facility-settings"
             class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-secondary text-foreground hover:bg-secondary/80 border border-border transition-all">
             <ng-icon name="lucideSettings" size="14" />
             <span>Facility Settings</span>
           </a>
           <a
-            routerLink="/org-admin/users"
+            routerLink="/organization-admin/users"
             class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-xs">
             <ng-icon name="lucideUsers" size="14" />
             <span>Staff Roster</span>
@@ -134,7 +134,7 @@ interface ToastAlert {
       <!-- Facility Operational KPI Summary (4 Cards) -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <!-- Staff Roster Card -->
-        <a routerLink="/org-admin/users" class="p-4 rounded-xl border border-border bg-card shadow-xs hover:border-primary/40 transition-all group">
+        <a routerLink="/organization-admin/users" class="p-4 rounded-xl border border-border bg-card shadow-xs hover:border-primary/40 transition-all group">
           <div class="flex items-center justify-between">
             <span class="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Clinical Staff</span>
             <div class="size-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center group-hover:scale-105 transition-transform">
@@ -151,7 +151,7 @@ interface ToastAlert {
         </a>
 
         <!-- Facility Settings Card -->
-        <a routerLink="/org-admin/facility-settings" class="p-4 rounded-xl border border-border bg-card shadow-xs hover:border-emerald-500/40 transition-all group">
+        <a routerLink="/organization-admin/facility-settings" class="p-4 rounded-xl border border-border bg-card shadow-xs hover:border-emerald-500/40 transition-all group">
           <div class="flex items-center justify-between">
             <span class="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Facility Profile</span>
             <div class="size-9 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center group-hover:scale-105 transition-transform">
@@ -166,7 +166,7 @@ interface ToastAlert {
         </a>
 
         <!-- Master Patient Index Card -->
-        <a routerLink="/org-admin/patients" class="p-4 rounded-xl border border-border bg-card shadow-xs hover:border-sky-500/40 transition-all group">
+        <a routerLink="/organization-admin/patients" class="p-4 rounded-xl border border-border bg-card shadow-xs hover:border-sky-500/40 transition-all group">
           <div class="flex items-center justify-between">
             <span class="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">MPI Census</span>
             <div class="size-9 rounded-lg bg-sky-500/10 text-sky-600 flex items-center justify-center group-hover:scale-105 transition-transform">
@@ -181,7 +181,7 @@ interface ToastAlert {
         </a>
 
         <!-- Schedule Capacity Card -->
-        <a routerLink="/org-admin/schedule-analytics" class="p-4 rounded-xl border border-border bg-card shadow-xs hover:border-amber-500/40 transition-all group">
+        <a routerLink="/organization-admin/schedule-analytics" class="p-4 rounded-xl border border-border bg-card shadow-xs hover:border-amber-500/40 transition-all group">
           <div class="flex items-center justify-between">
             <span class="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Consultation Load</span>
             <div class="size-9 rounded-lg bg-amber-500/10 text-amber-600 flex items-center justify-center group-hover:scale-105 transition-transform">
@@ -216,7 +216,7 @@ interface ToastAlert {
           </div>
           <div class="pt-3 border-t border-border flex items-center justify-between text-xs">
             <span class="text-muted-foreground">Active Staff: {{ staffCount() }}</span>
-            <a routerLink="/org-admin/users" hlmBtn variant="link" size="sm" class="text-xs text-primary gap-1 p-0 h-auto">
+            <a routerLink="/organization-admin/users" hlmBtn variant="link" size="sm" class="text-xs text-primary gap-1 p-0 h-auto">
               View Roster <ng-icon name="lucideChevronRight" size="14" />
             </a>
           </div>
@@ -240,7 +240,7 @@ interface ToastAlert {
           </div>
           <div class="pt-3 border-t border-border flex items-center justify-between text-xs">
             <span class="text-muted-foreground">Status: VERIFIED</span>
-            <a routerLink="/org-admin/facility-settings" hlmBtn variant="link" size="sm" class="text-xs text-emerald-600 gap-1 p-0 h-auto">
+            <a routerLink="/organization-admin/facility-settings" hlmBtn variant="link" size="sm" class="text-xs text-emerald-600 gap-1 p-0 h-auto">
               Edit Settings <ng-icon name="lucideChevronRight" size="14" />
             </a>
           </div>
@@ -264,7 +264,7 @@ interface ToastAlert {
           </div>
           <div class="pt-3 border-t border-border flex items-center justify-between text-xs">
             <span class="text-muted-foreground">Fulfillment: {{ completionRate() }}%</span>
-            <a routerLink="/org-admin/schedule-analytics" hlmBtn variant="link" size="sm" class="text-xs text-amber-600 gap-1 p-0 h-auto">
+            <a routerLink="/organization-admin/schedule-analytics" hlmBtn variant="link" size="sm" class="text-xs text-amber-600 gap-1 p-0 h-auto">
               Open Analytics <ng-icon name="lucideChevronRight" size="14" />
             </a>
           </div>
@@ -282,7 +282,7 @@ interface ToastAlert {
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <a routerLink="/org-admin/patients" class="p-3.5 rounded-lg border border-border/80 bg-muted/20 hover:bg-muted/40 transition-all space-y-1 block">
+          <a routerLink="/organization-admin/patients" class="p-3.5 rounded-lg border border-border/80 bg-muted/20 hover:bg-muted/40 transition-all space-y-1 block">
             <div class="flex items-center gap-2 text-xs font-semibold text-foreground">
               <ng-icon name="lucideHeartPulse" size="15" class="text-sky-600" />
               Master Patient Index (MPI)
@@ -310,7 +310,7 @@ interface ToastAlert {
     </div>
   `,
 })
-export class OrgAdminDashboardComponent implements OnInit {
+export class OrganizationAdminDashboardComponent implements OnInit {
   users = signal<User[]>([]);
   patients = signal<Patient[]>([]);
   appointments = signal<Appointment[]>([]);

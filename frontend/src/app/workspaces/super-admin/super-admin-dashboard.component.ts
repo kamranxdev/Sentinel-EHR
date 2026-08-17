@@ -33,7 +33,7 @@ interface ToastAlert {
 }
 
 @Component({
-  selector: 'app-sys-admin-dashboard',
+  selector: 'app-super-admin-dashboard',
   standalone: true,
   imports: [
     CommonModule,
@@ -87,10 +87,10 @@ interface ToastAlert {
           <div>
             <div class="flex items-center gap-2 flex-wrap">
               <h1 class="text-xl font-bold tracking-tight text-foreground">
-                System Administration Command Center
+                Super Admin Command Center
               </h1>
               <span hlmBadge variant="secondary" class="text-[10px] uppercase font-mono tracking-wider">
-                System Admin
+                Super Admin
               </span>
             </div>
             <p class="text-xs text-muted-foreground mt-0.5 flex items-center gap-2 flex-wrap">
@@ -115,7 +115,7 @@ interface ToastAlert {
             <span>Refresh</span>
           </button>
           <a
-            routerLink="/sys-admin/users"
+            routerLink="/super-admin/users"
             class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-xs">
             <ng-icon name="lucideUsers" size="14" />
             <span>Manage Users</span>
@@ -126,7 +126,7 @@ interface ToastAlert {
       <!-- System KPI Overview (6 Cards) -->
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         <!-- Users Card -->
-        <a routerLink="/sys-admin/users" class="p-4 rounded-xl border border-border bg-card shadow-xs hover:border-primary/40 transition-all group">
+        <a routerLink="/super-admin/users" class="p-4 rounded-xl border border-border bg-card shadow-xs hover:border-primary/40 transition-all group">
           <div class="flex items-center justify-between">
             <span class="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Active Users</span>
             <div class="size-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center group-hover:scale-105 transition-transform">
@@ -143,7 +143,7 @@ interface ToastAlert {
         </a>
 
         <!-- MPI Card -->
-        <a routerLink="/sys-admin/patients" class="p-4 rounded-xl border border-border bg-card shadow-xs hover:border-emerald-500/40 transition-all group">
+        <a routerLink="/super-admin/patients" class="p-4 rounded-xl border border-border bg-card shadow-xs hover:border-emerald-500/40 transition-all group">
           <div class="flex items-center justify-between">
             <span class="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">MPI Census</span>
             <div class="size-9 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center group-hover:scale-105 transition-transform">
@@ -158,7 +158,7 @@ interface ToastAlert {
         </a>
 
         <!-- Schedule Analytics Card -->
-        <a routerLink="/sys-admin/schedule-analytics" class="p-4 rounded-xl border border-border bg-card shadow-xs hover:border-sky-500/40 transition-all group">
+        <a routerLink="/super-admin/schedule-analytics" class="p-4 rounded-xl border border-border bg-card shadow-xs hover:border-sky-500/40 transition-all group">
           <div class="flex items-center justify-between">
             <span class="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Schedule Load</span>
             <div class="size-9 rounded-lg bg-sky-500/10 text-sky-600 flex items-center justify-center group-hover:scale-105 transition-transform">
@@ -173,7 +173,7 @@ interface ToastAlert {
         </a>
 
         <!-- Organizations & Clinics Governance Card -->
-        <a routerLink="/sys-admin/organizations" class="p-4 rounded-xl border border-border bg-card shadow-xs hover:border-amber-500/40 transition-all group">
+        <a routerLink="/super-admin/organizations" class="p-4 rounded-xl border border-border bg-card shadow-xs hover:border-amber-500/40 transition-all group">
           <div class="flex items-center justify-between">
             <span class="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Organizations</span>
             <div class="size-9 rounded-lg bg-amber-500/10 text-amber-600 flex items-center justify-center group-hover:scale-105 transition-transform">
@@ -188,7 +188,7 @@ interface ToastAlert {
         </a>
 
         <!-- System Governance Settings Card -->
-        <a routerLink="/sys-admin/organizations" class="p-4 rounded-xl border border-border bg-card shadow-xs hover:border-indigo-500/40 transition-all group">
+        <a routerLink="/super-admin/organizations" class="p-4 rounded-xl border border-border bg-card shadow-xs hover:border-indigo-500/40 transition-all group">
           <div class="flex items-center justify-between">
             <span class="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Governance</span>
             <div class="size-9 rounded-lg bg-indigo-500/10 text-indigo-600 flex items-center justify-center group-hover:scale-105 transition-transform">
@@ -222,7 +222,7 @@ interface ToastAlert {
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         <!-- User RBAC Management Card -->
         <a
-          routerLink="/sys-admin/users"
+          routerLink="/super-admin/users"
           class="p-5 rounded-xl border border-border bg-card hover:border-primary/50 transition-all duration-300 space-y-4 flex flex-col justify-between group shadow-xs">
           <div class="flex items-center justify-between">
             <div class="size-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
@@ -246,7 +246,7 @@ interface ToastAlert {
 
         <!-- Master Patient Index (MPI) Card -->
         <a
-          routerLink="/sys-admin/patients"
+          routerLink="/super-admin/patients"
           class="p-5 rounded-xl border border-border bg-card hover:border-emerald-500/50 transition-all duration-300 space-y-4 flex flex-col justify-between group shadow-xs">
           <div class="flex items-center justify-between">
             <div class="size-10 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-colors">
@@ -270,7 +270,7 @@ interface ToastAlert {
 
         <!-- Facility Schedule Analytics Card -->
         <a
-          routerLink="/sys-admin/schedule-analytics"
+          routerLink="/super-admin/schedule-analytics"
           class="p-5 rounded-xl border border-border bg-card hover:border-sky-500/50 transition-all duration-300 space-y-4 flex flex-col justify-between group shadow-xs">
           <div class="flex items-center justify-between">
             <div class="size-10 rounded-lg bg-sky-500/10 text-sky-600 flex items-center justify-center group-hover:bg-sky-600 group-hover:text-white transition-colors">
@@ -348,7 +348,7 @@ interface ToastAlert {
     </div>
   `,
 })
-export class SysAdminDashboardComponent implements OnInit {
+export class SuperAdminDashboardComponent implements OnInit {
   users = signal<User[]>([]);
   patients = signal<Patient[]>([]);
   appointments = signal<Appointment[]>([]);

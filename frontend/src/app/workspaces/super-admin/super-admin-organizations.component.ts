@@ -21,7 +21,7 @@ import {
 } from '@ng-icons/lucide';
 
 @Component({
-  selector: 'app-sys-admin-organizations',
+  selector: 'app-super-admin-organizations',
   standalone: true,
   imports: [CommonModule, RouterModule, FormsModule, NgIcon],
   providers: [
@@ -47,7 +47,7 @@ import {
         <div>
           <div class="flex items-center gap-2">
             <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
-              System Admin Desk
+              Super Admin Desk
             </span>
             <span class="text-xs text-muted-foreground font-mono">Multi-Tenant Governance</span>
           </div>
@@ -192,7 +192,7 @@ import {
     </div>
   `
 })
-export class SysAdminOrganizationsComponent implements OnInit {
+export class SuperAdminOrganizationsComponent implements OnInit {
   organizations = signal<Organization[]>([]);
   isLoading = signal(false);
   alertMessage = signal<string | null>(null);

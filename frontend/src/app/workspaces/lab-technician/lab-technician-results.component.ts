@@ -13,7 +13,7 @@ import { NgIcon, provideIcons } from '@ng-icons/core';
 import { lucideCheckCheck, lucideArrowLeft, lucideMicroscope } from '@ng-icons/lucide';
 
 @Component({
-  selector: 'app-labtech-results',
+  selector: 'app-lab-technician-results',
   standalone: true,
   imports: [
     CommonModule,
@@ -36,7 +36,7 @@ import { lucideCheckCheck, lucideArrowLeft, lucideMicroscope } from '@ng-icons/l
     <div class="space-y-6">
       <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-border">
         <div class="flex items-center gap-3">
-          <a routerLink="/labtech/dashboard" class="p-2 rounded-lg bg-muted text-muted-foreground hover:text-foreground transition-colors">
+          <a routerLink="/lab-technician/dashboard" class="p-2 rounded-lg bg-muted text-muted-foreground hover:text-foreground transition-colors">
             <ng-icon name="lucideArrowLeft" size="18" />
           </a>
           <div>
@@ -85,7 +85,7 @@ import { lucideCheckCheck, lucideArrowLeft, lucideMicroscope } from '@ng-icons/l
     </div>
   `,
 })
-export class LabTechResultsComponent implements OnInit {
+export class LabTechnicianResultsComponent implements OnInit {
   orderId = '';
   patientName = '';
   testLOINC = '';
@@ -115,7 +115,7 @@ export class LabTechResultsComponent implements OnInit {
 
   submitResults(): void {
     if (!this.orderId) {
-      this.router.navigate(['/labtech/worklist']);
+      this.router.navigate(['/lab-technician/worklist']);
       return;
     }
     this.submitting.set(true);
@@ -129,11 +129,11 @@ export class LabTechResultsComponent implements OnInit {
     this.apiService.addLabResult(this.orderId, body).subscribe({
       next: () => {
         this.submitting.set(false);
-        this.router.navigate(['/labtech/worklist']);
+        this.router.navigate(['/lab-technician/worklist']);
       },
       error: () => {
         this.submitting.set(false);
-        this.router.navigate(['/labtech/worklist']);
+        this.router.navigate(['/lab-technician/worklist']);
       },
     });
   }
