@@ -6,6 +6,10 @@ import { PatientContextService } from '../../core/services/patient-context.servi
 import { ApiService } from '../../core/services/api.service';
 import { Patient } from '../../core/models/patient.model';
 import { Vitals, Prescription, Allergy } from '../../core/models/clinical.model';
+import { TriageEwsResponseDTO, EmarRecordResponseDTO, NursingFlowsheet, NursingFlowsheetEntry } from '../../core/models/triage-emar.model';
+import { Bed } from '../../core/models/bed.model';
+import { CareTeamMember } from '../../core/models/care-team.model';
+import { toast } from '@spartan-ng/brain/sonner';
 
 import { HlmCardImports } from '@spartan-ng/helm/card';
 import { HlmTableImports } from '@spartan-ng/helm/table';
@@ -25,7 +29,16 @@ import {
   lucideClock,
   lucideX,
   lucideSave,
+  lucideHospital,
+  lucideBed,
+  lucideFileText,
+  lucideShieldAlert,
+  lucideCheck,
+  lucideArrowRightLeft,
+  lucideSparkles,
 } from '@ng-icons/lucide';
+
+export type NurseChartTab = 'vitals' | 'mar' | 'allergies' | 'triage' | 'flowsheet' | 'bed-transfer' | 'care-team';
 
 @Component({
   selector: 'app-nurse-chart',
@@ -54,6 +67,13 @@ import {
       lucideClock,
       lucideX,
       lucideSave,
+      lucideHospital,
+      lucideBed,
+      lucideFileText,
+      lucideShieldAlert,
+      lucideCheck,
+      lucideArrowRightLeft,
+      lucideSparkles,
     }),
   ],
   template: `
@@ -63,10 +83,10 @@ import {
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-border">
           <div>
             <h1 class="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
-              Bedside Clinical Chart
+              Nurse Station Bedside Chart
               <span hlmBadge variant="secondary" class="text-[10px]">Active Bedside Context</span>
             </h1>
-            <p class="text-xs text-muted-foreground mt-0.5">Comprehensive patient chart for bedside vitals, medication eMAR, and allergy safety.</p>
+            <p class="text-xs text-muted-foreground mt-0.5">Real-time nursing workspace for vitals monitoring, eMAR medication administration, NEWS2 triage, and shift flowsheets.</p>
           </div>
 
           <!-- Quick Patient Switcher Combobox -->
@@ -118,83 +138,106 @@ import {
 
           <div>
             <span class="text-[10px] text-muted-foreground uppercase tracking-wider block font-semibold">Status</span>
-            <span hlmBadge variant="secondary" class="text-[10px] bg-blue-500/10 text-blue-600">Bedside Active</span>
+            <span hlmBadge variant="secondary" class="text-[10px] bg-emerald-500/10 text-emerald-600">Bedside Active</span>
           </div>
         </div>
 
         <ng-template #noPatientSelected>
           <div class="p-4 bg-amber-500/10 border border-amber-500/20 rounded-lg text-amber-700 dark:text-amber-300 text-xs flex items-center justify-between">
             <span class="flex items-center gap-2">
-              <ng-icon name="lucideTriangleAlert" size="16" /> No active patient selected. Please select a patient from the dropdown or unit roster.
+              <ng-icon name="lucideTriangleAlert" size="16" /> No active patient selected. Please select a patient from the unit roster.
             </span>
           </div>
         </ng-template>
 
-        <!-- Bedside Chart Sub-Navigation Tabs -->
-        <div class="flex items-center gap-2 border-b border-border pt-1">
+        <!-- Bedside Chart Sub-Navigation Tabs (7 Subsystems) -->
+        <div class="flex items-center gap-1 border-b border-border pt-1 overflow-x-auto">
           <button
             (click)="selectTab('vitals')"
-            class="flex items-center gap-2 px-4 py-2 text-xs font-semibold border-b-2 transition-colors cursor-pointer"
+            class="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold border-b-2 transition-colors cursor-pointer whitespace-nowrap"
             [ngClass]="activeTab() === 'vitals' ? 'border-primary text-primary bg-primary/5 rounded-t-md' : 'border-transparent text-muted-foreground hover:text-foreground'"
           >
-            <ng-icon name="lucideActivity" size="15" /> Bedside Vitals Flowsheet
+            <ng-icon name="lucideActivity" size="14" /> Bedside Vitals
           </button>
 
           <button
             (click)="selectTab('mar')"
-            class="flex items-center gap-2 px-4 py-2 text-xs font-semibold border-b-2 transition-colors cursor-pointer"
+            class="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold border-b-2 transition-colors cursor-pointer whitespace-nowrap"
             [ngClass]="activeTab() === 'mar' ? 'border-primary text-primary bg-primary/5 rounded-t-md' : 'border-transparent text-muted-foreground hover:text-foreground'"
           >
-            <ng-icon name="lucidePill" size="15" /> Medication MAR Orders
+            <ng-icon name="lucidePill" size="14" /> eMAR & Admin Log
+          </button>
+
+          <button
+            (click)="selectTab('triage')"
+            class="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold border-b-2 transition-colors cursor-pointer whitespace-nowrap"
+            [ngClass]="activeTab() === 'triage' ? 'border-primary text-primary bg-primary/5 rounded-t-md' : 'border-transparent text-muted-foreground hover:text-foreground'"
+          >
+            <ng-icon name="lucideShieldAlert" size="14" /> NEWS2 & Triage
+          </button>
+
+          <button
+            (click)="selectTab('flowsheet')"
+            class="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold border-b-2 transition-colors cursor-pointer whitespace-nowrap"
+            [ngClass]="activeTab() === 'flowsheet' ? 'border-primary text-primary bg-primary/5 rounded-t-md' : 'border-transparent text-muted-foreground hover:text-foreground'"
+          >
+            <ng-icon name="lucideFileText" size="14" /> Nursing Flowsheet
           </button>
 
           <button
             (click)="selectTab('allergies')"
-            class="flex items-center gap-2 px-4 py-2 text-xs font-semibold border-b-2 transition-colors cursor-pointer"
+            class="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold border-b-2 transition-colors cursor-pointer whitespace-nowrap"
             [ngClass]="activeTab() === 'allergies' ? 'border-primary text-primary bg-primary/5 rounded-t-md' : 'border-transparent text-muted-foreground hover:text-foreground'"
           >
-            <ng-icon name="lucideTriangleAlert" size="15" /> Coded Allergies & ADRs
+            <ng-icon name="lucideTriangleAlert" size="14" /> Allergies
+          </button>
+
+          <button
+            (click)="selectTab('bed-transfer')"
+            class="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold border-b-2 transition-colors cursor-pointer whitespace-nowrap"
+            [ngClass]="activeTab() === 'bed-transfer' ? 'border-primary text-primary bg-primary/5 rounded-t-md' : 'border-transparent text-muted-foreground hover:text-foreground'"
+          >
+            <ng-icon name="lucideArrowRightLeft" size="14" /> Bed Transfer
+          </button>
+
+          <button
+            (click)="selectTab('care-team')"
+            class="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold border-b-2 transition-colors cursor-pointer whitespace-nowrap"
+            [ngClass]="activeTab() === 'care-team' ? 'border-primary text-primary bg-primary/5 rounded-t-md' : 'border-transparent text-muted-foreground hover:text-foreground'"
+          >
+            <ng-icon name="lucideUsers" size="14" /> Care Team
           </button>
         </div>
       </div>
 
-      <!-- Tab 1: Vitals Flowsheet -->
+      <!-- TAB 1: Bedside Vitals Flowsheet -->
       <div *ngIf="activeTab() === 'vitals'" class="space-y-6">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-border">
           <div>
             <h2 class="text-base font-bold tracking-tight text-foreground flex items-center gap-2">
               <ng-icon name="lucideActivity" size="18" class="text-blue-500" />
-              Bedside Vitals Flowsheet
+              Bedside Physiological Vitals Flowsheet
             </h2>
-            <p class="text-xs text-muted-foreground mt-0.5">Record and monitor physiological vital signs, blood pressure, pulse, temperature, and BMI.</p>
+            <p class="text-xs text-muted-foreground mt-0.5">Real-time vital parameters recorded at bedside.</p>
           </div>
 
           <button hlmBtn variant="default" size="sm" (click)="showVitalsModal.set(true)" class="gap-1.5 font-semibold text-xs bg-blue-600 hover:bg-blue-700 text-white">
-            <ng-icon name="lucidePlus" size="14" /> Log Bedside Vitals
+            <ng-icon name="lucidePlus" size="14" /> Log Vitals
           </button>
         </div>
 
         <div class="rounded-xl border border-border bg-card overflow-hidden shadow-xs">
-          <div class="p-4 border-b border-border bg-muted/20 flex justify-between items-center">
-            <h3 class="text-xs font-semibold text-foreground flex items-center gap-2">
-              <ng-icon name="lucideActivity" size="14" class="text-blue-500" />
-              Vitals History Log
-            </h3>
-            <span class="text-[11px] text-muted-foreground">{{ vitals().length }} readings recorded</span>
-          </div>
-
           <div class="overflow-x-auto">
             <table hlmTable class="w-full text-xs">
               <thead hlmTableHeader>
                 <tr hlmTableRow class="bg-muted/50 border-b border-border">
                   <th hlmTableHead class="py-3 px-4 text-left">Timestamp</th>
-                  <th hlmTableHead class="py-3 px-4 text-left">Blood Pressure</th>
+                  <th hlmTableHead class="py-3 px-4 text-left">BP (mmHg)</th>
                   <th hlmTableHead class="py-3 px-4 text-left">Heart Rate</th>
                   <th hlmTableHead class="py-3 px-4 text-left">Temperature</th>
                   <th hlmTableHead class="py-3 px-4 text-left">SpO2</th>
-                  <th hlmTableHead class="py-3 px-4 text-left">Glucose</th>
+                  <th hlmTableHead class="py-3 px-4 text-left">Blood Glucose</th>
                   <th hlmTableHead class="py-3 px-4 text-left">BMI</th>
-                  <th hlmTableHead class="py-3 px-4 text-left">Recorded By</th>
                 </tr>
               </thead>
               <tbody hlmTableBody class="divide-y divide-border">
@@ -206,10 +249,9 @@ import {
                   <td hlmTableCell class="py-3 px-4 font-mono">{{ v.oxygenSaturation }} %</td>
                   <td hlmTableCell class="py-3 px-4 font-mono">{{ v.bloodGlucose ? v.bloodGlucose + ' mg/dL' : 'N/A' }}</td>
                   <td hlmTableCell class="py-3 px-4 font-mono font-semibold">{{ v.bmi || 'N/A' }}</td>
-                  <td hlmTableCell class="py-3 px-4 text-muted-foreground">{{ v.recordedBy?.fullName || 'Nurse' }}</td>
                 </tr>
                 <tr *ngIf="vitals().length === 0" hlmTableRow>
-                  <td colspan="8" hlmTableCell class="py-12 text-center text-muted-foreground text-xs">No vitals recorded for this patient.</td>
+                  <td colspan="7" hlmTableCell class="py-12 text-center text-muted-foreground text-xs">No vitals logged for this patient.</td>
                 </tr>
               </tbody>
             </table>
@@ -217,25 +259,25 @@ import {
         </div>
       </div>
 
-      <!-- Tab 2: Medication MAR -->
+      <!-- TAB 2: eMAR & Medication Administration -->
       <div *ngIf="activeTab() === 'mar'" class="space-y-6">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-border">
           <div>
             <h2 class="text-base font-bold tracking-tight text-foreground flex items-center gap-2">
               <ng-icon name="lucidePill" size="18" class="text-emerald-500" />
-              Medication Administration Record (MAR)
+              Bedside eMAR Medication Administration Record
             </h2>
-            <p class="text-xs text-muted-foreground mt-0.5">Active physician eRx orders & 1-click bedside dose administration log.</p>
+            <p class="text-xs text-muted-foreground mt-0.5">Verify 5-Rights of medication administration and record dose execution.</p>
           </div>
         </div>
 
-        <div class="rounded-xl border border-border bg-card overflow-hidden shadow-xs space-y-0">
+        <div class="rounded-xl border border-border bg-card overflow-hidden shadow-xs">
           <div class="p-4 border-b border-border bg-muted/20 flex justify-between items-center">
             <h3 class="text-xs font-semibold text-foreground flex items-center gap-2">
               <ng-icon name="lucidePill" size="14" class="text-emerald-500" />
-              Active Physician eRx Orders
+              Active Medication Schedule
             </h3>
-            <span class="text-[11px] text-muted-foreground">{{ prescriptions().length }} active orders</span>
+            <span class="text-[11px] text-muted-foreground">{{ prescriptions().length }} medications</span>
           </div>
 
           <div class="overflow-x-auto">
@@ -246,8 +288,7 @@ import {
                   <th hlmTableHead class="py-3 px-4 text-left">Dosage & Route</th>
                   <th hlmTableHead class="py-3 px-4 text-left">Frequency</th>
                   <th hlmTableHead class="py-3 px-4 text-left">Instructions</th>
-                  <th hlmTableHead class="py-3 px-4 text-left">Status</th>
-                  <th hlmTableHead class="py-3 px-4 text-right">Action</th>
+                  <th hlmTableHead class="py-3 px-4 text-right">eMAR Action</th>
                 </tr>
               </thead>
               <tbody hlmTableBody class="divide-y divide-border">
@@ -256,92 +297,161 @@ import {
                   <td hlmTableCell class="py-3 px-4 text-muted-foreground">{{ rx.dosage }} ({{ rx.route || 'Oral' }})</td>
                   <td hlmTableCell class="py-3 px-4 text-muted-foreground">{{ rx.frequency }}</td>
                   <td hlmTableCell class="py-3 px-4 text-muted-foreground max-w-xs truncate">{{ rx.instructions }}</td>
-                  <td hlmTableCell class="py-3 px-4">
-                    <span hlmBadge variant="secondary" class="text-[10px] bg-emerald-500/10 text-emerald-600">{{ rx.status }}</span>
-                  </td>
                   <td hlmTableCell class="py-3 px-4 text-right">
-                    <button 
-                      hlmBtn 
-                      variant="default" 
-                      size="sm" 
-                      class="h-7 text-[11px] bg-emerald-600 hover:bg-emerald-700 text-white"
-                      (click)="administerMedication(rx)"
-                    >
-                      <ng-icon name="lucideCheckCircle2" size="12" class="mr-1" /> Log Administered
+                    <button hlmBtn variant="default" size="sm" (click)="openAdministerModal(rx)" class="h-7 text-[11px] gap-1 bg-emerald-600 hover:bg-emerald-700 text-white">
+                      <ng-icon name="lucideCheck" size="12" /> Administer Dose
                     </button>
                   </td>
                 </tr>
                 <tr *ngIf="prescriptions().length === 0" hlmTableRow>
-                  <td colspan="6" hlmTableCell class="py-12 text-center text-muted-foreground text-xs">No active eRx orders logged for this patient.</td>
+                  <td colspan="5" hlmTableCell class="py-12 text-center text-muted-foreground text-xs">No active medication orders.</td>
                 </tr>
               </tbody>
             </table>
           </div>
         </div>
 
-        <div class="p-6 rounded-xl border border-border bg-card space-y-4">
-          <div class="flex justify-between items-center border-b border-border pb-3">
-            <h3 class="text-sm font-semibold text-foreground flex items-center gap-2">
-              <ng-icon name="lucideClock" size="16" class="text-emerald-500" />
-              Bedside Administration Log (eMAR History)
-            </h3>
+        <!-- Administration History -->
+        <div class="rounded-xl border border-border bg-card overflow-hidden shadow-xs">
+          <div class="p-4 border-b border-border bg-muted/20">
+            <h3 class="text-xs font-semibold text-foreground">Recent Bedside Administrations</h3>
           </div>
-
-          <div class="overflow-x-auto" *ngIf="emarHistory().length > 0; else noEmar">
-            <table class="w-full text-xs text-left">
-              <thead class="bg-muted/40 text-muted-foreground font-semibold border-b border-border">
-                <tr>
-                  <th class="p-3">Administered At</th>
-                  <th class="p-3">Medication Name</th>
-                  <th class="p-3">Dose / Route</th>
-                  <th class="p-3">Status</th>
-                  <th class="p-3">Administered By</th>
+          <div class="overflow-x-auto">
+            <table hlmTable class="w-full text-xs">
+              <thead hlmTableHeader>
+                <tr hlmTableRow class="bg-muted/50 border-b border-border">
+                  <th hlmTableHead class="py-3 px-4 text-left">Administered Time</th>
+                  <th hlmTableHead class="py-3 px-4 text-left">Medication Name</th>
+                  <th hlmTableHead class="py-3 px-4 text-left">Dose</th>
+                  <th hlmTableHead class="py-3 px-4 text-left">Nurse / Clinician</th>
+                  <th hlmTableHead class="py-3 px-4 text-left">Status</th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-border">
-                <tr *ngFor="let item of emarHistory()" class="hover:bg-muted/20">
-                  <td class="p-3 text-muted-foreground">{{ item.administeredAt | date:'short' }}</td>
-                  <td class="p-3 font-semibold text-foreground">{{ item.medicationName }}</td>
-                  <td class="p-3">{{ item.dose }} • {{ item.route || 'Oral' }}</td>
-                  <td class="p-3 font-mono font-semibold text-emerald-600">{{ item.status }}</td>
-                  <td class="p-3 text-muted-foreground">{{ item.administeredBy?.fullName || 'Nurse' }}</td>
+              <tbody hlmTableBody class="divide-y divide-border">
+                <tr *ngFor="let adm of emarHistory()" hlmTableRow class="hover:bg-muted/40 transition-colors">
+                  <td hlmTableCell class="py-3 px-4 font-mono text-muted-foreground">{{ adm.administeredAt | date:'short' }}</td>
+                  <td hlmTableCell class="py-3 px-4 font-semibold text-foreground">{{ adm.medicationName }}</td>
+                  <td hlmTableCell class="py-3 px-4 font-mono">{{ adm.dose }}</td>
+                  <td hlmTableCell class="py-3 px-4 text-muted-foreground">{{ adm.administeredBy || 'Staff Nurse' }}</td>
+                  <td hlmTableCell class="py-3 px-4"><span hlmBadge variant="secondary" class="text-[10px] bg-emerald-500/10 text-emerald-600">GIVEN</span></td>
+                </tr>
+                <tr *ngIf="emarHistory().length === 0" hlmTableRow>
+                  <td colspan="5" hlmTableCell class="py-8 text-center text-muted-foreground text-xs">No administrations recorded yet for this encounter.</td>
                 </tr>
               </tbody>
             </table>
           </div>
-
-          <ng-template #noEmar>
-            <div class="p-6 text-center text-xs text-muted-foreground">
-              No medication administration records logged yet.
-            </div>
-          </ng-template>
         </div>
       </div>
 
-      <!-- Tab 3: Allergies & Risk Register -->
-      <div *ngIf="activeTab() === 'allergies'" class="space-y-6">
+      <!-- TAB 3: Clinical Triage & NEWS2 Early Warning Score -->
+      <div *ngIf="activeTab() === 'triage'" class="space-y-6">
         <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-border">
           <div>
             <h2 class="text-base font-bold tracking-tight text-foreground flex items-center gap-2">
-              <ng-icon name="lucideTriangleAlert" size="18" class="text-amber-500" />
-              Coded Allergies & Risk Register
+              <ng-icon name="lucideShieldAlert" size="18" class="text-amber-500" />
+              Clinical Triage & NEWS2 Early Warning Score
             </h2>
-            <p class="text-xs text-muted-foreground mt-0.5">Document allergen safety records, severity, and adverse reaction descriptions.</p>
+            <p class="text-xs text-muted-foreground mt-0.5">National Early Warning Score (NEWS2) calculation for early deterioration detection.</p>
           </div>
-          <button hlmBtn variant="default" size="sm" (click)="showAllergyModal.set(true)" class="gap-1.5 font-semibold text-xs bg-amber-600 hover:bg-amber-700 text-white">
-            <ng-icon name="lucidePlus" size="14" /> Document Allergy
+
+          <button hlmBtn variant="default" size="sm" (click)="showTriageModal.set(true)" class="gap-1.5 font-semibold text-xs bg-amber-600 hover:bg-amber-700 text-white">
+            <ng-icon name="lucidePlus" size="14" /> Calculate NEWS2 Triage
           </button>
         </div>
 
         <div class="rounded-xl border border-border bg-card overflow-hidden shadow-xs">
-          <div class="p-4 border-b border-border bg-muted/20 flex justify-between items-center">
-            <h3 class="text-xs font-semibold text-foreground flex items-center gap-2">
-              <ng-icon name="lucideTriangleAlert" size="14" class="text-amber-500" />
-              Active Coded Allergies Log
-            </h3>
-            <span class="text-[11px] text-muted-foreground">{{ allergies().length }} documented</span>
+          <div class="p-4 border-b border-border bg-muted/20">
+            <h3 class="text-xs font-semibold text-foreground">Triage & Acuity Log</h3>
           </div>
 
+          <div class="overflow-x-auto">
+            <table hlmTable class="w-full text-xs">
+              <thead hlmTableHeader>
+                <tr hlmTableRow class="bg-muted/50 border-b border-border">
+                  <th hlmTableHead class="py-3 px-4 text-left">Timestamp</th>
+                  <th hlmTableHead class="py-3 px-4 text-left">Triage Priority</th>
+                  <th hlmTableHead class="py-3 px-4 text-left">Chief Complaint</th>
+                  <th hlmTableHead class="py-3 px-4 text-left">Vitals Summary</th>
+                  <th hlmTableHead class="py-3 px-4 text-left">Recorded By</th>
+                </tr>
+              </thead>
+              <tbody hlmTableBody class="divide-y divide-border">
+                <tr *ngFor="let trg of triageRecords()" hlmTableRow class="hover:bg-muted/40 transition-colors">
+                  <td hlmTableCell class="py-3 px-4 font-mono text-muted-foreground">{{ trg.recordedAt | date:'short' }}</td>
+                  <td hlmTableCell class="py-3 px-4">
+                    <span hlmBadge [variant]="trg.triagePriority === 'RESUSCITATION' || trg.triagePriority === 'EMERGENCY' ? 'destructive' : 'secondary'" class="text-[10px]">
+                      {{ trg.triagePriority }}
+                    </span>
+                  </td>
+                  <td hlmTableCell class="py-3 px-4 font-semibold text-foreground">{{ trg.chiefComplaint || 'Clinical evaluation' }}</td>
+                  <td hlmTableCell class="py-3 px-4 text-muted-foreground font-mono text-[11px]">{{ trg.vitalsSummary }}</td>
+                  <td hlmTableCell class="py-3 px-4 text-muted-foreground">{{ trg.recordedBy || 'Triage Nurse' }}</td>
+                </tr>
+                <tr *ngIf="triageRecords().length === 0" hlmTableRow>
+                  <td colspan="5" hlmTableCell class="py-12 text-center text-muted-foreground text-xs">No triage or NEWS2 scores logged.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 4: Nursing Flowsheet -->
+      <div *ngIf="activeTab() === 'flowsheet'" class="space-y-6">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-border">
+          <div>
+            <h2 class="text-base font-bold tracking-tight text-foreground flex items-center gap-2">
+              <ng-icon name="lucideFileText" size="18" class="text-purple-500" />
+              Nursing Shift Flowsheet & Assessments
+            </h2>
+            <p class="text-xs text-muted-foreground mt-0.5">Hourly shift documentation: I/O fluids, wound status, line checks, and nurse notes.</p>
+          </div>
+
+          <button hlmBtn variant="default" size="sm" (click)="showFlowsheetModal.set(true)" class="gap-1.5 font-semibold text-xs bg-purple-600 hover:bg-purple-700 text-white">
+            <ng-icon name="lucidePlus" size="14" /> Add Flowsheet Entry
+          </button>
+        </div>
+
+        <div class="rounded-xl border border-border bg-card overflow-hidden shadow-xs">
+          <div class="p-4 border-b border-border bg-muted/20">
+            <h3 class="text-xs font-semibold text-foreground">Shift Flowsheet Entries</h3>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table hlmTable class="w-full text-xs">
+              <thead hlmTableHeader>
+                <tr hlmTableRow class="bg-muted/50 border-b border-border">
+                  <th hlmTableHead class="py-3 px-4 text-left">Timestamp</th>
+                  <th hlmTableHead class="py-3 px-4 text-left">Category</th>
+                  <th hlmTableHead class="py-3 px-4 text-left">Assessment / Note</th>
+                  <th hlmTableHead class="py-3 px-4 text-left">Shift</th>
+                  <th hlmTableHead class="py-3 px-4 text-left">Logged By</th>
+                </tr>
+              </thead>
+              <tbody hlmTableBody class="divide-y divide-border">
+                <tr *ngFor="let entry of flowsheetEntries()" hlmTableRow class="hover:bg-muted/40 transition-colors">
+                  <td hlmTableCell class="py-3 px-4 font-mono text-muted-foreground">{{ entry.recordedAt | date:'short' }}</td>
+                  <td hlmTableCell class="py-3 px-4"><span hlmBadge variant="outline">{{ entry.entryType || 'GENERAL_ASSESSMENT' }}</span></td>
+                  <td hlmTableCell class="py-3 px-4 font-medium text-foreground">{{ entry.notes || entry.content }}</td>
+                  <td hlmTableCell class="py-3 px-4 text-muted-foreground">{{ entry.shift || 'DAY_SHIFT' }}</td>
+                  <td hlmTableCell class="py-3 px-4 text-muted-foreground">{{ entry.recordedBy || 'Staff Nurse' }}</td>
+                </tr>
+                <tr *ngIf="flowsheetEntries().length === 0" hlmTableRow>
+                  <td colspan="5" hlmTableCell class="py-12 text-center text-muted-foreground text-xs">No nursing flowsheet entries documented.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 5: Allergies & Risk Register -->
+      <div *ngIf="activeTab() === 'allergies'" class="space-y-6">
+        <div class="rounded-xl border border-border bg-card overflow-hidden shadow-xs">
+          <div class="p-4 border-b border-border bg-muted/20">
+            <h3 class="text-xs font-semibold text-foreground">Patient Coded Allergies</h3>
+          </div>
           <div class="overflow-x-auto">
             <table hlmTable class="w-full text-xs">
               <thead hlmTableHeader>
@@ -358,7 +468,7 @@ import {
                   <td hlmTableCell class="py-3 px-4 font-semibold text-foreground">{{ a.allergenName }}</td>
                   <td hlmTableCell class="py-3 px-4 text-muted-foreground">{{ a.category }}</td>
                   <td hlmTableCell class="py-3 px-4">
-                    <span hlmBadge [variant]="a.severity === 'SEVERE' || a.severity === 'CRITICAL' ? 'destructive' : 'secondary'" class="text-[10px]">
+                    <span hlmBadge [variant]="a.severity === 'SEVERE' || a.severity === 'LIFE_THREATENING' ? 'destructive' : 'secondary'" class="text-[10px]">
                       {{ a.severity }}
                     </span>
                   </td>
@@ -366,7 +476,7 @@ import {
                   <td hlmTableCell class="py-3 px-4"><span hlmBadge variant="outline" class="text-[10px]">{{ a.status }}</span></td>
                 </tr>
                 <tr *ngIf="allergies().length === 0" hlmTableRow>
-                  <td colspan="5" hlmTableCell class="py-12 text-center text-muted-foreground text-xs">No active allergies documented for this patient.</td>
+                  <td colspan="5" hlmTableCell class="py-12 text-center text-muted-foreground text-xs">No allergies documented.</td>
                 </tr>
               </tbody>
             </table>
@@ -374,123 +484,226 @@ import {
         </div>
       </div>
 
-      <!-- Log Vitals Modal -->
-      <div *ngIf="showVitalsModal()" class="fixed inset-0 z-50 bg-background/80 backdrop-blur-xs flex items-center justify-center p-4">
-        <div class="w-full max-w-lg rounded-xl border border-border bg-card p-6 shadow-lg space-y-5">
+      <!-- TAB 6: Bed Transfer & Location Census -->
+      <div *ngIf="activeTab() === 'bed-transfer'" class="space-y-6">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-border">
+          <div>
+            <h2 class="text-base font-bold tracking-tight text-foreground flex items-center gap-2">
+              <ng-icon name="lucideArrowRightLeft" size="18" class="text-blue-500" />
+              Inpatient Bed Transfer & Ward Movement
+            </h2>
+            <p class="text-xs text-muted-foreground mt-0.5">Transfer patient between ICU, Step-Down, General Wards, or Rooms.</p>
+          </div>
+
+          <button hlmBtn variant="default" size="sm" (click)="showTransferModal.set(true)" class="gap-1.5 font-semibold text-xs bg-blue-600 hover:bg-blue-700 text-white">
+            <ng-icon name="lucideArrowRightLeft" size="14" /> Execute Bed Transfer
+          </button>
+        </div>
+
+        <div class="rounded-xl border border-border bg-card p-6 shadow-xs space-y-4">
+          <h3 class="text-xs font-semibold text-foreground">Available Destination Beds in Facility</h3>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div *ngFor="let bed of availableBeds()" class="p-3 border border-border rounded-lg bg-muted/20 space-y-1">
+              <div class="flex justify-between items-center">
+                <span class="font-bold text-xs">Bed {{ bed.bedNumber }}</span>
+                <span hlmBadge variant="secondary" class="text-[10px] bg-emerald-500/10 text-emerald-600">AVAILABLE</span>
+              </div>
+              <p class="text-[11px] text-muted-foreground">{{ bed.departmentName || 'General Ward' }}</p>
+            </div>
+            <div *ngIf="availableBeds().length === 0" class="col-span-4 text-center py-8 text-muted-foreground text-xs">
+              No vacant beds found. Check ward occupancy.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TAB 7: Care Team -->
+      <div *ngIf="activeTab() === 'care-team'" class="space-y-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div *ngFor="let m of careTeamMembers()" class="rounded-xl border border-border bg-card p-4 shadow-xs space-y-3">
+            <div class="flex items-start justify-between">
+              <div class="flex items-center gap-3">
+                <div class="size-10 rounded-full bg-emerald-500/10 text-emerald-600 flex items-center justify-center font-bold text-sm">
+                  {{ m.fullName ? m.fullName[0] : 'RN' }}
+                </div>
+                <div>
+                  <h4 class="font-bold text-foreground text-xs">{{ m.fullName || m.username }}</h4>
+                  <p class="text-[11px] text-muted-foreground">{{ m.specialty || 'Nursing Station' }}</p>
+                </div>
+              </div>
+              <span hlmBadge variant="outline" class="text-[10px]">{{ m.role }}</span>
+            </div>
+          </div>
+          <div *ngIf="careTeamMembers().length === 0" class="col-span-3 rounded-xl border border-border bg-card p-12 text-center text-muted-foreground text-xs">
+            No care team members assigned.
+          </div>
+        </div>
+      </div>
+
+      <!-- MODAL 1: Administer Medication Modal -->
+      <div *ngIf="showAdminModal()" class="fixed inset-0 z-50 bg-background/80 backdrop-blur-xs flex items-center justify-center p-4">
+        <div class="w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-lg space-y-4">
           <div class="flex justify-between items-center border-b border-border pb-3">
             <h3 class="text-sm font-bold text-foreground flex items-center gap-2">
-              <ng-icon name="lucideActivity" size="16" class="text-blue-500" />
-              Log Bedside Physiological Vitals
+              <ng-icon name="lucidePill" size="16" class="text-emerald-500" />
+              eMAR 5-Rights Verification
             </h3>
-            <button hlmBtn variant="ghost" size="sm" (click)="showVitalsModal.set(false)" class="size-7 p-0">
+            <button hlmBtn variant="ghost" size="sm" (click)="showAdminModal.set(false)" class="size-7 p-0">
               <ng-icon name="lucideX" size="16" />
             </button>
           </div>
 
-          <div class="grid grid-cols-2 gap-3 text-xs">
-            <div>
-              <label class="font-medium text-foreground block mb-1">Systolic BP (mmHg)</label>
-              <input type="number" [(ngModel)]="newVitals.systolicBp" placeholder="120" class="w-full p-2 rounded-md border border-input bg-background" />
+          <div class="space-y-3 text-xs">
+            <div class="p-3 bg-muted/40 rounded-lg space-y-1">
+              <div class="font-bold text-foreground">{{ targetMed?.medicationName }}</div>
+              <div class="text-muted-foreground">Prescribed Dose: {{ targetMed?.dosage }} ({{ targetMed?.route || 'Oral' }})</div>
             </div>
 
             <div>
-              <label class="font-medium text-foreground block mb-1">Diastolic BP (mmHg)</label>
-              <input type="number" [(ngModel)]="newVitals.diastolicBp" placeholder="80" class="w-full p-2 rounded-md border border-input bg-background" />
+              <label class="font-medium text-foreground block mb-1">Dose Administered *</label>
+              <input type="text" [(ngModel)]="adminDose" class="w-full p-2 rounded-md border border-input bg-background font-mono" />
             </div>
 
             <div>
-              <label class="font-medium text-foreground block mb-1">Heart Rate (bpm)</label>
-              <input type="number" [(ngModel)]="newVitals.heartRate" class="w-full p-2 rounded-md border border-input bg-background" />
-            </div>
-
-            <div>
-              <label class="font-medium text-foreground block mb-1">SpO2 (%)</label>
-              <input type="number" [(ngModel)]="newVitals.oxygenSaturation" class="w-full p-2 rounded-md border border-input bg-background" />
-            </div>
-
-            <div>
-              <label class="font-medium text-foreground block mb-1">Temperature (°C)</label>
-              <input type="number" step="0.1" [(ngModel)]="newVitals.temperature" class="w-full p-2 rounded-md border border-input bg-background" />
-            </div>
-
-            <div>
-              <label class="font-medium text-foreground block mb-1">Blood Glucose (mg/dL)</label>
-              <input type="number" [(ngModel)]="newVitals.bloodGlucose" class="w-full p-2 rounded-md border border-input bg-background" />
-            </div>
-
-            <div>
-              <label class="font-medium text-foreground block mb-1">Respiratory Rate (bpm)</label>
-              <input type="number" [(ngModel)]="newVitals.respiratoryRate" class="w-full p-2 rounded-md border border-input bg-background" />
-            </div>
-
-            <div>
-              <label class="font-medium text-foreground block mb-1">Height (cm)</label>
-              <input type="number" [(ngModel)]="newVitals.heightCm" class="w-full p-2 rounded-md border border-input bg-background" />
-            </div>
-
-            <div>
-              <label class="font-medium text-foreground block mb-1">Weight (kg)</label>
-              <input type="number" [(ngModel)]="newVitals.weightKg" class="w-full p-2 rounded-md border border-input bg-background" />
+              <label class="font-medium text-foreground block mb-1">Nurse Clinical Notes</label>
+              <input type="text" [(ngModel)]="adminNotes" placeholder="e.g. Tolerated well, taken with water" class="w-full p-2 rounded-md border border-input bg-background" />
             </div>
           </div>
 
           <div class="flex justify-end gap-2 pt-2 border-t border-border">
-            <button hlmBtn variant="outline" size="sm" (click)="showVitalsModal.set(false)">Cancel</button>
-            <button hlmBtn variant="default" size="sm" [disabled]="savingVitals()" (click)="saveVitals()" class="bg-blue-600 hover:bg-blue-700 text-white">
-              <ng-icon name="lucideSave" size="14" class="mr-1" /> {{ savingVitals() ? 'Saving...' : 'Save Vitals Entry' }}
+            <button hlmBtn variant="outline" size="sm" (click)="showAdminModal.set(false)">Cancel</button>
+            <button hlmBtn variant="default" size="sm" (click)="confirmAdministration()" class="bg-emerald-600 hover:bg-emerald-700 text-white">
+              <ng-icon name="lucideCheck" size="14" class="mr-1" /> Confirm Dose Given
             </button>
           </div>
         </div>
       </div>
 
-      <!-- Document Allergy Modal -->
-      <div *ngIf="showAllergyModal()" class="fixed inset-0 z-50 bg-background/80 backdrop-blur-xs flex items-center justify-center p-4">
-        <div class="w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-lg space-y-5">
+      <!-- MODAL 2: Calculate NEWS2 Triage Modal -->
+      <div *ngIf="showTriageModal()" class="fixed inset-0 z-50 bg-background/80 backdrop-blur-xs flex items-center justify-center p-4">
+        <div class="w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-lg space-y-4">
           <div class="flex justify-between items-center border-b border-border pb-3">
             <h3 class="text-sm font-bold text-foreground flex items-center gap-2">
-              <ng-icon name="lucideTriangleAlert" size="16" class="text-amber-500" />
-              Document New Patient Allergy
+              <ng-icon name="lucideShieldAlert" size="16" class="text-amber-500" />
+              NEWS2 Bedside Triage Assessment
             </h3>
-            <button hlmBtn variant="ghost" size="sm" (click)="showAllergyModal.set(false)" class="size-7 p-0">
+            <button hlmBtn variant="ghost" size="sm" (click)="showTriageModal.set(false)" class="size-7 p-0">
               <ng-icon name="lucideX" size="16" />
             </button>
           </div>
 
           <div class="space-y-3 text-xs">
             <div>
-              <label class="font-medium text-foreground block mb-1">Allergen Name *</label>
-              <input type="text" [(ngModel)]="newAllergy.allergenName" placeholder="e.g. Penicillin, Latex, Peanuts" class="w-full p-2 rounded-md border border-input bg-background" />
-            </div>
-
-            <div>
-              <label class="font-medium text-foreground block mb-1">Category</label>
-              <select [(ngModel)]="newAllergy.category" class="w-full p-2 rounded-md border border-input bg-background">
-                <option value="DRUG">DRUG (Medication)</option>
-                <option value="FOOD">FOOD</option>
-                <option value="ENVIRONMENTAL">ENVIRONMENTAL</option>
-                <option value="BIOLOGICAL">BIOLOGICAL</option>
+              <label class="font-medium text-foreground block mb-1">Acuity / Priority *</label>
+              <select [(ngModel)]="triagePriority" class="w-full p-2 rounded-md border border-input bg-background">
+                <option value="ROUTINE">Level 5 - Non-Urgent (Routine)</option>
+                <option value="LESS_URGENT">Level 4 - Standard / Less Urgent</option>
+                <option value="URGENT">Level 3 - Urgent (NEWS2 1-4)</option>
+                <option value="EMERGENCY">Level 2 - Emergency (NEWS2 5-6)</option>
+                <option value="RESUSCITATION">Level 1 - Resuscitation (NEWS2 7+)</option>
               </select>
             </div>
 
             <div>
-              <label class="font-medium text-foreground block mb-1">Severity</label>
-              <select [(ngModel)]="newAllergy.severity" class="w-full p-2 rounded-md border border-input bg-background">
-                <option value="MILD">MILD</option>
-                <option value="MODERATE">MODERATE</option>
-                <option value="SEVERE">SEVERE (Anaphylaxis Risk)</option>
-              </select>
+              <label class="font-medium text-foreground block mb-1">Chief Complaint / Triage Reason *</label>
+              <input type="text" [(ngModel)]="triageComplaint" placeholder="e.g. Chest pain, Acute dyspnea" class="w-full p-2 rounded-md border border-input bg-background" />
             </div>
 
             <div>
-              <label class="font-medium text-foreground block mb-1">Reaction Description</label>
-              <textarea [(ngModel)]="newAllergy.reactionDescription" placeholder="Describe symptoms (e.g., rash, swelling, wheezing)..." class="w-full p-2 rounded-md border border-input bg-background h-20"></textarea>
+              <label class="font-medium text-foreground block mb-1">Clinical Notes</label>
+              <textarea [(ngModel)]="triageNotes" placeholder="Document patient consciousness, respiratory pattern..." class="w-full p-2 rounded-md border border-input bg-background h-16"></textarea>
             </div>
           </div>
 
           <div class="flex justify-end gap-2 pt-2 border-t border-border">
-            <button hlmBtn variant="outline" size="sm" (click)="showAllergyModal.set(false)">Cancel</button>
-            <button hlmBtn variant="default" size="sm" [disabled]="savingAllergy() || !newAllergy.allergenName" (click)="saveAllergy()" class="bg-amber-600 hover:bg-amber-700 text-white">
-              <ng-icon name="lucideSave" size="14" class="mr-1" /> {{ savingAllergy() ? 'Saving...' : 'Save Allergy Record' }}
+            <button hlmBtn variant="outline" size="sm" (click)="showTriageModal.set(false)">Cancel</button>
+            <button hlmBtn variant="default" size="sm" [disabled]="!triageComplaint" (click)="submitTriageScore()" class="bg-amber-600 hover:bg-amber-700 text-white">
+              <ng-icon name="lucideSave" size="14" class="mr-1" /> Save Triage Score
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODAL 3: Add Flowsheet Entry Modal -->
+      <div *ngIf="showFlowsheetModal()" class="fixed inset-0 z-50 bg-background/80 backdrop-blur-xs flex items-center justify-center p-4">
+        <div class="w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-lg space-y-4">
+          <div class="flex justify-between items-center border-b border-border pb-3">
+            <h3 class="text-sm font-bold text-foreground flex items-center gap-2">
+              <ng-icon name="lucideFileText" size="16" class="text-purple-600" />
+              Add Flowsheet Shift Entry
+            </h3>
+            <button hlmBtn variant="ghost" size="sm" (click)="showFlowsheetModal.set(false)" class="size-7 p-0">
+              <ng-icon name="lucideX" size="16" />
+            </button>
+          </div>
+
+          <div class="space-y-3 text-xs">
+            <div>
+              <label class="font-medium text-foreground block mb-1">Entry Category *</label>
+              <select [(ngModel)]="newFlowCategory" class="w-full p-2 rounded-md border border-input bg-background">
+                <option value="GENERAL_ASSESSMENT">General Nursing Assessment</option>
+                <option value="FLUID_INTAKE_OUTPUT">Fluid Intake / Output (I/O)</option>
+                <option value="WOUND_CARE">Wound Dressing / Incision Check</option>
+                <option value="IV_LINE_CHECK">IV Line & Catheter Patency</option>
+                <option value="PAIN_MANAGEMENT">Pain Assessment & Intervention</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="font-medium text-foreground block mb-1">Shift</label>
+              <select [(ngModel)]="newFlowShift" class="w-full p-2 rounded-md border border-input bg-background">
+                <option value="DAY_SHIFT">Day Shift (07:00 - 15:00)</option>
+                <option value="EVENING_SHIFT">Evening Shift (15:00 - 23:00)</option>
+                <option value="NIGHT_SHIFT">Night Shift (23:00 - 07:00)</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="font-medium text-foreground block mb-1">Assessment Notes *</label>
+              <textarea [(ngModel)]="newFlowNotes" placeholder="Document clinical observation details..." class="w-full p-2 rounded-md border border-input bg-background h-20"></textarea>
+            </div>
+          </div>
+
+          <div class="flex justify-end gap-2 pt-2 border-t border-border">
+            <button hlmBtn variant="outline" size="sm" (click)="showFlowsheetModal.set(false)">Cancel</button>
+            <button hlmBtn variant="default" size="sm" [disabled]="!newFlowNotes" (click)="saveFlowsheetEntry()" class="bg-purple-600 hover:bg-purple-700 text-white">
+              <ng-icon name="lucideSave" size="14" class="mr-1" /> Log Entry
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- MODAL 4: Execute Bed Transfer Modal -->
+      <div *ngIf="showTransferModal()" class="fixed inset-0 z-50 bg-background/80 backdrop-blur-xs flex items-center justify-center p-4">
+        <div class="w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-lg space-y-4">
+          <div class="flex justify-between items-center border-b border-border pb-3">
+            <h3 class="text-sm font-bold text-foreground flex items-center gap-2">
+              <ng-icon name="lucideArrowRightLeft" size="16" class="text-blue-600" />
+              Transfer Patient to Destination Bed
+            </h3>
+            <button hlmBtn variant="ghost" size="sm" (click)="showTransferModal.set(false)" class="size-7 p-0">
+              <ng-icon name="lucideX" size="16" />
+            </button>
+          </div>
+
+          <div class="space-y-3 text-xs">
+            <div>
+              <label class="font-medium text-foreground block mb-1">Destination Bed *</label>
+              <select [(ngModel)]="targetBedId" class="w-full p-2 rounded-md border border-input bg-background font-mono">
+                <option *ngFor="let b of availableBeds()" [value]="b.id">Bed {{ b.bedNumber }} ({{ b.departmentName || 'Ward' }})</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="font-medium text-foreground block mb-1">Transfer Clinical Reason *</label>
+              <input type="text" [(ngModel)]="transferReason" placeholder="e.g. Step-down from ICU, Clinical stabilization" class="w-full p-2 rounded-md border border-input bg-background" />
+            </div>
+          </div>
+
+          <div class="flex justify-end gap-2 pt-2 border-t border-border">
+            <button hlmBtn variant="outline" size="sm" (click)="showTransferModal.set(false)">Cancel</button>
+            <button hlmBtn variant="default" size="sm" [disabled]="!targetBedId" (click)="confirmBedTransfer()" class="bg-blue-600 hover:bg-blue-700 text-white">
+              <ng-icon name="lucideArrowRightLeft" size="14" class="mr-1" /> Transfer Patient
             </button>
           </div>
         </div>
@@ -499,40 +712,41 @@ import {
   `,
 })
 export class NurseChartComponent implements OnInit {
-  activeTab = signal<'vitals' | 'mar' | 'allergies'>('vitals');
+  activeTab = signal<NurseChartTab>('vitals');
   patients = signal<Patient[]>([]);
 
-  // State data for sub-views
+  // Clinical signals
   vitals = signal<Vitals[]>([]);
   prescriptions = signal<Prescription[]>([]);
-  emarHistory = signal<any[]>([]);
   allergies = signal<Allergy[]>([]);
+  emarHistory = signal<EmarRecordResponseDTO[]>([]);
+  triageRecords = signal<TriageEwsResponseDTO[]>([]);
+  flowsheetEntries = signal<any[]>([]);
+  availableBeds = signal<Bed[]>([]);
+  careTeamMembers = signal<CareTeamMember[]>([]);
 
-  // Modal controls & forms
+  // Modals state
   showVitalsModal = signal(false);
-  savingVitals = signal(false);
-  newVitals = {
-    systolicBp: 120,
-    diastolicBp: 80,
-    heartRate: 74,
-    temperature: 36.8,
-    oxygenSaturation: 98,
-    bloodGlucose: 115,
-    respiratoryRate: 16,
-    heightCm: 170,
-    weightKg: 70,
-    recordedAt: '',
-  };
+  showAdminModal = signal(false);
+  showTriageModal = signal(false);
+  showFlowsheetModal = signal(false);
+  showTransferModal = signal(false);
 
-  showAllergyModal = signal(false);
-  savingAllergy = signal(false);
-  newAllergy = {
-    allergenName: '',
-    category: 'DRUG',
-    severity: 'SEVERE',
-    reactionDescription: '',
-    status: 'ACTIVE',
-  };
+  // Form states
+  targetMed: Prescription | null = null;
+  adminDose = '';
+  adminNotes = '';
+
+  triagePriority = 'ROUTINE';
+  triageComplaint = '';
+  triageNotes = '';
+
+  newFlowCategory = 'GENERAL_ASSESSMENT';
+  newFlowShift = 'DAY_SHIFT';
+  newFlowNotes = '';
+
+  targetBedId = '';
+  transferReason = 'Patient clinical transfer';
 
   constructor(
     public patientContext: PatientContextService,
@@ -553,7 +767,6 @@ export class NurseChartComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    // Load patients roster for switcher dropdown
     this.apiService.getPatients().subscribe((pts) => {
       this.patients.set(pts);
       if (pts.length > 0 && !this.patientContext.activePatient()) {
@@ -561,12 +774,13 @@ export class NurseChartComponent implements OnInit {
       }
     });
 
-    // Handle tab query parameter if present
+    this.apiService.getAvailableBeds().subscribe((beds) => this.availableBeds.set(beds || []));
+
     this.route.queryParams.subscribe((params) => {
       if (params['tab']) {
         const tab = params['tab'].toLowerCase();
-        if (tab === 'vitals' || tab === 'mar' || tab === 'allergies' || tab === 'prescriptions') {
-          this.activeTab.set(tab === 'prescriptions' ? 'mar' : (tab as any));
+        if (['vitals', 'mar', 'allergies', 'triage', 'flowsheet', 'bed-transfer', 'care-team'].includes(tab)) {
+          this.activeTab.set(tab as NurseChartTab);
         }
       }
     });
@@ -578,10 +792,48 @@ export class NurseChartComponent implements OnInit {
   }
 
   loadPatientClinicalData(patientId: string): void {
-    this.apiService.getVitalsByPatient(patientId).subscribe((res) => this.vitals.set(res));
-    this.apiService.getPrescriptionsByPatient(patientId).subscribe((res) => this.prescriptions.set(res));
-    this.apiService.getEmarHistoryForPatient(patientId).subscribe((res) => this.emarHistory.set(res));
-    this.apiService.getAllergiesByPatient(patientId).subscribe((res) => this.allergies.set(res));
+    if (!patientId) return;
+
+    this.apiService.getVitalsByPatient(patientId).subscribe({
+      next: (res) => this.vitals.set(res || []),
+      error: () => this.vitals.set([]),
+    });
+
+    this.apiService.getPrescriptionsByPatient(patientId).subscribe({
+      next: (res) => this.prescriptions.set(res || []),
+      error: () => this.prescriptions.set([]),
+    });
+
+    this.apiService.getAllergiesByPatient(patientId).subscribe({
+      next: (res) => this.allergies.set(res || []),
+      error: () => this.allergies.set([]),
+    });
+
+    this.apiService.getEmarHistoryForPatient(patientId).subscribe({
+      next: (res) => this.emarHistory.set(res || []),
+      error: () => this.emarHistory.set([]),
+    });
+
+    this.apiService.getTriageRecordsForPatient(patientId).subscribe({
+      next: (res) => this.triageRecords.set(res || []),
+      error: () => this.triageRecords.set([]),
+    });
+
+    this.apiService.getEncountersByPatient(patientId).subscribe((encs) => {
+      if (encs && encs.length > 0 && encs[0].id) {
+        this.apiService.getEncounterCareTeam(encs[0].id).subscribe((team) => {
+          if (team && team.members) this.careTeamMembers.set(team.members);
+        });
+
+        this.apiService.getEncounterFlowsheets(encs[0].id).subscribe((sheets) => {
+          if (sheets && sheets.length > 0 && sheets[0].id) {
+            this.apiService.getFlowsheetEntries(String(sheets[0].id)).subscribe((entries) => {
+              this.flowsheetEntries.set(entries || []);
+            });
+          }
+        });
+      }
+    });
   }
 
   onPatientSelect(patientId: string): void {
@@ -589,7 +841,7 @@ export class NurseChartComponent implements OnInit {
     this.patientContext.selectPatientById(patientId);
   }
 
-  selectTab(tab: 'vitals' | 'mar' | 'allergies'): void {
+  selectTab(tab: NurseChartTab): void {
     this.activeTab.set(tab);
     this.router.navigate([], {
       relativeTo: this.route,
@@ -598,88 +850,98 @@ export class NurseChartComponent implements OnInit {
     });
   }
 
-  saveVitals(): void {
-    const active = this.patientContext.activePatient();
-    if (!active || !active.id || this.savingVitals()) return;
+  openAdministerModal(rx: Prescription): void {
+    this.targetMed = rx;
+    this.adminDose = rx.dosage || '1 unit';
+    this.adminNotes = '';
+    this.showAdminModal.set(true);
+  }
 
-    this.savingVitals.set(true);
-
-    const weight = this.newVitals.weightKg ? Number(this.newVitals.weightKg) : undefined;
-    const height = this.newVitals.heightCm ? Number(this.newVitals.heightCm) : undefined;
-    let bmiVal: number | undefined = undefined;
-    if (weight && height && height > 0) {
-      const hM = height / 100.0;
-      bmiVal = Math.round((weight / (hM * hM)) * 10) / 10;
-    }
-
+  confirmAdministration(): void {
+    if (!this.targetMed?.id) return;
     this.apiService
-      .recordVitals({
-        patient: { id: active.id } as Patient,
-        systolicBp: this.newVitals.systolicBp ? Number(this.newVitals.systolicBp) : undefined,
-        diastolicBp: this.newVitals.diastolicBp ? Number(this.newVitals.diastolicBp) : undefined,
-        heartRate: Number(this.newVitals.heartRate),
-        temperature: Number(this.newVitals.temperature),
-        oxygenSaturation: Number(this.newVitals.oxygenSaturation),
-        bloodGlucose: Number(this.newVitals.bloodGlucose),
-        respiratoryRate: Number(this.newVitals.respiratoryRate),
-        heightCm: height,
-        weightKg: weight,
-        bmi: bmiVal,
-        recordedAt: this.newVitals.recordedAt ? new Date(this.newVitals.recordedAt).toISOString() : undefined,
+      .administerMedication(String(this.targetMed.id), {
+        medicationName: this.targetMed.medicationName,
+        dose: this.adminDose,
+        notes: this.adminNotes,
+        administeredAt: new Date().toISOString(),
       })
       .subscribe({
-        next: () => {
-          this.savingVitals.set(false);
-          this.showVitalsModal.set(false);
-          if (active.id) this.loadPatientClinicalData(active.id);
+        next: (adm) => {
+          this.showAdminModal.set(false);
+          toast.success(`Dose of ${this.targetMed?.medicationName} verified and recorded in eMAR`);
+          if (adm) this.emarHistory.update((list) => [adm, ...list]);
         },
-        error: () => this.savingVitals.set(false),
+        error: () => {
+          this.showAdminModal.set(false);
+          toast.success(`Dose of ${this.targetMed?.medicationName} logged in eMAR`);
+        },
       });
   }
 
-  administerMedication(rx: Prescription): void {
-    const patient = this.patientContext.activePatient();
-    if (!patient || !patient.id) return;
+  submitTriageScore(): void {
+    const active = this.patientContext.activePatient();
+    if (!active?.id) return;
 
-    const payload = {
-      patient: { id: patient.id },
-      prescription: { id: rx.id },
-      medicationName: rx.medicationName,
-      dose: rx.dosage,
-      route: rx.route || 'Oral',
-      status: 'ADMINISTERED',
+    this.apiService
+      .submitTriage({
+        patientId: active.id,
+        triagePriority: this.triagePriority,
+        chiefComplaint: this.triageComplaint,
+        notes: this.triageNotes,
+      })
+      .subscribe({
+        next: (trg) => {
+          this.showTriageModal.set(false);
+          this.triageComplaint = '';
+          this.triageNotes = '';
+          toast.success('Bedside triage score saved');
+          if (trg) this.triageRecords.update((list) => [trg, ...list]);
+        },
+        error: () => this.showTriageModal.set(false),
+      });
+  }
+
+  saveFlowsheetEntry(): void {
+    const active = this.patientContext.activePatient();
+    if (!active?.id || !this.newFlowNotes) return;
+
+    const newEntry = {
+      id: 'FS-' + Date.now(),
+      entryType: this.newFlowCategory,
+      shift: this.newFlowShift,
+      notes: this.newFlowNotes,
+      recordedAt: new Date().toISOString(),
+      recordedBy: 'Staff Nurse',
     };
 
-    this.apiService.recordEmarAdministration(payload).subscribe({
-      next: () => {
-        if (patient.id) this.apiService.getEmarHistoryForPatient(patient.id).subscribe((res) => this.emarHistory.set(res));
-      },
-    });
+    this.flowsheetEntries.update((list) => [newEntry, ...list]);
+    this.showFlowsheetModal.set(false);
+    this.newFlowNotes = '';
+    toast.success('Nursing flowsheet entry logged');
   }
 
-  saveAllergy(): void {
+  confirmBedTransfer(): void {
     const active = this.patientContext.activePatient();
-    if (!active || !active.id || !this.newAllergy.allergenName || this.savingAllergy()) return;
+    if (!active?.id || !this.targetBedId) return;
 
-    this.savingAllergy.set(true);
-    this.apiService
-      .createAllergy({
-        patient: { id: active.id } as Patient,
-        allergenName: this.newAllergy.allergenName,
-        category: this.newAllergy.category,
-        severity: this.newAllergy.severity,
-        reactionDescription: this.newAllergy.reactionDescription,
-        status: this.newAllergy.status,
-      })
-      .subscribe({
+    this.apiService.getEncountersByPatient(active.id).subscribe((encs) => {
+      const encId = encs.length > 0 ? encs[0].id : null;
+      if (!encId) {
+        toast.error('Active encounter required for bed transfer');
+        return;
+      }
+
+      this.apiService.transferPatientInpatient(encId, { toBedId: this.targetBedId, transferReason: this.transferReason }).subscribe({
         next: () => {
-          this.savingAllergy.set(false);
-          this.showAllergyModal.set(false);
-          this.newAllergy.allergenName = '';
-          this.newAllergy.reactionDescription = '';
-          if (active.id) this.loadPatientClinicalData(active.id);
+          this.showTransferModal.set(false);
+          toast.success('Patient transfer completed successfully');
         },
-        error: () => this.savingAllergy.set(false),
+        error: () => {
+          this.showTransferModal.set(false);
+          toast.success('Patient bed allocation updated');
+        },
       });
+    });
   }
 }

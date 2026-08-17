@@ -898,12 +898,20 @@ export class PatientAppointmentsComponent implements OnInit {
 
     // Construct ISO DateTime
     const timeStr = this.selectedSlot ? this.extractTimeFromSlot(this.selectedSlot) : this.bookingTime;
-    const dateTimeIso = `${this.bookingDate}T${timeStr}:00`;
+    const dateTimeStr = `${this.bookingDate}T${timeStr}:00`;
+    let dateTimeIso = dateTimeStr;
+    try {
+      const parsed = new Date(dateTimeStr);
+      if (!isNaN(parsed.getTime())) {
+        dateTimeIso = parsed.toISOString();
+      }
+    } catch (e) {}
 
     const appointmentPayload: AppointmentRequestDTO = {
       patientId: patient.id,
       doctorId: this.selectedDoctor.id,
       appointmentDate: dateTimeIso,
+      startsAt: dateTimeIso,
       reason: this.bookingReason,
       notes: this.bookingNotes,
       status: 'SCHEDULED',

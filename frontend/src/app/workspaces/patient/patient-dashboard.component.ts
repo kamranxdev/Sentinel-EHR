@@ -159,7 +159,7 @@ import {
             <h4 class="font-bold text-destructive uppercase tracking-wider text-[11px] flex items-center gap-1.5">
               <span>Critical Medical & Allergy Safety Alerts</span>
             </h4>
-            <a routerLink="/patient/allergies" class="text-destructive underline hover:text-destructive/80 font-medium">View Safety Record</a>
+            <a routerLink="/patient/chart" [queryParams]="{ tab: 'allergies' }" class="text-destructive underline hover:text-destructive/80 font-medium">View Safety Record</a>
           </div>
           <p class="text-foreground">
             {{ patient()?.medicalAlerts || getCriticalAllergiesText() }}
@@ -203,7 +203,7 @@ import {
               Rx Active
             </span>
           </div>
-          <a routerLink="/patient/prescriptions" class="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
+          <a routerLink="/patient/chart" [queryParams]="{ tab: 'prescriptions' }" class="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
             <span>View Prescriptions</span>
             <ng-icon name="lucideChevronRight" size="12" />
           </a>
@@ -238,7 +238,7 @@ import {
               {{ hasSevereAllergy() ? 'Severe Alert' : 'Documented' }}
             </span>
           </div>
-          <a routerLink="/patient/allergies" class="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
+          <a routerLink="/patient/chart" [queryParams]="{ tab: 'allergies' }" class="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1">
             <span>Safety Record</span>
             <ng-icon name="lucideChevronRight" size="12" />
           </a>
@@ -331,7 +331,7 @@ import {
                 <ng-icon name="lucidePill" size="18" class="text-emerald-500" />
                 <h2 class="text-sm font-bold text-foreground">Active Medications & Prescriptions</h2>
               </div>
-              <a routerLink="/patient/prescriptions" hlmBtn variant="ghost" size="sm" class="h-7 text-xs gap-1">
+              <a routerLink="/patient/chart" [queryParams]="{ tab: 'prescriptions' }" hlmBtn variant="ghost" size="sm" class="h-7 text-xs gap-1">
                 <span>View All Rx</span>
                 <ng-icon name="lucideChevronRight" size="14" />
               </a>
@@ -531,6 +531,58 @@ import {
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <a routerLink="/patient/chart" class="p-4 rounded-2xl border border-border bg-card hover:bg-accent/40 transition-colors flex items-center justify-between group shadow-xs">
+            <div class="flex items-center gap-3">
+              <div class="size-10 rounded-xl bg-teal-500/10 text-teal-600 dark:text-teal-400 flex items-center justify-center shrink-0">
+                <ng-icon name="lucideHeartPulse" size="20" />
+              </div>
+              <div>
+                <span class="text-xs font-bold text-foreground block">Clinical Health Chart</span>
+                <span class="text-[11px] text-muted-foreground block">Complete medical history</span>
+              </div>
+            </div>
+            <ng-icon name="lucideChevronRight" size="18" class="text-muted-foreground group-hover:text-foreground transition-transform group-hover:translate-x-0.5" />
+          </a>
+
+          <a routerLink="/patient/chart" [queryParams]="{ tab: 'labs' }" class="p-4 rounded-2xl border border-border bg-card hover:bg-accent/40 transition-colors flex items-center justify-between group shadow-xs">
+            <div class="flex items-center gap-3">
+              <div class="size-10 rounded-xl bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 flex items-center justify-center shrink-0">
+                <ng-icon name="lucideFileText" size="20" />
+              </div>
+              <div>
+                <span class="text-xs font-bold text-foreground block">Lab & Diagnostics</span>
+                <span class="text-[11px] text-muted-foreground block">Blood, metabolic & tests</span>
+              </div>
+            </div>
+            <ng-icon name="lucideChevronRight" size="18" class="text-muted-foreground group-hover:text-foreground transition-transform group-hover:translate-x-0.5" />
+          </a>
+
+          <a routerLink="/patient/chart" [queryParams]="{ tab: 'imaging' }" class="p-4 rounded-2xl border border-border bg-card hover:bg-accent/40 transition-colors flex items-center justify-between group shadow-xs">
+            <div class="flex items-center gap-3">
+              <div class="size-10 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
+                <ng-icon name="lucideFileText" size="20" />
+              </div>
+              <div>
+                <span class="text-xs font-bold text-foreground block">Imaging & X-Rays</span>
+                <span class="text-[11px] text-muted-foreground block">CT, MRI, X-Ray reports</span>
+              </div>
+            </div>
+            <ng-icon name="lucideChevronRight" size="18" class="text-muted-foreground group-hover:text-foreground transition-transform group-hover:translate-x-0.5" />
+          </a>
+
+          <a routerLink="/patient/chart" [queryParams]="{ tab: 'encounters' }" class="p-4 rounded-2xl border border-border bg-card hover:bg-accent/40 transition-colors flex items-center justify-between group shadow-xs">
+            <div class="flex items-center gap-3">
+              <div class="size-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                <ng-icon name="lucideStethoscope" size="20" />
+              </div>
+              <div>
+                <span class="text-xs font-bold text-foreground block">Doctor Consultations</span>
+                <span class="text-[11px] text-muted-foreground block">Visit notes & care advice</span>
+              </div>
+            </div>
+            <ng-icon name="lucideChevronRight" size="18" class="text-muted-foreground group-hover:text-foreground transition-transform group-hover:translate-x-0.5" />
+          </a>
+
           <a routerLink="/patient/appointments" class="p-4 rounded-2xl border border-border bg-card hover:bg-accent/40 transition-colors flex items-center justify-between group shadow-xs">
             <div class="flex items-center gap-3">
               <div class="size-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0">
@@ -544,7 +596,7 @@ import {
             <ng-icon name="lucideChevronRight" size="18" class="text-muted-foreground group-hover:text-foreground transition-transform group-hover:translate-x-0.5" />
           </a>
 
-          <a routerLink="/patient/prescriptions" class="p-4 rounded-2xl border border-border bg-card hover:bg-accent/40 transition-colors flex items-center justify-between group shadow-xs">
+          <a routerLink="/patient/chart" [queryParams]="{ tab: 'prescriptions' }" class="p-4 rounded-2xl border border-border bg-card hover:bg-accent/40 transition-colors flex items-center justify-between group shadow-xs">
             <div class="flex items-center gap-3">
               <div class="size-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
                 <ng-icon name="lucidePill" size="20" />
@@ -570,7 +622,7 @@ import {
             <ng-icon name="lucideChevronRight" size="18" class="text-muted-foreground group-hover:text-foreground transition-transform group-hover:translate-x-0.5" />
           </a>
 
-          <a routerLink="/patient/allergies" class="p-4 rounded-2xl border border-border bg-card hover:bg-accent/40 transition-colors flex items-center justify-between group shadow-xs">
+          <a routerLink="/patient/chart" [queryParams]="{ tab: 'allergies' }" class="p-4 rounded-2xl border border-border bg-card hover:bg-accent/40 transition-colors flex items-center justify-between group shadow-xs">
             <div class="flex items-center gap-3">
               <div class="size-10 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
                 <ng-icon name="lucideShieldCheck" size="20" />
@@ -656,6 +708,13 @@ export class PatientDashboardComponent implements OnInit {
     });
   }
 
+  labResults = signal<any[]>([]);
+  imagingReports = signal<any[]>([]);
+  clinicalDocuments = signal<any[]>([]);
+  invoices = signal<any[]>([]);
+  consents = signal<any[]>([]);
+  insurances = signal<any[]>([]);
+
   private loadPatientHealthData(patientId: string): void {
     this.apiService.getAppointmentsByPatient(patientId).subscribe({
       next: (apps) => this.appointments.set(Array.isArray(apps) ? apps : []),
@@ -685,6 +744,36 @@ export class PatientDashboardComponent implements OnInit {
     this.apiService.getEncountersByPatient(patientId).subscribe({
       next: (e) => this.encounters.set(Array.isArray(e) ? e : []),
       error: (err) => console.warn('Error loading encounters', err),
+    });
+
+    this.apiService.getPatientLabResults(patientId).subscribe({
+      next: (res) => this.labResults.set(res || []),
+      error: () => this.labResults.set([]),
+    });
+
+    this.apiService.getImagingOrdersByPatient(patientId).subscribe({
+      next: (orders) => this.imagingReports.set(orders || []),
+      error: () => this.imagingReports.set([]),
+    });
+
+    this.apiService.getPatientDocuments(patientId).subscribe({
+      next: (docs) => this.clinicalDocuments.set(docs || []),
+      error: () => this.clinicalDocuments.set([]),
+    });
+
+    this.apiService.getPatientInvoices(patientId).subscribe({
+      next: (invs) => this.invoices.set(invs || []),
+      error: () => this.invoices.set([]),
+    });
+
+    this.apiService.getPatientConsents(patientId).subscribe({
+      next: (c) => this.consents.set(c || []),
+      error: () => this.consents.set([]),
+    });
+
+    this.apiService.getPatientInsurances(patientId).subscribe({
+      next: (ins) => this.insurances.set(ins || []),
+      error: () => this.insurances.set([]),
     });
   }
 

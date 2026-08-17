@@ -40,6 +40,15 @@ import {
 } from '../models/triage-emar.model';
 import { EligibilityInquiryDTO, EligibilityResponseDTO, CopayCollectionDTO } from '../models/billing-eligibility.model';
 import { AuditLog } from '../models/audit.model';
+import { ImagingOrder, ImagingStudy, ImagingSeries, ImagingReport, CreateImagingOrderRequest, CreateImagingReportRequest } from '../models/imaging.model';
+import { ProcedureOrder, ProcedurePerformance, ProcedureNote, ProcedureParticipant, CreateProcedureOrderRequest, PerformProcedureRequest } from '../models/procedure.model';
+import { ConsentType, PatientConsent, CreatePatientConsentRequest, RevokeConsentRequest } from '../models/consent.model';
+import { ClinicalDocument, DocumentVersion, DocumentLink, CreateClinicalDocumentRequest } from '../models/document.model';
+import { InsurancePayer, InsurancePlan, PatientInsurancePolicy, InsuranceAuthorization, InsuranceClaim, ClaimItem, CreateInsuranceClaimRequest, CreateInsuranceAuthorizationRequest } from '../models/insurance.model';
+import { CodeSystem, TerminologyCode, TerminologySearchResult } from '../models/terminology.model';
+import { AbacPolicy, RbacRole, SecurityEventLog, CreateAbacPolicyRequest } from '../models/security-policy.model';
+import { CareTeam, CareTeamMember, AddCareTeamMemberRequest } from '../models/care-team.model';
+import { Facility, Department, Ward, Room, BedDetail, PriceList, PriceListItem } from '../models/tenancy.model';
 
 @Injectable({
   providedIn: 'root',
@@ -599,26 +608,35 @@ export class ApiService {
   // =========================================================================
   // 8. Laboratory Orders, Results & Specimens
   // =========================================================================
-  getLabOrdersList(patientId?: string, encounterId?: string): Observable<LabOrder[]> {
+  getLabOrdersList(patientId?: string, encounterId?: string, status?: string, search?: string): Observable<LabOrder[]> {
     if (patientId) {
       return this.get<LabOrder[]>(`/patients/${patientId}/lab-orders`).pipe(catchError(() => of([])));
     }
     if (encounterId) {
       return this.get<LabOrder[]>(`/encounters/${encounterId}/lab-orders`).pipe(catchError(() => of([])));
     }
-    // Query across all patients
-    return this.getPatients().pipe(
-      switchMap((patients) => {
-        if (!patients || patients.length === 0) return of([]);
-        const tasks = patients.slice(0, 10).map((p) =>
-          this.get<LabOrder[]>(`/patients/${p.id}/lab-orders`).pipe(
-            map((orders) => Array.isArray(orders) ? orders.map((o) => ({ ...o, patient: p })) : []),
-            catchError(() => of([])),
-          ),
+    const params: string[] = [];
+    if (status && status !== 'ALL') params.push(`status=${encodeURIComponent(status)}`);
+    if (search) params.push(`search=${encodeURIComponent(search)}`);
+    const qs = params.length > 0 ? `?${params.join('&')}` : '';
+
+    return this.get<LabOrder[]>(`/lab-orders${qs}`).pipe(
+      catchError(() => {
+        // Fallback: Query across patients
+        return this.getPatients().pipe(
+          switchMap((patients) => {
+            if (!patients || patients.length === 0) return of([]);
+            const tasks = patients.slice(0, 15).map((p) =>
+              this.get<LabOrder[]>(`/patients/${p.id}/lab-orders`).pipe(
+                map((orders) => Array.isArray(orders) ? orders.map((o) => ({ ...o, patient: p, patientFullName: p.fullName })) : []),
+                catchError(() => of([])),
+              ),
+            );
+            return forkJoin(tasks).pipe(map((res) => res.flat()));
+          }),
+          catchError(() => of([])),
         );
-        return forkJoin(tasks).pipe(map((res) => res.flat()));
       }),
-      catchError(() => of([])),
     );
   }
 
@@ -1016,14 +1034,35 @@ export class ApiService {
   }
 
   scheduleAppointment(appointment: AppointmentRequestDTO | Partial<Appointment>): Observable<Appointment> {
-    const startsAt = appointment.appointmentDate || appointment.startsAt || new Date().toISOString();
+    let startsAt = appointment.appointmentDate || appointment.startsAt;
+    if (startsAt) {
+      try {
+        const d = new Date(startsAt);
+        if (!isNaN(d.getTime())) {
+          startsAt = d.toISOString();
+        }
+      } catch (e) {}
+    } else {
+      startsAt = new Date().toISOString();
+    }
+
+    let endsAt = appointment.endsAt;
+    if (endsAt) {
+      try {
+        const d = new Date(endsAt);
+        if (!isNaN(d.getTime())) {
+          endsAt = d.toISOString();
+        }
+      } catch (e) {}
+    }
+
     const payload = {
       patientId: appointment.patientId,
       practitionerId: appointment.practitionerId || appointment.doctorId,
       facilityId: appointment.facilityId,
       departmentId: appointment.departmentId,
       startsAt: startsAt,
-      endsAt: appointment.endsAt,
+      endsAt: endsAt,
       appointmentType: appointment.appointmentType || 'CONSULTATION',
       reason: appointment.reason || 'General Consultation',
       priority: appointment.priority || 'ROUTINE',
@@ -1123,7 +1162,25 @@ export class ApiService {
   }
 
   rescheduleAppointment(id: string, payload: AppointmentRescheduleRequestDTO): Observable<Appointment> {
-    return this.post<Appointment>(`/appointments/${id}/reschedule`, payload).pipe(
+    let newStartsAt = payload.newStartsAt;
+    if (newStartsAt) {
+      try {
+        const d = new Date(newStartsAt);
+        if (!isNaN(d.getTime())) {
+          newStartsAt = d.toISOString();
+        }
+      } catch (e) {}
+    }
+    let newEndsAt = payload.newEndsAt;
+    if (newEndsAt) {
+      try {
+        const d = new Date(newEndsAt);
+        if (!isNaN(d.getTime())) {
+          newEndsAt = d.toISOString();
+        }
+      } catch (e) {}
+    }
+    return this.post<Appointment>(`/appointments/${id}/reschedule`, { ...payload, newStartsAt, newEndsAt }).pipe(
       map((a) => this.normalizeAppointment(a)),
     );
   }
@@ -1498,4 +1555,309 @@ export class ApiService {
   createFhirPatient(payload: any): Observable<any> {
     return this.http.post<any>(`${this.fhirUrl}/Patient`, payload);
   }
+
+  // =========================================================================
+  // 19. Imaging & Radiology (DICOM Studies, Series, Orders, Reports)
+  // =========================================================================
+  getImagingOrdersByPatient(patientId: string): Observable<ImagingOrder[]> {
+    return this.get<ImagingOrder[]>(`/patients/${patientId}/imaging-orders`).pipe(catchError(() => of([])));
+  }
+
+  getImagingOrdersByEncounter(encounterId: string): Observable<ImagingOrder[]> {
+    return this.get<ImagingOrder[]>(`/encounters/${encounterId}/imaging-orders`).pipe(catchError(() => of([])));
+  }
+
+  getImagingOrderById(orderId: number | string): Observable<ImagingOrder> {
+    return this.get<ImagingOrder>(`/imaging-orders/${orderId}`);
+  }
+
+  createImagingOrder(encounterId: string, order: CreateImagingOrderRequest): Observable<ImagingOrder> {
+    return this.post<ImagingOrder>(`/encounters/${encounterId}/imaging-orders`, order);
+  }
+
+  cancelImagingOrder(orderId: number | string): Observable<ImagingOrder> {
+    return this.post<ImagingOrder>(`/imaging-orders/${orderId}/cancel`, {});
+  }
+
+  getImagingStudies(orderId: number | string): Observable<ImagingStudy[]> {
+    return this.get<ImagingStudy[]>(`/imaging-orders/${orderId}/studies`).pipe(catchError(() => of([])));
+  }
+
+  getImagingStudyById(studyId: number | string): Observable<ImagingStudy> {
+    return this.get<ImagingStudy>(`/imaging-studies/${studyId}`);
+  }
+
+  getImagingSeries(studyId: number | string): Observable<ImagingSeries[]> {
+    return this.get<ImagingSeries[]>(`/imaging-studies/${studyId}/series`).pipe(catchError(() => of([])));
+  }
+
+  getImagingReports(studyId: number | string): Observable<ImagingReport[]> {
+    return this.get<ImagingReport[]>(`/imaging-studies/${studyId}/reports`).pipe(catchError(() => of([])));
+  }
+
+  createImagingReport(studyId: number | string, report: CreateImagingReportRequest): Observable<ImagingReport> {
+    return this.post<ImagingReport>(`/imaging-studies/${studyId}/reports`, report);
+  }
+
+  signImagingReport(reportId: number | string): Observable<ImagingReport> {
+    return this.post<ImagingReport>(`/imaging-reports/${reportId}/sign`, {});
+  }
+
+  // =========================================================================
+  // 20. Surgical & Clinical Procedures
+  // =========================================================================
+  getProcedureOrdersByPatient(patientId: string): Observable<ProcedureOrder[]> {
+    return this.get<ProcedureOrder[]>(`/patients/${patientId}/procedure-orders`).pipe(catchError(() => of([])));
+  }
+
+  getProcedureOrdersByEncounter(encounterId: string): Observable<ProcedureOrder[]> {
+    return this.get<ProcedureOrder[]>(`/encounters/${encounterId}/procedure-orders`).pipe(catchError(() => of([])));
+  }
+
+  createProcedureOrder(encounterId: string, payload: CreateProcedureOrderRequest): Observable<ProcedureOrder> {
+    return this.post<ProcedureOrder>(`/encounters/${encounterId}/procedure-orders`, payload);
+  }
+
+  performProcedure(orderId: number | string, payload: PerformProcedureRequest): Observable<ProcedurePerformance> {
+    return this.post<ProcedurePerformance>(`/procedure-orders/${orderId}/perform`, payload);
+  }
+
+  getProcedurePerformances(orderId: number | string): Observable<ProcedurePerformance[]> {
+    return this.get<ProcedurePerformance[]>(`/procedure-orders/${orderId}/performances`).pipe(catchError(() => of([])));
+  }
+
+  addProcedureNote(performanceId: number | string, payload: { noteType: string; content: string }): Observable<ProcedureNote> {
+    return this.post<ProcedureNote>(`/procedure-performances/${performanceId}/notes`, payload);
+  }
+
+  getProcedureNotes(performanceId: number | string): Observable<ProcedureNote[]> {
+    return this.get<ProcedureNote[]>(`/procedure-performances/${performanceId}/notes`).pipe(catchError(() => of([])));
+  }
+
+  // =========================================================================
+  // 21. Informed Consents & Directives
+  // =========================================================================
+  getConsentTypes(): Observable<ConsentType[]> {
+    return this.get<ConsentType[]>('/consent-types').pipe(catchError(() => of([])));
+  }
+
+  createConsentType(payload: Partial<ConsentType>): Observable<ConsentType> {
+    return this.post<ConsentType>('/consent-types', payload);
+  }
+
+  getPatientConsents(patientId: string): Observable<PatientConsent[]> {
+    return this.get<PatientConsent[]>(`/patients/${patientId}/consents`).pipe(catchError(() => of([])));
+  }
+
+  createPatientConsent(patientId: string, payload: CreatePatientConsentRequest): Observable<PatientConsent> {
+    return this.post<PatientConsent>(`/patients/${patientId}/consents`, payload);
+  }
+
+  revokePatientConsent(consentId: number | string, reason: string): Observable<PatientConsent> {
+    return this.post<PatientConsent>(`/patient-consents/${consentId}/revoke`, { revocationReason: reason });
+  }
+
+  // =========================================================================
+  // 22. Clinical Documents, Progress Notes & Discharge Summaries
+  // =========================================================================
+  getPatientDocuments(patientId: string): Observable<ClinicalDocument[]> {
+    return this.get<ClinicalDocument[]>(`/patients/${patientId}/documents`).pipe(catchError(() => of([])));
+  }
+
+  getEncounterClinicalDocuments(encounterId: string): Observable<ClinicalDocument[]> {
+    return this.get<ClinicalDocument[]>(`/encounters/${encounterId}/documents`).pipe(catchError(() => of([])));
+  }
+
+  createClinicalDocument(encounterId: string, payload: CreateClinicalDocumentRequest): Observable<ClinicalDocument> {
+    return this.post<ClinicalDocument>(`/encounters/${encounterId}/documents`, payload);
+  }
+
+  finalizeClinicalDocument(documentId: number | string): Observable<ClinicalDocument> {
+    return this.post<ClinicalDocument>(`/clinical-documents/${documentId}/finalize`, {});
+  }
+
+  addDocumentVersion(documentId: number | string, payload: { content: string; changeSummary?: string }): Observable<DocumentVersion> {
+    return this.post<DocumentVersion>(`/clinical-documents/${documentId}/versions`, payload);
+  }
+
+  getDocumentVersions(documentId: number | string): Observable<DocumentVersion[]> {
+    return this.get<DocumentVersion[]>(`/clinical-documents/${documentId}/versions`).pipe(catchError(() => of([])));
+  }
+
+  // =========================================================================
+  // 23. Care Teams
+  // =========================================================================
+  getEncounterCareTeam(encounterId: string): Observable<CareTeam> {
+    return this.get<CareTeam>(`/encounters/${encounterId}/care-team`).pipe(catchError(() => of(null as any)));
+  }
+
+  createEncounterCareTeam(encounterId: string): Observable<CareTeam> {
+    return this.post<CareTeam>(`/encounters/${encounterId}/care-team`, {});
+  }
+
+  addCareTeamMember(careTeamId: number | string, payload: AddCareTeamMemberRequest): Observable<CareTeamMember> {
+    return this.post<CareTeamMember>(`/care-teams/${careTeamId}/members`, payload);
+  }
+
+  removeCareTeamMember(careTeamId: number | string, memberId: number | string): Observable<any> {
+    return this.delete(`/care-teams/${careTeamId}/members/${memberId}`);
+  }
+
+  // =========================================================================
+  // 24. Insurance Payers, Plans, Authorizations & Claims
+  // =========================================================================
+  getInsurancePayers(): Observable<InsurancePayer[]> {
+    return this.get<InsurancePayer[]>('/insurance-payers').pipe(catchError(() => of([])));
+  }
+
+  createInsurancePayer(payload: Partial<InsurancePayer>): Observable<InsurancePayer> {
+    return this.post<InsurancePayer>('/insurance-payers', payload);
+  }
+
+  getPayerPlans(payerId: number | string): Observable<InsurancePlan[]> {
+    return this.get<InsurancePlan[]>(`/insurance-payers/${payerId}/plans`).pipe(catchError(() => of([])));
+  }
+
+  createPayerPlan(payerId: number | string, payload: Partial<InsurancePlan>): Observable<InsurancePlan> {
+    return this.post<InsurancePlan>(`/insurance-payers/${payerId}/plans`, payload);
+  }
+
+  getPatientInsurancePolicies(patientId: string): Observable<PatientInsurancePolicy[]> {
+    return this.get<PatientInsurancePolicy[]>(`/patients/${patientId}/insurances`).pipe(catchError(() => of([])));
+  }
+
+  createPatientInsurancePolicy(patientId: string, payload: Partial<PatientInsurancePolicy>): Observable<PatientInsurancePolicy> {
+    return this.post<PatientInsurancePolicy>(`/patients/${patientId}/insurances`, payload);
+  }
+
+  getEncounterAuthorizations(encounterId: string): Observable<InsuranceAuthorization[]> {
+    return this.get<InsuranceAuthorization[]>(`/encounters/${encounterId}/authorizations`).pipe(catchError(() => of([])));
+  }
+
+  requestAuthorization(encounterId: string, payload: CreateInsuranceAuthorizationRequest): Observable<InsuranceAuthorization> {
+    return this.post<InsuranceAuthorization>(`/encounters/${encounterId}/authorizations`, payload);
+  }
+
+  updateAuthorization(authId: number | string, payload: Partial<InsuranceAuthorization>): Observable<InsuranceAuthorization> {
+    return this.patch<InsuranceAuthorization>(`/insurance-authorizations/${authId}`, payload);
+  }
+
+  getEncounterClaims(encounterId: string): Observable<InsuranceClaim[]> {
+    return this.get<InsuranceClaim[]>(`/encounters/${encounterId}/claims`).pipe(catchError(() => of([])));
+  }
+
+  createInsuranceClaim(encounterId: string, payload: CreateInsuranceClaimRequest): Observable<InsuranceClaim> {
+    return this.post<InsuranceClaim>(`/encounters/${encounterId}/claims`, payload);
+  }
+
+  submitInsuranceClaim(claimId: number | string): Observable<InsuranceClaim> {
+    return this.post<InsuranceClaim>(`/insurance-claims/${claimId}/submit`, {});
+  }
+
+  updateInsuranceClaim(claimId: number | string, payload: Partial<InsuranceClaim>): Observable<InsuranceClaim> {
+    return this.patch<InsuranceClaim>(`/insurance-claims/${claimId}`, payload);
+  }
+
+  // =========================================================================
+  // 25. Facility Chargemasters & Price Lists
+  // =========================================================================
+  getFacilityPriceLists(facilityId: string): Observable<PriceList[]> {
+    return this.get<PriceList[]>(`/facilities/${facilityId}/price-lists`).pipe(catchError(() => of([])));
+  }
+
+  createPriceList(facilityId: string, payload: Partial<PriceList>): Observable<PriceList> {
+    return this.post<PriceList>(`/facilities/${facilityId}/price-lists`, payload);
+  }
+
+  getPriceListItems(priceListId: number | string): Observable<PriceListItem[]> {
+    return this.get<PriceListItem[]>(`/price-lists/${priceListId}/items`).pipe(catchError(() => of([])));
+  }
+
+  addPriceListItem(priceListId: number | string, payload: Partial<PriceListItem>): Observable<PriceListItem> {
+    return this.post<PriceListItem>(`/price-lists/${priceListId}/items`, payload);
+  }
+
+  // =========================================================================
+  // 26. Tenancy Hierarchy (Facilities, Departments, Wards, Rooms, Beds)
+  // =========================================================================
+  getFacilities(organizationId: string): Observable<Facility[]> {
+    return this.get<Facility[]>(`/organizations/${organizationId}/facilities`).pipe(catchError(() => of([])));
+  }
+
+  createFacility(organizationId: string, payload: Partial<Facility>): Observable<Facility> {
+    return this.post<Facility>(`/organizations/${organizationId}/facilities`, payload);
+  }
+
+  getDepartments(facilityId: string): Observable<Department[]> {
+    return this.get<Department[]>(`/facilities/${facilityId}/departments`).pipe(catchError(() => of([])));
+  }
+
+  createDepartment(facilityId: string, payload: Partial<Department>): Observable<Department> {
+    return this.post<Department>(`/facilities/${facilityId}/departments`, payload);
+  }
+
+  getWards(departmentId: string): Observable<Ward[]> {
+    return this.get<Ward[]>(`/departments/${departmentId}/wards`).pipe(catchError(() => of([])));
+  }
+
+  createWard(departmentId: string, payload: Partial<Ward>): Observable<Ward> {
+    return this.post<Ward>(`/departments/${departmentId}/wards`, payload);
+  }
+
+  getRooms(wardId: string): Observable<Room[]> {
+    return this.get<Room[]>(`/wards/${wardId}/rooms`).pipe(catchError(() => of([])));
+  }
+
+  createRoom(wardId: string, payload: Partial<Room>): Observable<Room> {
+    return this.post<Room>(`/wards/${wardId}/rooms`, payload);
+  }
+
+  // =========================================================================
+  // 27. Security Policies (ABAC), RBAC Roles & Security Events
+  // =========================================================================
+  getAbacPolicies(): Observable<AbacPolicy[]> {
+    return this.get<AbacPolicy[]>('/abac-policies').pipe(catchError(() => of([])));
+  }
+
+  createAbacPolicy(payload: CreateAbacPolicyRequest): Observable<AbacPolicy> {
+    return this.post<AbacPolicy>('/abac-policies', payload);
+  }
+
+  updateAbacPolicy(policyId: number | string, payload: Partial<AbacPolicy>): Observable<AbacPolicy> {
+    return this.patch<AbacPolicy>(`/abac-policies/${policyId}`, payload);
+  }
+
+  getRbacRoles(): Observable<RbacRole[]> {
+    return this.get<RbacRole[]>('/roles').pipe(catchError(() => of([])));
+  }
+
+  createRbacRole(payload: { name: string; description?: string }): Observable<RbacRole> {
+    return this.post<RbacRole>('/roles', payload);
+  }
+
+  getRolePermissions(roleId: number | string): Observable<string[]> {
+    return this.get<string[]>(`/roles/${roleId}/permissions`).pipe(catchError(() => of([])));
+  }
+
+  assignRolePermissions(roleId: number | string, permissions: string[]): Observable<any> {
+    return this.post(`/roles/${roleId}/permissions`, { permissions });
+  }
+
+  getSecurityEvents(): Observable<SecurityEventLog[]> {
+    return this.get<SecurityEventLog[]>('/security-events').pipe(catchError(() => of([])));
+  }
+
+  // =========================================================================
+  // 28. Terminology Engine & Medical Code Search
+  // =========================================================================
+  getCodeSystems(): Observable<CodeSystem[]> {
+    return this.get<CodeSystem[]>('/code-systems').pipe(catchError(() => of([])));
+  }
+
+  searchTerminology(query: string, system?: string): Observable<TerminologySearchResult[]> {
+    const params: string[] = [`q=${encodeURIComponent(query)}`];
+    if (system) params.push(`system=${encodeURIComponent(system)}`);
+    return this.get<TerminologySearchResult[]>(`/terminology/search?${params.join('&')}`).pipe(catchError(() => of([])));
+  }
 }
+

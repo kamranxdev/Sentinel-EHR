@@ -18,6 +18,12 @@ spring:
     console:
       enabled: true
       path: /h2-console
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    deserialization:
+      adjust-dates-to-context-time-zone: false
+      fail-on-unknown-properties: false
 
 app:
   jwt-secret: ${JWT_SECRET:9a2f8c4e7b1a3d6f8e5c2b0a4f6e8d1c3b5a7f9e2d4c6b8a0f2e4d6c8b0a1f3}

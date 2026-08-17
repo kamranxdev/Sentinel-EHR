@@ -1,79 +1,22 @@
-import { Component, OnInit, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { ApiService } from '../../core/services/api.service';
-import { AuthService } from '../../core/services/auth.service';
-import { Allergy } from '../../core/models/clinical.model';
-
-import { HlmCardImports } from '@spartan-ng/helm/card';
-import { HlmTableImports } from '@spartan-ng/helm/table';
-import { HlmBadgeImports } from '@spartan-ng/helm/badge';
-import { NgIcon, provideIcons } from '@ng-icons/core';
-import { lucideTriangleAlert } from '@ng-icons/lucide';
+import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-patient-allergies',
   standalone: true,
-  imports: [CommonModule, HlmCardImports, HlmTableImports, HlmBadgeImports],
-  providers: [provideIcons({ lucideTriangleAlert })],
   template: `
-    <div class="space-y-6">
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-border">
-        <div>
-          <h1 class="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
-            My Allergies & Medical Safety Record
-            <span hlmBadge variant="outline" class="text-[10px]">Patient Portal</span>
-          </h1>
-          <p class="text-xs text-muted-foreground mt-0.5">View your documented drug, food, and environmental allergies.</p>
-        </div>
-      </div>
-
-      <div class="rounded-xl border border-border bg-card overflow-hidden shadow-xs">
-        <div class="overflow-x-auto">
-          <table hlmTable class="w-full text-xs">
-            <thead hlmTableHeader>
-              <tr hlmTableRow class="bg-muted/50 border-b border-border">
-                <th hlmTableHead class="py-3 px-4 text-left">Allergen</th>
-                <th hlmTableHead class="py-3 px-4 text-left">Category</th>
-                <th hlmTableHead class="py-3 px-4 text-left">Severity</th>
-                <th hlmTableHead class="py-3 px-4 text-left">Reaction Description</th>
-              </tr>
-            </thead>
-            <tbody hlmTableBody class="divide-y divide-border">
-              <tr *ngFor="let a of allergies()" hlmTableRow class="hover:bg-muted/40 transition-colors">
-                <td hlmTableCell class="py-3 px-4 font-semibold text-foreground">{{ a.allergenName }}</td>
-                <td hlmTableCell class="py-3 px-4 text-muted-foreground">{{ a.category }}</td>
-                <td hlmTableCell class="py-3 px-4"><span hlmBadge [variant]="a.severity === 'SEVERE' || a.severity === 'LIFE_THREATENING' ? 'destructive' : 'secondary'" class="text-[10px]">{{ a.severity }}</span></td>
-                <td hlmTableCell class="py-3 px-4 text-muted-foreground">{{ a.reactionDescription || a.reaction || 'Documented reaction' }}</td>
-              </tr>
-              <tr *ngIf="allergies().length === 0" hlmTableRow>
-                <td colspan="4" hlmTableCell class="py-12 text-center text-muted-foreground text-xs">No allergies documented.</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+    <div class="p-8 text-center text-xs text-muted-foreground">
+      Redirecting to unified clinical chart allergies...
     </div>
   `,
 })
 export class PatientAllergiesComponent implements OnInit {
-  allergies = signal<Allergy[]>([]);
-
-  constructor(
-    private apiService: ApiService,
-    public authService: AuthService,
-  ) {}
+  constructor(private router: Router) {}
 
   ngOnInit(): void {
-    this.apiService.getMyPatientProfile().subscribe({
-      next: (p) => {
-        if (p?.id) {
-          this.apiService.getAllergiesByPatient(p.id).subscribe({
-            next: (a) => this.allergies.set(Array.isArray(a) ? a : []),
-            error: (err) => console.warn('Could not load patient allergies', err),
-          });
-        }
-      },
-      error: (err) => console.warn('Could not load patient profile for allergies', err),
+    this.router.navigate(['/patient/chart'], {
+      queryParams: { tab: 'allergies' },
+      replaceUrl: true,
     });
   }
 }

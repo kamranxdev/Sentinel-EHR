@@ -18,6 +18,14 @@ public class LabOrderResponseDTO {
     private LocalDateTime specimenCollectedAt;
     private LocalDateTime resultedAt;
     private String clinicalNotes;
+    private String patientFullName;
+    private String patientMrn;
+    private String patientGender;
+    private String patientBirthDate;
+    private String priority = "ROUTINE";
+    private LocalDateTime inProcessAt;
+    private LocalDateTime reviewedAt;
+    private String reviewedByUsername;
     private List<LabOrderItemDTO> items;
 
     public LabOrderResponseDTO() {}
@@ -69,10 +77,26 @@ public class LabOrderResponseDTO {
     public void setOrderedAt(LocalDateTime orderedAt) { this.orderedAt = orderedAt; }
     public LocalDateTime getSpecimenCollectedAt() { return specimenCollectedAt; }
     public void setSpecimenCollectedAt(LocalDateTime specimenCollectedAt) { this.specimenCollectedAt = specimenCollectedAt; }
+    public LocalDateTime getInProcessAt() { return inProcessAt; }
+    public void setInProcessAt(LocalDateTime inProcessAt) { this.inProcessAt = inProcessAt; }
     public LocalDateTime getResultedAt() { return resultedAt; }
     public void setResultedAt(LocalDateTime resultedAt) { this.resultedAt = resultedAt; }
+    public LocalDateTime getReviewedAt() { return reviewedAt; }
+    public void setReviewedAt(LocalDateTime reviewedAt) { this.reviewedAt = reviewedAt; }
+    public String getReviewedByUsername() { return reviewedByUsername; }
+    public void setReviewedByUsername(String reviewedByUsername) { this.reviewedByUsername = reviewedByUsername; }
     public String getClinicalNotes() { return clinicalNotes; }
     public void setClinicalNotes(String clinicalNotes) { this.clinicalNotes = clinicalNotes; }
+    public String getPatientFullName() { return patientFullName; }
+    public void setPatientFullName(String patientFullName) { this.patientFullName = patientFullName; }
+    public String getPatientMrn() { return patientMrn; }
+    public void setPatientMrn(String patientMrn) { this.patientMrn = patientMrn; }
+    public String getPatientGender() { return patientGender; }
+    public void setPatientGender(String patientGender) { this.patientGender = patientGender; }
+    public String getPatientBirthDate() { return patientBirthDate; }
+    public void setPatientBirthDate(String patientBirthDate) { this.patientBirthDate = patientBirthDate; }
+    public String getPriority() { return priority; }
+    public void setPriority(String priority) { this.priority = priority; }
     public List<LabOrderItemDTO> getItems() { return items; }
     public void setItems(List<LabOrderItemDTO> items) { this.items = items; }
 }

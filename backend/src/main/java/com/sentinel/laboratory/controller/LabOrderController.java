@@ -34,6 +34,15 @@ public class LabOrderController {
         return new ResponseEntity<>(ApiResponse.success("Lab order created successfully", response), HttpStatus.CREATED);
     }
 
+    @GetMapping("/api/v1/lab-orders")
+    @Operation(summary = "Get all lab orders with optional status and search filtering")
+    public ResponseEntity<ApiResponse<List<LabOrderResponseDTO>>> getAllLabOrders(
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String search) {
+        List<LabOrderResponseDTO> response = labOrderService.getAllLabOrders(status, search);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
     @GetMapping("/api/v1/encounters/{encounterId}/lab-orders")
     @Operation(summary = "Get all lab orders for an encounter")
     public ResponseEntity<ApiResponse<List<LabOrderResponseDTO>>> getEncounterOrders(

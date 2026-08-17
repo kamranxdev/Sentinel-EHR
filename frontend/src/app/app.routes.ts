@@ -234,6 +234,58 @@ export const routes: Routes = [
     data: { roles: ['PATIENT'] },
   },
   {
+    path: 'patient/chart',
+    loadComponent: () =>
+      import('./workspaces/patient/patient-chart.component').then((m) => m.PatientChartComponent),
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['PATIENT'] },
+  },
+  {
+    path: 'patient/records',
+    redirectTo: 'patient/chart',
+    pathMatch: 'full',
+  },
+  {
+    path: 'patient/labs',
+    redirectTo: 'patient/chart',
+    pathMatch: 'full',
+  },
+  {
+    path: 'patient/imaging',
+    redirectTo: 'patient/chart',
+    pathMatch: 'full',
+  },
+  {
+    path: 'patient/encounters',
+    redirectTo: 'patient/chart',
+    pathMatch: 'full',
+  },
+  {
+    path: 'patient/diagnoses',
+    redirectTo: 'patient/chart',
+    pathMatch: 'full',
+  },
+  {
+    path: 'patient/procedures',
+    redirectTo: 'patient/chart',
+    pathMatch: 'full',
+  },
+  {
+    path: 'patient/documents',
+    redirectTo: 'patient/chart',
+    pathMatch: 'full',
+  },
+  {
+    path: 'patient/care-team',
+    redirectTo: 'patient/chart',
+    pathMatch: 'full',
+  },
+  {
+    path: 'patient/consents',
+    redirectTo: 'patient/chart',
+    pathMatch: 'full',
+  },
+  {
     path: 'patient/profile',
     loadComponent: () =>
       import('./workspaces/patient/patient-profile.component').then((m) => m.PatientProfileComponent),

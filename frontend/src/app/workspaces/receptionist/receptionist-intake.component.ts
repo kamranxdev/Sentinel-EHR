@@ -498,13 +498,21 @@ export class ReceptionistIntakeComponent implements OnInit {
         next: (savedPatient) => {
           if (this.scheduleTodayAppointment && this.selectedDoctorId && savedPatient.id) {
             const dateStr = new Date().toISOString().split('T')[0];
-            const dateTimeIso = `${dateStr}T${this.appointmentTime}:00`;
+            const dateTimeStr = `${dateStr}T${this.appointmentTime}:00`;
+            let dateTimeIso = dateTimeStr;
+            try {
+              const parsed = new Date(dateTimeStr);
+              if (!isNaN(parsed.getTime())) {
+                dateTimeIso = parsed.toISOString();
+              }
+            } catch (e) {}
 
             this.apiService
               .scheduleAppointment({
                 patientId: savedPatient.id,
                 doctorId: this.selectedDoctorId,
                 appointmentDate: dateTimeIso,
+                startsAt: dateTimeIso,
                 reason: this.consultationReason,
                 status: this.initialStage,
                 stage: this.initialStage,

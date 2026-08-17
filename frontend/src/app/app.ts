@@ -26,6 +26,11 @@ import {
   lucideChevronRight,
   lucideMicroscope,
   lucideReceipt,
+  lucideEye,
+  lucideScissors,
+  lucideUsers,
+  lucideFileBadge,
+  lucideStethoscope,
 } from '@ng-icons/lucide';
 
 import { AuthService } from './core/services/auth.service';
@@ -103,6 +108,11 @@ interface PatientOption {
       lucideChevronRight,
       lucideMicroscope,
       lucideReceipt,
+      lucideEye,
+      lucideScissors,
+      lucideUsers,
+      lucideFileBadge,
+      lucideStethoscope,
     }),
   ],
   templateUrl: './app.component.html',
@@ -487,14 +497,18 @@ export class App implements OnInit, OnDestroy {
     }
     return [
       {
-        label: 'My Personal Health Record',
+        label: 'My Clinical Records',
         items: [
           { icon: 'lucideLayoutDashboard', label: 'My Health Summary', routerLink: '/patient/dashboard' },
+          { icon: 'lucideHeartPulse', label: 'My Health Chart & Reports', routerLink: '/patient/chart' },
+          { icon: 'lucideActivity', label: 'Vitals & Flowsheet', routerLink: '/patient/vitals' },
+        ],
+      },
+      {
+        label: 'Care & Appointments',
+        items: [
+          { icon: 'lucideCalendarClock', label: 'Appointments & Schedule', routerLink: '/patient/appointments' },
           { icon: 'lucideUserRound', label: 'My Health Profile', routerLink: '/patient/profile' },
-          { icon: 'lucidePill', label: 'My Prescriptions', routerLink: '/patient/prescriptions' },
-          { icon: 'lucideActivity', label: 'My Vitals Trends', routerLink: '/patient/vitals' },
-          { icon: 'lucideTriangleAlert', label: 'My Allergies', routerLink: '/patient/allergies' },
-          { icon: 'lucideCalendarClock', label: 'My Appointments', routerLink: '/patient/appointments' },
         ],
       },
     ];
