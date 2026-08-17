@@ -242,47 +242,57 @@ export const routes: Routes = [
   },
   {
     path: 'patient/records',
-    redirectTo: 'patient/chart',
+    redirectTo: () => '/patient/chart',
     pathMatch: 'full',
   },
   {
     path: 'patient/labs',
-    redirectTo: 'patient/chart',
+    redirectTo: () => '/patient/chart?tab=labs',
     pathMatch: 'full',
   },
   {
     path: 'patient/imaging',
-    redirectTo: 'patient/chart',
+    redirectTo: () => '/patient/chart?tab=imaging',
     pathMatch: 'full',
   },
   {
     path: 'patient/encounters',
-    redirectTo: 'patient/chart',
+    redirectTo: () => '/patient/chart?tab=encounters',
     pathMatch: 'full',
   },
   {
     path: 'patient/diagnoses',
-    redirectTo: 'patient/chart',
+    redirectTo: () => '/patient/chart?tab=diagnoses',
     pathMatch: 'full',
   },
   {
     path: 'patient/procedures',
-    redirectTo: 'patient/chart',
+    redirectTo: () => '/patient/chart?tab=procedures',
     pathMatch: 'full',
   },
   {
     path: 'patient/documents',
-    redirectTo: 'patient/chart',
+    redirectTo: () => '/patient/chart?tab=documents',
     pathMatch: 'full',
   },
   {
     path: 'patient/care-team',
-    redirectTo: 'patient/chart',
+    redirectTo: () => '/patient/chart?tab=care-team',
     pathMatch: 'full',
   },
   {
     path: 'patient/consents',
-    redirectTo: 'patient/chart',
+    redirectTo: () => '/patient/chart?tab=consents',
+    pathMatch: 'full',
+  },
+  {
+    path: 'patient/prescriptions',
+    redirectTo: () => '/patient/chart?tab=prescriptions',
+    pathMatch: 'full',
+  },
+  {
+    path: 'patient/allergies',
+    redirectTo: () => '/patient/chart?tab=allergies',
     pathMatch: 'full',
   },
   {
@@ -300,23 +310,9 @@ export const routes: Routes = [
     data: { roles: ['PATIENT'] },
   },
   {
-    path: 'patient/prescriptions',
-    loadComponent: () =>
-      import('./workspaces/patient/patient-prescriptions.component').then((m) => m.PatientPrescriptionsComponent),
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['PATIENT'] },
-  },
-  {
     path: 'patient/vitals',
     loadComponent: () =>
       import('./workspaces/patient/patient-vitals.component').then((m) => m.PatientVitalsComponent),
-    canActivate: [authGuard, roleGuard],
-    data: { roles: ['PATIENT'] },
-  },
-  {
-    path: 'patient/allergies',
-    loadComponent: () =>
-      import('./workspaces/patient/patient-allergies.component').then((m) => m.PatientAllergiesComponent),
     canActivate: [authGuard, roleGuard],
     data: { roles: ['PATIENT'] },
   },
