@@ -31,11 +31,11 @@ import { lucideShieldCheck, lucideSearch, lucideRefreshCw, lucideFilter, lucideX
       <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-border">
         <div>
           <h1 class="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
-            HIPAA Audit Vault Ledger
+            ABDM & DPDP Compliance Audit Ledger
             <span hlmBadge variant="secondary" class="text-[10px]">WORM Storage</span>
           </h1>
           <p class="text-xs text-muted-foreground mt-0.5">
-            Immutable log trail for compliance reviews and access audits across the EHR system.
+            Immutable log trail for compliance reviews and access audits across the EHR system under ABDM HDMP & DPDP Act 2023.
           </p>
         </div>
         <button hlmBtn variant="outline" size="sm" (click)="loadLogs()" [disabled]="loading()" class="gap-1.5 text-xs">

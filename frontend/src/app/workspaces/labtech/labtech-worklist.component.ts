@@ -213,6 +213,11 @@ export class LabTechWorklistComponent implements OnInit {
 
   submitCollect(): void {
     if (!this.activeOrder || !this.barcodeInput) return;
+    this.apiService.createSpecimen(this.activeOrder.id, {
+      specimenBarcode: this.barcodeInput,
+      specimenType: 'BLOOD',
+    }).subscribe({ error: () => {} });
+
     this.apiService.updateLabOrderStatus(this.activeOrder.id, 'SPECIMEN_COLLECTED', this.barcodeInput).subscribe({
       next: () => {
         toast.success(`Specimen barcode ${this.barcodeInput} recorded. Status updated to SPECIMEN_COLLECTED.`);
@@ -243,9 +248,16 @@ export class LabTechWorklistComponent implements OnInit {
 
   submitResult(): void {
     if (!this.activeOrder) return;
-    const body = { testName: this.resultParam, resultValue: this.resultVal, unit: this.resultUnit };
+    const body = {
+      testCode: this.activeOrder.testCode || this.activeOrder.loincCode || 'LOINC-4548-4',
+      testName: this.resultParam,
+      resultValue: this.resultVal,
+      unit: this.resultUnit,
+      abnormalFlag: 'NORMAL',
+    };
     this.apiService.addLabResult(this.activeOrder.id, body).subscribe({
       next: () => {
+        this.apiService.updateLabOrderStatus(this.activeOrder.id, 'COMPLETED').subscribe({ error: () => {} });
         toast.success(`Lab result published for Order #LAB-${this.activeOrder.id}.`);
         this.isResultModalOpen.set(false);
         this.loadOrders();

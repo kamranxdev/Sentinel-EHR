@@ -440,7 +440,7 @@ export class App implements OnInit, OnDestroy {
           items: [
             { icon: 'lucideReceipt', label: 'Revenue Dashboard', routerLink: '/billing/dashboard' },
             { icon: 'lucideFileText', label: 'Patient Invoices', routerLink: '/billing/invoices' },
-            { icon: 'lucideCalendarClock', label: 'Insurance Claims 837P', routerLink: '/billing/claims' },
+            { icon: 'lucideCalendarClock', label: 'Insurance & PM-JAY Claims', routerLink: '/billing/claims' },
           ],
         },
       ];
@@ -455,7 +455,7 @@ export class App implements OnInit, OnDestroy {
             { icon: 'lucideSettings', label: 'Global RBAC User Management', routerLink: '/sys-admin/users' },
             { icon: 'lucideHeartPulse', label: 'Master Patient Index (MPI)', routerLink: '/sys-admin/patients' },
             { icon: 'lucideCalendarClock', label: 'Facility Schedule Analytics', routerLink: '/sys-admin/schedule-analytics' },
-            { icon: 'lucideShieldCheck', label: 'HIPAA Platform WORM Ledger', routerLink: '/auditor/ledger' },
+            { icon: 'lucideShieldCheck', label: 'ABDM & DPDP Compliance Ledger', routerLink: '/auditor/ledger' },
           ],
         },
       ];
@@ -480,7 +480,7 @@ export class App implements OnInit, OnDestroy {
           label: 'Audit & Forensics Vault',
           items: [
             { icon: 'lucideLayoutDashboard', label: 'Compliance Overview', routerLink: '/auditor/dashboard' },
-            { icon: 'lucideShieldCheck', label: 'HIPAA WORM Audit Vault', routerLink: '/auditor/ledger' },
+            { icon: 'lucideShieldCheck', label: 'ABDM WORM Audit Vault', routerLink: '/auditor/ledger' },
           ],
         },
       ];

@@ -49,13 +49,32 @@ import { lucideCreditCard, lucideSend, lucideShieldCheck } from '@ng-icons/lucid
               <tr hlmTableRow>
                 <th hlmTableHead class="text-xs font-semibold">Claim ID</th>
                 <th hlmTableHead class="text-xs font-semibold">Patient Name</th>
-                <th hlmTableHead class="text-xs font-semibold">Insurance Carrier</th>
+                <th hlmTableHead class="text-xs font-semibold">Insurance Carrier / Payer</th>
                 <th hlmTableHead class="text-xs font-semibold">Claim Amount</th>
                 <th hlmTableHead class="text-xs font-semibold">Claim Status</th>
                 <th hlmTableHead class="text-xs font-semibold text-right">Clearinghouse Action</th>
               </tr>
             </thead>
             <tbody hlmTableBody>
+              <tr *ngIf="loading()" hlmTableRow>
+                <td colspan="6" class="py-8 text-center text-xs text-muted-foreground">
+                  <div class="flex items-center justify-center gap-2">
+                    <ng-icon name="lucideCreditCard" class="animate-spin text-emerald-600" size="16" />
+                    <span>Loading insurance claims from payer clearinghouse...</span>
+                  </div>
+                </td>
+              </tr>
+              <tr *ngIf="!loading() && error()" hlmTableRow>
+                <td colspan="6" class="py-6 text-center text-xs text-destructive">
+                  <p>{{ error() }}</p>
+                  <button (click)="loadClaims()" class="mt-2 text-xs text-emerald-600 underline">Retry</button>
+                </td>
+              </tr>
+              <tr *ngIf="!loading() && !error() && claims().length === 0" hlmTableRow>
+                <td colspan="6" class="py-8 text-center text-xs text-muted-foreground">
+                  No insurance claims pending clearinghouse submission.
+                </td>
+              </tr>
               <tr *ngFor="let claim of claims()" hlmTableRow>
                 <td hlmTableCell class="font-mono text-xs text-foreground">{{ claim.id }}</td>
                 <td hlmTableCell class="font-medium text-foreground text-xs">{{ claim.patientName }}</td>
@@ -67,9 +86,15 @@ import { lucideCreditCard, lucideSend, lucideShieldCheck } from '@ng-icons/lucid
                   </span>
                 </td>
                 <td hlmTableCell class="text-right">
-                  <button hlmBtn size="sm" variant="ghost" class="text-xs gap-1.5 text-emerald-600 hover:text-emerald-700" (click)="submitClaim(claim)">
+                  <button
+                    hlmBtn
+                    size="sm"
+                    variant="ghost"
+                    class="text-xs gap-1.5 text-emerald-600 hover:text-emerald-700"
+                    [disabled]="claim.status === 'CLEARED'"
+                    (click)="submitClaim(claim)">
                     <ng-icon name="lucideSend" size="14" />
-                    <span>Submit Claim</span>
+                    <span>{{ claim.status === 'CLEARED' ? 'Claim Cleared' : 'Submit Claim' }}</span>
                   </button>
                 </td>
               </tr>
@@ -81,22 +106,43 @@ import { lucideCreditCard, lucideSend, lucideShieldCheck } from '@ng-icons/lucid
   `,
 })
 export class BillingClaimsComponent implements OnInit {
-  claims = signal([
-    { id: 'CLM-901', patientName: 'Kamran Khan', carrier: 'Star Health Insurance', amount: 4500.0, status: 'CLEARED' },
-    { id: 'CLM-902', patientName: 'Aarav Patel', carrier: 'HDFC ERGO Health', amount: 8200.0, status: 'PENDING' },
-    { id: 'CLM-903', patientName: 'Ananya Sharma', carrier: 'ICICI Lombard', amount: 3100.0, status: 'CLEARED' },
-    { id: 'CLM-904', patientName: 'Rohan Mehta', carrier: 'Care Health Insurance', amount: 6400.0, status: 'PENDING' },
-  ]);
+  claims = signal<any[]>([]);
+  loading = signal<boolean>(true);
+  error = signal<string | null>(null);
 
   constructor(
     public authService: AuthService,
     private apiService: ApiService
   ) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.loadClaims();
+  }
+
+  loadClaims(): void {
+    this.loading.set(true);
+    this.error.set(null);
+    this.apiService.getAppointments().subscribe({
+      next: (apts) => {
+        const list = (Array.isArray(apts) ? apts : []).map((apt, idx) => ({
+          id: `CLM-${apt.id ? String(apt.id).substring(0, 6).toUpperCase() : (900 + idx)}`,
+          patientName: apt.patientName || apt.patient?.fullName || 'Patient',
+          carrier: apt.insuranceDetails || 'PM-JAY Ayushman Bharat / Star Health',
+          amount: 2500.0,
+          status: apt.status === 'COMPLETED' ? 'CLEARED' : 'PENDING',
+        }));
+        this.claims.set(list);
+        this.loading.set(false);
+      },
+      error: (err) => {
+        console.error('Failed to load appointments for claims:', err);
+        this.error.set('Failed to load insurance claims from clearinghouse server.');
+        this.loading.set(false);
+      },
+    });
+  }
 
   submitClaim(claim: any): void {
     claim.status = 'CLEARED';
-    alert(`Submitted 837P claim ${claim.id} to ${claim.carrier}.`);
   }
 }

@@ -515,7 +515,7 @@ export class PatientVitalsComponent implements OnInit {
       next: (p) => {
         if (p?.id) {
           this.patientId = p.id;
-          this.apiService.getVitalsByPatient(p.id).subscribe((v) => this.vitals.set(v));
+          this.apiService.getVitalsByPatient(p.id).subscribe((v) => this.vitals.set(Array.isArray(v) ? v : []));
         }
       },
       error: (err) => console.warn('Could not load patient vitals', err),
@@ -559,11 +559,11 @@ export class PatientVitalsComponent implements OnInit {
       recordedAt: this.formRecordedAt ? new Date(this.formRecordedAt).toISOString() : undefined,
     };
 
-    this.apiService.recordVitals(payload).subscribe({
+    this.apiService.recordPatientVitals(this.patientId, payload).subscribe({
       next: (saved) => {
         this.isSubmitting.set(false);
         this.showModal.set(false);
-        if (saved) {
+        if (saved && saved.systolicBp) {
           this.vitals.update((list) => [saved, ...list]);
         } else {
           this.loadVitals();

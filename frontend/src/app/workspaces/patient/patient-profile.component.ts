@@ -819,11 +819,11 @@ type ProfileTab = 'demographics' | 'contact' | 'insurance' | 'allergies' | 'hist
             </div>
           </div>
 
-          <!-- HIPAA § 164.312 Data Integrity Notice -->
+          <!-- ABDM & DPDP Act Data Integrity Notice -->
           <div class="p-4 rounded-2xl border border-amber-500/30 bg-amber-500/5 space-y-2 text-xs">
             <div class="flex items-center gap-2 text-amber-600 dark:text-amber-400 font-bold">
               <ng-icon name="lucideLock" size="16" />
-              <span>HIPAA § 164.312 Identity Safeguard</span>
+              <span>ABDM & DPDP Act Identity Safeguard</span>
             </div>
             <p class="text-muted-foreground text-[11px] leading-relaxed">
               Legal name, DOB, ABHA Health ID, and blood type fields are locked after initial save to maintain medical record integrity. You can submit formal amendment requests at any time.
@@ -862,7 +862,7 @@ type ProfileTab = 'demographics' | 'contact' | 'insurance' | 'allergies' | 'hist
               Legal identity details (Full Name, Date of Birth, Administrative Gender, ABHA ID, Blood Group, MRN Code) and verified clinical medical histories cannot be directly edited by patients once established.
             </p>
             <p>
-              This safeguard ensures compliance with HIPAA § 164.312 data integrity regulations and ABDM standards.
+              This safeguard ensures compliance with ABDM HDMP and the Digital Personal Data Protection (DPDP) Act 2023.
             </p>
           </div>
 
@@ -1012,7 +1012,7 @@ export class PatientProfileComponent implements OnInit {
       this.lockedFieldName.set(fieldName);
       this.showLockedModal.set(true);
       toast.info(`${fieldName} Record Field Locked`, {
-        description: 'Verified legal identity details are protected under HIPAA and ABDM regulations.',
+        description: 'Verified legal identity details are protected under ABDM and DPDP Act regulations.',
       });
     }
   }

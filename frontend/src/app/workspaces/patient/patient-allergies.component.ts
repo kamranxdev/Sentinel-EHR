@@ -42,8 +42,8 @@ import { lucideTriangleAlert } from '@ng-icons/lucide';
               <tr *ngFor="let a of allergies()" hlmTableRow class="hover:bg-muted/40 transition-colors">
                 <td hlmTableCell class="py-3 px-4 font-semibold text-foreground">{{ a.allergenName }}</td>
                 <td hlmTableCell class="py-3 px-4 text-muted-foreground">{{ a.category }}</td>
-                <td hlmTableCell class="py-3 px-4"><span hlmBadge [variant]="a.severity === 'SEVERE' ? 'destructive' : 'secondary'" class="text-[10px]">{{ a.severity }}</span></td>
-                <td hlmTableCell class="py-3 px-4 text-muted-foreground">{{ a.reactionDescription }}</td>
+                <td hlmTableCell class="py-3 px-4"><span hlmBadge [variant]="a.severity === 'SEVERE' || a.severity === 'LIFE_THREATENING' ? 'destructive' : 'secondary'" class="text-[10px]">{{ a.severity }}</span></td>
+                <td hlmTableCell class="py-3 px-4 text-muted-foreground">{{ a.reactionDescription || a.reaction || 'Documented reaction' }}</td>
               </tr>
               <tr *ngIf="allergies().length === 0" hlmTableRow>
                 <td colspan="4" hlmTableCell class="py-12 text-center text-muted-foreground text-xs">No allergies documented.</td>
@@ -66,9 +66,14 @@ export class PatientAllergiesComponent implements OnInit {
   ngOnInit(): void {
     this.apiService.getMyPatientProfile().subscribe({
       next: (p) => {
-        if (p) this.apiService.getAllergiesByPatient(p.id).subscribe((a) => this.allergies.set(a));
+        if (p?.id) {
+          this.apiService.getAllergiesByPatient(p.id).subscribe({
+            next: (a) => this.allergies.set(Array.isArray(a) ? a : []),
+            error: (err) => console.warn('Could not load patient allergies', err),
+          });
+        }
       },
-      error: (err) => console.warn('Could not load patient allergies', err),
+      error: (err) => console.warn('Could not load patient profile for allergies', err),
     });
   }
 }

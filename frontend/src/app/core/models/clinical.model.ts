@@ -5,36 +5,54 @@ export interface Encounter {
   id?: string;
   patient?: Patient;
   patientId?: string;
+  organizationId?: string;
+  facilityId?: string;
+  departmentId?: string;
+  departmentName?: string;
+  encounterNumber?: string;
   attendingProvider?: User;
   attendingProviderId?: string;
   encounterType: 'INPATIENT' | 'OUTPATIENT' | 'EMERGENCY' | 'TELEHEALTH' | string;
   classCode?: string;
   location?: string;
   acuityScore?: string;
+  acuity?: string;
   chiefComplaint?: string;
+  reasonForVisit?: string;
   clinicalNotes?: string;
   dischargeSummary?: string;
   reasonCode?: string;
   reasonText?: string;
   startTime?: string;
+  startedAt?: string;
   endTime?: string;
-  status: 'ACTIVE' | 'COMPLETED' | 'DISCHARGED' | string;
+  endedAt?: string;
+  status: 'ACTIVE' | 'COMPLETED' | 'DISCHARGED' | 'CANCELLED' | string;
   encounterDate?: string;
+  createdByUsername?: string;
+  createdAt?: string;
 }
 
 export interface Allergy {
   id?: string;
   patient?: Patient;
   patientId?: string;
+  organizationId?: string;
   allergenName: string;
   allergenCode?: string;
   category: 'DRUG' | 'FOOD' | 'ENVIRONMENTAL' | 'OTHER' | string;
   severity?: 'MILD' | 'MODERATE' | 'SEVERE' | 'LIFE_THREATENING' | string;
   criticality?: string;
+  reaction?: string;
   reactionDescription?: string;
+  onsetDate?: string;
   status: 'ACTIVE' | 'INACTIVE' | 'RESOLVED' | string;
+  verificationStatus?: string;
+  notes?: string;
   recordedBy?: User;
+  recordedByUsername?: string;
   recordedAt?: string;
+  updatedAt?: string;
 }
 
 export interface Diagnosis {
@@ -83,17 +101,24 @@ export interface Vitals {
   recordedBy?: User;
   recordedById?: string;
   recordedByName?: string;
+  recordedByUsername?: string;
   systolicBp?: number;
   diastolicBp?: number;
+  meanArterialPressure?: number;
   heartRate?: number;
   temperature?: number;
+  temperatureUnit?: string;
   oxygenSaturation?: number;
   respiratoryRate?: number;
   weightKg?: number;
   heightCm?: number;
   bmi?: number;
   bloodGlucose?: number;
+  glucoseUnit?: string;
   painScore?: number;
+  position?: string;
+  oxygenDeliveryMethod?: string;
+  notes?: string;
   news2Score?: number;
   triageCategory?: string;
   fluidIntakeMl?: number;
@@ -106,8 +131,10 @@ export interface Prescription {
   id?: string;
   patient?: Patient;
   patientId?: string;
+  encounterId?: string;
   practitionerId?: string;
   doctor?: User;
+  doctorUsername?: string;
   medicationName: string;
   medicationCode?: string;
   rxNormCode?: string;
@@ -120,11 +147,16 @@ export interface Prescription {
   durationUnit?: string;
   quantity?: number;
   refills?: number;
+  indication?: string;
   instructions?: string;
   status: string;
   prescribedAt?: string;
   startDate?: string;
+  startAt?: string;
   endDate?: string;
+  endAt?: string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface SafetyCheckResult {

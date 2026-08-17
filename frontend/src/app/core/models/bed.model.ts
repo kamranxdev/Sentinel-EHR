@@ -2,24 +2,32 @@ import { Encounter } from './clinical.model';
 
 export interface Bed {
   id?: string;
-  bedCode?: string;
-  bedNumber: string;
+  organizationId?: string;
+  facilityId?: string;
+  wardId?: string;
   wardName?: string;
-  departmentName?: string;
+  roomId?: string;
   roomNumber?: string;
-  status: 'AVAILABLE' | 'OCCUPIED' | 'MAINTENANCE' | 'CLEANING' | string;
+  bedNumber: string;
+  bedType?: string;
+  bedCode?: string;
+  departmentName?: string;
+  status: 'AVAILABLE' | 'OCCUPIED' | 'MAINTENANCE' | 'CLEANING' | 'RESERVED' | string;
   features?: string;
   currentEncounter?: Encounter;
   lastCleanedAt?: string;
+  createdAt?: string;
 }
 
 export interface BedRequestDTO {
   id?: string;
+  roomId?: string;
   bedNumber: string;
+  bedType?: string;
+  bedCode?: string;
   ward?: string;
   department?: string;
   roomNumber?: string;
-  bedType?: string;
 }
 
 export interface BedStatusUpdateDTO {
@@ -29,7 +37,9 @@ export interface BedStatusUpdateDTO {
 export interface LocationHistory {
   id?: string;
   encounter?: Encounter;
+  encounterId?: string;
   bed?: Bed;
+  bedId?: string;
   assignedAt?: string;
   releasedAt?: string;
   transferReason?: string;

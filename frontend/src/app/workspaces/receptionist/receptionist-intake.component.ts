@@ -69,7 +69,7 @@ import {
                 5-Step Patient Demographic Intake Wizard
                 <span hlmBadge variant="secondary" class="text-[11px] bg-sky-500/10 text-sky-600 border border-sky-500/20">Intake Modal</span>
               </h1>
-              <p class="text-xs text-muted-foreground mt-0.5">Capture identity markers, PIN Code address validation, insurance coverage & electronic ABDM/HIPAA consent.</p>
+              <p class="text-xs text-muted-foreground mt-0.5">Capture identity markers, PIN Code address validation, insurance coverage & electronic ABDM/DPDP consent.</p>
             </div>
           </div>
 
@@ -91,7 +91,7 @@ import {
               3. Insurance
             </div>
             <div [ngClass]="currentStep() === 4 ? 'text-primary font-bold border-b-2 border-primary pb-2' : 'text-muted-foreground pb-2'">
-              4. HIPAA Consent
+              4. ABDM/DPDP Consent
             </div>
             <div [ngClass]="currentStep() === 5 ? 'text-primary font-bold border-b-2 border-primary pb-2' : 'text-muted-foreground pb-2'">
               5. Final Review
@@ -230,7 +230,7 @@ import {
               <span>Back</span>
             </button>
             <button hlmBtn variant="default" size="sm" (click)="nextStep()" class="text-xs gap-1.5 bg-primary">
-              <span>Continue to HIPAA Directives</span>
+              <span>Continue to ABDM/DPDP Consent</span>
               <ng-icon name="lucideArrowRight" size="14" />
             </button>
           </div>
@@ -382,35 +382,35 @@ export class ReceptionistIntakeComponent implements OnInit {
 
   currentStep = signal(1);
 
-  fullName = 'Sunita Sharma';
-  dob = '1988-04-12';
-  nationalId = 'AADHAAR-9876-5432';
-  abhaId = '91-4590-1284-9001';
+  fullName = '';
+  dob = '';
+  nationalId = '';
+  abhaId = '';
   gender = 'Female';
-  bloodType = 'B+';
+  bloodType = 'O+';
   language = 'English';
-  raceEthnicity = 'Asian';
+  raceEthnicity = 'Not Specified';
 
-  address = '402 Sunrise Apartments, MG Road, Ward 12, City 560001';
-  phone = '+91 98450 11223';
-  email = 'sunita.sharma@example.com';
-  emergencyContactName = 'Vikram Sharma';
-  emergencyContactRelationship = 'Husband';
-  emergencyContactPhone = '+91 98450 99887';
+  address = '';
+  phone = '';
+  email = '';
+  emergencyContactName = '';
+  emergencyContactRelationship = 'Spouse';
+  emergencyContactPhone = '';
 
-  insuranceProvider = 'Star Health & Allied Insurance';
-  insurancePolicyNumber = 'POL-887102';
-  insuranceGroupNumber = 'GRP-9910';
-  coveragePlan = 'Comprehensive Gold PPO Plan';
+  insuranceProvider = '';
+  insurancePolicyNumber = '';
+  insuranceGroupNumber = '';
+  coveragePlan = '';
 
   hipaaPrivacySigned = true;
   treatmentConsentSigned = true;
   financialAgreementSigned = true;
 
   // Today's Appointment Scheduling for First Visit
-  scheduleTodayAppointment = true;
+  scheduleTodayAppointment = false;
   doctors = signal<any[]>([]);
-  selectedDoctorId: string = 'doc-001';
+  selectedDoctorId: string = '';
   appointmentTime: string = '10:30';
   consultationReason: string = 'First Visit General Consultation & Clinical Assessment';
   initialStage: string = 'ARRIVED';
@@ -430,26 +430,27 @@ export class ReceptionistIntakeComponent implements OnInit {
   }
 
   loadDoctors(): void {
-    this.apiService.getRecommendedDoctors().subscribe({
+    this.apiService.getDoctors().subscribe({
       next: (docs) => {
         if (docs && docs.length > 0) {
-          this.doctors.set(docs);
-          this.selectedDoctorId = String(docs[0].id);
+          const list = docs.map((d: any) => ({
+            id: d.id,
+            fullName: d.fullName || d.username,
+            specialty: d.specialization || d.specialty || 'General Physician',
+          }));
+          this.doctors.set(list);
+          this.selectedDoctorId = String(list[0].id);
         } else {
-          this.setFallbackDoctors();
+          this.doctors.set([]);
+          this.selectedDoctorId = '';
         }
       },
-      error: () => this.setFallbackDoctors(),
+      error: (err) => {
+        console.warn('Could not load practitioners for intake', err);
+        this.doctors.set([]);
+        this.selectedDoctorId = '';
+      },
     });
-  }
-
-  setFallbackDoctors(): void {
-    this.doctors.set([
-      { id: 'doc-001', fullName: 'Ananya Deshmukh', specialty: 'General Internal Medicine' },
-      { id: 'doc-002', fullName: 'Vikramaditya Verma', specialty: 'Cardiology' },
-      { id: 'doc-003', fullName: 'Meera Kulkarni', specialty: 'Pediatrics' },
-    ]);
-    this.selectedDoctorId = 'doc-001';
   }
 
   dismissModal(): void {

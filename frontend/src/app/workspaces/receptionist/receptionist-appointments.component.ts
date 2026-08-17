@@ -531,9 +531,17 @@ export class ReceptionistAppointmentsComponent implements OnInit {
 
   updateStage(apt: Appointment, stage: string): void {
     if (!apt.id) return;
-    this.apiService.updateAppointmentStage(apt.id, stage).subscribe({
-      next: () => this.loadData(),
-    });
+    if (stage === 'CHECKED_IN') {
+      this.apiService.checkInPatient(apt.id).subscribe({
+        next: () => this.loadData(),
+        error: () => this.loadData(),
+      });
+    } else {
+      this.apiService.updateAppointmentStatus(apt.id, stage).subscribe({
+        next: () => this.loadData(),
+        error: () => this.loadData(),
+      });
+    }
   }
 
   openCancelModal(apt: Appointment): void {

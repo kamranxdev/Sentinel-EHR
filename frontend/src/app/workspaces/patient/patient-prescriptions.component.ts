@@ -68,9 +68,14 @@ export class PatientPrescriptionsComponent implements OnInit {
   ngOnInit(): void {
     this.apiService.getMyPatientProfile().subscribe({
       next: (p) => {
-        if (p) this.apiService.getPrescriptionsByPatient(p.id).subscribe((rx) => this.prescriptions.set(rx));
+        if (p?.id) {
+          this.apiService.getPrescriptionsByPatient(p.id).subscribe({
+            next: (rx) => this.prescriptions.set(Array.isArray(rx) ? rx : []),
+            error: (err) => console.warn('Error loading patient prescriptions', err),
+          });
+        }
       },
-      error: (err) => console.warn('Could not load patient prescriptions', err),
+      error: (err) => console.warn('Could not load patient profile for prescriptions', err),
     });
   }
 }

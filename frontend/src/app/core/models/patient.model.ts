@@ -17,18 +17,26 @@ export interface EmergencyContact {
 export interface Patient {
   id: string;
   patientCode: string;
+  personId?: string;
   mrn?: string;
   abhaId?: string;
   nationalId?: string;
   fullName: string;
   firstName?: string;
   lastName?: string;
+  middleName?: string;
   dateOfBirth: string;
   gender: string;
   sexAtBirth?: string;
   genderIdentity?: string;
+  sexualOrientation?: string;
+  maritalStatus?: string;
+  preferredLanguage?: string;
+  ethnicity?: string;
+  race?: string;
   bloodType?: string;
   bloodGroup?: string;
+  rhFactor?: string;
   phone: string;
   email: string;
   address: string;
@@ -36,7 +44,9 @@ export interface Patient {
   state?: string;
   countryCode?: string;
   pinCode?: string;
+  status?: string;
   emergencyContact?: EmergencyContact;
+  emergencyContacts?: EmergencyContact[];
   insuranceProvider?: string;
   insurancePolicyNumber?: string;
   insuranceGroupNumber?: string;
@@ -54,6 +64,7 @@ export interface Patient {
   user?: User;
   createdAt?: string;
   updatedAt?: string;
+  deceasedAt?: string;
 }
 
 export interface PatientClinicalHistoryDTO {

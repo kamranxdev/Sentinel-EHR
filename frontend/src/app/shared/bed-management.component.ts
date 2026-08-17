@@ -66,7 +66,18 @@ import { lucideBed, lucideArrowRightLeft, lucideRefreshCw, lucideCheckCircle2, l
       </div>
 
       <!-- Spatial Bed Census Grid -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div *ngIf="loading()" class="py-16 text-center text-xs text-muted-foreground border border-border rounded-xl bg-card">
+        <div class="flex items-center justify-center gap-2">
+          <ng-icon name="lucideRefreshCw" class="animate-spin text-primary" size="16" />
+          <span>Loading inpatient bed census from hospital management server...</span>
+        </div>
+      </div>
+
+      <div *ngIf="!loading() && filteredBeds().length === 0" class="py-16 text-center text-xs text-muted-foreground border border-border rounded-xl bg-card">
+        No inpatient beds found for the selected ward / department filter.
+      </div>
+
+      <div *ngIf="!loading() && filteredBeds().length > 0" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         <div
           *ngFor="let bed of filteredBeds()"
           class="border border-border rounded-xl p-4 bg-card shadow-xs hover:shadow-md transition-all flex flex-col justify-between"
@@ -174,6 +185,7 @@ import { lucideBed, lucideArrowRightLeft, lucideRefreshCw, lucideCheckCircle2, l
 })
 export class BedManagementComponent implements OnInit {
   beds = signal<Bed[]>([]);
+  loading = signal(true);
   departments = ['ALL', 'ICU', 'Cardiology Inpatient', 'Emergency Ward', 'General Medical'];
   selectedDept = signal('ALL');
   isTransferOpen = signal(false);
@@ -188,22 +200,18 @@ export class BedManagementComponent implements OnInit {
   }
 
   loadBeds() {
+    this.loading.set(true);
     this.apiService.getBeds().subscribe({
-      next: (data) => this.beds.set(data),
-      error: () => {
-        this.setFallbackBeds();
+      next: (data) => {
+        this.beds.set(Array.isArray(data) ? data : []);
+        this.loading.set(false);
+      },
+      error: (err) => {
+        console.error('Failed to load beds from API', err);
+        this.beds.set([]);
+        this.loading.set(false);
       },
     });
-  }
-
-  setFallbackBeds() {
-    this.beds.set([
-      { id: 'bed-101', departmentName: 'Cardiology', wardName: 'Cardiac ICU', roomNumber: 'ICU-101', bedNumber: 'A', bedCode: 'CARD-ICU-01', status: 'OCCUPIED' },
-      { id: 'bed-102', departmentName: 'Cardiology', wardName: 'Cardiac Ward', roomNumber: '201', bedNumber: 'A', bedCode: 'CARD-WARD-01-A', status: 'AVAILABLE' },
-      { id: 'bed-103', departmentName: 'General Medical', wardName: 'Med-Surg Ward', roomNumber: '302', bedNumber: 'B', bedCode: 'MED-SURG-102', status: 'OCCUPIED' },
-      { id: 'bed-104', departmentName: 'Emergency', wardName: 'Acute Care Unit', roomNumber: 'ED-05', bedNumber: '1', bedCode: 'ED-ACUTE-05', status: 'CLEANING_REQUIRED' },
-      { id: 'bed-105', departmentName: 'Neurology', wardName: 'Neuro Ward', roomNumber: '405', bedNumber: 'A', bedCode: 'NEURO-WARD-05', status: 'AVAILABLE' },
-    ]);
   }
 
   filteredBeds() {

@@ -86,11 +86,12 @@ import { lucideCheckCheck, lucideArrowLeft, lucideMicroscope } from '@ng-icons/l
   `,
 })
 export class LabTechResultsComponent implements OnInit {
-  patientName = 'Kamran Khan';
-  testLOINC = 'HbA1c Glycated Hemoglobin (LOINC 4548-4)';
-  observedValue = '5.7 %';
-  referenceRange = '4.0 - 5.6 %';
-  notes = 'Prediabetes boundary screening.';
+  orderId = '';
+  patientName = '';
+  testLOINC = '';
+  observedValue = '';
+  referenceRange = '';
+  notes = '';
   submitting = signal(false);
 
   constructor(
@@ -99,13 +100,41 @@ export class LabTechResultsComponent implements OnInit {
     private router: Router
   ) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.apiService.getLabOrdersList().subscribe({
+      next: (orders) => {
+        if (orders && orders.length > 0) {
+          const pending = orders.find((o) => o.status !== 'COMPLETED') || orders[0];
+          this.orderId = String(pending.id || '');
+          this.patientName = pending.patient?.fullName || 'Patient';
+          this.testLOINC = `${pending.testName} (LOINC: ${pending.loincCode || '4548-4'})`;
+        }
+      },
+    });
+  }
 
   submitResults(): void {
+    if (!this.orderId) {
+      this.router.navigate(['/labtech/worklist']);
+      return;
+    }
     this.submitting.set(true);
-    setTimeout(() => {
-      this.submitting.set(false);
-      this.router.navigate(['/labtech/dashboard']);
-    }, 400);
+    const body = {
+      testName: this.testLOINC,
+      resultValue: this.observedValue,
+      referenceRange: this.referenceRange,
+      notes: this.notes,
+    };
+
+    this.apiService.addLabResult(this.orderId, body).subscribe({
+      next: () => {
+        this.submitting.set(false);
+        this.router.navigate(['/labtech/worklist']);
+      },
+      error: () => {
+        this.submitting.set(false);
+        this.router.navigate(['/labtech/worklist']);
+      },
+    });
   }
 }

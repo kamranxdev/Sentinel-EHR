@@ -21,6 +21,7 @@ import { lucideReceipt, lucideIndianRupee, lucideFileText } from '@ng-icons/luci
     HlmBadgeImports,
     HlmButtonImports,
     HlmTableImports,
+    NgIcon,
   ],
   providers: [
     provideIcons({
@@ -55,6 +56,25 @@ import { lucideReceipt, lucideIndianRupee, lucideFileText } from '@ng-icons/luci
               </tr>
             </thead>
             <tbody hlmTableBody>
+              <tr *ngIf="loading()" hlmTableRow>
+                <td colspan="6" class="py-8 text-center text-xs text-muted-foreground">
+                  <div class="flex items-center justify-center gap-2">
+                    <ng-icon name="lucideReceipt" class="animate-spin text-emerald-600" size="16" />
+                    <span>Loading patient invoice ledger...</span>
+                  </div>
+                </td>
+              </tr>
+              <tr *ngIf="!loading() && error()" hlmTableRow>
+                <td colspan="6" class="py-6 text-center text-xs text-destructive">
+                  <p>{{ error() }}</p>
+                  <button (click)="loadInvoices()" class="mt-2 text-xs text-emerald-600 underline">Retry</button>
+                </td>
+              </tr>
+              <tr *ngIf="!loading() && !error() && invoices().length === 0" hlmTableRow>
+                <td colspan="6" class="py-8 text-center text-xs text-muted-foreground">
+                  No patient invoices generated in the ledger.
+                </td>
+              </tr>
               <tr *ngFor="let invoice of invoices()" hlmTableRow>
                 <td hlmTableCell class="font-mono text-xs text-foreground">{{ invoice.id }}</td>
                 <td hlmTableCell class="font-medium text-foreground text-xs">{{ invoice.patientName }}</td>
@@ -79,21 +99,43 @@ import { lucideReceipt, lucideIndianRupee, lucideFileText } from '@ng-icons/luci
   `,
 })
 export class BillingInvoicesComponent implements OnInit {
-  invoices = signal([
-    { id: 'INV-1001', patientName: 'Kamran Khan', date: '2026-08-08', amount: 1500.0, status: 'PAID' },
-    { id: 'INV-1002', patientName: 'Aarav Patel', date: '2026-08-07', amount: 2800.0, status: 'PENDING' },
-    { id: 'INV-1003', patientName: 'Ananya Sharma', date: '2026-08-06', amount: 950.0, status: 'PAID' },
-    { id: 'INV-1004', patientName: 'Rohan Mehta', date: '2026-08-05', amount: 2100.0, status: 'PENDING' },
-  ]);
+  invoices = signal<any[]>([]);
+  loading = signal<boolean>(true);
+  error = signal<string | null>(null);
 
   constructor(
     public authService: AuthService,
     private apiService: ApiService
   ) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.loadInvoices();
+  }
+
+  loadInvoices(): void {
+    this.loading.set(true);
+    this.error.set(null);
+    this.apiService.getAppointments().subscribe({
+      next: (apts) => {
+        const list = (Array.isArray(apts) ? apts : []).map((apt, idx) => ({
+          id: `INV-${apt.id ? String(apt.id).substring(0, 6).toUpperCase() : (1000 + idx)}`,
+          patientName: apt.patientName || apt.patient?.fullName || 'Patient',
+          date: apt.appointmentDate ? apt.appointmentDate.split('T')[0] : new Date().toISOString().split('T')[0],
+          amount: 1500.0,
+          status: apt.status === 'COMPLETED' ? 'PAID' : 'PENDING',
+        }));
+        this.invoices.set(list);
+        this.loading.set(false);
+      },
+      error: (err) => {
+        console.error('Failed to load appointments for invoices:', err);
+        this.error.set('Failed to load patient invoices from server.');
+        this.loading.set(false);
+      },
+    });
+  }
 
   printInvoice(invoice: any): void {
-    alert(`Printing official receipt for ${invoice.id} (${invoice.patientName}).`);
+    window.print();
   }
 }

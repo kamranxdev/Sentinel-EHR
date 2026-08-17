@@ -694,18 +694,19 @@ export class PatientAppointmentsComponent implements OnInit {
   }
 
   getDoctorDisplayName(apt: Appointment): string {
-    const rawName = apt.doctorName || apt.doctor?.fullName;
+    const rawName = apt.doctorName || apt.doctorUsername || apt.doctor?.fullName;
     if (!rawName) return 'Assigned Physician';
     return this.formatDoctorName(rawName);
   }
 
   getDoctorSpecialization(apt: Appointment): string {
-    return apt.doctorSpecialization || apt.doctor?.specialization || '';
+    return apt.doctorSpecialization || apt.doctor?.specialization || 'Clinical Medicine';
   }
 
   // Computed Properties for Filtering
   filteredAppointments = computed(() => {
     let list = this.appointments();
+    if (!Array.isArray(list)) return [];
 
     const filter = this.activeFilter();
     if (filter !== 'ALL') {
@@ -718,6 +719,7 @@ export class PatientAppointmentsComponent implements OnInit {
         (a) =>
           a.reason?.toLowerCase().includes(q) ||
           a.doctorName?.toLowerCase().includes(q) ||
+          a.doctorUsername?.toLowerCase().includes(q) ||
           a.doctor?.fullName?.toLowerCase().includes(q) ||
           a.doctorSpecialization?.toLowerCase().includes(q) ||
           a.doctor?.specialization?.toLowerCase().includes(q)
@@ -739,26 +741,26 @@ export class PatientAppointmentsComponent implements OnInit {
 
   loadPatientAndAppointments(): void {
     this.apiService.getMyPatientProfile().subscribe({
-      next: (p) => {
-        if (p) {
-          this.patientProfile.set(p);
-          this.fetchAppointments(p.id);
+      next: (profile) => {
+        if (profile) {
+          this.patientProfile.set(profile);
+          this.fetchAppointments(profile.id);
         }
       },
-      error: (err) => console.warn('Could not load patient profile', err),
+      error: (err) => console.warn('Could not load patient profile for appointments', err),
     });
   }
 
   fetchAppointments(patientId: string): void {
     this.apiService.getAppointmentsByPatient(patientId).subscribe({
-      next: (apts) => this.appointments.set(apts),
+      next: (apts) => this.appointments.set(Array.isArray(apts) ? apts : []),
       error: (err) => console.warn('Error fetching patient appointments', err),
     });
   }
 
   loadDoctors(): void {
     this.apiService.getDoctors().subscribe({
-      next: (docs) => this.allDoctors.set(docs),
+      next: (docs) => this.allDoctors.set(Array.isArray(docs) ? docs : []),
       error: (err) => console.warn('Error fetching doctors list', err),
     });
   }

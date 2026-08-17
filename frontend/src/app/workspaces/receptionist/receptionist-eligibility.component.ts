@@ -294,9 +294,9 @@ export class ReceptionistEligibilityComponent implements OnInit, OnChanges {
   @Output() close = new EventEmitter<void>();
 
   patientId: string | null = null;
-  subscriberId = 'POL-887102';
-  payerName = 'Star Health & Allied Insurance';
-  groupNumber = 'GRP-9910';
+  subscriberId = '';
+  payerName = '';
+  groupNumber = '';
 
   loading = signal(false);
   collecting = signal(false);
@@ -311,10 +311,10 @@ export class ReceptionistEligibilityComponent implements OnInit, OnChanges {
   selectedPatient = signal<Patient | null>(null);
 
   payerPresets = [
-    { name: 'Star Health', group: 'GRP-STAR-01' },
-    { name: 'Care Health', group: 'GRP-CARE-99' },
-    { name: 'PM-JAY Ayushman', group: 'GRP-AB-PMJAY' },
-    { name: 'BCBS PPO', group: 'GRP-BCBS-99' },
+    { name: 'Star Health & Allied', group: 'GRP-STAR-01' },
+    { name: 'Care Health Insurance', group: 'GRP-CARE-99' },
+    { name: 'PM-JAY Ayushman Bharat', group: 'GRP-AB-PMJAY' },
+    { name: 'HDFC ERGO Health', group: 'GRP-HDFC-02' },
   ];
 
   constructor(

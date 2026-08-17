@@ -3,42 +3,62 @@ import { Prescription } from './clinical.model';
 
 export interface TriageEwsRecord {
   id?: string;
+  encounterId?: string;
   patientId?: string;
   patient?: Patient;
-  ewsScore: number;
-  triagePriority: 'ROUTINE' | 'URGENT' | 'EMERGENT' | 'RESUSCITATION' | string;
+  ewsScore?: number;
+  chiefComplaint?: string;
+  triagePriority: 'ROUTINE' | 'URGENT' | 'EMERGENT' | 'RESUSCITATION' | 'NON_URGENT' | string;
+  vitalsSummary?: string;
   systolicBp?: number;
+  diastolicBp?: number;
   heartRate?: number;
   respiratoryRate?: number;
   temperature?: number;
   oxygenSaturation?: number;
   consciousnessLevel?: string;
+  notes?: string;
+  triagedByUsername?: string;
   recordedBy?: string;
   recordedAt?: string;
+  triagedAt?: string;
 }
 
 export interface TriageEwsRequestDTO {
-  patientId: string;
+  encounterId?: string;
+  patientId?: string;
+  chiefComplaint?: string;
+  triagePriority?: string;
+  vitalsSummary?: string;
   systolicBp?: number;
+  diastolicBp?: number;
   heartRate?: number;
   respiratoryRate?: number;
   temperature?: number;
   oxygenSaturation?: number;
   consciousnessLevel?: string;
+  notes?: string;
 }
 
 export interface TriageEwsResponseDTO {
   id: string;
-  patientId: string;
-  ewsScore: number;
+  encounterId?: string;
+  patientId?: string;
+  chiefComplaint?: string;
   triagePriority: string;
-  recordedBy: string;
-  recordedAt: string;
+  vitalsSummary?: string;
+  notes?: string;
+  ewsScore?: number;
+  triagedByUsername?: string;
+  recordedBy?: string;
+  triagedAt?: string;
+  recordedAt?: string;
 }
 
 export interface EmarRecord {
   id?: string;
   patientId?: string;
+  encounterId?: string;
   prescriptionId?: string;
   patient?: Patient;
   prescription?: Prescription;
@@ -48,6 +68,7 @@ export interface EmarRecord {
   site?: string;
   route?: string;
   administeredBy?: string;
+  administeredByUsername?: string;
   scheduledAt?: string;
   administeredAt?: string;
   status?: string;
@@ -55,27 +76,50 @@ export interface EmarRecord {
 }
 
 export interface EmarRecordRequestDTO {
-  patientId: string;
   prescriptionId?: string;
+  encounterId?: string;
+  patientId?: string;
   medicationName: string;
   dose: string;
   unit?: string;
   site?: string;
   route?: string;
   notes?: string;
+  administeredAt?: string;
 }
 
 export interface EmarRecordResponseDTO {
   id: string;
-  patientId: string;
+  patientId?: string;
+  encounterId?: string;
   prescriptionId?: string;
   medicationName: string;
   dose: string;
   unit?: string;
   site?: string;
   route?: string;
-  administeredBy: string;
+  administeredBy?: string;
+  administeredByUsername?: string;
   scheduledAt?: string;
   administeredAt: string;
   status: string;
+  notes?: string;
+}
+
+export interface NursingFlowsheetEntry {
+  id?: string;
+  parameterName: string;
+  parameterValue: string;
+  unit?: string;
+  notes?: string;
+  recordedAt?: string;
+}
+
+export interface NursingFlowsheet {
+  id: string;
+  encounterId: string;
+  shift: string;
+  nurseUsername?: string;
+  createdAt: string;
+  entries: NursingFlowsheetEntry[];
 }

@@ -129,7 +129,7 @@ import {
               <span class="text-[10px] font-mono font-medium px-2 py-0.5 rounded bg-muted text-muted-foreground">5-Step Wizard</span>
             </div>
             <h3 class="text-sm font-bold text-foreground">Patient Intake & Registration</h3>
-            <p class="text-xs text-muted-foreground">Demographic wizard with PIN Code address validation & electronic ABDM/HIPAA consent.</p>
+            <p class="text-xs text-muted-foreground">Demographic wizard with PIN Code address validation & electronic ABDM/DPDP consent.</p>
           </div>
           <button (click)="openIntakeModal()" class="text-xs font-semibold text-emerald-500 hover:text-emerald-600 flex items-center gap-1.5 text-left">
             <span>Start Registration</span>

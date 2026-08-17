@@ -1,6 +1,6 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
 import { StatCardComponent } from '../../shared/ui/stat-card.component';
@@ -102,6 +102,25 @@ import {
               </tr>
             </thead>
             <tbody hlmTableBody>
+              <tr *ngIf="loading()" hlmTableRow>
+                <td colspan="5" class="py-8 text-center text-xs text-muted-foreground">
+                  <div class="flex items-center justify-center gap-2">
+                    <ng-icon name="lucideFlaskConical" class="animate-spin text-teal-600" size="16" />
+                    <span>Loading diagnostic worklist from laboratory server...</span>
+                  </div>
+                </td>
+              </tr>
+              <tr *ngIf="!loading() && error()" hlmTableRow>
+                <td colspan="5" class="py-6 text-center text-xs text-destructive">
+                  <p>{{ error() }}</p>
+                  <button (click)="loadOrders()" class="mt-2 text-xs text-teal-600 underline">Retry</button>
+                </td>
+              </tr>
+              <tr *ngIf="!loading() && !error() && labSamples().length === 0" hlmTableRow>
+                <td colspan="5" class="py-8 text-center text-xs text-muted-foreground">
+                  No active diagnostic test orders in the laboratory worklist.
+                </td>
+              </tr>
               <tr *ngFor="let sample of labSamples()" hlmTableRow>
                 <td hlmTableCell class="font-medium text-foreground text-xs">{{ sample.patientName }}</td>
                 <td hlmTableCell class="text-xs text-muted-foreground">{{ sample.testName }}</td>
@@ -125,24 +144,48 @@ import {
   `,
 })
 export class LabTechDashboardComponent implements OnInit {
-  specimenQueueCount = signal(4);
-  verifiedCount = signal(18);
+  labSamples = signal<any[]>([]);
+  loading = signal<boolean>(true);
+  error = signal<string | null>(null);
 
-  labSamples = signal([
-    { patientName: 'Kamran Khan', testName: 'HbA1c Glycated Hemoglobin', loinc: '4548-4', priority: 'ROUTINE' },
-    { patientName: 'Aarav Patel', testName: 'Comprehensive Metabolic Panel (CMP)', loinc: '24323-8', priority: 'STAT' },
-    { patientName: 'Ananya Sharma', testName: 'Complete Blood Count (CBC)', loinc: '57021-8', priority: 'URGENT' },
-    { patientName: 'Rohan Mehta', testName: 'Lipid Panel', loinc: '24331-1', priority: 'ROUTINE' },
-  ]);
+  specimenQueueCount = computed(() => this.labSamples().filter((o) => o.status !== 'COMPLETED').length);
+  verifiedCount = computed(() => this.labSamples().filter((o) => o.status === 'COMPLETED').length);
 
   constructor(
     public authService: AuthService,
-    private apiService: ApiService
+    private apiService: ApiService,
+    private router: Router
   ) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.loadOrders();
+  }
+
+  loadOrders(): void {
+    this.loading.set(true);
+    this.error.set(null);
+    this.apiService.getLabOrdersList().subscribe({
+      next: (orders) => {
+        const list = (Array.isArray(orders) ? orders : []).map((o) => ({
+          id: o.id,
+          patientName: o.patient?.fullName || (o as any).patientName || 'Patient',
+          testName: o.testName,
+          loinc: o.loincCode || '4548-4',
+          priority: o.priority || 'ROUTINE',
+          status: o.status,
+        }));
+        this.labSamples.set(list);
+        this.loading.set(false);
+      },
+      error: (err) => {
+        console.error('Failed to load lab orders:', err);
+        this.error.set('Failed to load diagnostic worklist from laboratory server.');
+        this.loading.set(false);
+      },
+    });
+  }
 
   enterResult(sample: any): void {
-    alert(`Opened result entry sheet for ${sample.patientName} (${sample.testName}).`);
+    this.router.navigate(['/labtech/worklist']);
   }
 }

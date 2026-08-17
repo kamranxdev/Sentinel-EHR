@@ -31,7 +31,7 @@ export class PatientContextService {
       this.apiService.getMyPatientProfile().subscribe({
         next: (patient) => {
           this.activePatient.set(patient);
-          this.patientList.set([patient]);
+          this.patientList.set(patient ? [patient] : []);
           this.loading.set(false);
         },
         error: (err) => {
@@ -44,11 +44,12 @@ export class PatientContextService {
       // Clinician / Staff user: load Master Patient Index
       this.apiService.getPatients().subscribe({
         next: (patients) => {
-          this.patientList.set(patients);
+          const list = Array.isArray(patients) ? patients : [];
+          this.patientList.set(list);
           const current = this.activePatient();
           // Retain currently selected patient if still in list
           if (current) {
-            const found = patients.find((p) => String(p.id) === String(current.id));
+            const found = list.find((p) => String(p.id) === String(current.id));
             this.activePatient.set(found || null);
           }
           this.loading.set(false);

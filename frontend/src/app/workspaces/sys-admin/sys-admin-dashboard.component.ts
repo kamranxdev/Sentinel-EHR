@@ -102,7 +102,7 @@ interface ToastAlert {
                 Enterprise Systems Active
               </span>
               <span>•</span>
-              <span>RBAC provisioning, MPI patient registry, HIPAA audit vault & capacity analytics</span>
+              <span>RBAC provisioning, MPI patient registry, ABDM & DPDP audit vault & capacity analytics</span>
             </p>
           </div>
         </div>
@@ -212,7 +212,7 @@ interface ToastAlert {
           </div>
           <div class="mt-2 flex items-baseline justify-between">
             <div class="text-2xl font-bold text-purple-600 font-mono">WORM</div>
-            <span class="text-[11px] font-medium text-purple-600 font-mono">HIPAA</span>
+            <span class="text-[11px] font-medium text-purple-600 font-mono">ABDM</span>
           </div>
           <p class="text-[10px] text-muted-foreground mt-1">Immutable security log</p>
         </a>
@@ -300,7 +300,7 @@ interface ToastAlert {
             <ng-icon name="lucideShieldCheck" size="16" class="text-purple-600" />
             Enterprise Security & Governance Overview
           </h2>
-          <span hlmBadge variant="secondary" class="text-[10px]">HIPAA 164.312 Compliant</span>
+          <span hlmBadge variant="secondary" class="text-[10px]">ABDM & DPDP Compliant</span>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">

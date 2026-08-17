@@ -301,9 +301,9 @@ interface ToastAlert {
           <a routerLink="/auditor/ledger" class="p-3.5 rounded-lg border border-border/80 bg-muted/20 hover:bg-muted/40 transition-all space-y-1 block">
             <div class="flex items-center gap-2 text-xs font-semibold text-foreground">
               <ng-icon name="lucideShieldCheck" size="15" class="text-purple-600" />
-              HIPAA Audit Ledger
+              ABDM & DPDP Audit Ledger
             </div>
-            <p class="text-[11px] text-muted-foreground">Inspect immutable WORM access logs for audit compliance.</p>
+            <p class="text-[11px] text-muted-foreground">Inspect immutable WORM access logs for statutory compliance.</p>
           </a>
         </div>
       </div>

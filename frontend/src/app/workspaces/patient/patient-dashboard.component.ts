@@ -599,29 +599,37 @@ export class PatientDashboardComponent implements OnInit {
   // Computed signals for smart UI presentation
   latestVitals = computed(() => {
     const list = this.vitalsList();
-    return list.length > 0 ? list[list.length - 1] : null;
+    if (!Array.isArray(list) || list.length === 0) return null;
+    return list[0];
   });
 
   activePrescriptions = computed(() => {
-    return this.prescriptions().filter(
+    const list = this.prescriptions();
+    if (!Array.isArray(list)) return [];
+    return list.filter(
       (rx) => rx.status?.toUpperCase() !== 'CANCELLED' && rx.status?.toUpperCase() !== 'DISCONTINUED',
     );
   });
 
   nextAppointment = computed(() => {
-    const apps = this.appointments().filter(
+    const apps = this.appointments();
+    if (!Array.isArray(apps) || apps.length === 0) return null;
+    const filtered = apps.filter(
       (a) => a.status?.toUpperCase() !== 'CANCELLED' && a.status?.toUpperCase() !== 'COMPLETED',
     );
-    if (apps.length === 0) return null;
-    return apps[0];
+    return filtered.length > 0 ? filtered[0] : null;
   });
 
   recentEncounters = computed(() => {
-    return [...this.encounters()].reverse().slice(0, 3);
+    const encs = this.encounters();
+    if (!Array.isArray(encs)) return [];
+    return encs.slice(0, 3);
   });
 
   activeDiagnoses = computed(() => {
-    return this.diagnoses().filter((d) => d.status?.toUpperCase() !== 'RESOLVED');
+    const list = this.diagnoses();
+    if (!Array.isArray(list)) return [];
+    return list.filter((d) => d.status?.toUpperCase() !== 'RESOLVED');
   });
 
   constructor(
@@ -650,32 +658,32 @@ export class PatientDashboardComponent implements OnInit {
 
   private loadPatientHealthData(patientId: string): void {
     this.apiService.getAppointmentsByPatient(patientId).subscribe({
-      next: (apps) => this.appointments.set(apps),
+      next: (apps) => this.appointments.set(Array.isArray(apps) ? apps : []),
       error: (err) => console.warn('Error loading appointments', err),
     });
 
     this.apiService.getPrescriptionsByPatient(patientId).subscribe({
-      next: (rx) => this.prescriptions.set(rx),
+      next: (rx) => this.prescriptions.set(Array.isArray(rx) ? rx : []),
       error: (err) => console.warn('Error loading prescriptions', err),
     });
 
     this.apiService.getVitalsByPatient(patientId).subscribe({
-      next: (v) => this.vitalsList.set(v),
+      next: (v) => this.vitalsList.set(Array.isArray(v) ? v : []),
       error: (err) => console.warn('Error loading vitals', err),
     });
 
     this.apiService.getAllergiesByPatient(patientId).subscribe({
-      next: (a) => this.allergies.set(a),
+      next: (a) => this.allergies.set(Array.isArray(a) ? a : []),
       error: (err) => console.warn('Error loading allergies', err),
     });
 
     this.apiService.getDiagnosesByPatient(patientId).subscribe({
-      next: (d) => this.diagnoses.set(d),
+      next: (d) => this.diagnoses.set(Array.isArray(d) ? d : []),
       error: (err) => console.warn('Error loading diagnoses', err),
     });
 
     this.apiService.getEncountersByPatient(patientId).subscribe({
-      next: (e) => this.encounters.set(e),
+      next: (e) => this.encounters.set(Array.isArray(e) ? e : []),
       error: (err) => console.warn('Error loading encounters', err),
     });
   }

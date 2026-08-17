@@ -24,11 +24,18 @@ export interface Appointment {
   patientName?: string;
   patientCode?: string;
   patient?: Patient;
+  organizationId?: string;
+  facilityId?: string;
+  departmentId?: string;
+  practitionerId?: string;
   doctorId?: string;
   doctorName?: string;
+  doctorUsername?: string;
   doctorSpecialization?: string;
   doctor?: User;
-  appointmentDate: string;
+  appointmentDate?: string;
+  startsAt?: string;
+  endsAt?: string;
   startTime?: string;
   endTime?: string;
   appointmentType?: string;
@@ -41,21 +48,74 @@ export interface Appointment {
   insuranceDetails?: string;
   reportsUploaded?: string;
   followUpDate?: string;
+  checkedInAt?: string;
   arrivedAt?: string;
+  completedAt?: string;
   vitals?: Vitals;
   createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface AppointmentRequestDTO {
   patientId: string;
-  doctorId: string;
-  appointmentDate: string;
+  practitionerId?: string;
+  doctorId?: string;
+  appointmentDate?: string;
+  startsAt?: string;
+  endsAt?: string;
+  organizationId?: string;
+  facilityId?: string;
+  departmentId?: string;
   appointmentType?: string;
   status?: string;
   stage?: string;
   reason?: string;
   priority?: string;
   notes?: string;
+}
+
+export interface AppointmentCheckInRequestDTO {
+  notes?: string;
+  insuranceVerified?: boolean;
+  insuranceDetails?: string;
+}
+
+export interface AppointmentTriageRequestDTO {
+  systolicBp?: number;
+  diastolicBp?: number;
+  heartRate?: number;
+  respiratoryRate?: number;
+  temperature?: number;
+  oxygenSaturation?: number;
+  notes?: string;
+}
+
+export interface AppointmentConsultRequestDTO {
+  diagnosis?: string;
+  icdCode?: string;
+  treatmentNotes?: string;
+}
+
+export interface AppointmentCancelRequestDTO {
+  cancellationReason: string;
+  additionalComment?: string;
+}
+
+export interface AppointmentRescheduleRequestDTO {
+  newStartsAt: string;
+  newEndsAt?: string;
+  reason?: string;
+}
+
+export interface ScheduleSlot {
+  id: string;
+  organizationId?: string;
+  facilityId?: string;
+  practitionerId: string;
+  startTime: string;
+  endTime: string;
+  slotStatus: 'AVAILABLE' | 'BOOKED' | 'BLOCKED' | string;
+  capacity?: number;
 }
 
 export interface AppointmentNote {
@@ -110,12 +170,4 @@ export interface AppointmentBilling {
   netPayable: number;
   paymentStatus: string;
   generatedAt?: string;
-}
-
-export interface AppointmentStatusUpdateDTO {
-  status: string;
-}
-
-export interface AppointmentStageUpdateDTO {
-  stage: string;
 }

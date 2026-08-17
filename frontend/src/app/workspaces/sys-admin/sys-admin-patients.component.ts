@@ -117,7 +117,7 @@ interface ToastAlert {
             </div>
             <p class="text-xs text-muted-foreground mt-0.5 flex items-center gap-2">
               <span class="inline-flex items-center gap-1 text-emerald-500 font-semibold">
-                <ng-icon name="lucideShieldCheck" size="13" /> HIPAA Minimum Necessary Compliant
+                <ng-icon name="lucideShieldCheck" size="13" /> ABDM & DPDP Act Compliant
               </span>
               <span>•</span>
               <span>Enterprise identity registry, MRN code allocation, & Fellegi-Sunter de-duplication</span>
@@ -216,7 +216,7 @@ interface ToastAlert {
             <ng-icon name="lucideHeartPulse" size="18" class="text-emerald-600" />
             <div>
               <h2 class="text-sm font-semibold text-foreground">MPI Master Identity Registry</h2>
-              <p class="text-xs text-muted-foreground">Deterministic MRN search with HIPAA Minimum Necessary PHI protection.</p>
+              <p class="text-xs text-muted-foreground">Deterministic MRN search with ABDM & DPDP Act Data Protection.</p>
             </div>
           </div>
 
@@ -275,7 +275,7 @@ interface ToastAlert {
                 <th hlmTableHead class="py-3 px-4 text-left">ABHA ID / National ID</th>
                 <th hlmTableHead class="py-3 px-4 text-left">Contact Info</th>
                 <th hlmTableHead class="py-3 px-4 text-left">Payer / Medical Alerts</th>
-                <th hlmTableHead class="py-3 px-4 text-right">HIPAA Governance</th>
+                <th hlmTableHead class="py-3 px-4 text-right">Data Governance</th>
               </tr>
             </thead>
             <tbody hlmTableBody class="divide-y divide-border">
@@ -337,7 +337,7 @@ interface ToastAlert {
                   </div>
                 </td>
 
-                <!-- HIPAA Governance Actions -->
+                <!-- ABDM & DPDP Data Governance Actions -->
                 <td hlmTableCell class="py-3 px-4 text-right whitespace-nowrap">
                   <div class="flex items-center justify-end gap-1.5">
                     <button
@@ -529,7 +529,7 @@ export class SysAdminPatientsComponent implements OnInit {
     this.revealPHI.set(!this.revealPHI());
     if (this.revealPHI()) {
       this.toastMessage.set({
-        message: `AUDIT NOTICE: Unmasked sensitive PHI for ${this.selectedPatient()?.fullName}. Action logged to HIPAA WORM Vault.`,
+        message: `AUDIT NOTICE: Unmasked sensitive patient data for ${this.selectedPatient()?.fullName}. Action logged to ABDM WORM Vault.`,
         type: 'success',
       });
     }

@@ -206,8 +206,8 @@ export class NurseDashboardComponent implements OnInit {
     if (!q) return this.patients();
     return this.patients().filter(
       (p) =>
-        p.fullName.toLowerCase().includes(q) ||
-        p.patientCode.toLowerCase().includes(q)
+        p.fullName?.toLowerCase().includes(q) ||
+        p.patientCode?.toLowerCase().includes(q)
     );
   });
 

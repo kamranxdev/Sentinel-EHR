@@ -33,8 +33,6 @@ public class CustomUserDetailsService implements UserDetailsService {
                 .or(() -> userRepository.findByEmail(username))
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username or email: " + username));
 
-        System.out.println(">>> DEBUG LOADED USER: " + user.getUsername() + " PASS_HASH: [" + user.getPassword() + "]");
-
         Set<GrantedAuthority> authorities = new HashSet<>();
         Set<String> roleNames = new HashSet<>();
         Set<String> permissionCodes = new HashSet<>();
@@ -61,7 +59,6 @@ public class CustomUserDetailsService implements UserDetailsService {
                 null,
                 authorities,
                 roleNames,
-                permissionCodes
-        );
+                permissionCodes);
     }
 }

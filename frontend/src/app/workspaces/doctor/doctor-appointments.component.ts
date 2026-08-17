@@ -591,6 +591,7 @@ export class DoctorAppointmentsComponent implements OnInit {
     const validDiagnoses = this.diagnoses.filter(d => d.conditionName.trim().length > 0);
     const validPrescriptions = this.prescriptions.filter(p => p.medicationName.trim().length > 0);
     const validLabOrders = this.labOrders.filter(l => l.testName.trim().length > 0);
+    const patientId = apt.patientId || apt.patient?.id;
 
     const payload = {
       doctorNotes: this.doctorNotes,
@@ -598,6 +599,35 @@ export class DoctorAppointmentsComponent implements OnInit {
       prescriptions: validPrescriptions,
       labOrders: validLabOrders,
     };
+
+    // Auto-persist prescriptions and lab orders to patient chart
+    if (patientId) {
+      validPrescriptions.forEach(rx => {
+        this.apiService.createPrescription({
+          patientId,
+          medicationName: rx.medicationName,
+          dosage: rx.dosage,
+          frequency: rx.frequency,
+          status: 'ACTIVE',
+        }).subscribe({ error: () => {} });
+      });
+
+      validLabOrders.forEach(lab => {
+        this.apiService.createLabOrder({
+          patientId,
+          testName: lab.testName,
+        }).subscribe({ error: () => {} });
+      });
+
+      validDiagnoses.forEach(d => {
+        this.apiService.createDiagnosis({
+          patientId,
+          conditionName: d.conditionName,
+          icdCode: d.icdCode,
+          status: 'ACTIVE',
+        }).subscribe({ error: () => {} });
+      });
+    }
 
     this.apiService.recordDoctorConsultation(apt.id, payload).subscribe({
       next: () => {

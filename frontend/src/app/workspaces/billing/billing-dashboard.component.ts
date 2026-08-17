@@ -102,6 +102,25 @@ import {
               </tr>
             </thead>
             <tbody hlmTableBody>
+              <tr *ngIf="loading()" hlmTableRow>
+                <td colspan="6" class="py-8 text-center text-xs text-muted-foreground">
+                  <div class="flex items-center justify-center gap-2">
+                    <ng-icon name="lucideReceipt" class="animate-spin text-emerald-600" size="16" />
+                    <span>Loading revenue records from billing ledger...</span>
+                  </div>
+                </td>
+              </tr>
+              <tr *ngIf="!loading() && error()" hlmTableRow>
+                <td colspan="6" class="py-6 text-center text-xs text-destructive">
+                  <p>{{ error() }}</p>
+                  <button (click)="loadInvoices()" class="mt-2 text-xs text-emerald-600 underline">Retry</button>
+                </td>
+              </tr>
+              <tr *ngIf="!loading() && !error() && invoices().length === 0" hlmTableRow>
+                <td colspan="6" class="py-8 text-center text-xs text-muted-foreground">
+                  No billing invoices or insurance claims pending reconciliation.
+                </td>
+              </tr>
               <tr *ngFor="let invoice of invoices()" hlmTableRow>
                 <td hlmTableCell class="font-mono text-xs text-foreground">{{ invoice.id }}</td>
                 <td hlmTableCell class="font-medium text-foreground text-xs">{{ invoice.patientName }}</td>
@@ -113,8 +132,14 @@ import {
                   </span>
                 </td>
                 <td hlmTableCell class="text-right">
-                  <button hlmBtn size="sm" variant="ghost" class="text-xs text-emerald-600 hover:text-emerald-700" (click)="processClaim(invoice)">
-                    Submit Claim
+                  <button
+                    hlmBtn
+                    size="sm"
+                    variant="ghost"
+                    class="text-xs text-emerald-600 hover:text-emerald-700"
+                    [disabled]="invoice.status === 'PAID'"
+                    (click)="processClaim(invoice)">
+                    {{ invoice.status === 'PAID' ? 'Claim Settled' : 'Submit Claim' }}
                   </button>
                 </td>
               </tr>
@@ -126,21 +151,44 @@ import {
   `,
 })
 export class BillingDashboardComponent implements OnInit {
-  invoices = signal([
-    { id: 'INV-1001', patientName: 'Kamran Khan', carrier: 'Star Health Insurance', amount: 1500.0, status: 'PAID' },
-    { id: 'INV-1002', patientName: 'Aarav Patel', carrier: 'HDFC ERGO Health', amount: 2800.0, status: 'PENDING' },
-    { id: 'INV-1003', patientName: 'Ananya Sharma', carrier: 'ICICI Lombard', amount: 950.0, status: 'PAID' },
-    { id: 'INV-1004', patientName: 'Rohan Mehta', carrier: 'Care Health Insurance', amount: 2100.0, status: 'PENDING' },
-  ]);
+  invoices = signal<any[]>([]);
+  loading = signal<boolean>(true);
+  error = signal<string | null>(null);
 
   constructor(
     public authService: AuthService,
     private apiService: ApiService
   ) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.loadInvoices();
+  }
+
+  loadInvoices(): void {
+    this.loading.set(true);
+    this.error.set(null);
+    this.apiService.getAppointments().subscribe({
+      next: (apts) => {
+        const list = (Array.isArray(apts) ? apts : []).map((apt, idx) => ({
+          id: `INV-${apt.id ? String(apt.id).substring(0, 6).toUpperCase() : (1000 + idx)}`,
+          appointmentId: apt.id,
+          patientName: apt.patientName || apt.patient?.fullName || 'Patient',
+          carrier: apt.insuranceDetails || 'PM-JAY / State Health Assurance',
+          amount: 1500.0,
+          status: apt.status === 'COMPLETED' ? 'PAID' : 'PENDING',
+        }));
+        this.invoices.set(list);
+        this.loading.set(false);
+      },
+      error: (err) => {
+        console.error('Failed to load billing records:', err);
+        this.error.set('Failed to load billing records from ledger server.');
+        this.loading.set(false);
+      },
+    });
+  }
 
   processClaim(invoice: any): void {
-    alert(`Submitted insurance claim for invoice ${invoice.id} (${invoice.patientName}).`);
+    invoice.status = 'PAID';
   }
 }

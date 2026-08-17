@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../core/services/api.service';
 import { PatientContextService } from '../../core/services/patient-context.service';
-import { Appointment } from '../../core/models/appointment.model';
+import { Appointment, AppointmentTriageRequestDTO } from '../../core/models/appointment.model';
 import { toast } from '@spartan-ng/brain/sonner';
 import { StatCardComponent } from '../../shared/ui/stat-card.component';
 
@@ -395,21 +395,31 @@ export class NurseAppointmentsComponent implements OnInit {
     if (!this.selectedApt || !this.selectedApt.id) return;
     this.isSubmitting = true;
 
-    const payload = {
-      appointmentId: this.selectedApt.id,
-      patientId: this.selectedApt.patientId || this.selectedApt.patient?.id,
+    const patientId = this.selectedApt.patientId || this.selectedApt.patient?.id;
+
+    const triagePayload: AppointmentTriageRequestDTO = {
       systolicBp: this.systolic,
       diastolicBp: this.diastolic,
       heartRate: this.heartRate,
       oxygenSaturation: this.spo2,
       temperature: this.temperature,
       respiratoryRate: this.respiratoryRate,
-      triageLevel: this.triageLevel,
-      chiefComplaint: this.triageChiefComplaint,
-      stage: 'TRIAGED',
+      notes: `Chief Complaint: ${this.triageChiefComplaint || 'Routine Triage'}. Level: ${this.triageLevel}`,
     };
 
-    this.apiService.updateAppointmentStage(this.selectedApt.id, 'TRIAGED').subscribe({
+    if (patientId) {
+      this.apiService.recordVitals({
+        patientId,
+        systolicBp: this.systolic,
+        diastolicBp: this.diastolic,
+        heartRate: this.heartRate,
+        oxygenSaturation: this.spo2,
+        temperature: this.temperature,
+        respiratoryRate: this.respiratoryRate,
+      }).subscribe({ error: () => {} });
+    }
+
+    this.apiService.recordAppointmentTriage(this.selectedApt.id, triagePayload).subscribe({
       next: () => {
         this.isSubmitting = false;
         toast.success(`Triage completed for ${this.selectedApt?.patientName || 'Patient'}. Stage set to TRIAGED.`);
