@@ -28,16 +28,18 @@ Welcome to the comprehensive technical and operational documentation for **Senti
   - End-to-end specimen collection, accessioning, barcode tracking, analyzer processing, result validation, and critical alert routing.
 - [**Receptionist & Front-Desk Workspace**](./workspaces/receptionist-workspace.md)
   - Patient registration, Master Patient Index (MPI) deduplication, appointment scheduling, and OPD arrival check-in.
-- [**Administrator Workspace**](./workspaces/admin-workspace.md)
-  - Multi-tenant onboarding, facility/ward/bed spatial configuration, practitioner roles, and security audit log inspection.
-- [**Patient Self-Service Portal**](./workspaces/patient-workspace.md)
-  - Patient self-registration, timeline history, lab result access, active prescriptions, and consent management.
-- [**Pharmacist Workspace**](./workspaces/pharmacist-workspace.md)
+- [**Organization Administrator Workspace**](./workspaces/organization-admin-workspace.md)
+  - Facility settings, clinical staff roster & credentialing, spatial ward & bed topology provisioning, MPI duplicate governance, and facility schedule analytics.
+- [**Super Administrator Platform Workspace**](./workspaces/super-admin-workspace.md)
+  - Multi-tenant hospital network onboarding, global cross-tenant RBAC, network-wide MPI indexing, platform analytics, and ABDM/DPDP compliance ledger.
+- [**Pharmacist Clinical Workspace**](./workspaces/pharmacist-workspace.md)
   - eRx clinical review, unit-dose dispensing, drug-drug interaction alerts, and formulary inventory.
-- [**Billing & Financial Workspace**](./workspaces/billing-workspace.md)
+- [**Billing & Revenue Cycle Workspace**](./workspaces/billing-workspace.md)
   - Itemized invoicing, insurance claims adjudication, fee schedules, and payment processing.
 - [**Auditor & Compliance Workspace**](./workspaces/auditor-workspace.md)
   - Cryptographically sequenced WORM audit logs and emergency break-glass override surveillance.
+- [**Patient Self-Service Portal**](./workspaces/patient-workspace.md)
+  - Patient self-registration, timeline history, lab result access, active prescriptions, and consent management.
 
 ---
 
