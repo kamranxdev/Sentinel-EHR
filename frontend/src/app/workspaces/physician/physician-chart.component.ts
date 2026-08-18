@@ -179,86 +179,96 @@ export type PhysicianChartTab =
           </div>
         </ng-template>
 
-        <!-- Physician Chart Sub-Navigation Tabs (10 Micro-Subsystems) -->
-        <div class="flex items-center gap-1 border-b border-border pt-1 overflow-x-auto">
+        <!-- Physician Chart Sub-Navigation Tabs (10 Micro-Subsystems Responsive Multi-Row Grid) -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-1.5 p-1.5 bg-muted/40 rounded-xl border border-border">
           <button
             (click)="selectTab('encounters')"
-            class="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold border-b-2 transition-colors cursor-pointer whitespace-nowrap"
-            [ngClass]="activeTab() === 'encounters' ? 'border-primary text-primary bg-primary/5 rounded-t-md' : 'border-transparent text-muted-foreground hover:text-foreground'"
+            class="flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg transition-all cursor-pointer text-center"
+            [ngClass]="activeTab() === 'encounters' ? 'bg-primary text-primary-foreground shadow-xs font-bold' : 'text-muted-foreground hover:text-foreground hover:bg-background/60'"
           >
-            <ng-icon name="lucideStethoscope" size="14" /> Encounters
+            <ng-icon name="lucideStethoscope" size="14" />
+            <span class="truncate">Encounters</span>
           </button>
 
           <button
             (click)="selectTab('diagnoses')"
-            class="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold border-b-2 transition-colors cursor-pointer whitespace-nowrap"
-            [ngClass]="activeTab() === 'diagnoses' ? 'border-primary text-primary bg-primary/5 rounded-t-md' : 'border-transparent text-muted-foreground hover:text-foreground'"
+            class="flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg transition-all cursor-pointer text-center"
+            [ngClass]="activeTab() === 'diagnoses' ? 'bg-primary text-primary-foreground shadow-xs font-bold' : 'text-muted-foreground hover:text-foreground hover:bg-background/60'"
           >
-            <ng-icon name="lucideListChecks" size="14" /> Problem List
+            <ng-icon name="lucideListChecks" size="14" />
+            <span class="truncate">Problem List</span>
           </button>
 
           <button
             (click)="selectTab('erx')"
-            class="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold border-b-2 transition-colors cursor-pointer whitespace-nowrap"
-            [ngClass]="activeTab() === 'erx' ? 'border-primary text-primary bg-primary/5 rounded-t-md' : 'border-transparent text-muted-foreground hover:text-foreground'"
+            class="flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg transition-all cursor-pointer text-center"
+            [ngClass]="activeTab() === 'erx' ? 'bg-primary text-primary-foreground shadow-xs font-bold' : 'text-muted-foreground hover:text-foreground hover:bg-background/60'"
           >
-            <ng-icon name="lucidePill" size="14" /> eRx Pharmacy
+            <ng-icon name="lucidePill" size="14" />
+            <span class="truncate">eRx Pharmacy</span>
           </button>
 
           <button
             (click)="selectTab('allergies')"
-            class="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold border-b-2 transition-colors cursor-pointer whitespace-nowrap"
-            [ngClass]="activeTab() === 'allergies' ? 'border-primary text-primary bg-primary/5 rounded-t-md' : 'border-transparent text-muted-foreground hover:text-foreground'"
+            class="flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg transition-all cursor-pointer text-center"
+            [ngClass]="activeTab() === 'allergies' ? 'bg-primary text-primary-foreground shadow-xs font-bold' : 'text-muted-foreground hover:text-foreground hover:bg-background/60'"
           >
-            <ng-icon name="lucideTriangleAlert" size="14" /> Allergies
+            <ng-icon name="lucideTriangleAlert" size="14" />
+            <span class="truncate">Allergies</span>
           </button>
 
           <button
             (click)="selectTab('vitals')"
-            class="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold border-b-2 transition-colors cursor-pointer whitespace-nowrap"
-            [ngClass]="activeTab() === 'vitals' ? 'border-primary text-primary bg-primary/5 rounded-t-md' : 'border-transparent text-muted-foreground hover:text-foreground'"
+            class="flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg transition-all cursor-pointer text-center"
+            [ngClass]="activeTab() === 'vitals' ? 'bg-primary text-primary-foreground shadow-xs font-bold' : 'text-muted-foreground hover:text-foreground hover:bg-background/60'"
           >
-            <ng-icon name="lucideActivity" size="14" /> Vitals
+            <ng-icon name="lucideActivity" size="14" />
+            <span class="truncate">Vitals</span>
           </button>
 
           <button
             (click)="selectTab('imaging')"
-            class="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold border-b-2 transition-colors cursor-pointer whitespace-nowrap"
-            [ngClass]="activeTab() === 'imaging' ? 'border-primary text-primary bg-primary/5 rounded-t-md' : 'border-transparent text-muted-foreground hover:text-foreground'"
+            class="flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg transition-all cursor-pointer text-center"
+            [ngClass]="activeTab() === 'imaging' ? 'bg-primary text-primary-foreground shadow-xs font-bold' : 'text-muted-foreground hover:text-foreground hover:bg-background/60'"
           >
-            <ng-icon name="lucideEye" size="14" /> Imaging / PACS
+            <ng-icon name="lucideEye" size="14" />
+            <span class="truncate">Imaging / PACS</span>
           </button>
 
           <button
             (click)="selectTab('procedures')"
-            class="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold border-b-2 transition-colors cursor-pointer whitespace-nowrap"
-            [ngClass]="activeTab() === 'procedures' ? 'border-primary text-primary bg-primary/5 rounded-t-md' : 'border-transparent text-muted-foreground hover:text-foreground'"
+            class="flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg transition-all cursor-pointer text-center"
+            [ngClass]="activeTab() === 'procedures' ? 'bg-primary text-primary-foreground shadow-xs font-bold' : 'text-muted-foreground hover:text-foreground hover:bg-background/60'"
           >
-            <ng-icon name="lucideScissors" size="14" /> Procedures
+            <ng-icon name="lucideScissors" size="14" />
+            <span class="truncate">Procedures</span>
           </button>
 
           <button
             (click)="selectTab('care-team')"
-            class="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold border-b-2 transition-colors cursor-pointer whitespace-nowrap"
-            [ngClass]="activeTab() === 'care-team' ? 'border-primary text-primary bg-primary/5 rounded-t-md' : 'border-transparent text-muted-foreground hover:text-foreground'"
+            class="flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg transition-all cursor-pointer text-center"
+            [ngClass]="activeTab() === 'care-team' ? 'bg-primary text-primary-foreground shadow-xs font-bold' : 'text-muted-foreground hover:text-foreground hover:bg-background/60'"
           >
-            <ng-icon name="lucideUsers" size="14" /> Care Team
+            <ng-icon name="lucideUsers" size="14" />
+            <span class="truncate">Care Team</span>
           </button>
 
           <button
             (click)="selectTab('documents')"
-            class="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold border-b-2 transition-colors cursor-pointer whitespace-nowrap"
-            [ngClass]="activeTab() === 'documents' ? 'border-primary text-primary bg-primary/5 rounded-t-md' : 'border-transparent text-muted-foreground hover:text-foreground'"
+            class="flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg transition-all cursor-pointer text-center"
+            [ngClass]="activeTab() === 'documents' ? 'bg-primary text-primary-foreground shadow-xs font-bold' : 'text-muted-foreground hover:text-foreground hover:bg-background/60'"
           >
-            <ng-icon name="lucideFileText" size="14" /> Clinical Docs
+            <ng-icon name="lucideFileText" size="14" />
+            <span class="truncate">Clinical Docs</span>
           </button>
 
           <button
             (click)="selectTab('consents')"
-            class="flex items-center gap-1.5 px-3 py-2 text-xs font-semibold border-b-2 transition-colors cursor-pointer whitespace-nowrap"
-            [ngClass]="activeTab() === 'consents' ? 'border-primary text-primary bg-primary/5 rounded-t-md' : 'border-transparent text-muted-foreground hover:text-foreground'"
+            class="flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg transition-all cursor-pointer text-center"
+            [ngClass]="activeTab() === 'consents' ? 'bg-primary text-primary-foreground shadow-xs font-bold' : 'text-muted-foreground hover:text-foreground hover:bg-background/60'"
           >
-            <ng-icon name="lucideFileBadge" size="14" /> Consents
+            <ng-icon name="lucideFileBadge" size="14" />
+            <span class="truncate">Consents</span>
           </button>
         </div>
       </div>

@@ -27,6 +27,11 @@ export interface JwtAuthResponse {
   userId?: string;
   id?: string;
   assignedPatientIds?: string[];
+  specialty?: string;
+  specialization?: string;
+  department?: string;
+  facilityId?: string;
+  licenseNumber?: string;
 }
 
 export interface UserUpdateRequestDTO {

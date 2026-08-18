@@ -69,28 +69,47 @@ export const routes: Routes = [
     data: { roles: ['PHYSICIAN'], permission: 'APPOINTMENT_READ' },
   },
   {
+    path: 'physician/inpatients',
+    loadComponent: () =>
+      import('./workspaces/physician/physician-inpatients.component').then((m) => m.PhysicianInpatientsComponent),
+    canActivate: [authGuard, roleGuard, clinicalAccessGuard],
+    data: { roles: ['PHYSICIAN'] },
+  },
+  {
+    path: 'physician/break-glass',
+    loadComponent: () =>
+      import('./workspaces/physician/physician-break-glass.component').then((m) => m.PhysicianBreakGlassComponent),
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['PHYSICIAN'] },
+  },
+  {
     path: 'physician/encounters',
-    redirectTo: 'physician/chart',
+    redirectTo: () => '/physician/chart?tab=encounters',
     pathMatch: 'full',
   },
   {
     path: 'physician/prescriptions',
-    redirectTo: 'physician/chart',
+    redirectTo: () => '/physician/chart?tab=erx',
     pathMatch: 'full',
   },
   {
     path: 'physician/diagnoses',
-    redirectTo: 'physician/chart',
+    redirectTo: () => '/physician/chart?tab=diagnoses',
+    pathMatch: 'full',
+  },
+  {
+    path: 'physician/orders',
+    redirectTo: () => '/physician/chart?tab=diagnoses',
     pathMatch: 'full',
   },
   {
     path: 'physician/allergies',
-    redirectTo: 'physician/chart',
+    redirectTo: () => '/physician/chart?tab=allergies',
     pathMatch: 'full',
   },
   {
     path: 'physician/vitals',
-    redirectTo: 'physician/chart',
+    redirectTo: () => '/physician/chart?tab=vitals',
     pathMatch: 'full',
   },
 

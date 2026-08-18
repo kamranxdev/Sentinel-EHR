@@ -31,6 +31,8 @@ import {
   lucideUsers,
   lucideFileBadge,
   lucideStethoscope,
+  lucideShieldAlert,
+  lucideBed,
 } from '@ng-icons/lucide';
 
 import { AuthService } from './core/services/auth.service';
@@ -113,6 +115,8 @@ interface PatientOption {
       lucideUsers,
       lucideFileBadge,
       lucideStethoscope,
+      lucideShieldAlert,
+      lucideBed,
     }),
   ],
   templateUrl: './app.component.html',
@@ -387,10 +391,17 @@ export class App implements OnInit, OnDestroy {
     if (this.isPhysician()) {
       return [
         {
-          label: 'Physician Desk Workspace',
+          label: 'Clinical Practice & Rounds',
           items: [
-            { icon: 'lucideLayoutDashboard', label: 'Physician Desk', routerLink: '/physician/dashboard' },
-            { icon: 'lucideCalendarClock', label: 'Consultation Schedule', routerLink: '/physician/appointments' },
+            { icon: 'lucideLayoutDashboard', label: 'Physician Command Desk', routerLink: '/physician/dashboard' },
+            { icon: 'lucideCalendarClock', label: 'Outpatient Appointments & Queue', routerLink: '/physician/appointments' },
+            { icon: 'lucideBed', label: 'Inpatient Ward Census & Rounds', routerLink: '/physician/inpatients' },
+          ],
+        },
+        {
+          label: 'Safety & Overrides',
+          items: [
+            { icon: 'lucideShieldAlert', label: 'Emergency Break-Glass Access', routerLink: '/physician/break-glass' },
           ],
         },
       ];
