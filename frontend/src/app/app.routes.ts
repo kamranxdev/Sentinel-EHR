@@ -130,17 +130,22 @@ export const routes: Routes = [
   },
   {
     path: 'nurse/vitals',
-    redirectTo: 'nurse/chart',
+    redirectTo: () => '/nurse/chart?tab=vitals',
     pathMatch: 'full',
   },
   {
     path: 'nurse/prescriptions',
-    redirectTo: 'nurse/chart',
+    redirectTo: () => '/nurse/chart?tab=mar',
+    pathMatch: 'full',
+  },
+  {
+    path: 'nurse/mar',
+    redirectTo: () => '/nurse/chart?tab=mar',
     pathMatch: 'full',
   },
   {
     path: 'nurse/patients',
-    redirectTo: 'nurse/dashboard',
+    redirectTo: () => '/nurse/dashboard',
     pathMatch: 'full',
   },
   {
@@ -152,7 +157,17 @@ export const routes: Routes = [
   },
   {
     path: 'nurse/allergies',
-    redirectTo: 'nurse/chart',
+    redirectTo: () => '/nurse/chart?tab=allergies',
+    pathMatch: 'full',
+  },
+  {
+    path: 'nurse/triage',
+    redirectTo: () => '/nurse/chart?tab=triage',
+    pathMatch: 'full',
+  },
+  {
+    path: 'nurse/flowsheet',
+    redirectTo: () => '/nurse/chart?tab=flowsheet',
     pathMatch: 'full',
   },
   {

@@ -27,6 +27,7 @@ export interface Appointment {
   organizationId?: string;
   facilityId?: string;
   departmentId?: string;
+  departmentName?: string;
   practitionerId?: string;
   doctorId?: string;
   doctorName?: string;

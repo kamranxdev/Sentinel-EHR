@@ -409,11 +409,16 @@ export class App implements OnInit, OnDestroy {
     if (this.isNurse()) {
       return [
         {
-          label: 'Nurse Station Workspace',
+          label: 'Station Command & Triage',
           items: [
-            { icon: 'lucideLayoutDashboard', label: 'Nursing Station', routerLink: '/nurse/dashboard' },
-            { icon: 'lucideCalendarClock', label: 'Unit Triage & Ward Schedule', routerLink: '/nurse/appointments' },
-            { icon: 'lucideHospital', label: 'Spatial Bed & Ward Census', routerLink: '/nurse/beds' },
+            { icon: 'lucideLayoutDashboard', label: 'Nursing Command Station', routerLink: '/nurse/dashboard' },
+            { icon: 'lucideCalendarClock', label: 'Outpatient Appointments & Triage', routerLink: '/nurse/appointments' },
+          ],
+        },
+        {
+          label: 'Inpatient Ward & Bedside Care',
+          items: [
+            { icon: 'lucideBed', label: 'Spatial Bed & Ward Census', routerLink: '/nurse/beds' },
           ],
         },
       ];
