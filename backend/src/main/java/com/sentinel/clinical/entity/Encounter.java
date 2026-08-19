@@ -3,7 +3,6 @@ package com.sentinel.clinical.entity;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sentinel.patient.entity.Patient;
 import com.sentinel.tenancy.entity.Department;
-import com.sentinel.tenancy.entity.Facility;
 import com.sentinel.tenancy.entity.Organization;
 import com.sentinel.identity.entity.User;
 import jakarta.persistence.*;
@@ -22,10 +21,6 @@ public class Encounter {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "organization_id", nullable = false)
     private Organization organization;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "facility_id", nullable = false)
-    private Facility facility;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "patient_id", nullable = false)
@@ -76,9 +71,6 @@ public class Encounter {
 
     public Organization getOrganization() { return organization; }
     public void setOrganization(Organization organization) { this.organization = organization; }
-
-    public Facility getFacility() { return facility; }
-    public void setFacility(Facility facility) { this.facility = facility; }
 
     public Patient getPatient() { return patient; }
     public void setPatient(Patient patient) { this.patient = patient; }

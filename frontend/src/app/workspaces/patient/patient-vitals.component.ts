@@ -3,7 +3,9 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
+import { PatientContextService } from '../../core/services/patient-context.service';
 import { Vitals } from '../../core/models/clinical.model';
+import { toast } from '@spartan-ng/brain/sonner';
 
 import { HlmCardImports } from '@spartan-ng/helm/card';
 import { HlmTableImports } from '@spartan-ng/helm/table';
@@ -504,6 +506,7 @@ export class PatientVitalsComponent implements OnInit {
   constructor(
     private apiService: ApiService,
     public authService: AuthService,
+    public patientContext: PatientContextService,
   ) {}
 
   ngOnInit(): void {
@@ -516,9 +519,15 @@ export class PatientVitalsComponent implements OnInit {
         if (p?.id) {
           this.patientId = p.id;
           this.apiService.getVitalsByPatient(p.id).subscribe((v) => this.vitals.set(Array.isArray(v) ? v : []));
+        } else {
+          console.warn('Patient profile loaded but no ID found.');
+          toast.error('Could not verify patient profile identity.');
         }
       },
-      error: (err) => console.warn('Could not load patient vitals', err),
+      error: (err) => {
+        console.error('Failed to load patient vitals via API', err);
+        toast.error('Failed to load vitals: ' + (err.error?.message || 'Unknown network error'));
+      },
     });
   }
 

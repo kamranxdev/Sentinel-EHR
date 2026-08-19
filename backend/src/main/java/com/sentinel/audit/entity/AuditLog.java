@@ -15,7 +15,6 @@ public class AuditLog {
     private UUID id;
 
     private UUID organizationId;
-    private UUID facilityId;
     private UUID userId;
     private UUID patientId;
     private UUID encounterId;
@@ -79,9 +78,6 @@ public class AuditLog {
 
     public UUID getOrganizationId() { return organizationId; }
     public void setOrganizationId(UUID organizationId) { this.organizationId = organizationId; }
-
-    public UUID getFacilityId() { return facilityId; }
-    public void setFacilityId(UUID facilityId) { this.facilityId = facilityId; }
 
     public UUID getUserId() { return userId; }
     public void setUserId(UUID userId) { this.userId = userId; }

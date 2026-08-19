@@ -12,7 +12,8 @@ public class DiagnosisResponseDTO {
     private String status;
     private OffsetDateTime onsetDate;
     private String notes;
-    private String doctorUsername;
+    private UUID doctorId;
+    private String doctorName;
     private OffsetDateTime recordedAt;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
@@ -35,8 +36,10 @@ public class DiagnosisResponseDTO {
     public void setOnsetDate(OffsetDateTime onsetDate) { this.onsetDate = onsetDate; }
     public String getNotes() { return notes; }
     public void setNotes(String notes) { this.notes = notes; }
-    public String getDoctorUsername() { return doctorUsername; }
-    public void setDoctorUsername(String doctorUsername) { this.doctorUsername = doctorUsername; }
+    public UUID getDoctorId() { return doctorId; }
+    public void setDoctorId(UUID doctorId) { this.doctorId = doctorId; }
+    public String getDoctorName() { return doctorName; }
+    public void setDoctorName(String doctorName) { this.doctorName = doctorName; }
     public OffsetDateTime getRecordedAt() { return recordedAt; }
     public void setRecordedAt(OffsetDateTime recordedAt) { this.recordedAt = recordedAt; }
     public OffsetDateTime getCreatedAt() { return createdAt; }

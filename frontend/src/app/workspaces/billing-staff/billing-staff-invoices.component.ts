@@ -78,7 +78,7 @@ export interface BillingInvoiceViewModel {
             Revenue Cycle Management & Accounts Ledger
             <span hlmBadge variant="secondary" class="text-[11px]">Billing Staff</span>
           </h1>
-          <p class="text-xs text-muted-foreground mt-0.5">Manage patient invoices, billable charges from clinical events, facility chargemaster price lists, and insurance prior-authorizations.</p>
+          <p class="text-xs text-muted-foreground mt-0.5">Manage patient invoices, billable charges from clinical events, hospital chargemaster price lists, and insurance prior-authorizations.</p>
         </div>
 
         <!-- Navigation Tabs -->
@@ -224,11 +224,11 @@ export interface BillingInvoiceViewModel {
         </div>
       </div>
 
-      <!-- TAB 3: Facility Chargemaster Price Lists -->
+      <!-- TAB 3: Organization Chargemaster Price Lists -->
       <div *ngIf="activeTab() === 'pricelists'" hlmCard class="p-6 space-y-4">
         <div class="flex justify-between items-center">
           <div>
-            <h3 class="text-xs font-semibold text-foreground">Facility Standard Chargemaster Price Lists</h3>
+            <h3 class="text-xs font-semibold text-foreground">Hospital / Clinic Standard Chargemaster Price Lists</h3>
             <p class="text-[11px] text-muted-foreground">Standard tariff rates for consultations, laboratory, imaging, and beds.</p>
           </div>
           <button hlmBtn variant="default" size="sm" (click)="showPriceModal.set(true)" class="gap-1.5 text-xs bg-emerald-600 hover:bg-emerald-700 text-white">
@@ -551,7 +551,7 @@ export class BillingStaffInvoicesComponent implements OnInit {
       }
     });
 
-    this.apiService.getFacilityPriceLists('1').subscribe((lists: PriceList[]) => {
+    this.apiService.getOrganizationPriceLists('1').subscribe((lists: PriceList[]) => {
       if (lists && lists.length > 0 && lists[0].items) {
         this.priceItems.set(lists[0].items);
       }

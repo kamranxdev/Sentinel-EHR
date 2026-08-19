@@ -6,7 +6,6 @@ import java.util.UUID;
 public class EncounterResponseDTO {
     private UUID id;
     private UUID organizationId;
-    private UUID facilityId;
     private UUID patientId;
     private String patientName;
     private String encounterNumber;
@@ -32,8 +31,6 @@ public class EncounterResponseDTO {
     public void setId(UUID id) { this.id = id; }
     public UUID getOrganizationId() { return organizationId; }
     public void setOrganizationId(UUID organizationId) { this.organizationId = organizationId; }
-    public UUID getFacilityId() { return facilityId; }
-    public void setFacilityId(UUID facilityId) { this.facilityId = facilityId; }
     public UUID getPatientId() { return patientId; }
     public void setPatientId(UUID patientId) { this.patientId = patientId; }
     public String getPatientName() { return patientName; }

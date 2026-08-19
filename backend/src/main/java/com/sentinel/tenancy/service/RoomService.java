@@ -38,7 +38,6 @@ public class RoomService {
 
         Room room = new Room();
         room.setOrganization(ward.getOrganization());
-        room.setFacility(ward.getFacility());
         room.setWard(ward);
         room.setRoomNumber(request.getRoomNumber());
         room.setRoomType(request.getRoomType());
@@ -85,8 +84,10 @@ public class RoomService {
     public RoomResponseDTO mapToDTO(Room room) {
         RoomResponseDTO dto = new RoomResponseDTO();
         dto.setId(room.getId());
-        if (room.getOrganization() != null) dto.setOrganizationId(room.getOrganization().getId());
-        if (room.getFacility() != null) dto.setFacilityId(room.getFacility().getId());
+        if (room.getOrganization() != null) {
+            dto.setOrganizationId(room.getOrganization().getId());
+            dto.setOrganizationName(room.getOrganization().getName());
+        }
         if (room.getWard() != null) {
             dto.setWardId(room.getWard().getId());
             dto.setWardName(room.getWard().getName());

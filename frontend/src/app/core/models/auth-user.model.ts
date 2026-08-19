@@ -5,14 +5,6 @@ export interface DepartmentContextDTO {
   departmentType?: string;
 }
 
-export interface FacilityContextDTO {
-  id: string;
-  code: string;
-  name: string;
-  facilityType?: string;
-  departments: DepartmentContextDTO[];
-}
-
 export interface OrganizationContextDTO {
   id: string;
   code: string;
@@ -21,15 +13,13 @@ export interface OrganizationContextDTO {
   organizationType?: string;
   employeeCode?: string;
   employmentType?: string;
-  facilities: FacilityContextDTO[];
+  departments?: DepartmentContextDTO[];
 }
 
 export interface SelectedContext {
   organizationId: string;
   organizationName: string;
   organizationCode?: string;
-  facilityId?: string;
-  facilityName?: string;
   departmentId?: string;
   departmentName?: string;
   roleName?: string;
@@ -72,7 +62,6 @@ export interface JwtAuthResponse {
   specialty?: string;
   specialization?: string;
   department?: string;
-  facilityId?: string;
   licenseNumber?: string;
 }
 

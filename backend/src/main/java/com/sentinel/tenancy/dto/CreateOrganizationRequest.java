@@ -17,6 +17,13 @@ public class CreateOrganizationRequest {
     private String website;
     private String licenseNumber;
     private String address;
+    private String addressLine1;
+    private String addressLine2;
+    private String landmark;
+    private String city;
+    private String district;
+    private String state;
+    private String postalCode;
     private String adminUsername;
     private String adminPassword;
     private String adminEmail;
@@ -68,6 +75,29 @@ public class CreateOrganizationRequest {
 
     public String getAddress() { return address; }
     public void setAddress(String address) { this.address = address; }
+
+    public String getAddressLine1() {
+        return addressLine1 != null && !addressLine1.isBlank() ? addressLine1 : address;
+    }
+    public void setAddressLine1(String addressLine1) { this.addressLine1 = addressLine1; }
+
+    public String getAddressLine2() { return addressLine2; }
+    public void setAddressLine2(String addressLine2) { this.addressLine2 = addressLine2; }
+
+    public String getLandmark() { return landmark; }
+    public void setLandmark(String landmark) { this.landmark = landmark; }
+
+    public String getCity() { return city; }
+    public void setCity(String city) { this.city = city; }
+
+    public String getDistrict() { return district; }
+    public void setDistrict(String district) { this.district = district; }
+
+    public String getState() { return state; }
+    public void setState(String state) { this.state = state; }
+
+    public String getPostalCode() { return postalCode; }
+    public void setPostalCode(String postalCode) { this.postalCode = postalCode; }
 
     public String getAdminUsername() { return adminUsername; }
     public void setAdminUsername(String adminUsername) { this.adminUsername = adminUsername; }

@@ -111,13 +111,39 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public List<UserResponseDTO> searchUsers(UserSearchCriteria criteria) {
-        List<User> users;
-        if (criteria != null && (criteria.getQuery() != null || criteria.getStatus() != null || criteria.getRole() != null || criteria.getOrganizationId() != null)) {
-            users = userRepository.searchUsers(criteria.getQuery(), criteria.getStatus(), criteria.getRole(), criteria.getOrganizationId());
-        } else {
-            users = userRepository.findAll();
+        List<User> users = userRepository.findAll();
+        List<UserResponseDTO> dtos = users.stream().map(this::mapToDTO).collect(Collectors.toList());
+
+        if (criteria != null) {
+            if (criteria.getQuery() != null && !criteria.getQuery().isBlank()) {
+                String q = criteria.getQuery().toLowerCase().trim();
+                dtos = dtos.stream().filter(u ->
+                    (u.getEmail() != null && u.getEmail().toLowerCase().contains(q)) ||
+                    (u.getFullName() != null && u.getFullName().toLowerCase().contains(q)) ||
+                    (u.getFirstName() != null && u.getFirstName().toLowerCase().contains(q)) ||
+                    (u.getLastName() != null && u.getLastName().toLowerCase().contains(q))
+                ).collect(Collectors.toList());
+            }
+            if (criteria.getStatus() != null && !criteria.getStatus().isBlank()) {
+                String st = criteria.getStatus().trim();
+                dtos = dtos.stream().filter(u ->
+                    u.getStatus() != null && u.getStatus().equalsIgnoreCase(st)
+                ).collect(Collectors.toList());
+            }
+            if (criteria.getRole() != null && !criteria.getRole().isBlank()) {
+                String r = criteria.getRole().trim();
+                dtos = dtos.stream().filter(u ->
+                    u.getRoles() != null && u.getRoles().contains(r)
+                ).collect(Collectors.toList());
+            }
+            if (criteria.getOrganizationId() != null) {
+                UUID orgId = criteria.getOrganizationId();
+                dtos = dtos.stream().filter(u ->
+                    u.getOrganizations() != null && u.getOrganizations().stream().anyMatch(org -> orgId.equals(org.getId()))
+                ).collect(Collectors.toList());
+            }
         }
-        return users.stream().map(this::mapToDTO).collect(Collectors.toList());
+        return dtos;
     }
 
     public UserResponseDTO updateUser(UUID userId, UpdateUserRequest request) {
@@ -194,6 +220,21 @@ public class UserService {
         if (user.getRoles() != null) {
             dto.setRoles(user.getRoles().stream().map(Role::getName).collect(Collectors.toSet()));
         }
+
+        List<UserOrganization> userOrgs = userOrganizationRepository.findByUserId(user.getId());
+        if (userOrgs != null && !userOrgs.isEmpty()) {
+            List<UserResponseDTO.UserOrgDTO> orgDTOs = userOrgs.stream()
+                    .filter(uo -> uo.getOrganization() != null)
+                    .map(uo -> new UserResponseDTO.UserOrgDTO(
+                            uo.getOrganization().getId(),
+                            uo.getOrganization().getName(),
+                            uo.getOrganization().getCode(),
+                            uo.getEmploymentType()
+                    ))
+                    .collect(Collectors.toList());
+            dto.setOrganizations(orgDTOs);
+        }
+
         return dto;
     }
 }

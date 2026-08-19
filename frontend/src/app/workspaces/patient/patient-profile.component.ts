@@ -918,7 +918,10 @@ export class PatientProfileComponent implements OnInit {
           this.loadEmergencyContact(p.emergencyContact);
         }
       },
-      error: (err) => console.warn('Could not load profile', err),
+      error: (err) => {
+        console.error('Could not load profile', err);
+        toast.error('Failed to load profile: ' + (err.error?.message || 'Unknown network error'));
+      },
     });
   }
 

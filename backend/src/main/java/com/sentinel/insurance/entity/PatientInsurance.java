@@ -2,7 +2,6 @@ package com.sentinel.insurance.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.sentinel.patient.entity.Patient;
-import com.sentinel.tenancy.entity.Facility;
 import com.sentinel.tenancy.entity.Organization;
 import jakarta.persistence.*;
 import java.time.LocalDate;

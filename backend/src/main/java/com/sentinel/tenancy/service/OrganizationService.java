@@ -78,6 +78,13 @@ public class OrganizationService {
         org.setPhone(request.getPhone());
         org.setEmail(request.getEmail());
         org.setWebsite(request.getWebsite());
+        org.setAddressLine1(request.getAddressLine1());
+        org.setAddressLine2(request.getAddressLine2());
+        org.setLandmark(request.getLandmark());
+        org.setCity(request.getCity());
+        org.setDistrict(request.getDistrict());
+        org.setState(request.getState());
+        org.setPostalCode(request.getPostalCode());
         org.setStatus("ACTIVE");
         org.setCreatedAt(OffsetDateTime.now());
         org.setUpdatedAt(OffsetDateTime.now());
@@ -164,6 +171,13 @@ public class OrganizationService {
         if (request.getPhone() != null) org.setPhone(request.getPhone());
         if (request.getEmail() != null) org.setEmail(request.getEmail());
         if (request.getWebsite() != null) org.setWebsite(request.getWebsite());
+        if (request.getAddressLine1() != null) org.setAddressLine1(request.getAddressLine1());
+        if (request.getAddressLine2() != null) org.setAddressLine2(request.getAddressLine2());
+        if (request.getLandmark() != null) org.setLandmark(request.getLandmark());
+        if (request.getCity() != null) org.setCity(request.getCity());
+        if (request.getDistrict() != null) org.setDistrict(request.getDistrict());
+        if (request.getState() != null) org.setState(request.getState());
+        if (request.getPostalCode() != null) org.setPostalCode(request.getPostalCode());
         if (request.getStatus() != null) org.setStatus(request.getStatus());
         org.setUpdatedAt(OffsetDateTime.now());
 
@@ -192,6 +206,13 @@ public class OrganizationService {
         dto.setPhone(org.getPhone());
         dto.setEmail(org.getEmail());
         dto.setWebsite(org.getWebsite());
+        dto.setAddressLine1(org.getAddressLine1());
+        dto.setAddressLine2(org.getAddressLine2());
+        dto.setLandmark(org.getLandmark());
+        dto.setCity(org.getCity());
+        dto.setDistrict(org.getDistrict());
+        dto.setState(org.getState());
+        dto.setPostalCode(org.getPostalCode());
         dto.setCreatedAt(org.getCreatedAt());
         dto.setUpdatedAt(org.getUpdatedAt());
         return dto;

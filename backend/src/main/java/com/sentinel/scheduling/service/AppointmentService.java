@@ -12,10 +12,8 @@ import com.sentinel.scheduling.dto.UpdateAppointmentRequest;
 import com.sentinel.scheduling.entity.Appointment;
 import com.sentinel.scheduling.repository.AppointmentRepository;
 import com.sentinel.tenancy.entity.Department;
-import com.sentinel.tenancy.entity.Facility;
 import com.sentinel.tenancy.entity.Organization;
 import com.sentinel.tenancy.repository.DepartmentRepository;
-import com.sentinel.tenancy.repository.FacilityRepository;
 import com.sentinel.tenancy.repository.OrganizationRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,7 +37,6 @@ public class AppointmentService {
     private final PractitionerRepository practitionerRepository;
     private final UserOrganizationRepository userOrganizationRepository;
     private final OrganizationRepository organizationRepository;
-    private final FacilityRepository facilityRepository;
     private final DepartmentRepository departmentRepository;
     private final AuditService auditService;
 
@@ -49,7 +46,6 @@ public class AppointmentService {
                               PractitionerRepository practitionerRepository,
                               UserOrganizationRepository userOrganizationRepository,
                               OrganizationRepository organizationRepository,
-                              FacilityRepository facilityRepository,
                               DepartmentRepository departmentRepository,
                               AuditService auditService) {
         this.appointmentRepository = appointmentRepository;
@@ -58,7 +54,6 @@ public class AppointmentService {
         this.practitionerRepository = practitionerRepository;
         this.userOrganizationRepository = userOrganizationRepository;
         this.organizationRepository = organizationRepository;
-        this.facilityRepository = facilityRepository;
         this.departmentRepository = departmentRepository;
         this.auditService = auditService;
     }
@@ -92,14 +87,11 @@ public class AppointmentService {
         if (request.getOrganizationId() != null) {
             organizationRepository.findById(request.getOrganizationId()).ifPresent(appt::setOrganization);
         }
-        if (request.getFacilityId() != null) {
-            facilityRepository.findById(request.getFacilityId()).ifPresent(appt::setFacility);
-        }
         if (request.getDepartmentId() != null) {
             departmentRepository.findById(request.getDepartmentId()).ifPresent(appt::setDepartment);
         }
 
-        // Fallback for non-null constraints on organization & facility
+        // Fallback for non-null constraints on organization
         if (appt.getOrganization() == null) {
             if (appt.getCreatedBy() != null) {
                 userOrganizationRepository.findByUserId(appt.getCreatedBy().getId()).stream()
@@ -114,12 +106,6 @@ public class AppointmentService {
             if (appt.getOrganization() == null) {
                 organizationRepository.findAll().stream().findFirst().ifPresent(appt::setOrganization);
             }
-        }
-
-        if (appt.getFacility() == null && appt.getOrganization() != null) {
-            facilityRepository.findByOrganizationId(appt.getOrganization().getId()).stream()
-                    .findFirst()
-                    .ifPresent(appt::setFacility);
         }
 
         Appointment saved = appointmentRepository.save(appt);
@@ -146,8 +132,8 @@ public class AppointmentService {
     }
 
     @Transactional(readOnly = true)
-    public List<AppointmentResponseDTO> getFacilityAppointments(UUID facilityId) {
-        return appointmentRepository.findByFacilityIdOrderByStartsAtDesc(facilityId).stream()
+    public List<AppointmentResponseDTO> getOrganizationAppointments(UUID organizationId) {
+        return appointmentRepository.findByOrganizationIdOrderByStartsAtDesc(organizationId).stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
     }
@@ -177,13 +163,15 @@ public class AppointmentService {
         AppointmentResponseDTO dto = new AppointmentResponseDTO();
         dto.setId(a.getId());
         if (a.getOrganization() != null) dto.setOrganizationId(a.getOrganization().getId());
-        if (a.getFacility() != null) dto.setFacilityId(a.getFacility().getId());
         if (a.getDepartment() != null) dto.setDepartmentId(a.getDepartment().getId());
         if (a.getPatient() != null) {
             dto.setPatientId(a.getPatient().getId());
             dto.setPatientName(a.getPatient().getFullName());
         }
-        if (a.getCreatedBy() != null) dto.setDoctorUsername(a.getCreatedBy().getUsername());
+        if (a.getCreatedBy() != null) {
+            dto.setDoctorId(a.getCreatedBy().getId());
+            dto.setDoctorName(a.getCreatedBy().getFullName());
+        }
         dto.setStartsAt(a.getStartsAt());
         dto.setEndsAt(a.getEndsAt());
         dto.setStatus(a.getStatus());

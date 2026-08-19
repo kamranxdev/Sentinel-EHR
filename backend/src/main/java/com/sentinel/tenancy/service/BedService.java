@@ -34,7 +34,6 @@ public class BedService {
 
         Bed bed = new Bed();
         bed.setOrganization(room.getOrganization());
-        bed.setFacility(room.getFacility());
         bed.setWard(room.getWard());
         bed.setRoom(room);
         bed.setBedNumber(request.getBedNumber());
@@ -91,8 +90,8 @@ public class BedService {
     }
 
     @Transactional(readOnly = true)
-    public List<BedResponseDTO> findAvailableBeds(UUID facilityId, UUID wardId) {
-        return bedRepository.findAvailableBeds(facilityId, wardId).stream()
+    public List<BedResponseDTO> findAvailableBeds(UUID organizationId, UUID wardId) {
+        return bedRepository.findAvailableBeds(organizationId, wardId).stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
     }
@@ -100,8 +99,10 @@ public class BedService {
     public BedResponseDTO mapToDTO(Bed bed) {
         BedResponseDTO dto = new BedResponseDTO();
         dto.setId(bed.getId());
-        if (bed.getOrganization() != null) dto.setOrganizationId(bed.getOrganization().getId());
-        if (bed.getFacility() != null) dto.setFacilityId(bed.getFacility().getId());
+        if (bed.getOrganization() != null) {
+            dto.setOrganizationId(bed.getOrganization().getId());
+            dto.setOrganizationName(bed.getOrganization().getName());
+        }
         if (bed.getWard() != null) {
             dto.setWardId(bed.getWard().getId());
             dto.setWardName(bed.getWard().getName());

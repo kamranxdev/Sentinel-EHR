@@ -25,20 +25,20 @@ public class DepartmentController {
         this.departmentService = departmentService;
     }
 
-    @PostMapping("/api/v1/facilities/{facilityId}/departments")
-    @Operation(summary = "Create department in a facility")
+    @PostMapping({"/api/v1/organizations/{organizationId}/departments", "/api/v1/facilities/{organizationId}/departments"})
+    @Operation(summary = "Create department in an organization")
     public ResponseEntity<ApiResponse<DepartmentResponseDTO>> createDepartment(
-            @PathVariable UUID facilityId,
+            @PathVariable UUID organizationId,
             @Valid @RequestBody CreateDepartmentRequest request) {
-        DepartmentResponseDTO response = departmentService.createDepartment(facilityId, request);
+        DepartmentResponseDTO response = departmentService.createDepartment(organizationId, request);
         return new ResponseEntity<>(ApiResponse.success("Department created successfully", response), HttpStatus.CREATED);
     }
 
-    @GetMapping("/api/v1/facilities/{facilityId}/departments")
-    @Operation(summary = "Get all departments in a facility")
-    public ResponseEntity<ApiResponse<List<DepartmentResponseDTO>>> getFacilityDepartments(
-            @PathVariable UUID facilityId) {
-        List<DepartmentResponseDTO> response = departmentService.getFacilityDepartments(facilityId);
+    @GetMapping({"/api/v1/organizations/{organizationId}/departments", "/api/v1/facilities/{organizationId}/departments"})
+    @Operation(summary = "Get all departments in an organization")
+    public ResponseEntity<ApiResponse<List<DepartmentResponseDTO>>> getOrganizationDepartments(
+            @PathVariable UUID organizationId) {
+        List<DepartmentResponseDTO> response = departmentService.getOrganizationDepartments(organizationId);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 

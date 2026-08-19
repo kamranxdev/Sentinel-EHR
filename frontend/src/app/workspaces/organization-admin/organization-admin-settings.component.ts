@@ -26,7 +26,7 @@ import {
 } from '@ng-icons/lucide';
 
 @Component({
-  selector: 'app-organization-admin-facility-settings',
+  selector: 'app-organization-admin-settings',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule, NgIcon],
   providers: [
@@ -53,15 +53,15 @@ import {
         <div>
           <div class="flex items-center gap-2">
             <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
-              Org Admin Desk
+              Hospital Admin Desk
             </span>
-            <span class="text-xs text-muted-foreground font-mono">Facility Settings & Hierarchy</span>
+            <span class="text-xs text-muted-foreground font-mono">Hospital Profile & Departments</span>
           </div>
           <h1 class="text-2xl font-bold tracking-tight text-foreground mt-1">
-            Facility Profile & Tenancy Hierarchy
+            Hospital Profile & Clinical Departments
           </h1>
           <p class="text-xs text-muted-foreground mt-0.5">
-            Configure hospital profile, contact parameters, and physical structure (Departments -> Wards -> Rooms -> Beds).
+            Configure hospital / clinic profile (e.g. AIIMS Delhi, AIIMS Gorakhpur), contact details, clinical departments, and inpatient units.
           </p>
         </div>
 
@@ -72,35 +72,36 @@ import {
             (click)="activeTab.set('profile')"
             [class]="'px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ' + (activeTab() === 'profile' ? 'bg-primary text-primary-foreground border-primary' : 'bg-card text-muted-foreground border-border hover:text-foreground')"
           >
-            <ng-icon name="lucideBuilding2" size="14" class="mr-1 inline" /> Facility Profile
+            <ng-icon name="lucideHospital" size="14" class="mr-1 inline" /> Hospital Profile
           </button>
           <button
             type="button"
             (click)="activeTab.set('hierarchy')"
             [class]="'px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ' + (activeTab() === 'hierarchy' ? 'bg-primary text-primary-foreground border-primary' : 'bg-card text-muted-foreground border-border hover:text-foreground')"
           >
-            <ng-icon name="lucideHospital" size="14" class="mr-1 inline" /> Wards & Spatial Layout
+            <ng-icon name="lucideBuilding2" size="14" class="mr-1 inline" /> Departments & Wards
           </button>
         </div>
       </div>
 
-      <!-- TAB 1: Facility Profile Form -->
+      <!-- TAB 1: Hospital Profile Form -->
       <div *ngIf="activeTab() === 'profile'" class="bg-card rounded-2xl border border-border shadow-xs p-6 space-y-6">
         <form (ngSubmit)="onSave()" class="space-y-5">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label class="block text-xs font-semibold text-foreground mb-1.5">Facility Name *</label>
+              <label class="block text-xs font-semibold text-foreground mb-1.5">Hospital / Clinic Name *</label>
               <input
                 type="text"
                 name="name"
                 [(ngModel)]="facility.name"
                 required
+                placeholder="e.g. AIIMS New Delhi, Apollo Hospital"
                 class="w-full px-3.5 py-2.5 rounded-xl border border-input bg-background text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
               />
             </div>
 
             <div>
-              <label class="block text-xs font-semibold text-foreground mb-1.5">Organization Code</label>
+              <label class="block text-xs font-semibold text-foreground mb-1.5">Hospital Identifier Code</label>
               <input
                 type="text"
                 [value]="facility.orgCode"
@@ -117,6 +118,7 @@ import {
                 type="email"
                 name="email"
                 [(ngModel)]="facility.email"
+                placeholder="contact@hospital.org"
                 class="w-full px-3.5 py-2.5 rounded-xl border border-input bg-background text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
               />
             </div>
@@ -127,18 +129,19 @@ import {
                 type="tel"
                 name="phone"
                 [(ngModel)]="facility.phone"
+                placeholder="+91 11 2658 8500"
                 class="w-full px-3.5 py-2.5 rounded-xl border border-input bg-background text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
               />
             </div>
           </div>
 
           <div>
-            <label class="block text-xs font-semibold text-foreground mb-1.5">Official Address</label>
+            <label class="block text-xs font-semibold text-foreground mb-1.5">Hospital Official Address</label>
             <input
               type="text"
               name="address"
               [(ngModel)]="facility.address"
-              placeholder="Building, Street, City, State, ZIP"
+              placeholder="Building, Street, City, State, PIN/ZIP"
               class="w-full px-3.5 py-2.5 rounded-xl border border-input bg-background text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-primary/40"
             />
           </div>
@@ -150,7 +153,7 @@ import {
               class="px-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold text-xs flex items-center gap-2 hover:bg-primary/90 transition-colors disabled:opacity-50"
             >
               <ng-icon name="lucideSave" size="14" />
-              <span>{{ saving() ? 'Saving...' : 'Update Facility Settings' }}</span>
+              <span>{{ saving() ? 'Saving...' : 'Update Hospital Settings' }}</span>
             </button>
           </div>
         </form>
@@ -250,7 +253,7 @@ import {
     </div>
   `,
 })
-export class OrganizationAdminFacilitySettingsComponent implements OnInit {
+export class OrganizationAdminSettingsComponent implements OnInit {
   activeTab = signal<'profile' | 'hierarchy'>('profile');
   saving = signal(false);
 
@@ -289,7 +292,7 @@ export class OrganizationAdminFacilitySettingsComponent implements OnInit {
       error: () => {},
     });
 
-    this.apiService.getDepartmentsByFacility('1').subscribe({
+    this.apiService.getDepartments(this.authService.getActiveOrganizationId() || '1').subscribe({
       next: (depts: Department[]) => this.departments.set(depts || []),
       error: () => this.departments.set([]),
     });
@@ -307,11 +310,11 @@ export class OrganizationAdminFacilitySettingsComponent implements OnInit {
       .subscribe({
         next: () => {
           this.saving.set(false);
-          toast.success('Facility settings saved successfully');
+          toast.success('Hospital settings saved successfully');
         },
         error: () => {
           this.saving.set(false);
-          toast.success('Facility profile updated');
+          toast.success('Hospital profile updated');
         },
       });
   }
@@ -319,7 +322,7 @@ export class OrganizationAdminFacilitySettingsComponent implements OnInit {
   saveDepartment(): void {
     const dept: Department = {
       id: String(Date.now()),
-      facilityId: '1',
+      organizationId: this.authService.getActiveOrganizationId() || '1',
       name: this.newDept.name,
       departmentCode: this.newDept.departmentCode.toUpperCase(),
       specialty: this.newDept.specialty,
@@ -332,7 +335,7 @@ export class OrganizationAdminFacilitySettingsComponent implements OnInit {
     this.departments.update((list) => [...list, dept]);
     this.showAddDeptModal.set(false);
     this.newDept = { name: '', departmentCode: '', specialty: '' };
-    toast.success('Department created in facility hierarchy');
+    toast.success('Clinical Department created successfully');
   }
 
   openAddWard(dept: Department): void {

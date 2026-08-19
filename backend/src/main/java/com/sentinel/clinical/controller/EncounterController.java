@@ -55,10 +55,9 @@ public class EncounterController {
     public ResponseEntity<ApiResponse<List<EncounterResponseDTO>>> searchEncounters(
             @RequestParam(required = false) UUID patientId,
             @RequestParam(required = false) UUID organizationId,
-            @RequestParam(required = false) UUID facilityId,
             @RequestParam(required = false) String status,
             @RequestParam(required = false) String encounterType) {
-        EncounterSearchCriteria criteria = new EncounterSearchCriteria(patientId, organizationId, facilityId, status, encounterType);
+        EncounterSearchCriteria criteria = new EncounterSearchCriteria(patientId, organizationId, status, encounterType);
         List<EncounterResponseDTO> response = encounterService.searchEncounters(criteria);
         return ResponseEntity.ok(ApiResponse.success(response));
     }

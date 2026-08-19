@@ -7,7 +7,7 @@ Person
   ↓
 User (Role = PHYSICIAN)
   ↓
-Practitioner (Specialty, License #, Facility)
+Practitioner (Specialty, License #, Hospital / Organization)
   ↓
 Clinical Access Scope:
   ├── Assigned Outpatients (Appointments -> Check-in -> Encounter)

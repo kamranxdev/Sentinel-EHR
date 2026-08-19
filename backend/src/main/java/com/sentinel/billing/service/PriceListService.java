@@ -10,8 +10,7 @@ import com.sentinel.billing.entity.PriceListItem;
 import com.sentinel.billing.repository.PriceListItemRepository;
 import com.sentinel.billing.repository.PriceListRepository;
 import com.sentinel.common.exception.ResourceNotFoundException;
-import com.sentinel.tenancy.entity.Facility;
-import com.sentinel.tenancy.repository.FacilityRepository;
+import com.sentinel.tenancy.entity.Organization;
 import com.sentinel.tenancy.repository.OrganizationRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,27 +26,24 @@ public class PriceListService {
     private final PriceListRepository priceListRepository;
     private final PriceListItemRepository priceListItemRepository;
     private final OrganizationRepository organizationRepository;
-    private final FacilityRepository facilityRepository;
     private final AuditService auditService;
 
     public PriceListService(PriceListRepository priceListRepository,
                             PriceListItemRepository priceListItemRepository,
                             OrganizationRepository organizationRepository,
-                            FacilityRepository facilityRepository,
                             AuditService auditService) {
         this.priceListRepository = priceListRepository;
         this.priceListItemRepository = priceListItemRepository;
         this.organizationRepository = organizationRepository;
-        this.facilityRepository = facilityRepository;
         this.auditService = auditService;
     }
 
-    public PriceListResponseDTO createPriceList(UUID facilityId, CreatePriceListRequest request) {
-        Facility facility = facilityRepository.findById(facilityId)
-                .orElseThrow(() -> new ResourceNotFoundException("Facility not found with id: " + facilityId));
+    public PriceListResponseDTO createPriceList(UUID organizationId, CreatePriceListRequest request) {
+        Organization organization = organizationRepository.findById(organizationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Organization not found with id: " + organizationId));
 
         PriceList priceList = new PriceList();
-        priceList.setOrganization(facility.getOrganization());
+        priceList.setOrganization(organization);
         priceList.setName(request.getName());
         priceList.setCurrency(request.getCurrency() != null ? request.getCurrency() : "INR");
         priceList.setActive(true);
@@ -62,11 +58,8 @@ public class PriceListService {
     }
 
     @Transactional(readOnly = true)
-    public List<PriceListResponseDTO> getFacilityPriceLists(UUID facilityId) {
-        Facility facility = facilityRepository.findById(facilityId)
-                .orElseThrow(() -> new ResourceNotFoundException("Facility not found with id: " + facilityId));
-
-        return priceListRepository.findByOrganizationId(facility.getOrganization().getId()).stream()
+    public List<PriceListResponseDTO> getOrganizationPriceLists(UUID organizationId) {
+        return priceListRepository.findByOrganizationId(organizationId).stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
     }

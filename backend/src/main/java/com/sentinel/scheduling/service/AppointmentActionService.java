@@ -184,13 +184,15 @@ public class AppointmentActionService {
         AppointmentResponseDTO dto = new AppointmentResponseDTO();
         dto.setId(a.getId());
         if (a.getOrganization() != null) dto.setOrganizationId(a.getOrganization().getId());
-        if (a.getFacility() != null) dto.setFacilityId(a.getFacility().getId());
         if (a.getDepartment() != null) dto.setDepartmentId(a.getDepartment().getId());
         if (a.getPatient() != null) {
             dto.setPatientId(a.getPatient().getId());
             dto.setPatientName(a.getPatient().getFullName());
         }
-        if (a.getCreatedBy() != null) dto.setDoctorUsername(a.getCreatedBy().getUsername());
+        if (a.getCreatedBy() != null) {
+            dto.setDoctorId(a.getCreatedBy().getId());
+            dto.setDoctorName(a.getCreatedBy().getFullName());
+        }
         dto.setStartsAt(a.getStartsAt());
         dto.setEndsAt(a.getEndsAt());
         dto.setStatus(a.getStatus());

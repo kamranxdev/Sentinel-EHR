@@ -19,7 +19,8 @@ public interface PatientRepository extends JpaRepository<Patient, UUID> {
            "LEFT JOIN p.person per " +
            "LEFT JOIN PatientOrganization po ON po.patient.id = p.id " +
            "LEFT JOIN PatientPhoneNumber ph ON ph.patient.id = p.id " +
-           "WHERE (:query IS NULL OR LOWER(per.firstName) LIKE LOWER(CONCAT('%', :query, '%')) OR LOWER(per.lastName) LIKE LOWER(CONCAT('%', :query, '%')) OR LOWER(po.mrn) LIKE LOWER(CONCAT('%', :query, '%'))) " +
+           "LEFT JOIN PatientEmailAddress e ON e.patient.id = p.id " +
+           "WHERE (:query IS NULL OR LOWER(per.firstName) LIKE LOWER(CONCAT('%', :query, '%')) OR LOWER(per.lastName) LIKE LOWER(CONCAT('%', :query, '%')) OR LOWER(CONCAT(per.firstName, ' ', per.lastName)) LIKE LOWER(CONCAT('%', :query, '%')) OR LOWER(e.email) LIKE LOWER(CONCAT('%', :query, '%')) OR LOWER(po.mrn) LIKE LOWER(CONCAT('%', :query, '%'))) " +
            "AND (:mrn IS NULL OR po.mrn = :mrn) " +
            "AND (:phone IS NULL OR ph.phoneNumber LIKE CONCAT('%', :phone, '%')) " +
            "AND (:status IS NULL OR p.status = :status) " +

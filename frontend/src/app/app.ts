@@ -497,11 +497,11 @@ export class App implements OnInit, OnDestroy {
     if (this.isOrganizationAdmin()) {
       return [
         {
-          label: 'Facility Administration',
+          label: 'Hospital Administration',
           items: [
             { icon: 'lucideLayoutDashboard', label: 'Org Admin Command Center', routerLink: '/organization-admin/dashboard' },
-            { icon: 'lucideBuilding2', label: 'Facility Spatial Layout', routerLink: '/organization-admin/facility-settings' },
-            { icon: 'lucideUsers', label: 'Facility Staff Roster', routerLink: '/organization-admin/users' },
+            { icon: 'lucideBuilding2', label: 'Hospital Layout & Units', routerLink: '/organization-admin/facility-settings' },
+            { icon: 'lucideUsers', label: 'Staff Roster & Users', routerLink: '/organization-admin/users' },
             { icon: 'lucideActivity', label: 'Patient Census Policies', routerLink: '/organization-admin/patients' },
             { icon: 'lucideCalendarClock', label: 'Consultation Load Analytics', routerLink: '/organization-admin/schedule-analytics' },
           ],

@@ -7,9 +7,9 @@ Person
   ↓
 User (Role = RECEPTIONIST)
   ↓
-Organization Membership
+Organization Membership (Hospital / Clinic)
   ↓
-Facility / Front-Desk Reception
+Hospital Front-Desk Reception
   ↓
 Administrative Scope:
   ├── Patient Demographic Registration (New MRN issuance)
@@ -31,8 +31,8 @@ Administrative Scope:
 | **`patients`** | `patient` | All Org Patients | Full Create & Update Demographics | `organization_id` $\rightarrow$ `organizations.id` |
 | **`patient_demographics`**| `patient` | All Org Patients | Full Create & Update | `patient_id` $\rightarrow$ `patients.id` |
 | **`patient_contacts`** | `patient` | All Org Patients | Full Create & Update | `patient_id` $\rightarrow$ `patients.id` |
-| **`appointments`** | `scheduling` | Facility Roster | Full Create, Reschedule, Check-in (`CHECKED_IN`) | `patient_id` $\rightarrow$ `patients.id`, `doctorId` $\rightarrow$ `users.id` |
-| **`mpi_audit_records`**| `patient` | Facility Records | Create Merge Requests (with justification) | `primary_patient_id` $\rightarrow$ `patients.id`, `duplicate_patient_id` $\rightarrow$ `patients.id` |
+| **`appointments`** | `scheduling` | Hospital Roster | Full Create, Reschedule, Check-in (`CHECKED_IN`) | `patient_id` $\rightarrow$ `patients.id`, `doctorId` $\rightarrow$ `users.id`, `organization_id` $\rightarrow$ `organizations.id` |
+| **`mpi_audit_records`**| `patient` | Hospital Records | Create Merge Requests (with justification) | `primary_patient_id` $\rightarrow$ `patients.id`, `duplicate_patient_id` $\rightarrow$ `patients.id` |
 | **`clinical_documents`**| `clinical` | **DENIED** | **DENIED** | Clinical confidentiality protection |
 
 ---

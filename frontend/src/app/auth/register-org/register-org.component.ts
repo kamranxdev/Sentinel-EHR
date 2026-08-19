@@ -407,13 +407,13 @@ interface StepItem {
             <div *ngIf="currentStep() === 1" class="space-y-4 animate-in fade-in duration-200">
               <div class="p-3.5 rounded-xl bg-primary/5 border border-primary/15 text-xs text-muted-foreground flex items-center gap-2.5">
                 <ng-icon name="lucideBuilding2" size="16" class="text-primary shrink-0" />
-                <span>Specify the facility's identity, unique organization code, and healthcare provider type.</span>
+                <span>Specify the hospital or clinic's identity, unique organization code, and healthcare provider type.</span>
               </div>
 
-              <!-- Facility Display Name -->
+              <!-- Hospital Display Name -->
               <div class="space-y-1.5">
                 <label class="text-xs font-semibold text-foreground flex items-center justify-between">
-                  <span>Facility / Hospital Name *</span>
+                  <span>Hospital / Clinic Name *</span>
                   <span class="text-[11px] text-muted-foreground font-normal">Primary Display Title</span>
                 </label>
                 <div class="relative">
@@ -460,7 +460,7 @@ interface StepItem {
                 </div>
 
                 <div class="space-y-1.5">
-                  <label class="text-xs font-semibold text-foreground block">Facility Type *</label>
+                  <label class="text-xs font-semibold text-foreground block">Organization Type *</label>
                   <select
                     [(ngModel)]="formData.organizationType"
                     name="organizationType"

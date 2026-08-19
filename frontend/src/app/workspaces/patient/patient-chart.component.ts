@@ -1013,7 +1013,7 @@ export type PatientChartTab =
                         </div>
                         <div>
                           <span>{{ rx.medicationName }}</span>
-                          <span *ngIf="rx.doctor?.fullName || rx.doctorUsername" class="block text-[10px] text-muted-foreground font-normal">Dr. {{ rx.doctor?.fullName || rx.doctorUsername }}</span>
+                          <span *ngIf="rx.doctor?.fullName || rx.doctorName" class="block text-[10px] text-muted-foreground font-normal">Dr. {{ rx.doctor?.fullName || rx.doctorName }}</span>
                         </div>
                       </div>
                     </td>
@@ -1544,24 +1544,14 @@ export class PatientChartComponent implements OnInit {
           this.patient.set(profile);
           this.fetchAllClinicalRecords(profile.id);
         } else {
-          // Fallback to active patient context or mock
-          const active = this.patientContext.activePatient();
-          if (active && active.id) {
-            this.patient.set(active);
-            this.fetchAllClinicalRecords(active.id);
-          } else {
-            this.loading.set(false);
-          }
+          this.loading.set(false);
+          toast.error('Could not verify patient profile identity.');
         }
       },
-      error: () => {
-        const active = this.patientContext.activePatient();
-        if (active && active.id) {
-          this.patient.set(active);
-          this.fetchAllClinicalRecords(active.id);
-        } else {
-          this.loading.set(false);
-        }
+      error: (err) => {
+        this.loading.set(false);
+        console.error('Failed to load patient chart data', err);
+        toast.error('Failed to load chart: ' + (err.error?.message || 'Unknown network error'));
       },
     });
   }

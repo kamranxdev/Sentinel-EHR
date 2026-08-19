@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of, forkJoin, throwError } from 'rxjs';
 import { map, catchError, switchMap } from 'rxjs/operators';
-import { User, UserUpdateRequestDTO } from '../models/auth-user.model';
+import { User, UserUpdateRequestDTO, OrganizationContextDTO } from '../models/auth-user.model';
 import {
   Patient,
   PatientClinicalHistoryDTO,
@@ -36,6 +36,9 @@ import {
   AppointmentLabOrder,
   AppointmentNote,
   DoctorRecommendationDTO,
+  PractitionerDTO,
+  PractitionerOrgInfo,
+  PractitionerSpecialtyInfo,
 } from '../models/appointment.model';
 import {
   LabOrder,
@@ -65,7 +68,7 @@ import { InsurancePayer, InsurancePlan, InsuranceAuthorization, InsuranceClaim, 
 import { CodeSystem, TerminologyCode, TerminologySearchResult } from '../models/terminology.model';
 import { AbacPolicy, RbacRole, SecurityEventLog, CreateAbacPolicyRequest } from '../models/security-policy.model';
 import { CareTeam, CareTeamMember, AddCareTeamMemberRequest } from '../models/care-team.model';
-import { Facility, Department, Ward, Room, BedDetail, PriceList, PriceListItem } from '../models/tenancy.model';
+import { Department, Ward, Room, BedDetail, PriceList, PriceListItem } from '../models/tenancy.model';
 import { MedicationOrder, MedicationBatch, InventoryItem, MedicationCatalogItem, StockReceiptDTO, StockAdjustmentDTO, DispensationRecord, PharmacySafetyEvaluation } from '../models/pharmacy.model';
 import { BillingAccount, ChargeItem, Invoice, InvoiceItem, Payment, RefundRequestDTO } from '../models/billing.model';
 import { Organization } from '../models/organization.model';
@@ -77,7 +80,7 @@ import { FhirBundle, FhirResource, FhirCapabilityStatement, FhirPatient } from '
 export class ApiService {
   private baseUrl = 'http://localhost:8080/api/v1';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   /**
    * Unwraps backend ApiResponse envelope { success: boolean, message: string, data: T }
@@ -170,7 +173,9 @@ export class ApiService {
       : storedUser?.patientId;
 
     if (assignedId) {
-      return this.getPatientById(assignedId);
+      return this.getPatientById(assignedId).pipe(
+        switchMap(p => this.enrichPatientProfile(p))
+      );
     }
 
     const searchKey = storedUser?.fullName || storedUser?.username || storedUser?.email || '';
@@ -438,19 +443,21 @@ export class ApiService {
         }
 
         if (res.medicalHistory) {
-          enriched.pastMedicalHistory = enriched.pastMedicalHistory || res.medicalHistory.condition || res.medicalHistory.diagnosis;
+          enriched.pastMedicalHistory = enriched.pastMedicalHistory || res.medicalHistory.pastMedicalHistory || res.medicalHistory.condition || res.medicalHistory.diagnosis;
           enriched.seriousConditions = enriched.seriousConditions || res.medicalHistory.notes;
+          enriched.surgeriesAndProcedures = enriched.surgeriesAndProcedures || res.medicalHistory.pastSurgicalHistory || res.medicalHistory.surgeriesAndProcedures;
+          enriched.familyMedicalHistory = enriched.familyMedicalHistory || res.medicalHistory.familyHistory || res.medicalHistory.familyMedicalHistory;
         }
 
         if (res.socialHistory) {
           enriched.smokingStatus = enriched.smokingStatus || res.socialHistory.smokingStatus;
-          enriched.alcoholConsumption = enriched.alcoholConsumption || res.socialHistory.alcoholConsumption;
-          enriched.exerciseRoutine = enriched.exerciseRoutine || res.socialHistory.exerciseRoutine;
+          enriched.alcoholConsumption = enriched.alcoholConsumption || res.socialHistory.alcoholStatus || res.socialHistory.alcoholConsumption;
+          enriched.exerciseRoutine = enriched.exerciseRoutine || res.socialHistory.exerciseFrequency || res.socialHistory.exerciseRoutine;
         }
 
         if (res.dietaryHistory) {
           enriched.dietaryHabits = enriched.dietaryHabits || res.dietaryHistory.dietType || res.dietaryHistory.dietaryHabits;
-          enriched.foodAllergies = enriched.foodAllergies || res.dietaryHistory.restrictions || res.dietaryHistory.foodAllergies;
+          enriched.foodAllergies = enriched.foodAllergies || res.dietaryHistory.dietaryRestrictions || res.dietaryHistory.restrictions || res.dietaryHistory.foodAllergies;
         }
 
         return this.normalizePatient(enriched);
@@ -502,13 +509,13 @@ export class ApiService {
       map((list) =>
         Array.isArray(list)
           ? list.map((e) => ({
-              ...e,
-              encounterType: e.encounterType || 'OUTPATIENT',
-              status: e.status || 'ACTIVE',
-              startTime: e.startTime || e.startedAt || e.createdAt,
-              encounterDate: e.encounterDate || e.startedAt?.split('T')[0],
-              chiefComplaint: e.chiefComplaint || e.reasonForVisit || e.reasonText || 'Clinical Consultation',
-            }))
+            ...e,
+            encounterType: e.encounterType || 'OUTPATIENT',
+            status: e.status || 'ACTIVE',
+            startTime: e.startTime || e.startedAt || e.createdAt,
+            encounterDate: e.encounterDate || e.startedAt?.split('T')[0],
+            chiefComplaint: e.chiefComplaint || e.reasonForVisit || e.reasonText || 'Clinical Consultation',
+          }))
           : [],
       ),
       catchError(() => of([])),
@@ -565,9 +572,9 @@ export class ApiService {
   // =========================================================================
   // 6. Bed Management
   // =========================================================================
-  getAvailableBeds(facilityId?: string, wardId?: string): Observable<Bed[]> {
+  getAvailableBeds(organizationId?: string, wardId?: string): Observable<Bed[]> {
     const params: string[] = [];
-    if (facilityId) params.push(`facilityId=${facilityId}`);
+    if (organizationId) params.push(`organizationId=${organizationId}`);
     if (wardId) params.push(`wardId=${wardId}`);
     const query = params.length > 0 ? `?${params.join('&')}` : '';
     return this.get<Bed[]>(`/beds/available${query}`).pipe(
@@ -765,11 +772,11 @@ export class ApiService {
       map((list) =>
         Array.isArray(list)
           ? list.map((a) => ({
-              ...a,
-              reactionDescription: a.reactionDescription || a.reaction || 'Documented allergic sensitivity',
-              reaction: a.reaction || a.reactionDescription,
-              status: a.status || 'ACTIVE',
-            }))
+            ...a,
+            reactionDescription: a.reactionDescription || a.reaction || 'Documented allergic sensitivity',
+            reaction: a.reaction || a.reactionDescription,
+            status: a.status || 'ACTIVE',
+          }))
           : [],
       ),
       catchError(() => of([])),
@@ -808,18 +815,18 @@ export class ApiService {
       map((list) =>
         Array.isArray(list)
           ? list.map((p) => ({
-              id: p.id,
-              patientId: p.patientId,
-              conditionName: p.problemName || p.conditionName || 'Medical Diagnosis',
-              diagnosisName: p.problemName || p.diagnosisName || p.conditionName,
-              icdCode: p.icd10Code || p.icdCode || 'ICD-10',
-              snomedCode: p.snomedCode,
-              onsetDate: p.onsetDate,
-              status: p.status || 'ACTIVE',
-              verificationStatus: p.verificationStatus,
-              notes: p.notes,
-              recordedAt: p.recordedAt || p.createdAt,
-            }))
+            id: p.id,
+            patientId: p.patientId,
+            conditionName: p.problemName || p.conditionName || 'Medical Diagnosis',
+            diagnosisName: p.problemName || p.diagnosisName || p.conditionName,
+            icdCode: p.icd10Code || p.icdCode || 'ICD-10',
+            snomedCode: p.snomedCode,
+            onsetDate: p.onsetDate,
+            status: p.status || 'ACTIVE',
+            verificationStatus: p.verificationStatus,
+            notes: p.notes,
+            recordedAt: p.recordedAt || p.createdAt,
+          }))
           : [],
       ),
       catchError(() => of([])),
@@ -866,10 +873,10 @@ export class ApiService {
       map((list) =>
         Array.isArray(list)
           ? list.map((v) => ({
-              ...v,
-              recordedAt: v.recordedAt || new Date().toISOString(),
-              temperatureUnit: v.temperatureUnit || 'F',
-            }))
+            ...v,
+            recordedAt: v.recordedAt || new Date().toISOString(),
+            temperatureUnit: v.temperatureUnit || 'F',
+          }))
           : [],
       ),
       catchError(() => of([])),
@@ -928,13 +935,13 @@ export class ApiService {
       map((list) =>
         Array.isArray(list)
           ? list.map((rx) => ({
-              ...rx,
-              dosage: rx.dosage || rx.dose || 'Standard',
-              route: rx.route || 'Oral',
-              frequency: rx.frequency || 'Once Daily',
-              refills: rx.refills ?? 1,
-              status: rx.status || 'ACTIVE',
-            }))
+            ...rx,
+            dosage: rx.dosage || rx.dose || 'Standard',
+            route: rx.route || 'Oral',
+            frequency: rx.frequency || 'Once Daily',
+            refills: rx.refills ?? 1,
+            status: rx.status || 'ACTIVE',
+          }))
           : [],
       ),
       catchError(() => of([])),
@@ -1047,8 +1054,8 @@ export class ApiService {
     );
   }
 
-  getAppointmentsByFacility(facilityId: string): Observable<Appointment[]> {
-    return this.get<Appointment[]>(`/facilities/${facilityId}/appointments`).pipe(
+  getAppointmentsByOrganization(organizationId: string): Observable<Appointment[]> {
+    return this.get<Appointment[]>(`/organizations/${organizationId}/appointments`).pipe(
       map((list) => (Array.isArray(list) ? list.map((a) => this.normalizeAppointment(a)) : [])),
       catchError(() => of([])),
     );
@@ -1062,7 +1069,7 @@ export class ApiService {
         if (!isNaN(d.getTime())) {
           startsAt = d.toISOString();
         }
-      } catch (e) {}
+      } catch (e) { }
     } else {
       startsAt = new Date().toISOString();
     }
@@ -1074,13 +1081,12 @@ export class ApiService {
         if (!isNaN(d.getTime())) {
           endsAt = d.toISOString();
         }
-      } catch (e) {}
+      } catch (e) { }
     }
 
     const payload = {
       patientId: appointment.patientId,
       practitionerId: appointment.practitionerId || appointment.doctorId,
-      facilityId: appointment.facilityId,
       departmentId: appointment.departmentId,
       startsAt: startsAt,
       endsAt: endsAt,
@@ -1194,7 +1200,7 @@ export class ApiService {
         if (!isNaN(d.getTime())) {
           newStartsAt = d.toISOString();
         }
-      } catch (e) {}
+      } catch (e) { }
     }
     let newEndsAt = payload.newEndsAt;
     if (newEndsAt) {
@@ -1203,7 +1209,7 @@ export class ApiService {
         if (!isNaN(d.getTime())) {
           newEndsAt = d.toISOString();
         }
-      } catch (e) {}
+      } catch (e) { }
     }
     return this.post<Appointment>(`/appointments/${id}/reschedule`, { ...payload, newStartsAt, newEndsAt }).pipe(
       map((a) => this.normalizeAppointment(a)),
@@ -1224,14 +1230,13 @@ export class ApiService {
 
   getOrganizations(): Observable<Organization[]> {
     return this.get<Organization[]>('/organizations').pipe(
-      catchError(() => this.get<Organization[]>('/sys-admin/organizations')),
-      catchError(() => of([])),
+      catchError(() => of([] as Organization[])),
     );
   }
 
   getRecommendedDoctors(patientId?: string, reason?: string, date?: string, organizationId?: string): Observable<DoctorRecommendationDTO[]> {
     return this.getDoctors(organizationId).pipe(
-      map((doctors) => {
+      map((doctors: User[]) => {
         if (!doctors || doctors.length === 0) return [];
 
         const q = (reason || '').toLowerCase().trim();
@@ -1243,7 +1248,7 @@ export class ApiService {
         const isOnco = /cancer|onco|tumor|chemo|biopsy|lump|oncology|radiation/i.test(q);
         const isRad = /x-ray|mri|ct scan|ultrasound|scan|radiology|imaging|fracture/i.test(q);
 
-        const scored = doctors.map((doc, idx) => {
+        const scored: DoctorRecommendationDTO[] = doctors.map((doc: User, idx: number): DoctorRecommendationDTO => {
           const spec = (doc.specialization || doc.specialty || '').toLowerCase();
           let matchScore = 78;
           let matchReason = `Board-certified clinical specialist available for outpatient consultation.`;
@@ -1272,7 +1277,7 @@ export class ApiService {
           }
 
           const orgList = doc.organizations && doc.organizations.length > 0
-            ? doc.organizations.map((o: any) => o.name || o.code).join(', ')
+            ? doc.organizations.map((o: OrganizationContextDTO) => o.name || o.code).join(', ')
             : 'Sentinel Health Network';
 
           const specialty = doc.specialization || 'Clinical Specialist';
@@ -1286,26 +1291,33 @@ export class ApiService {
             matchReason: `${matchReason} (Affiliated: ${orgList})`,
             verifiedLicense: true,
             recommendedSlots: ['09:00 AM', '10:30 AM', '02:00 PM', '04:15 PM', '05:30 PM'],
-          } as DoctorRecommendationDTO;
+          };
         });
 
         // Sort by match score descending
         return scored.sort((a, b) => b.matchScore - a.matchScore);
       }),
-      catchError(() => of([])),
+      catchError(() => of([] as DoctorRecommendationDTO[])),
     );
   }
 
   private normalizeAppointment(a: any): Appointment {
     if (!a) return a;
     const starts = a.startsAt || a.appointmentDate || new Date().toISOString();
-    const docName = a.doctorName || (a.doctorUsername ? 'Dr. ' + a.doctorUsername : (a.doctor?.fullName || 'Attending Physician'));
+    
+    // Safely parse doctor name, avoiding emails (in case any old data remains)
+    let docName = a.doctorName || a.doctor?.fullName;
+    if (!docName) {
+      docName = 'Attending Physician';
+    } else if (!docName.startsWith('Dr.')) {
+      docName = 'Dr. ' + docName;
+    }
+
     return {
       ...a,
       appointmentDate: starts,
       startsAt: starts,
       doctorName: docName,
-      doctorUsername: a.doctorUsername || a.doctor?.username,
       doctorSpecialization: a.doctorSpecialization || a.doctor?.specialization || 'Clinical Medicine',
       status: a.status || 'SCHEDULED',
       stage: a.stage || a.status || 'SCHEDULED',
@@ -1313,35 +1325,41 @@ export class ApiService {
   }
 
   getDoctors(organizationId?: string): Observable<User[]> {
-    const hasOrgFilter = organizationId && organizationId !== 'ALL';
-    const query = hasOrgFilter ? `?organizationId=${organizationId}` : '';
-    return this.get<any[]>(`/practitioners${query}`).pipe(
-      map((list) => {
+    const hasOrgFilter = !!(organizationId && organizationId !== 'ALL');
+    const query = hasOrgFilter ? `?organizationId=${encodeURIComponent(organizationId)}` : '';
+    return this.get<PractitionerDTO[]>(`/practitioners${query}`).pipe(
+      map((list: PractitionerDTO[]) => {
         if (Array.isArray(list) && list.length > 0) {
-          const physicians = list.filter((p) => !p.practitionerType || p.practitionerType === 'PHYSICIAN');
+          const physicians = list.filter((p: PractitionerDTO) => !p.practitionerType || p.practitionerType === 'PHYSICIAN');
           const targetList = physicians.length > 0 ? physicians : list;
-          let result = targetList.map((p) => {
+          let result: User[] = targetList.map((p: PractitionerDTO): User => {
             const rawName = p.fullName || `${p.firstName || ''} ${p.lastName || ''}`.trim();
             const cleanName = rawName.replace(/^(Dr\.?\s*)+/i, '');
+            const orgContexts: OrganizationContextDTO[] = (p.organizations || []).map((o: PractitionerOrgInfo): OrganizationContextDTO => ({
+              id: o.id,
+              code: o.code,
+              name: o.name,
+              departments: [],
+            }));
+
             return {
               id: p.userId || p.id,
-              practitionerId: p.id,
               personId: p.personId,
               email: p.email,
               username: p.email || p.identifier || cleanName.toLowerCase().replace(/\s+/g, '.'),
               fullName: `Dr. ${cleanName}`,
               specialization: p.primarySpecialty || (p.specialties && p.specialties.length > 0 ? p.specialties[0].specialtyName : 'General Physician'),
               specialty: p.primarySpecialty || (p.specialties && p.specialties.length > 0 ? p.specialties[0].specialtyName : 'General Physician'),
-              organizations: p.organizations || [],
+              organizations: orgContexts,
               roles: ['PHYSICIAN'],
               status: p.status || 'ACTIVE',
-            } as User;
+            };
           });
 
           if (hasOrgFilter) {
-            result = result.filter((d) =>
+            result = result.filter((d: User) =>
               d.organizations && d.organizations.length > 0
-                ? d.organizations.some((o: any) => o.id === organizationId || o.code === organizationId)
+                ? d.organizations.some((o: OrganizationContextDTO) => o.id === organizationId || o.code === organizationId)
                 : true
             );
           }
@@ -1349,21 +1367,27 @@ export class ApiService {
         }
         return [];
       }),
-      catchError(() =>
-        this.get<any[]>(`/users?role=PHYSICIAN${hasOrgFilter ? '&organizationId=' + organizationId : ''}`).pipe(
-          map((list) => {
+      catchError(() => {
+        const userParams = ['role=PHYSICIAN'];
+        if (hasOrgFilter) {
+          userParams.push(`organizationId=${encodeURIComponent(organizationId!)}`);
+        }
+        return this.get<User[]>(`/users?${userParams.join('&')}`).pipe(
+          map((list: User[]) => {
             if (Array.isArray(list)) {
-              let result = list.map((u) => ({
+              let result: User[] = list.map((u: User): User => ({
                 ...u,
                 fullName: u.fullName ? `Dr. ${u.fullName.replace(/^(Dr\.?\s*)+/i, '')}` : 'Dr. Physician',
                 specialization: u.specialization || 'Clinical Medicine',
                 organizations: u.organizations || [],
-              } as User));
+                roles: u.roles || ['PHYSICIAN'],
+                status: u.status || 'ACTIVE',
+              }));
 
               if (hasOrgFilter) {
-                result = result.filter((d) =>
+                result = result.filter((d: User) =>
                   d.organizations && d.organizations.length > 0
-                    ? d.organizations.some((o: any) => o.id === organizationId || o.code === organizationId)
+                    ? d.organizations.some((o: OrganizationContextDTO) => o.id === organizationId || o.code === organizationId)
                     : true
                 );
               }
@@ -1371,9 +1395,9 @@ export class ApiService {
             }
             return [];
           }),
-          catchError(() => of([])),
-        ),
-      ),
+          catchError(() => of([] as User[])),
+        );
+      }),
     );
   }
 
@@ -1576,7 +1600,6 @@ export class ApiService {
         let items: AuditLog[] = list.map((a: any) => ({
           id: a.id,
           organizationId: a.organizationId,
-          facilityId: a.facilityId,
           userId: a.userId,
           patientId: a.patientId,
           encounterId: a.encounterId,
@@ -1852,14 +1875,14 @@ export class ApiService {
   }
 
   // =========================================================================
-  // 25. Facility Chargemasters & Price Lists
+  // 25. Organization Chargemasters & Price Lists
   // =========================================================================
-  getFacilityPriceLists(facilityId: string): Observable<PriceList[]> {
-    return this.get<PriceList[]>(`/facilities/${facilityId}/price-lists`).pipe(catchError(() => of([])));
+  getOrganizationPriceLists(organizationId: string): Observable<PriceList[]> {
+    return this.get<PriceList[]>(`/organizations/${organizationId}/price-lists`).pipe(catchError(() => of([])));
   }
 
-  createPriceList(facilityId: string, payload: Partial<PriceList>): Observable<PriceList> {
-    return this.post<PriceList>(`/facilities/${facilityId}/price-lists`, payload);
+  createPriceList(organizationId: string, payload: Partial<PriceList>): Observable<PriceList> {
+    return this.post<PriceList>(`/organizations/${organizationId}/price-lists`, payload);
   }
 
   getPriceListItems(priceListId: number | string): Observable<PriceListItem[]> {
@@ -1871,22 +1894,18 @@ export class ApiService {
   }
 
   // =========================================================================
-  // 26. Tenancy Hierarchy (Facilities, Departments, Wards, Rooms, Beds)
+  // 26. Tenancy Hierarchy (Departments, Wards, Rooms, Beds)
   // =========================================================================
-  getFacilities(organizationId: string): Observable<Facility[]> {
-    return this.get<Facility[]>(`/organizations/${organizationId}/facilities`).pipe(catchError(() => of([])));
+  getDepartments(organizationId: string): Observable<Department[]> {
+    return this.get<Department[]>(`/organizations/${organizationId}/departments`).pipe(catchError(() => of([])));
   }
 
-  createFacility(organizationId: string, payload: Partial<Facility>): Observable<Facility> {
-    return this.post<Facility>(`/organizations/${organizationId}/facilities`, payload);
+  getDepartmentsByOrganization(organizationId: string): Observable<Department[]> {
+    return this.getDepartments(organizationId);
   }
 
-  getDepartments(facilityId: string): Observable<Department[]> {
-    return this.get<Department[]>(`/facilities/${facilityId}/departments`).pipe(catchError(() => of([])));
-  }
-
-  createDepartment(facilityId: string, payload: Partial<Department>): Observable<Department> {
-    return this.post<Department>(`/facilities/${facilityId}/departments`, payload);
+  createDepartment(organizationId: string, payload: Partial<Department>): Observable<Department> {
+    return this.post<Department>(`/organizations/${organizationId}/departments`, payload);
   }
 
   getWards(departmentId: string): Observable<Ward[]> {
@@ -1958,7 +1977,6 @@ export class ApiService {
   // =========================================================================
   getPlatformOrganizations(): Observable<Organization[]> {
     return this.get<Organization[]>('/organizations').pipe(
-      catchError(() => this.get<Organization[]>('/sys-admin/organizations')),
       catchError(() => of([])),
     );
   }
@@ -1970,14 +1988,14 @@ export class ApiService {
   }
 
   activatePlatformOrganization(id: string): Observable<Organization> {
-    return this.patch<Organization>(`/organizations/${id}`, { status: 'ACTIVE' }).pipe(
-      catchError(() => this.patch<Organization>(`/sys-admin/organizations/${id}/status`, { status: 'VERIFIED' })),
+    return this.patch<Organization>(`/organizations/${id}/status`, { status: 'ACTIVE' }).pipe(
+      catchError(() => this.patch<Organization>(`/organizations/${id}`, { status: 'ACTIVE' })),
     );
   }
 
   suspendPlatformOrganization(id: string): Observable<Organization> {
-    return this.patch<Organization>(`/organizations/${id}`, { status: 'SUSPENDED' }).pipe(
-      catchError(() => this.delete<Organization>(`/organizations/${id}`)),
+    return this.patch<Organization>(`/organizations/${id}/status`, { status: 'SUSPENDED' }).pipe(
+      catchError(() => this.patch<Organization>(`/organizations/${id}`, { status: 'SUSPENDED' })),
     );
   }
 
@@ -2021,23 +2039,23 @@ export class ApiService {
                 map((rxs: Prescription[]) =>
                   Array.isArray(rxs)
                     ? rxs.map((r: Prescription) => ({
-                        id: r.id || String(Date.now()),
-                        patientId: p.id!,
-                        patient: p,
-                        encounterId: r.encounterId,
-                        medicationName: r.medicationName,
-                        medicationCode: r.medicationCode,
-                        rxNormCode: r.rxNormCode,
-                        dosage: r.dosage || r.dose || 'Standard',
-                        route: r.route || 'Oral',
-                        frequency: r.frequency || 'Daily',
-                        quantity: r.quantity || 1,
-                        refills: r.refills || 0,
-                        instructions: r.instructions,
-                        status: r.status || 'PENDING_VERIFICATION',
-                        doctorName: (r as any).prescriberName || (r as any).doctorName,
-                        orderedAt: r.prescribedAt || (r as any).createdAt || new Date().toISOString(),
-                      } as MedicationOrder))
+                      id: r.id || String(Date.now()),
+                      patientId: p.id!,
+                      patient: p,
+                      encounterId: r.encounterId,
+                      medicationName: r.medicationName,
+                      medicationCode: r.medicationCode,
+                      rxNormCode: r.rxNormCode,
+                      dosage: r.dosage || r.dose || 'Standard',
+                      route: r.route || 'Oral',
+                      frequency: r.frequency || 'Daily',
+                      quantity: r.quantity || 1,
+                      refills: r.refills || 0,
+                      instructions: r.instructions,
+                      status: r.status || 'PENDING_VERIFICATION',
+                      doctorName: (r as any).prescriberName || (r as any).doctorName,
+                      orderedAt: r.prescribedAt || (r as any).createdAt || new Date().toISOString(),
+                    } as MedicationOrder))
                     : [],
                 ),
                 catchError(() => of([])),
@@ -2076,9 +2094,6 @@ export class ApiService {
     );
   }
 
-  getDepartmentsByFacility(facilityId: string): Observable<Department[]> {
-    return this.get<Department[]>(`/facilities/${facilityId}/departments`).pipe(catchError(() => of([])));
-  }
 
   getPharmacyInventory(): Observable<InventoryItem[]> {
     return this.get<InventoryItem[]>('/pharmacy/inventory').pipe(
@@ -2148,10 +2163,10 @@ export class ApiService {
                 map((invs: Invoice[]) =>
                   Array.isArray(invs)
                     ? invs.map((inv: Invoice) => ({
-                        ...inv,
-                        patientId: p.id,
-                        patientName: p.fullName,
-                      } as Invoice))
+                      ...inv,
+                      patientId: p.id,
+                      patientName: p.fullName,
+                    } as Invoice))
                     : [],
                 ),
                 catchError(() => of([])),

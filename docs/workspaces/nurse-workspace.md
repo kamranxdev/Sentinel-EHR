@@ -7,9 +7,9 @@ Person
   ↓
 User (Role = NURSE)
   ↓
-Organization Membership
+Organization Membership (Hospital / Clinic)
   ↓
-Facility / Department / Ward (e.g. Ward 3A)
+Department / Ward (e.g. Ward 3A)
   ↓
 Shift Assignment (e.g. Morning 07:00 – 15:00)
   ↓
@@ -28,9 +28,9 @@ Nursing Care Scope:
 
 | Entity / Table | Backend Package | Read Privileges | Write / Mutation Privileges | Relationships & Foreign Keys |
 | :--- | :--- | :---: | :---: | :--- |
-| **`wards`** | `spatial` / `adt` | Facility Wards | None (Admin managed) | `facility_id` $\rightarrow$ `facilities.id`, `department_id` $\rightarrow$ `departments.id` |
-| **`beds`** | `spatial` / `adt` | Assigned Ward | Update Status (`AVAILABLE`, `CLEANING`, `OCCUPIED`) | `room_id` $\rightarrow$ `rooms.id`, `ward_id` $\rightarrow$ `wards.id` |
-| **`encounters`** | `clinical` | Ward / Triage | Update Vitals, Stage, & Flowsheet | `patient_id` $\rightarrow$ `patients.id`, `facility_id` $\rightarrow$ `facilities.id` |
+| **`wards`** | `spatial` / `adt` | Hospital Wards | None (Admin managed) | `organization_id` $\rightarrow$ `organizations.id`, `department_id` $\rightarrow$ `departments.id` |
+| **`beds`** | `spatial` / `adt` | Assigned Ward | Update Status (`AVAILABLE`, `CLEANING`, `OCCUPIED`) | `room_id` $\rightarrow$ `rooms.id`, `ward_id` $\rightarrow$ `wards.id`, `organization_id` $\rightarrow$ `organizations.id` |
+| **`encounters`** | `clinical` | Ward / Triage | Update Vitals, Stage, & Flowsheet | `patient_id` $\rightarrow$ `patients.id`, `organization_id` $\rightarrow$ `organizations.id` |
 | **`appointments`** | `scheduling` | Clinic Queue | Update Stage (`TRIAGED`) | `patient_id` $\rightarrow$ `patients.id`, `departmentId` $\rightarrow$ `departments.id` |
 | **`vitals`** | `clinical` | Ward / Triage | Full Create (Log BP, HR, Temp, Resp, SpO2, BMI) | `encounter_id` $\rightarrow$ `encounters.id`, `recorded_by` $\rightarrow$ `users.id` |
 | **`prescriptions`** | `pharmacy` | Ward Inpatients | Read Active Orders | `encounter_id` $\rightarrow$ `encounters.id`, `patient_id` $\rightarrow$ `patients.id` |

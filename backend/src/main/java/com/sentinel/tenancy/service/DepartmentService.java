@@ -5,9 +5,9 @@ import com.sentinel.tenancy.dto.CreateDepartmentRequest;
 import com.sentinel.tenancy.dto.DepartmentResponseDTO;
 import com.sentinel.tenancy.dto.UpdateDepartmentRequest;
 import com.sentinel.tenancy.entity.Department;
-import com.sentinel.tenancy.entity.Facility;
+import com.sentinel.tenancy.entity.Organization;
 import com.sentinel.tenancy.repository.DepartmentRepository;
-import com.sentinel.tenancy.repository.FacilityRepository;
+import com.sentinel.tenancy.repository.OrganizationRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,24 +21,23 @@ import java.util.stream.Collectors;
 public class DepartmentService {
 
     private final DepartmentRepository departmentRepository;
-    private final FacilityRepository facilityRepository;
+    private final OrganizationRepository organizationRepository;
 
-    public DepartmentService(DepartmentRepository departmentRepository, FacilityRepository facilityRepository) {
+    public DepartmentService(DepartmentRepository departmentRepository, OrganizationRepository organizationRepository) {
         this.departmentRepository = departmentRepository;
-        this.facilityRepository = facilityRepository;
+        this.organizationRepository = organizationRepository;
     }
 
-    public DepartmentResponseDTO createDepartment(UUID facilityId, CreateDepartmentRequest request) {
-        Facility facility = facilityRepository.findById(facilityId)
-                .orElseThrow(() -> new ResourceNotFoundException("Facility not found with id: " + facilityId));
+    public DepartmentResponseDTO createDepartment(UUID organizationId, CreateDepartmentRequest request) {
+        Organization organization = organizationRepository.findById(organizationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Organization not found with id: " + organizationId));
 
-        if (departmentRepository.existsByFacilityIdAndCode(facilityId, request.getCode())) {
-            throw new IllegalArgumentException("Department code already exists in facility: " + request.getCode());
+        if (departmentRepository.existsByOrganizationIdAndCode(organizationId, request.getCode())) {
+            throw new IllegalArgumentException("Department code already exists in organization: " + request.getCode());
         }
 
         Department dept = new Department();
-        dept.setOrganization(facility.getOrganization());
-        dept.setFacility(facility);
+        dept.setOrganization(organization);
         dept.setCode(request.getCode());
         dept.setName(request.getName());
         dept.setDepartmentType(request.getDepartmentType());
@@ -50,8 +49,8 @@ public class DepartmentService {
     }
 
     @Transactional(readOnly = true)
-    public List<DepartmentResponseDTO> getFacilityDepartments(UUID facilityId) {
-        return departmentRepository.findByFacilityId(facilityId).stream()
+    public List<DepartmentResponseDTO> getOrganizationDepartments(UUID organizationId) {
+        return departmentRepository.findByOrganizationId(organizationId).stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
     }
@@ -87,10 +86,7 @@ public class DepartmentService {
         dto.setId(dept.getId());
         if (dept.getOrganization() != null) {
             dto.setOrganizationId(dept.getOrganization().getId());
-        }
-        if (dept.getFacility() != null) {
-            dto.setFacilityId(dept.getFacility().getId());
-            dto.setFacilityName(dept.getFacility().getName());
+            dto.setOrganizationName(dept.getOrganization().getName());
         }
         dto.setCode(dept.getCode());
         dto.setName(dept.getName());

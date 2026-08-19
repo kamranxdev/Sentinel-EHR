@@ -19,7 +19,6 @@ public class RegisterPatientRequest {
     private String postalCode;
     private String mrn;
     private UUID organizationId;
-    private UUID facilityId;
 
     public RegisterPatientRequest() {}
 
@@ -53,6 +52,4 @@ public class RegisterPatientRequest {
     public void setMrn(String mrn) { this.mrn = mrn; }
     public UUID getOrganizationId() { return organizationId; }
     public void setOrganizationId(UUID organizationId) { this.organizationId = organizationId; }
-    public UUID getFacilityId() { return facilityId; }
-    public void setFacilityId(UUID facilityId) { this.facilityId = facilityId; }
 }

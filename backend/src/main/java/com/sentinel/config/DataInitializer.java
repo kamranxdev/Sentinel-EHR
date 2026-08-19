@@ -59,7 +59,6 @@ public class DataInitializer implements ApplicationRunner {
 
     // 2. Tenancy
     private final OrganizationRepository organizationRepository;
-    private final FacilityRepository facilityRepository;
     private final DepartmentRepository departmentRepository;
     private final WardRepository wardRepository;
     private final RoomRepository roomRepository;
@@ -76,7 +75,6 @@ public class DataInitializer implements ApplicationRunner {
     private final PersonRepository personRepository;
     private final UserRepository userRepository;
     private final UserOrganizationRepository userOrganizationRepository;
-    private final UserFacilityRepository userFacilityRepository;
     private final UserDepartmentRepository userDepartmentRepository;
     private final PractitionerRepository practitionerRepository;
     private final PractitionerSpecialtyRepository practitionerSpecialtyRepository;
@@ -203,7 +201,6 @@ public class DataInitializer implements ApplicationRunner {
             TerminologyCodeRepository terminologyCodeRepository,
             TerminologyUnitRepository terminologyUnitRepository,
             OrganizationRepository organizationRepository,
-            FacilityRepository facilityRepository,
             DepartmentRepository departmentRepository,
             WardRepository wardRepository,
             RoomRepository roomRepository,
@@ -216,7 +213,6 @@ public class DataInitializer implements ApplicationRunner {
             PersonRepository personRepository,
             UserRepository userRepository,
             UserOrganizationRepository userOrganizationRepository,
-            UserFacilityRepository userFacilityRepository,
             UserDepartmentRepository userDepartmentRepository,
             PractitionerRepository practitionerRepository,
             PractitionerSpecialtyRepository practitionerSpecialtyRepository,
@@ -316,7 +312,6 @@ public class DataInitializer implements ApplicationRunner {
         this.terminologyCodeRepository = terminologyCodeRepository;
         this.terminologyUnitRepository = terminologyUnitRepository;
         this.organizationRepository = organizationRepository;
-        this.facilityRepository = facilityRepository;
         this.departmentRepository = departmentRepository;
         this.wardRepository = wardRepository;
         this.roomRepository = roomRepository;
@@ -329,7 +324,6 @@ public class DataInitializer implements ApplicationRunner {
         this.personRepository = personRepository;
         this.userRepository = userRepository;
         this.userOrganizationRepository = userOrganizationRepository;
-        this.userFacilityRepository = userFacilityRepository;
         this.userDepartmentRepository = userDepartmentRepository;
         this.practitionerRepository = practitionerRepository;
         this.practitionerSpecialtyRepository = practitionerSpecialtyRepository;
@@ -435,7 +429,7 @@ public class DataInitializer implements ApplicationRunner {
         // 1. Terminology (Code Systems, Codes, Units)
         TerminologyContext terminology = initTerminology();
 
-        // 2. Tenancy Hierarchy (Organizations, Facilities, Departments, Wards, Rooms, Beds)
+        // 2. Tenancy Hierarchy (Organizations, Departments, Wards, Rooms, Beds)
         TenancyContext tenancy = initTenancy();
 
         // 3. Security & Authorization (Permissions, Canonical Roles, ABAC Policies)
@@ -443,34 +437,41 @@ public class DataInitializer implements ApplicationRunner {
         Map<String, Role> roles = initRoles(permissions);
         initAbacPolicies();
 
-        // 4. Identity & Staff Users (Person, User, Practitioners, Licenses, Specialties, User-Org/Dept/Facility)
+        // 4. Identity & Staff Users (Person, User, Practitioners, Licenses,
+        // Specialties, User-Org/Dept)
         IdentityContext identity = initIdentity(roles, tenancy);
 
         // 5. Patients & Complete Demographics / Histories / Alerts / Contacts
         List<PatientContext> patients = initPatients(tenancy, identity);
 
-        // 6. Clinical Encounters, Admissions, Vitals, Triage, Care Teams, Notes, Flowsheets, Transfers, Discharges
+        // 6. Clinical Encounters, Admissions, Vitals, Triage, Care Teams, Notes,
+        // Flowsheets, Transfers, Discharges
         ClinicalContext clinical = initClinical(tenancy, identity, patients, terminology);
 
         // 7. Laboratory Test Catalog, Orders, Specimen Collection, Results & Components
         initLaboratory(tenancy, identity, patients, clinical);
 
-        // 8. Pharmacy Catalog, Products, Prescriptions, Dosing, eMAR Administrations, Reconciliation
+        // 8. Pharmacy Catalog, Products, Prescriptions, Dosing, eMAR Administrations,
+        // Reconciliation
         initPharmacy(tenancy, identity, patients, clinical);
 
         // 9. Procedures Catalog, Orders, Performances, Participants, Operative Notes
         initProcedures(tenancy, identity, patients, clinical);
 
-        // 10. Imaging Orders, DICOM Studies, Series, Instances, Radiology Reports & Versions
+        // 10. Imaging Orders, DICOM Studies, Series, Instances, Radiology Reports &
+        // Versions
         initImaging(tenancy, identity, patients, clinical);
 
-        // 11. Scheduling Appointment Types, Slots, Multi-stage Appointments, Status History, Notes, Reschedules, Cancellations
+        // 11. Scheduling Appointment Types, Slots, Multi-stage Appointments, Status
+        // History, Notes, Reschedules, Cancellations
         initScheduling(tenancy, identity, patients);
 
-        // 12. Billing Price Lists, Items, Billing Accounts, Charge Items, Invoices, Items, Payments, Allocations, Refunds
+        // 12. Billing Price Lists, Items, Billing Accounts, Charge Items, Invoices,
+        // Items, Payments, Allocations, Refunds
         initBilling(tenancy, identity, patients, clinical);
 
-        // 13. Insurance Payers, Plans, Patient Coverage, Verifications, Prior Authorizations, Claims & Claim Items
+        // 13. Insurance Payers, Plans, Patient Coverage, Verifications, Prior
+        // Authorizations, Claims & Claim Items
         initInsurance(tenancy, identity, patients, clinical);
 
         // 14. Consent Types, Electronic Documents, Versioning, Patient Consents
@@ -479,7 +480,8 @@ public class DataInitializer implements ApplicationRunner {
         // 15. Security Events & Audit Logs
         initSecurityAndAudit(tenancy, identity, patients, clinical);
 
-        log.info("Sentinel EHR database initialization completed successfully with 100% relational integrity across all schemas!");
+        log.info(
+                "Sentinel EHR database initialization completed successfully with 100% relational integrity across all schemas!");
     }
 
     // =========================================================================
@@ -604,14 +606,9 @@ public class DataInitializer implements ApplicationRunner {
     // =========================================================================
     public static class TenancyContext {
         public Organization aiims;
+        public Organization aiimsGorakhpur;
         public Organization apollo;
         public Organization maxHealthcare;
-
-        public Facility aiimsMain;
-        public Facility aiimsOpd;
-        public Facility aiimsTrauma;
-        public Facility apolloMumbai;
-        public Facility maxSaket;
 
         public Department cardio;
         public Department neuro;
@@ -653,9 +650,32 @@ public class DataInitializer implements ApplicationRunner {
             Organization o = new Organization("AIIMS-DEL", "AIIMS New Delhi");
             o.setLegalName("All India Institute of Medical Sciences");
             o.setOrganizationType("HOSPITAL");
+            o.setTimezone("Asia/Kolkata");
+            o.setCountryCode("IN");
             o.setPhone("+91-11-26588500");
             o.setEmail("director@aiims.edu");
             o.setWebsite("https://www.aiims.edu");
+            o.setAddressLine1("Sri Aurobindo Marg, Ansari Nagar");
+            o.setCity("New Delhi");
+            o.setState("Delhi");
+            o.setPostalCode("110029");
+            o.setStatus("ACTIVE");
+            return organizationRepository.save(o);
+        });
+
+        ctx.aiimsGorakhpur = organizationRepository.findByCode("AIIMS-GKP").orElseGet(() -> {
+            Organization o = new Organization("AIIMS-GKP", "AIIMS Gorakhpur");
+            o.setLegalName("All India Institute of Medical Sciences, Gorakhpur");
+            o.setOrganizationType("HOSPITAL");
+            o.setTimezone("Asia/Kolkata");
+            o.setCountryCode("IN");
+            o.setPhone("+91-551-2205501");
+            o.setEmail("admin@aiimsgorakhpur.edu.in");
+            o.setWebsite("https://aiimsgorakhpur.edu.in");
+            o.setAddressLine1("Kunraghat, Gorakhpur");
+            o.setCity("Gorakhpur");
+            o.setState("Uttar Pradesh");
+            o.setPostalCode("273008");
             o.setStatus("ACTIVE");
             return organizationRepository.save(o);
         });
@@ -664,9 +684,15 @@ public class DataInitializer implements ApplicationRunner {
             Organization o = new Organization("APOLLO-MUM", "Apollo Hospitals Mumbai");
             o.setLegalName("Apollo Hospitals Enterprise Ltd - Mumbai");
             o.setOrganizationType("HOSPITAL");
+            o.setTimezone("Asia/Kolkata");
+            o.setCountryCode("IN");
             o.setPhone("+91-22-66920000");
             o.setEmail("admin@apollomumbai.com");
             o.setWebsite("https://www.apollohospitals.com");
+            o.setAddressLine1("Plot # 13, Parsik Hill Rd, Sector 23, CBD Belapur");
+            o.setCity("Navi Mumbai");
+            o.setState("Maharashtra");
+            o.setPostalCode("400614");
             o.setStatus("ACTIVE");
             return organizationRepository.save(o);
         });
@@ -675,101 +701,23 @@ public class DataInitializer implements ApplicationRunner {
             Organization o = new Organization("MAX-DEL", "Max Super Speciality Hospital");
             o.setLegalName("Max Healthcare Institute Limited");
             o.setOrganizationType("HOSPITAL");
+            o.setTimezone("Asia/Kolkata");
+            o.setCountryCode("IN");
             o.setPhone("+91-11-26515050");
             o.setEmail("contact@maxhealthcare.com");
             o.setWebsite("https://www.maxhealthcare.in");
+            o.setAddressLine1("1, 2, Press Enclave Marg, Saket");
+            o.setCity("New Delhi");
+            o.setState("Delhi");
+            o.setPostalCode("110017");
             o.setStatus("ACTIVE");
             return organizationRepository.save(o);
         });
 
-        // Facilities
-        ctx.aiimsMain = facilityRepository.findByCode("AIIMS-MAIN").orElseGet(() -> {
-            Facility f = new Facility();
-            f.setOrganization(ctx.aiims);
-            f.setCode("AIIMS-MAIN");
-            f.setName("AIIMS Main Inpatient Hospital");
-            f.setFacilityType("INPATIENT");
-            f.setAddressLine1("Ansari Nagar East");
-            f.setAddressLine2("Aurobindo Marg");
-            f.setCity("New Delhi");
-            f.setState("Delhi");
-            f.setPostalCode("110029");
-            f.setPhone("+91-11-26588500");
-            f.setEmail("main.hospital@aiims.edu");
-            f.setStatus("ACTIVE");
-            return facilityRepository.save(f);
-        });
-
-        ctx.aiimsOpd = facilityRepository.findByCode("AIIMS-OPD").orElseGet(() -> {
-            Facility f = new Facility();
-            f.setOrganization(ctx.aiims);
-            f.setCode("AIIMS-OPD");
-            f.setName("AIIMS Rajkumari Amrit Kaur OPD Block");
-            f.setFacilityType("OUTPATIENT");
-            f.setAddressLine1("Ansari Nagar East");
-            f.setCity("New Delhi");
-            f.setState("Delhi");
-            f.setPostalCode("110029");
-            f.setPhone("+91-11-26588501");
-            f.setEmail("opd@aiims.edu");
-            f.setStatus("ACTIVE");
-            return facilityRepository.save(f);
-        });
-
-        ctx.aiimsTrauma = facilityRepository.findByCode("AIIMS-TRAUMA").orElseGet(() -> {
-            Facility f = new Facility();
-            f.setOrganization(ctx.aiims);
-            f.setCode("AIIMS-TRAUMA");
-            f.setName("Jai Prakash Narayan Apex Trauma Center");
-            f.setFacilityType("EMERGENCY");
-            f.setAddressLine1("Ring Road, Raj Nagar");
-            f.setCity("New Delhi");
-            f.setState("Delhi");
-            f.setPostalCode("110029");
-            f.setPhone("+91-11-26105700");
-            f.setEmail("trauma@aiims.edu");
-            f.setStatus("ACTIVE");
-            return facilityRepository.save(f);
-        });
-
-        ctx.apolloMumbai = facilityRepository.findByCode("APOLLO-NM").orElseGet(() -> {
-            Facility f = new Facility();
-            f.setOrganization(ctx.apollo);
-            f.setCode("APOLLO-NM");
-            f.setName("Apollo Navi Mumbai Multi-Speciality");
-            f.setFacilityType("INPATIENT");
-            f.setAddressLine1("Plot 13, Parsik Hill Rd");
-            f.setCity("Navi Mumbai");
-            f.setState("Maharashtra");
-            f.setPostalCode("400614");
-            f.setPhone("+91-22-33503350");
-            f.setEmail("mumbai@apollohospitals.com");
-            f.setStatus("ACTIVE");
-            return facilityRepository.save(f);
-        });
-
-        ctx.maxSaket = facilityRepository.findByCode("MAX-SAKET").orElseGet(() -> {
-            Facility f = new Facility();
-            f.setOrganization(ctx.maxHealthcare);
-            f.setCode("MAX-SAKET");
-            f.setName("Max Super Speciality Hospital Saket");
-            f.setFacilityType("INPATIENT");
-            f.setAddressLine1("1, 2, Press Enclave Marg");
-            f.setAddressLine2("Saket");
-            f.setCity("New Delhi");
-            f.setState("Delhi");
-            f.setPostalCode("110017");
-            f.setPhone("+91-11-26515050");
-            f.setEmail("saket@maxhealthcare.com");
-            f.setStatus("ACTIVE");
-            return facilityRepository.save(f);
-        });
-
         // AIIMS Departments
-        ctx.cardio = departmentRepository.findByFacilityIdAndCode(ctx.aiimsMain.getId(), "CARD").orElseGet(() -> {
+        ctx.cardio = departmentRepository.findByOrganizationIdAndCode(ctx.aiims.getId(), "CARD").orElseGet(() -> {
             Department d = new Department();
             d.setOrganization(ctx.aiims);
-            d.setFacility(ctx.aiimsMain);
             d.setCode("CARD");
             d.setName("Department of Cardiology");
             d.setDepartmentType("CLINICAL");
@@ -777,10 +725,9 @@ public class DataInitializer implements ApplicationRunner {
             return departmentRepository.save(d);
         });
 
-        ctx.neuro = departmentRepository.findByFacilityIdAndCode(ctx.aiimsMain.getId(), "NEURO").orElseGet(() -> {
+        ctx.neuro = departmentRepository.findByOrganizationIdAndCode(ctx.aiims.getId(), "NEURO").orElseGet(() -> {
             Department d = new Department();
             d.setOrganization(ctx.aiims);
-            d.setFacility(ctx.aiimsMain);
             d.setCode("NEURO");
             d.setName("Department of Neurology");
             d.setDepartmentType("CLINICAL");
@@ -788,10 +735,9 @@ public class DataInitializer implements ApplicationRunner {
             return departmentRepository.save(d);
         });
 
-        ctx.emer = departmentRepository.findByFacilityIdAndCode(ctx.aiimsMain.getId(), "EMER").orElseGet(() -> {
+        ctx.emer = departmentRepository.findByOrganizationIdAndCode(ctx.aiims.getId(), "EMER").orElseGet(() -> {
             Department d = new Department();
             d.setOrganization(ctx.aiims);
-            d.setFacility(ctx.aiimsMain);
             d.setCode("EMER");
             d.setName("Emergency & Critical Care Medicine");
             d.setDepartmentType("EMERGENCY");
@@ -799,10 +745,9 @@ public class DataInitializer implements ApplicationRunner {
             return departmentRepository.save(d);
         });
 
-        ctx.genmed = departmentRepository.findByFacilityIdAndCode(ctx.aiimsMain.getId(), "GENMED").orElseGet(() -> {
+        ctx.genmed = departmentRepository.findByOrganizationIdAndCode(ctx.aiims.getId(), "GENMED").orElseGet(() -> {
             Department d = new Department();
             d.setOrganization(ctx.aiims);
-            d.setFacility(ctx.aiimsMain);
             d.setCode("GENMED");
             d.setName("General Internal Medicine");
             d.setDepartmentType("CLINICAL");
@@ -810,10 +755,9 @@ public class DataInitializer implements ApplicationRunner {
             return departmentRepository.save(d);
         });
 
-        ctx.rad = departmentRepository.findByFacilityIdAndCode(ctx.aiimsMain.getId(), "RAD").orElseGet(() -> {
+        ctx.rad = departmentRepository.findByOrganizationIdAndCode(ctx.aiims.getId(), "RAD").orElseGet(() -> {
             Department d = new Department();
             d.setOrganization(ctx.aiims);
-            d.setFacility(ctx.aiimsMain);
             d.setCode("RAD");
             d.setName("Radiodiagnosis & Imaging");
             d.setDepartmentType("DIAGNOSTIC");
@@ -821,10 +765,9 @@ public class DataInitializer implements ApplicationRunner {
             return departmentRepository.save(d);
         });
 
-        ctx.path = departmentRepository.findByFacilityIdAndCode(ctx.aiimsMain.getId(), "PATH").orElseGet(() -> {
+        ctx.path = departmentRepository.findByOrganizationIdAndCode(ctx.aiims.getId(), "PATH").orElseGet(() -> {
             Department d = new Department();
             d.setOrganization(ctx.aiims);
-            d.setFacility(ctx.aiimsMain);
             d.setCode("PATH");
             d.setName("Pathology & Clinical Biochemistry");
             d.setDepartmentType("LABORATORY");
@@ -833,10 +776,9 @@ public class DataInitializer implements ApplicationRunner {
         });
 
         // Apollo Departments
-        ctx.apolloCardio = departmentRepository.findByFacilityIdAndCode(ctx.apolloMumbai.getId(), "CARD").orElseGet(() -> {
+        ctx.apolloCardio = departmentRepository.findByOrganizationIdAndCode(ctx.apollo.getId(), "CARD").orElseGet(() -> {
             Department d = new Department();
             d.setOrganization(ctx.apollo);
-            d.setFacility(ctx.apolloMumbai);
             d.setCode("CARD");
             d.setName("Cardiology & Cath Lab");
             d.setDepartmentType("CLINICAL");
@@ -844,10 +786,9 @@ public class DataInitializer implements ApplicationRunner {
             return departmentRepository.save(d);
         });
 
-        ctx.apolloOnco = departmentRepository.findByFacilityIdAndCode(ctx.apolloMumbai.getId(), "ONCO").orElseGet(() -> {
+        ctx.apolloOnco = departmentRepository.findByOrganizationIdAndCode(ctx.apollo.getId(), "ONCO").orElseGet(() -> {
             Department d = new Department();
             d.setOrganization(ctx.apollo);
-            d.setFacility(ctx.apolloMumbai);
             d.setCode("ONCO");
             d.setName("Medical Oncology & Cancer Center");
             d.setDepartmentType("CLINICAL");
@@ -855,10 +796,9 @@ public class DataInitializer implements ApplicationRunner {
             return departmentRepository.save(d);
         });
 
-        ctx.apolloEmer = departmentRepository.findByFacilityIdAndCode(ctx.apolloMumbai.getId(), "EMER").orElseGet(() -> {
+        ctx.apolloEmer = departmentRepository.findByOrganizationIdAndCode(ctx.apollo.getId(), "EMER").orElseGet(() -> {
             Department d = new Department();
             d.setOrganization(ctx.apollo);
-            d.setFacility(ctx.apolloMumbai);
             d.setCode("EMER");
             d.setName("Emergency & Trauma Center");
             d.setDepartmentType("EMERGENCY");
@@ -867,10 +807,9 @@ public class DataInitializer implements ApplicationRunner {
         });
 
         // Max Healthcare Departments
-        ctx.maxCardio = departmentRepository.findByFacilityIdAndCode(ctx.maxSaket.getId(), "CARD").orElseGet(() -> {
+        ctx.maxCardio = departmentRepository.findByOrganizationIdAndCode(ctx.maxHealthcare.getId(), "CARD").orElseGet(() -> {
             Department d = new Department();
             d.setOrganization(ctx.maxHealthcare);
-            d.setFacility(ctx.maxSaket);
             d.setCode("CARD");
             d.setName("Cardiology Institute");
             d.setDepartmentType("CLINICAL");
@@ -878,10 +817,9 @@ public class DataInitializer implements ApplicationRunner {
             return departmentRepository.save(d);
         });
 
-        ctx.maxGenMed = departmentRepository.findByFacilityIdAndCode(ctx.maxSaket.getId(), "GENMED").orElseGet(() -> {
+        ctx.maxGenMed = departmentRepository.findByOrganizationIdAndCode(ctx.maxHealthcare.getId(), "GENMED").orElseGet(() -> {
             Department d = new Department();
             d.setOrganization(ctx.maxHealthcare);
-            d.setFacility(ctx.maxSaket);
             d.setCode("GENMED");
             d.setName("Internal Medicine & Outpatient");
             d.setDepartmentType("CLINICAL");
@@ -889,10 +827,9 @@ public class DataInitializer implements ApplicationRunner {
             return departmentRepository.save(d);
         });
 
-        ctx.maxEmer = departmentRepository.findByFacilityIdAndCode(ctx.maxSaket.getId(), "EMER").orElseGet(() -> {
+        ctx.maxEmer = departmentRepository.findByOrganizationIdAndCode(ctx.maxHealthcare.getId(), "EMER").orElseGet(() -> {
             Department d = new Department();
             d.setOrganization(ctx.maxHealthcare);
-            d.setFacility(ctx.maxSaket);
             d.setCode("EMER");
             d.setName("24x7 Emergency Care Unit");
             d.setDepartmentType("EMERGENCY");
@@ -901,11 +838,10 @@ public class DataInitializer implements ApplicationRunner {
         });
 
         // Wards
-        ctx.cardWard = wardRepository.findByFacilityId(ctx.aiimsMain.getId()).stream()
+        ctx.cardWard = wardRepository.findByOrganizationId(ctx.aiims.getId()).stream()
                 .filter(w -> "CARD-W1".equals(w.getCode())).findFirst().orElseGet(() -> {
                     Ward w = new Ward();
                     w.setOrganization(ctx.aiims);
-                    w.setFacility(ctx.aiimsMain);
                     w.setDepartment(ctx.cardio);
                     w.setCode("CARD-W1");
                     w.setName("Cardiology Step-Down Ward");
@@ -915,11 +851,10 @@ public class DataInitializer implements ApplicationRunner {
                     return wardRepository.save(w);
                 });
 
-        ctx.ccu = wardRepository.findByFacilityId(ctx.aiimsMain.getId()).stream()
+        ctx.ccu = wardRepository.findByOrganizationId(ctx.aiims.getId()).stream()
                 .filter(w -> "CARD-CCU".equals(w.getCode())).findFirst().orElseGet(() -> {
                     Ward w = new Ward();
                     w.setOrganization(ctx.aiims);
-                    w.setFacility(ctx.aiimsMain);
                     w.setDepartment(ctx.cardio);
                     w.setCode("CARD-CCU");
                     w.setName("Coronary Intensive Care Unit (CCU)");
@@ -929,11 +864,10 @@ public class DataInitializer implements ApplicationRunner {
                     return wardRepository.save(w);
                 });
 
-        ctx.neuroWard = wardRepository.findByFacilityId(ctx.aiimsMain.getId()).stream()
+        ctx.neuroWard = wardRepository.findByOrganizationId(ctx.aiims.getId()).stream()
                 .filter(w -> "NEURO-W1".equals(w.getCode())).findFirst().orElseGet(() -> {
                     Ward w = new Ward();
                     w.setOrganization(ctx.aiims);
-                    w.setFacility(ctx.aiimsMain);
                     w.setDepartment(ctx.neuro);
                     w.setCode("NEURO-W1");
                     w.setName("Neurology Inpatient Ward");
@@ -943,11 +877,10 @@ public class DataInitializer implements ApplicationRunner {
                     return wardRepository.save(w);
                 });
 
-        ctx.emerBay = wardRepository.findByFacilityId(ctx.aiimsMain.getId()).stream()
+        ctx.emerBay = wardRepository.findByOrganizationId(ctx.aiims.getId()).stream()
                 .filter(w -> "EMER-TB".equals(w.getCode())).findFirst().orElseGet(() -> {
                     Ward w = new Ward();
                     w.setOrganization(ctx.aiims);
-                    w.setFacility(ctx.aiimsMain);
                     w.setDepartment(ctx.emer);
                     w.setCode("EMER-TB");
                     w.setName("Emergency Resuscitation & Triage Bay");
@@ -961,7 +894,6 @@ public class DataInitializer implements ApplicationRunner {
         ctx.room101 = roomRepository.findByWardIdAndRoomNumber(ctx.cardWard.getId(), "101").orElseGet(() -> {
             Room r = new Room();
             r.setOrganization(ctx.aiims);
-            r.setFacility(ctx.aiimsMain);
             r.setWard(ctx.cardWard);
             r.setRoomNumber("101");
             r.setRoomType("GENERAL");
@@ -973,7 +905,6 @@ public class DataInitializer implements ApplicationRunner {
         ctx.roomCcu01 = roomRepository.findByWardIdAndRoomNumber(ctx.ccu.getId(), "CCU-01").orElseGet(() -> {
             Room r = new Room();
             r.setOrganization(ctx.aiims);
-            r.setFacility(ctx.aiimsMain);
             r.setWard(ctx.ccu);
             r.setRoomNumber("CCU-01");
             r.setRoomType("ICU");
@@ -985,7 +916,6 @@ public class DataInitializer implements ApplicationRunner {
         ctx.room201 = roomRepository.findByWardIdAndRoomNumber(ctx.neuroWard.getId(), "201").orElseGet(() -> {
             Room r = new Room();
             r.setOrganization(ctx.aiims);
-            r.setFacility(ctx.aiimsMain);
             r.setWard(ctx.neuroWard);
             r.setRoomNumber("201");
             r.setRoomType("SEMI_PRIVATE");
@@ -997,7 +927,6 @@ public class DataInitializer implements ApplicationRunner {
         ctx.roomEr01 = roomRepository.findByWardIdAndRoomNumber(ctx.emerBay.getId(), "ER-01").orElseGet(() -> {
             Room r = new Room();
             r.setOrganization(ctx.aiims);
-            r.setFacility(ctx.aiimsMain);
             r.setWard(ctx.emerBay);
             r.setRoomNumber("ER-01");
             r.setRoomType("TRAUMA");
@@ -1010,7 +939,6 @@ public class DataInitializer implements ApplicationRunner {
         ctx.bed101_1 = bedRepository.findByBedCode("B101-1").orElseGet(() -> {
             Bed b = new Bed();
             b.setOrganization(ctx.aiims);
-            b.setFacility(ctx.aiimsMain);
             b.setWard(ctx.cardWard);
             b.setRoom(ctx.room101);
             b.setBedCode("B101-1");
@@ -1023,7 +951,6 @@ public class DataInitializer implements ApplicationRunner {
         ctx.bed101_2 = bedRepository.findByBedCode("B101-2").orElseGet(() -> {
             Bed b = new Bed();
             b.setOrganization(ctx.aiims);
-            b.setFacility(ctx.aiimsMain);
             b.setWard(ctx.cardWard);
             b.setRoom(ctx.room101);
             b.setBedCode("B101-2");
@@ -1036,7 +963,6 @@ public class DataInitializer implements ApplicationRunner {
         ctx.bedCcu1 = bedRepository.findByBedCode("B-CCU-1").orElseGet(() -> {
             Bed b = new Bed();
             b.setOrganization(ctx.aiims);
-            b.setFacility(ctx.aiimsMain);
             b.setWard(ctx.ccu);
             b.setRoom(ctx.roomCcu01);
             b.setBedCode("B-CCU-1");
@@ -1049,7 +975,6 @@ public class DataInitializer implements ApplicationRunner {
         ctx.bed201_1 = bedRepository.findByBedCode("B201-1").orElseGet(() -> {
             Bed b = new Bed();
             b.setOrganization(ctx.aiims);
-            b.setFacility(ctx.aiimsMain);
             b.setWard(ctx.neuroWard);
             b.setRoom(ctx.room201);
             b.setBedCode("B201-1");
@@ -1062,7 +987,6 @@ public class DataInitializer implements ApplicationRunner {
         ctx.bedEr1 = bedRepository.findByBedCode("B-ER-1").orElseGet(() -> {
             Bed b = new Bed();
             b.setOrganization(ctx.aiims);
-            b.setFacility(ctx.aiimsMain);
             b.setWard(ctx.emerBay);
             b.setRoom(ctx.roomEr01);
             b.setBedCode("B-ER-1");
@@ -1322,94 +1246,79 @@ public class DataInitializer implements ApplicationRunner {
 
         // 2. Dr. Arjun Sharma (Multi-tenant Cardiologist: AIIMS + Apollo Mumbai + Max Healthcare)
         ctx.arjun = createStaffUser("arjun.sharma@aiims.edu", defaultPass, "Arjun", "Sharma", "MALE", LocalDate.of(1982, 6, 15), roles.get("PHYSICIAN"));
-        linkStaffToTenancy(ctx.arjun, tenancy.aiims, tenancy.aiimsMain, tenancy.cardio, "EMP-AIIMS-CARD-01", "FULL_TIME");
-        linkStaffToTenancy(ctx.arjun, tenancy.apollo, tenancy.apolloMumbai, tenancy.apolloCardio, "EMP-APL-CARD-02", "CONSULTANT");
-        linkStaffToTenancy(ctx.arjun, tenancy.maxHealthcare, tenancy.maxSaket, tenancy.maxCardio, "EMP-MAX-CARD-01", "VISITING");
+        linkStaffToTenancy(ctx.arjun, tenancy.aiims, tenancy.cardio, "EMP-AIIMS-CARD-01", "FULL_TIME");
+        linkStaffToTenancy(ctx.arjun, tenancy.apollo, tenancy.apolloCardio, "EMP-APL-CARD-02", "CONSULTANT");
+        linkStaffToTenancy(ctx.arjun, tenancy.maxHealthcare, tenancy.maxCardio, "EMP-MAX-CARD-01", "VISITING");
         ctx.arjunPrac = createPractitioner(ctx.arjun.getPerson(), "MCI-2010-12345", "PHYSICIAN", "Cardiology", "DMC-DL-11029", "Delhi Medical Council", "Interventional Cardiology", "CARD_INTERV");
 
         // 3. Dr. Priya Kapoor (Multi-tenant Neurologist: AIIMS + Max Healthcare)
         ctx.priya = createStaffUser("priya.kapoor@aiims.edu", defaultPass, "Priya", "Kapoor", "FEMALE", LocalDate.of(1988, 3, 22), roles.get("PHYSICIAN"));
-        linkStaffToTenancy(ctx.priya, tenancy.aiims, tenancy.aiimsOpd, tenancy.neuro, "EMP-AIIMS-NEURO-01", "FULL_TIME");
-        linkStaffToTenancy(ctx.priya, tenancy.maxHealthcare, tenancy.maxSaket, tenancy.maxGenMed, "EMP-MAX-NEURO-02", "CONSULTANT");
+        linkStaffToTenancy(ctx.priya, tenancy.aiims, tenancy.neuro, "EMP-AIIMS-NEURO-01", "FULL_TIME");
+        linkStaffToTenancy(ctx.priya, tenancy.maxHealthcare, tenancy.maxGenMed, "EMP-MAX-NEURO-02", "CONSULTANT");
         ctx.priyaPrac = createPractitioner(ctx.priya.getPerson(), "MCI-2015-67890", "PHYSICIAN", "Neurology", "DMC-DL-18842", "Delhi Medical Council", "Clinical Neurology & Stroke", "NEURO_STROKE");
 
         // 4. Dr. Rajesh Patel (Multi-tenant Emergency: AIIMS + Apollo)
         ctx.rajesh = createStaffUser("rajesh.patel@aiims.edu", defaultPass, "Rajesh", "Patel", "MALE", LocalDate.of(1978, 11, 8), roles.get("PHYSICIAN"));
-        linkStaffToTenancy(ctx.rajesh, tenancy.aiims, tenancy.aiimsTrauma, tenancy.emer, "EMP-AIIMS-EMER-01", "FULL_TIME");
-        linkStaffToTenancy(ctx.rajesh, tenancy.apollo, tenancy.apolloMumbai, tenancy.apolloEmer, "EMP-APL-EMER-02", "VISITING");
+        linkStaffToTenancy(ctx.rajesh, tenancy.aiims, tenancy.emer, "EMP-AIIMS-EMER-01", "FULL_TIME");
+        linkStaffToTenancy(ctx.rajesh, tenancy.apollo, tenancy.apolloEmer, "EMP-APL-EMER-02", "VISITING");
         ctx.rajeshPrac = createPractitioner(ctx.rajesh.getPerson(), "MCI-2008-33445", "PHYSICIAN", "Emergency Medicine", "DMC-DL-09912", "Delhi Medical Council", "Trauma & Resuscitation", "EMER_TRAUMA");
 
         // 5. Dr. Vikram Sethi (Radiologist)
         ctx.vikramRad = createStaffUser("vikram.sethi@aiims.edu", defaultPass, "Vikram", "Sethi", "MALE", LocalDate.of(1984, 5, 12), roles.get("RADIOLOGIST"));
-        linkStaffToTenancy(ctx.vikramRad, tenancy.aiims, tenancy.aiimsMain, tenancy.rad, "EMP-AIIMS-RAD-01", "FULL_TIME");
+        linkStaffToTenancy(ctx.vikramRad, tenancy.aiims, tenancy.rad, "EMP-AIIMS-RAD-01", "FULL_TIME");
         ctx.vikramPrac = createPractitioner(ctx.vikramRad.getPerson(), "MCI-2012-77889", "PHYSICIAN", "Radiology", "DMC-DL-14401", "Delhi Medical Council", "Diagnostic Neuroradiology", "RAD_DIAG");
 
         // 6. Nurse Sunita Verma (CCU Senior Nurse)
         ctx.sunita = createStaffUser("sunita.verma@aiims.edu", defaultPass, "Sunita", "Verma", "FEMALE", LocalDate.of(1985, 7, 30), roles.get("NURSE"));
-        linkStaffToTenancy(ctx.sunita, tenancy.aiims, tenancy.aiimsMain, tenancy.cardio, "EMP-AIIMS-NUR-01", "FULL_TIME");
+        linkStaffToTenancy(ctx.sunita, tenancy.aiims, tenancy.cardio, "EMP-AIIMS-NUR-01", "FULL_TIME");
         ctx.sunitaPrac = createPractitioner(ctx.sunita.getPerson(), "INC-2006-55555", "NURSE", "Critical Care Nursing", "DNC-NUR-5501", "Delhi Nursing Council", "Cardiac Intensive Care", "NUR_CCU");
 
         // 7. Nurse Rahul Nair (Emergency / Triage Nurse)
         ctx.rahul = createStaffUser("rahul.nair@aiims.edu", defaultPass, "Rahul", "Nair", "MALE", LocalDate.of(1991, 9, 10), roles.get("NURSE"));
-        linkStaffToTenancy(ctx.rahul, tenancy.aiims, tenancy.aiimsTrauma, tenancy.emer, "EMP-AIIMS-NUR-02", "FULL_TIME");
+        linkStaffToTenancy(ctx.rahul, tenancy.aiims, tenancy.emer, "EMP-AIIMS-NUR-02", "FULL_TIME");
         ctx.rahulPrac = createPractitioner(ctx.rahul.getPerson(), "INC-2014-99881", "NURSE", "Emergency Nursing", "DNC-NUR-8820", "Delhi Nursing Council", "Emergency Triage", "NUR_EMER");
 
         // 8. Front Desk Receptionist Sarita Gupta (AIIMS)
         ctx.sarita = createStaffUser("sarita.gupta@aiims.edu", defaultPass, "Sarita", "Gupta", "FEMALE", LocalDate.of(1992, 9, 14), roles.get("RECEPTIONIST"));
-        linkStaffToTenancy(ctx.sarita, tenancy.aiims, tenancy.aiimsOpd, tenancy.genmed, "EMP-AIIMS-REC-01", "FULL_TIME");
+        linkStaffToTenancy(ctx.sarita, tenancy.aiims, tenancy.genmed, "EMP-AIIMS-REC-01", "FULL_TIME");
 
         // 9. Senior Lab Technologist Amit Roy (AIIMS)
         ctx.amit = createStaffUser("amit.roy@aiims.edu", defaultPass, "Amit", "Roy", "MALE", LocalDate.of(1989, 4, 18), roles.get("LAB_TECHNICIAN"));
-        linkStaffToTenancy(ctx.amit, tenancy.aiims, tenancy.aiimsMain, tenancy.path, "EMP-AIIMS-LAB-01", "FULL_TIME");
+        linkStaffToTenancy(ctx.amit, tenancy.aiims, tenancy.path, "EMP-AIIMS-LAB-01", "FULL_TIME");
 
         // 10. Chief Pharmacist Anita Deshmukh (AIIMS)
         ctx.anitaPharm = createStaffUser("anita.deshmukh@aiims.edu", defaultPass, "Anita", "Deshmukh", "FEMALE", LocalDate.of(1986, 12, 5), roles.get("PHARMACIST"));
-        linkStaffToTenancy(ctx.anitaPharm, tenancy.aiims, tenancy.aiimsMain, tenancy.cardio, "EMP-AIIMS-PHARM-01", "FULL_TIME");
+        linkStaffToTenancy(ctx.anitaPharm, tenancy.aiims, tenancy.cardio, "EMP-AIIMS-PHARM-01", "FULL_TIME");
 
         // 11. Financial Officer Vikas Mehta (AIIMS)
         ctx.vikas = createStaffUser("vikas.mehta@aiims.edu", defaultPass, "Vikas", "Mehta", "MALE", LocalDate.of(1984, 8, 27), roles.get("BILLING_STAFF"));
-        linkStaffToTenancy(ctx.vikas, tenancy.aiims, tenancy.aiimsMain, tenancy.genmed, "EMP-AIIMS-FIN-01", "FULL_TIME");
+        linkStaffToTenancy(ctx.vikas, tenancy.aiims, tenancy.genmed, "EMP-AIIMS-FIN-01", "FULL_TIME");
 
         // 12. Compliance Auditor Suresh Nair
         ctx.sureshAuditor = createStaffUser("suresh.nair@aiims.edu", defaultPass, "Suresh", "Nair", "MALE", LocalDate.of(1979, 3, 11), roles.get("AUDITOR"));
-        linkStaffToTenancy(ctx.sureshAuditor, tenancy.aiims, tenancy.aiimsMain, tenancy.genmed, "EMP-AIIMS-AUD-01", "FULL_TIME");
+        linkStaffToTenancy(ctx.sureshAuditor, tenancy.aiims, tenancy.genmed, "EMP-AIIMS-AUD-01", "FULL_TIME");
 
         // 13. Apollo Hospitals Mumbai Staff Seeding
         ctx.orgAdminVikram = createStaffUser("vikram.singh@apollo.com", defaultPass, "Vikram", "Singh", "MALE", LocalDate.of(1975, 1, 20), roles.get("ORGANIZATION_ADMIN"));
-        linkStaffToTenancy(ctx.orgAdminVikram, tenancy.apollo, tenancy.apolloMumbai, null, "EMP-APL-MUM-01", "FULL_TIME");
+        linkStaffToTenancy(ctx.orgAdminVikram, tenancy.apollo, null, "EMP-APL-MUM-01", "FULL_TIME");
 
         ctx.siddharthDoc = createStaffUser("siddharth.m@apollo.com", defaultPass, "Siddharth", "Mukherjee", "MALE", LocalDate.of(1980, 5, 14), roles.get("PHYSICIAN"));
-        linkStaffToTenancy(ctx.siddharthDoc, tenancy.apollo, tenancy.apolloMumbai, tenancy.apolloOnco, "EMP-APL-ONCO-01", "FULL_TIME");
+        linkStaffToTenancy(ctx.siddharthDoc, tenancy.apollo, tenancy.apolloOnco, "EMP-APL-ONCO-01", "FULL_TIME");
         ctx.siddharthPrac = createPractitioner(ctx.siddharthDoc.getPerson(), "MCI-2009-44112", "PHYSICIAN", "Medical Oncology", "MMC-MH-44112", "Maharashtra Medical Council", "Clinical Oncology", "ONCO_CLIN");
-
-        ctx.meeraNurse = createStaffUser("meera.nair@apollo.com", defaultPass, "Meera", "Nair", "FEMALE", LocalDate.of(1990, 8, 19), roles.get("NURSE"));
-        linkStaffToTenancy(ctx.meeraNurse, tenancy.apollo, tenancy.apolloMumbai, tenancy.apolloCardio, "EMP-APL-NUR-01", "FULL_TIME");
-
-        ctx.rohanRec = createStaffUser("rohan.deshmukh@apollo.com", defaultPass, "Rohan", "Deshmukh", "MALE", LocalDate.of(1993, 2, 11), roles.get("RECEPTIONIST"));
-        linkStaffToTenancy(ctx.rohanRec, tenancy.apollo, tenancy.apolloMumbai, tenancy.apolloEmer, "EMP-APL-REC-01", "FULL_TIME");
-
-        ctx.poojaPharm = createStaffUser("pooja.patel@apollo.com", defaultPass, "Pooja", "Patel", "FEMALE", LocalDate.of(1987, 10, 24), roles.get("PHARMACIST"));
-        linkStaffToTenancy(ctx.poojaPharm, tenancy.apollo, tenancy.apolloMumbai, tenancy.apolloCardio, "EMP-APL-PHARM-01", "FULL_TIME");
-
-        ctx.kunalLab = createStaffUser("kunal.sen@apollo.com", defaultPass, "Kunal", "Sen", "MALE", LocalDate.of(1992, 11, 30), roles.get("LAB_TECHNICIAN"));
-        linkStaffToTenancy(ctx.kunalLab, tenancy.apollo, tenancy.apolloMumbai, tenancy.apolloCardio, "EMP-APL-LAB-01", "FULL_TIME");
-
-        ctx.ananyaBilling = createStaffUser("ananya.roy@apollo.com", defaultPass, "Ananya", "Roy", "FEMALE", LocalDate.of(1991, 6, 8), roles.get("BILLING_STAFF"));
-        linkStaffToTenancy(ctx.ananyaBilling, tenancy.apollo, tenancy.apolloMumbai, tenancy.apolloEmer, "EMP-APL-BIL-01", "FULL_TIME");
 
         // 14. Max Healthcare Saket Staff Seeding
         ctx.nehaOrgAdmin = createStaffUser("neha.singhal@maxhealthcare.com", defaultPass, "Neha", "Singhal", "FEMALE", LocalDate.of(1977, 4, 18), roles.get("ORGANIZATION_ADMIN"));
-        linkStaffToTenancy(ctx.nehaOrgAdmin, tenancy.maxHealthcare, tenancy.maxSaket, null, "EMP-MAX-ADM-01", "FULL_TIME");
+        linkStaffToTenancy(ctx.nehaOrgAdmin, tenancy.maxHealthcare, null, "EMP-MAX-ADM-01", "FULL_TIME");
 
         ctx.kabirDoc = createStaffUser("kabir.anand@maxhealthcare.com", defaultPass, "Kabir", "Anand", "MALE", LocalDate.of(1983, 7, 29), roles.get("PHYSICIAN"));
-        linkStaffToTenancy(ctx.kabirDoc, tenancy.maxHealthcare, tenancy.maxSaket, tenancy.maxCardio, "EMP-MAX-CARD-02", "FULL_TIME");
+        linkStaffToTenancy(ctx.kabirDoc, tenancy.maxHealthcare, tenancy.maxCardio, "EMP-MAX-CARD-02", "FULL_TIME");
         ctx.kabirPrac = createPractitioner(ctx.kabirDoc.getPerson(), "MCI-2011-99882", "PHYSICIAN", "Cardiology", "DMC-DL-23091", "Delhi Medical Council", "Interventional Cardiology", "CARD_INTERV");
 
         ctx.kavitaNurse = createStaffUser("kavita.joshi@maxhealthcare.com", defaultPass, "Kavita", "Joshi", "FEMALE", LocalDate.of(1989, 1, 14), roles.get("NURSE"));
-        linkStaffToTenancy(ctx.kavitaNurse, tenancy.maxHealthcare, tenancy.maxSaket, tenancy.maxEmer, "EMP-MAX-NUR-01", "FULL_TIME");
+        linkStaffToTenancy(ctx.kavitaNurse, tenancy.maxHealthcare, tenancy.maxEmer, "EMP-MAX-NUR-01", "FULL_TIME");
 
         ctx.manishRec = createStaffUser("manish.verma@maxhealthcare.com", defaultPass, "Manish", "Verma", "MALE", LocalDate.of(1994, 3, 5), roles.get("RECEPTIONIST"));
-        linkStaffToTenancy(ctx.manishRec, tenancy.maxHealthcare, tenancy.maxSaket, tenancy.maxGenMed, "EMP-MAX-REC-01", "FULL_TIME");
+        linkStaffToTenancy(ctx.manishRec, tenancy.maxHealthcare, tenancy.maxGenMed, "EMP-MAX-REC-01", "FULL_TIME");
 
         // 15. Patient Portal Accounts
         ctx.rameshUser = createStaffUser("ramesh.kumar@gmail.com", defaultPass, "Ramesh", "Kumar", "MALE", LocalDate.of(1960, 4, 10), roles.get("PATIENT"));
@@ -1451,7 +1360,7 @@ public class DataInitializer implements ApplicationRunner {
         });
     }
 
-    private void linkStaffToTenancy(User user, Organization org, Facility fac, Department dept, String empCode, String empType) {
+    private void linkStaffToTenancy(User user, Organization org, Department dept, String empCode, String empType) {
         if (org != null) {
             userOrganizationRepository.findByUserIdAndOrganizationId(user.getId(), org.getId()).orElseGet(() -> {
                 UserOrganization uo = new UserOrganization();
@@ -1462,12 +1371,6 @@ public class DataInitializer implements ApplicationRunner {
                 uo.setStatus("ACTIVE");
                 uo.setJoinedAt(LocalDate.of(2021, 1, 15));
                 return userOrganizationRepository.save(uo);
-            });
-        }
-        if (fac != null) {
-            userFacilityRepository.findByUserIdAndFacilityId(user.getId(), fac.getId()).orElseGet(() -> {
-                UserFacility uf = new UserFacility(user, fac);
-                return userFacilityRepository.save(uf);
             });
         }
         if (dept != null) {
@@ -1763,7 +1666,7 @@ public class DataInitializer implements ApplicationRunner {
                 surg.setProcedureName((String) pRow[26]);
                 surg.setProcedureCode("SURG-GEN-01");
                 surg.setPerformedAt(LocalDate.of(2020, 5, 10));
-                surg.setFacilityName(org.getName());
+                surg.setHospitalName(org.getName());
                 surg.setSurgeonName("Dr. Ashok Seth");
                 surg.setComplications("None noted. Uneventful post-operative recovery.");
                 surg.setNotes("Laparoscopic approach completed successfully.");
@@ -1902,7 +1805,6 @@ public class DataInitializer implements ApplicationRunner {
         // 1. Encounter 1: Ramesh Kumar (Inpatient STEMI in CCU)
         ctx.encRamesh = new Encounter();
         ctx.encRamesh.setOrganization(tenancy.aiims);
-        ctx.encRamesh.setFacility(tenancy.aiimsMain);
         ctx.encRamesh.setDepartment(tenancy.cardio);
         ctx.encRamesh.setPatient(pRamesh.patient);
         ctx.encRamesh.setCreatedBy(identity.arjun);
@@ -2138,7 +2040,6 @@ public class DataInitializer implements ApplicationRunner {
         // 2. Encounter 2: Anita Sharma (Completed Outpatient Neurology consult)
         ctx.encAnita = new Encounter();
         ctx.encAnita.setOrganization(tenancy.aiims);
-        ctx.encAnita.setFacility(tenancy.aiimsOpd);
         ctx.encAnita.setDepartment(tenancy.neuro);
         ctx.encAnita.setPatient(pAnita.patient);
         ctx.encAnita.setCreatedBy(identity.priya);
@@ -2164,7 +2065,6 @@ public class DataInitializer implements ApplicationRunner {
         // 3. Encounter 3: Mohammed Azhar (General Medicine Outpatient)
         ctx.encAzhar = new Encounter();
         ctx.encAzhar.setOrganization(tenancy.aiims);
-        ctx.encAzhar.setFacility(tenancy.aiimsOpd);
         ctx.encAzhar.setDepartment(tenancy.genmed);
         ctx.encAzhar.setPatient(pAzhar.patient);
         ctx.encAzhar.setCreatedBy(identity.rajesh);
@@ -2178,7 +2078,6 @@ public class DataInitializer implements ApplicationRunner {
         // 4. Encounter 4: Lakshmi Iyer
         ctx.encLakshmi = new Encounter();
         ctx.encLakshmi.setOrganization(tenancy.aiims);
-        ctx.encLakshmi.setFacility(tenancy.aiimsMain);
         ctx.encLakshmi.setDepartment(tenancy.genmed);
         ctx.encLakshmi.setPatient(pLakshmi.patient);
         ctx.encLakshmi.setCreatedBy(identity.rajesh);
@@ -2194,7 +2093,6 @@ public class DataInitializer implements ApplicationRunner {
         // 5. Encounter 5: Suresh Naidu (Apollo Emergency)
         ctx.encSuresh = new Encounter();
         ctx.encSuresh.setOrganization(tenancy.apollo);
-        ctx.encSuresh.setFacility(tenancy.apolloMumbai);
         ctx.encSuresh.setDepartment(null);
         ctx.encSuresh.setPatient(pSuresh.patient);
         ctx.encSuresh.setCreatedBy(identity.orgAdminVikram);
@@ -2678,7 +2576,6 @@ public class DataInitializer implements ApplicationRunner {
         // Appointment 1: Anita Sharma (Scheduled Neurology follow-up)
         Appointment appt1 = new Appointment();
         appt1.setOrganization(tenancy.aiims);
-        appt1.setFacility(tenancy.aiimsOpd);
         appt1.setDepartment(tenancy.neuro);
         appt1.setPatient(pAnita.patient);
         appt1.setCreatedBy(identity.priya);
@@ -2717,7 +2614,6 @@ public class DataInitializer implements ApplicationRunner {
         // Appointment 2: Ramesh Kumar (Post-PCI 2-week Cardiology Follow-up)
         Appointment appt2 = new Appointment();
         appt2.setOrganization(tenancy.aiims);
-        appt2.setFacility(tenancy.aiimsOpd);
         appt2.setDepartment(tenancy.cardio);
         appt2.setPatient(pRamesh.patient);
         appt2.setCreatedBy(identity.arjun);
@@ -2730,7 +2626,6 @@ public class DataInitializer implements ApplicationRunner {
         // Appointment 3: Suresh Naidu (Cancelled Appointment with Audit)
         Appointment appt3 = new Appointment();
         appt3.setOrganization(tenancy.apollo);
-        appt3.setFacility(tenancy.apolloMumbai);
         appt3.setPatient(pSuresh.patient);
         appt3.setCreatedBy(identity.orgAdminVikram);
         appt3.setStatus("CANCELLED");
@@ -3153,7 +3048,6 @@ public class DataInitializer implements ApplicationRunner {
 
             AuditLog a1 = new AuditLog();
             a1.setOrganizationId(tenancy.aiims.getId());
-            a1.setFacilityId(tenancy.aiimsMain.getId());
             a1.setUserId(identity.arjun.getId());
             a1.setPatientId(pRamesh.patient.getId());
             a1.setEncounterId(clinical.encRamesh != null ? clinical.encRamesh.getId() : null);
@@ -3173,7 +3067,6 @@ public class DataInitializer implements ApplicationRunner {
 
             AuditLog a2 = new AuditLog();
             a2.setOrganizationId(tenancy.aiims.getId());
-            a2.setFacilityId(tenancy.aiimsMain.getId());
             a2.setUserId(identity.arjun.getId());
             a2.setPatientId(pRamesh.patient.getId());
             a2.setEncounterId(clinical.encRamesh != null ? clinical.encRamesh.getId() : null);
@@ -3192,7 +3085,6 @@ public class DataInitializer implements ApplicationRunner {
 
             AuditLog a3 = new AuditLog();
             a3.setOrganizationId(tenancy.aiims.getId());
-            a3.setFacilityId(tenancy.aiimsOpd.getId());
             a3.setUserId(identity.priya.getId());
             a3.setPatientId(pAnita.patient.getId());
             a3.setAction("READ");
@@ -3210,3 +3102,5 @@ public class DataInitializer implements ApplicationRunner {
         }
     }
 }
+
+

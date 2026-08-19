@@ -190,13 +190,13 @@
       <div class="flex items-center justify-between px-1">
         <div class="flex items-center gap-2.5">
           <div class="size-7 rounded-lg bg-blue-500/10 text-blue-500 flex items-center justify-center">
-            <ng-icon name="lucideBuilding2" size="16" />
+            <ng-icon name="lucideHospital" size="16" />
           </div>
           <div>
             <h2 class="text-base font-bold text-foreground">
-              Hospital & Clinical Workspaces ({{ organizations().length }})
+              Hospital & Clinic Workspaces ({{ organizations().length }})
             </h2>
-            <p class="text-[11px] text-muted-foreground">Select your active hospital organization to initialize session</p>
+            <p class="text-[11px] text-muted-foreground">Select your hospital or clinic to initialize clinical session</p>
           </div>
         </div>
         <span class="hidden sm:inline text-xs text-muted-foreground">Role: <strong class="text-foreground">{{ authService.getPrimaryRole() }}</strong></span>
@@ -205,7 +205,7 @@
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
         <div
           *ngFor="let org of organizations()"
-          (click)="handleSelectOrganization(org, org.facilities && org.facilities.length > 0 ? org.facilities[0] : undefined)"
+          (click)="handleSelectOrganization(org)"
           class="group relative overflow-hidden p-6 rounded-3xl border border-border/70 bg-card hover:border-blue-500/50 hover:shadow-2xl hover:shadow-blue-500/10 transition-all duration-300 cursor-pointer flex flex-col justify-between space-y-4 shadow-xs"
         >
           <div class="space-y-3">
@@ -215,7 +215,7 @@
                   {{ org.name }}
                 </h3>
                 <p class="text-xs text-muted-foreground font-medium">
-                  {{ org.legalName || 'Healthcare Facility' }}
+                  {{ org.legalName || 'Hospital / Medical Center' }}
                 </p>
               </div>
               <div class="size-10 rounded-2xl bg-muted/60 text-muted-foreground flex items-center justify-center group-hover:bg-blue-500 group-hover:text-white transition-all shrink-0">
@@ -223,15 +223,12 @@
               </div>
             </div>
 
-            <!-- Facilities & Department Badges -->
-            <div *ngIf="org.facilities && org.facilities.length > 0" class="space-y-1.5 pt-1 border-t border-border/60">
+            <!-- Hospital Type & Status Badge -->
+            <div class="space-y-1.5 pt-1 border-t border-border/60">
               <div class="flex flex-wrap gap-1.5">
                 <span class="inline-flex items-center gap-1 text-[11px] px-2.5 py-0.5 rounded-md bg-muted font-medium text-foreground">
                   <span class="size-1.5 rounded-full bg-blue-500"></span>
-                  {{ org.facilities[0].name }}
-                </span>
-                <span *ngIf="org.facilities[0].departments && org.facilities[0].departments.length > 0" class="text-[10px] px-2 py-0.5 rounded-md bg-muted/60 text-muted-foreground font-medium">
-                  {{ org.facilities[0].departments.length }} clinical units
+                  {{ org.organizationType || 'Hospital / Clinic' }}
                 </span>
               </div>
             </div>

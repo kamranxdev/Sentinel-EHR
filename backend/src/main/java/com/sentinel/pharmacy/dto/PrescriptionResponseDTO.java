@@ -17,7 +17,8 @@ public class PrescriptionResponseDTO {
     private String indication;
     private String instructions;
     private Integer refills;
-    private String doctorUsername;
+    private UUID doctorId;
+    private String doctorName;
     private OffsetDateTime prescribedAt;
     private OffsetDateTime startAt;
     private OffsetDateTime endAt;
@@ -52,8 +53,10 @@ public class PrescriptionResponseDTO {
     public void setInstructions(String instructions) { this.instructions = instructions; }
     public Integer getRefills() { return refills; }
     public void setRefills(Integer refills) { this.refills = refills; }
-    public String getDoctorUsername() { return doctorUsername; }
-    public void setDoctorUsername(String doctorUsername) { this.doctorUsername = doctorUsername; }
+    public UUID getDoctorId() { return doctorId; }
+    public void setDoctorId(UUID doctorId) { this.doctorId = doctorId; }
+    public String getDoctorName() { return doctorName; }
+    public void setDoctorName(String doctorName) { this.doctorName = doctorName; }
     public OffsetDateTime getPrescribedAt() { return prescribedAt; }
     public void setPrescribedAt(OffsetDateTime prescribedAt) { this.prescribedAt = prescribedAt; }
     public OffsetDateTime getStartAt() { return startAt; }

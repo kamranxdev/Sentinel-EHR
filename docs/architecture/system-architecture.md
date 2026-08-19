@@ -61,17 +61,15 @@ Sentinel-EHR is designed as a high-throughput, horizontally scalable, multi-tena
 Sentinel-EHR partitions data at the root organization level. Every entity is bound to an `organization_id` which is verified by both application middleware and database policies.
 
 ```text
-Organization (Hospital Network / Trust)
+Organization (Hospital / Clinic e.g. AIIMS Delhi, AIIMS Gorakhpur)
   │
-  └── Facility (Hospital Campus / Medical Center)
+  └── Department (e.g. Cardiology, Internal Medicine, Radiology)
         │
-        └── Department (e.g. Cardiology, Internal Medicine, Radiology)
+        └── Ward / Section (e.g. Ward 3A, ICU Step-Down)
               │
-              └── Ward / Section (e.g. Ward 3A, ICU Step-Down)
+              └── Room (e.g. Room 301, Room 302)
                     │
-                    └── Room (e.g. Room 301, Room 302)
-                          │
-                          └── Spatial Bed (e.g. Bed 301A, Bed 301B)
+                    └── Spatial Bed (e.g. Bed 301A, Bed 301B)
 ```
 
 ---

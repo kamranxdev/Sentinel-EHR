@@ -14,10 +14,8 @@ import com.sentinel.patient.entity.PatientOrganization;
 import com.sentinel.patient.repository.PatientOrganizationRepository;
 import com.sentinel.patient.repository.PatientRepository;
 import com.sentinel.tenancy.entity.Department;
-import com.sentinel.tenancy.entity.Facility;
 import com.sentinel.tenancy.entity.Organization;
 import com.sentinel.tenancy.repository.DepartmentRepository;
-import com.sentinel.tenancy.repository.FacilityRepository;
 import com.sentinel.tenancy.repository.OrganizationRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -36,7 +34,6 @@ public class EncounterService {
     private final PatientRepository patientRepository;
     private final PatientOrganizationRepository patientOrganizationRepository;
     private final OrganizationRepository organizationRepository;
-    private final FacilityRepository facilityRepository;
     private final DepartmentRepository departmentRepository;
     private final AuditService auditService;
 
@@ -45,7 +42,6 @@ public class EncounterService {
                             PatientRepository patientRepository,
                             PatientOrganizationRepository patientOrganizationRepository,
                             OrganizationRepository organizationRepository,
-                            FacilityRepository facilityRepository,
                             DepartmentRepository departmentRepository,
                             AuditService auditService) {
         this.encounterRepository = encounterRepository;
@@ -53,7 +49,6 @@ public class EncounterService {
         this.patientRepository = patientRepository;
         this.patientOrganizationRepository = patientOrganizationRepository;
         this.organizationRepository = organizationRepository;
-        this.facilityRepository = facilityRepository;
         this.departmentRepository = departmentRepository;
         this.auditService = auditService;
     }
@@ -73,14 +68,6 @@ public class EncounterService {
             }
         }
 
-        Facility facility = null;
-        if (request.getFacilityId() != null) {
-            facility = facilityRepository.findById(request.getFacilityId()).orElse(null);
-        } else if (org != null) {
-            List<Facility> facilities = facilityRepository.findByOrganizationId(org.getId());
-            if (!facilities.isEmpty()) facility = facilities.get(0);
-        }
-
         Department department = null;
         if (request.getDepartmentId() != null) {
             department = departmentRepository.findById(request.getDepartmentId()).orElse(null);
@@ -88,7 +75,6 @@ public class EncounterService {
 
         Encounter encounter = new Encounter();
         encounter.setOrganization(org);
-        encounter.setFacility(facility);
         encounter.setPatient(patient);
         encounter.setDepartment(department);
         encounter.setEncounterNumber("ENC-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
@@ -128,8 +114,8 @@ public class EncounterService {
     @Transactional(readOnly = true)
     public List<EncounterResponseDTO> searchEncounters(EncounterSearchCriteria criteria) {
         List<Encounter> list;
-        if (criteria != null && (criteria.getPatientId() != null || criteria.getOrganizationId() != null || criteria.getFacilityId() != null || criteria.getStatus() != null || criteria.getEncounterType() != null)) {
-            list = encounterRepository.searchEncounters(criteria.getPatientId(), criteria.getOrganizationId(), criteria.getFacilityId(), criteria.getStatus(), criteria.getEncounterType());
+        if (criteria != null && (criteria.getPatientId() != null || criteria.getOrganizationId() != null || criteria.getStatus() != null || criteria.getEncounterType() != null)) {
+            list = encounterRepository.searchEncounters(criteria.getPatientId(), criteria.getOrganizationId(), criteria.getStatus(), criteria.getEncounterType());
         } else {
             list = encounterRepository.findAll();
         }
@@ -175,7 +161,6 @@ public class EncounterService {
         EncounterResponseDTO dto = new EncounterResponseDTO();
         dto.setId(e.getId());
         if (e.getOrganization() != null) dto.setOrganizationId(e.getOrganization().getId());
-        if (e.getFacility() != null) dto.setFacilityId(e.getFacility().getId());
         if (e.getPatient() != null) {
             dto.setPatientId(e.getPatient().getId());
             dto.setPatientName(e.getPatient().getFullName());

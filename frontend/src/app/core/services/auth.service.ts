@@ -103,10 +103,6 @@ export class AuthService {
     return this.activeContext()?.organizationId || null;
   }
 
-  getActiveFacilityId(): string | null {
-    return this.activeContext()?.facilityId || null;
-  }
-
   logout(): void {
     localStorage.removeItem('sentinel_token');
     localStorage.removeItem('sentinel_user');

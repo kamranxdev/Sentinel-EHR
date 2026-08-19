@@ -16,9 +16,7 @@ import com.sentinel.patient.repository.PatientAddressRepository;
 import com.sentinel.patient.repository.PatientDemographicsRepository;
 import com.sentinel.patient.repository.PatientOrganizationRepository;
 import com.sentinel.patient.repository.PatientRepository;
-import com.sentinel.tenancy.entity.Facility;
 import com.sentinel.tenancy.entity.Organization;
-import com.sentinel.tenancy.repository.FacilityRepository;
 import com.sentinel.tenancy.repository.OrganizationRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +25,9 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import com.sentinel.patient.repository.PatientPhoneNumberRepository;
+import com.sentinel.patient.repository.PatientEmailAddressRepository;
 
 @Service
 @Transactional
@@ -37,8 +38,9 @@ public class PatientService {
     private final PatientDemographicsRepository demographicsRepository;
     private final PatientOrganizationRepository patientOrganizationRepository;
     private final PatientAddressRepository patientAddressRepository;
+    private final PatientPhoneNumberRepository patientPhoneNumberRepository;
+    private final PatientEmailAddressRepository patientEmailAddressRepository;
     private final OrganizationRepository organizationRepository;
-    private final FacilityRepository facilityRepository;
     private final AuditService auditService;
 
     public PatientService(PatientRepository patientRepository,
@@ -46,16 +48,18 @@ public class PatientService {
                           PatientDemographicsRepository demographicsRepository,
                           PatientOrganizationRepository patientOrganizationRepository,
                           PatientAddressRepository patientAddressRepository,
+                          PatientPhoneNumberRepository patientPhoneNumberRepository,
+                          PatientEmailAddressRepository patientEmailAddressRepository,
                           OrganizationRepository organizationRepository,
-                          FacilityRepository facilityRepository,
                           AuditService auditService) {
         this.patientRepository = patientRepository;
         this.personRepository = personRepository;
         this.demographicsRepository = demographicsRepository;
         this.patientOrganizationRepository = patientOrganizationRepository;
         this.patientAddressRepository = patientAddressRepository;
+        this.patientPhoneNumberRepository = patientPhoneNumberRepository;
+        this.patientEmailAddressRepository = patientEmailAddressRepository;
         this.organizationRepository = organizationRepository;
-        this.facilityRepository = facilityRepository;
         this.auditService = auditService;
     }
 
@@ -106,9 +110,6 @@ public class PatientService {
             po.setPatientStatus("ACTIVE");
             po.setRegisteredAt(OffsetDateTime.now());
 
-            if (request.getFacilityId() != null) {
-                facilityRepository.findById(request.getFacilityId()).ifPresent(po::setPrimaryFacility);
-            }
             patientOrganizationRepository.save(po);
         }
 
@@ -188,9 +189,17 @@ public class PatientService {
             dto.setFullName(p.getFullName());
             dto.setGender(p.getSexAtBirth());
             dto.setDateOfBirth(p.getDateOfBirth());
-            dto.setPhone(p.getPhone());
-            dto.setEmail(p.getEmail());
         }
+
+        patientPhoneNumberRepository.findByPatientId(patient.getId()).stream().filter(ph -> Boolean.TRUE.equals(ph.getIsPrimary())).findFirst().ifPresentOrElse(
+            ph -> dto.setPhone(ph.getPhoneNumber()),
+            () -> patientPhoneNumberRepository.findByPatientId(patient.getId()).stream().findFirst().ifPresent(ph -> dto.setPhone(ph.getPhoneNumber()))
+        );
+
+        patientEmailAddressRepository.findByPatientId(patient.getId()).stream().filter(e -> Boolean.TRUE.equals(e.getIsPrimary())).findFirst().ifPresentOrElse(
+            e -> dto.setEmail(e.getEmail()),
+            () -> patientEmailAddressRepository.findByPatientId(patient.getId()).stream().findFirst().ifPresent(e -> dto.setEmail(e.getEmail()))
+        );
 
         demographicsRepository.findByPatientId(patient.getId()).ifPresent(demo -> {
             dto.setBloodGroup(demo.getBloodGroup());

@@ -8,7 +8,6 @@ import com.sentinel.patient.entity.PatientOrganization;
 import com.sentinel.patient.repository.PatientOrganizationRepository;
 import com.sentinel.patient.repository.PatientRepository;
 import com.sentinel.tenancy.entity.Organization;
-import com.sentinel.tenancy.repository.FacilityRepository;
 import com.sentinel.tenancy.repository.OrganizationRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,16 +24,13 @@ public class PatientOrganizationService {
     private final PatientOrganizationRepository patientOrganizationRepository;
     private final PatientRepository patientRepository;
     private final OrganizationRepository organizationRepository;
-    private final FacilityRepository facilityRepository;
 
     public PatientOrganizationService(PatientOrganizationRepository patientOrganizationRepository,
                                       PatientRepository patientRepository,
-                                      OrganizationRepository organizationRepository,
-                                      FacilityRepository facilityRepository) {
+                                      OrganizationRepository organizationRepository) {
         this.patientOrganizationRepository = patientOrganizationRepository;
         this.patientRepository = patientRepository;
         this.organizationRepository = organizationRepository;
-        this.facilityRepository = facilityRepository;
     }
 
     public PatientOrganizationResponseDTO registerPatientWithOrganization(UUID patientId, UUID organizationId, RegisterPatientOrganizationRequest request) {
@@ -58,10 +54,6 @@ public class PatientOrganizationService {
         po.setMrn(mrn);
         po.setPatientStatus("ACTIVE");
         po.setRegisteredAt(OffsetDateTime.now());
-
-        if (request != null && request.getPrimaryFacilityId() != null) {
-            facilityRepository.findById(request.getPrimaryFacilityId()).ifPresent(po::setPrimaryFacility);
-        }
 
         PatientOrganization saved = patientOrganizationRepository.save(po);
         return mapToDTO(saved);
@@ -91,10 +83,6 @@ public class PatientOrganizationService {
         }
         dto.setMrn(po.getMrn());
         dto.setPatientStatus(po.getPatientStatus());
-        if (po.getPrimaryFacility() != null) {
-            dto.setPrimaryFacilityId(po.getPrimaryFacility().getId());
-            dto.setPrimaryFacilityName(po.getPrimaryFacility().getName());
-        }
         dto.setRegisteredAt(po.getRegisteredAt());
         return dto;
     }

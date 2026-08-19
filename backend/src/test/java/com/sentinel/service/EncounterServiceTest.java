@@ -43,7 +43,6 @@ public class EncounterServiceTest {
         patientRepository = mock(PatientRepository.class);
         com.sentinel.patient.repository.PatientOrganizationRepository patientOrganizationRepository = mock(com.sentinel.patient.repository.PatientOrganizationRepository.class);
         com.sentinel.tenancy.repository.OrganizationRepository organizationRepository = mock(com.sentinel.tenancy.repository.OrganizationRepository.class);
-        com.sentinel.tenancy.repository.FacilityRepository facilityRepository = mock(com.sentinel.tenancy.repository.FacilityRepository.class);
         com.sentinel.tenancy.repository.DepartmentRepository departmentRepository = mock(com.sentinel.tenancy.repository.DepartmentRepository.class);
         com.sentinel.audit.service.AuditService auditService = mock(com.sentinel.audit.service.AuditService.class);
 
@@ -53,7 +52,6 @@ public class EncounterServiceTest {
             patientRepository, 
             patientOrganizationRepository, 
             organizationRepository, 
-            facilityRepository, 
             departmentRepository, 
             auditService
         );

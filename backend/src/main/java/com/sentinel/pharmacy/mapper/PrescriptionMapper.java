@@ -49,7 +49,8 @@ public class PrescriptionMapper {
         }
 
         if (entity.getDoctor() != null) {
-            dto.setDoctorUsername(entity.getDoctor().getUsername());
+            dto.setDoctorId(entity.getDoctor().getId());
+            dto.setDoctorName(entity.getDoctor().getFullName());
         }
 
         return dto;

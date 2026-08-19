@@ -27,8 +27,8 @@ public class PatientSurgicalHistory {
     @Column(name = "performed_at")
     private LocalDate performedAt;
 
-    @Column(name = "facility_name", length = 255)
-    private String facilityName;
+    @Column(name = "hospital_name", length = 255)
+    private String hospitalName;
 
     @Column(name = "surgeon_name", length = 255)
     private String surgeonName;
@@ -56,8 +56,8 @@ public class PatientSurgicalHistory {
     public LocalDate getPerformedAt() { return performedAt; }
     public void setPerformedAt(LocalDate performedAt) { this.performedAt = performedAt; }
 
-    public String getFacilityName() { return facilityName; }
-    public void setFacilityName(String facilityName) { this.facilityName = facilityName; }
+    public String getHospitalName() { return hospitalName; }
+    public void setHospitalName(String hospitalName) { this.hospitalName = hospitalName; }
 
     public String getSurgeonName() { return surgeonName; }
     public void setSurgeonName(String surgeonName) { this.surgeonName = surgeonName; }

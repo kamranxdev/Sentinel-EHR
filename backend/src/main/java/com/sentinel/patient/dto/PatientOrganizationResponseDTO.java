@@ -10,8 +10,6 @@ public class PatientOrganizationResponseDTO {
     private String organizationName;
     private String mrn;
     private String patientStatus;
-    private UUID primaryFacilityId;
-    private String primaryFacilityName;
     private OffsetDateTime registeredAt;
 
     public PatientOrganizationResponseDTO() {}
@@ -28,10 +26,6 @@ public class PatientOrganizationResponseDTO {
     public void setMrn(String mrn) { this.mrn = mrn; }
     public String getPatientStatus() { return patientStatus; }
     public void setPatientStatus(String patientStatus) { this.patientStatus = patientStatus; }
-    public UUID getPrimaryFacilityId() { return primaryFacilityId; }
-    public void setPrimaryFacilityId(UUID primaryFacilityId) { this.primaryFacilityId = primaryFacilityId; }
-    public String getPrimaryFacilityName() { return primaryFacilityName; }
-    public void setPrimaryFacilityName(String primaryFacilityName) { this.primaryFacilityName = primaryFacilityName; }
     public OffsetDateTime getRegisteredAt() { return registeredAt; }
     public void setRegisteredAt(OffsetDateTime registeredAt) { this.registeredAt = registeredAt; }
 }

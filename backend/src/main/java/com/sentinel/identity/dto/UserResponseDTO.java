@@ -1,6 +1,7 @@
 package com.sentinel.identity.dto;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -17,11 +18,37 @@ public class UserResponseDTO {
     private String status;
     private Boolean mfaEnabled;
     private Set<String> roles;
+    private List<UserOrgDTO> organizations;
     private OffsetDateTime lastLoginAt;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
 
     public UserResponseDTO() {}
+
+    public static class UserOrgDTO {
+        private UUID id;
+        private String name;
+        private String code;
+        private String employmentType;
+
+        public UserOrgDTO() {}
+
+        public UserOrgDTO(UUID id, String name, String code, String employmentType) {
+            this.id = id;
+            this.name = name;
+            this.code = code;
+            this.employmentType = employmentType;
+        }
+
+        public UUID getId() { return id; }
+        public void setId(UUID id) { this.id = id; }
+        public String getName() { return name; }
+        public void setName(String name) { this.name = name; }
+        public String getCode() { return code; }
+        public void setCode(String code) { this.code = code; }
+        public String getEmploymentType() { return employmentType; }
+        public void setEmploymentType(String employmentType) { this.employmentType = employmentType; }
+    }
 
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }
@@ -47,6 +74,8 @@ public class UserResponseDTO {
     public void setMfaEnabled(Boolean mfaEnabled) { this.mfaEnabled = mfaEnabled; }
     public Set<String> getRoles() { return roles; }
     public void setRoles(Set<String> roles) { this.roles = roles; }
+    public List<UserOrgDTO> getOrganizations() { return organizations; }
+    public void setOrganizations(List<UserOrgDTO> organizations) { this.organizations = organizations; }
     public OffsetDateTime getLastLoginAt() { return lastLoginAt; }
     public void setLastLoginAt(OffsetDateTime lastLoginAt) { this.lastLoginAt = lastLoginAt; }
     public OffsetDateTime getCreatedAt() { return createdAt; }

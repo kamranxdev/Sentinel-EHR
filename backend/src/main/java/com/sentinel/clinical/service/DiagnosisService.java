@@ -98,7 +98,10 @@ public class DiagnosisService {
         dto.setStatus(d.getStatus());
         dto.setOnsetDate(d.getOnsetDate());
         dto.setNotes(d.getNotes());
-        if (d.getDoctor() != null) dto.setDoctorUsername(d.getDoctor().getUsername());
+        if (d.getDoctor() != null) {
+            dto.setDoctorId(d.getDoctor().getId());
+            dto.setDoctorName(d.getDoctor().getFullName());
+        }
         dto.setRecordedAt(d.getRecordedAt());
         dto.setCreatedAt(d.getCreatedAt());
         dto.setUpdatedAt(d.getUpdatedAt());

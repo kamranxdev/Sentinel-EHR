@@ -14,20 +14,17 @@ import java.util.UUID;
 public interface BedRepository extends JpaRepository<Bed, UUID> {
     List<Bed> findByRoomId(UUID roomId);
     List<Bed> findByWardId(UUID wardId);
-    List<Bed> findByFacilityId(UUID facilityId);
     List<Bed> findByOrganizationId(UUID organizationId);
     Optional<Bed> findByBedCode(String bedCode);
 
     @Query("SELECT b FROM Bed b WHERE b.status = 'AVAILABLE' AND " +
-           "(:facilityId IS NULL OR b.facility.id = :facilityId) AND " +
+           "(:organizationId IS NULL OR b.organization.id = :organizationId) AND " +
            "(:wardId IS NULL OR b.ward.id = :wardId)")
-    List<Bed> findAvailableBeds(@Param("facilityId") UUID facilityId, @Param("wardId") UUID wardId);
+    List<Bed> findAvailableBeds(@Param("organizationId") UUID organizationId, @Param("wardId") UUID wardId);
 
     @Query("SELECT b FROM Bed b WHERE b.status = 'AVAILABLE' AND " +
            "(:organizationId IS NULL OR b.organization.id = :organizationId) AND " +
-           "(:facilityId IS NULL OR b.facility.id = :facilityId) AND " +
            "(:wardId IS NULL OR b.ward.id = :wardId)")
     List<Bed> findAvailableBedsForTenant(@Param("organizationId") UUID organizationId,
-                                        @Param("facilityId") UUID facilityId,
                                         @Param("wardId") UUID wardId);
 }

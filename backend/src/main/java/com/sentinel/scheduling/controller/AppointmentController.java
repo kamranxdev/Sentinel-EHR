@@ -49,11 +49,11 @@ public class AppointmentController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    @GetMapping("/api/v1/facilities/{facilityId}/appointments")
-    @Operation(summary = "Get all appointments for a facility")
-    public ResponseEntity<ApiResponse<List<AppointmentResponseDTO>>> getFacilityAppointments(
-            @PathVariable UUID facilityId) {
-        List<AppointmentResponseDTO> response = appointmentService.getFacilityAppointments(facilityId);
+    @GetMapping({"/api/v1/organizations/{organizationId}/appointments", "/api/v1/facilities/{organizationId}/appointments"})
+    @Operation(summary = "Get all appointments for an organization")
+    public ResponseEntity<ApiResponse<List<AppointmentResponseDTO>>> getOrganizationAppointments(
+            @PathVariable UUID organizationId) {
+        List<AppointmentResponseDTO> response = appointmentService.getOrganizationAppointments(organizationId);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 

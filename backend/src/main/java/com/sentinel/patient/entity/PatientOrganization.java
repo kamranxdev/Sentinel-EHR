@@ -1,7 +1,6 @@
 package com.sentinel.patient.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.sentinel.tenancy.entity.Facility;
 import com.sentinel.tenancy.entity.Organization;
 import jakarta.persistence.*;
 import java.time.OffsetDateTime;
@@ -37,10 +36,6 @@ public class PatientOrganization {
     @Column(name = "registered_at", nullable = false)
     private OffsetDateTime registeredAt = OffsetDateTime.now();
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "primary_facility_id")
-    private Facility primaryFacility;
-
     public PatientOrganization() {}
 
     public UUID getId() { return id; }
@@ -64,7 +59,4 @@ public class PatientOrganization {
 
     public OffsetDateTime getRegisteredAt() { return registeredAt; }
     public void setRegisteredAt(OffsetDateTime registeredAt) { this.registeredAt = registeredAt; }
-
-    public Facility getPrimaryFacility() { return primaryFacility; }
-    public void setPrimaryFacility(Facility primaryFacility) { this.primaryFacility = primaryFacility; }
 }

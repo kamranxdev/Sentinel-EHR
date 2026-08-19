@@ -103,7 +103,7 @@ interface ToastAlert {
             routerLink="/organization-admin/facility-settings"
             class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-secondary text-foreground hover:bg-secondary/80 border border-border transition-all">
             <ng-icon name="lucideSettings" size="14" />
-            <span>Facility Spatial Layout</span>
+            <span>Hospital Spatial Layout</span>
           </a>
           <a
             routerLink="/organization-admin/users"
@@ -114,7 +114,7 @@ interface ToastAlert {
         </div>
       </div>
 
-      <!-- Facility Operational KPI Summary (4 Cards) -->
+      <!-- Hospital Operational KPI Summary (4 Cards) -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <!-- Staff Roster Card -->
         <a routerLink="/organization-admin/users" class="p-4 rounded-xl border border-border bg-card shadow-xs hover:border-emerald-500/40 transition-all group">
@@ -133,7 +133,7 @@ interface ToastAlert {
           <p class="text-[10px] text-muted-foreground mt-1">Doctors, Nurses, Pharmacists, Staff</p>
         </a>
 
-        <!-- Facility Spatial Layout Card -->
+        <!-- Hospital Spatial Layout Card -->
         <a routerLink="/organization-admin/facility-settings" class="p-4 rounded-xl border border-border bg-card shadow-xs hover:border-blue-500/40 transition-all group">
           <div class="flex items-center justify-between">
             <span class="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Spatial Layout</span>
@@ -191,7 +191,7 @@ interface ToastAlert {
               <span hlmBadge variant="outline" class="text-[10px]">Staff Management</span>
             </div>
             <div>
-              <h3 class="text-base font-semibold text-foreground">Facility Staff & Role Matrix</h3>
+              <h3 class="text-base font-semibold text-foreground">Hospital Staff & Role Matrix</h3>
               <p class="text-xs text-muted-foreground mt-1 leading-relaxed">
                 Onboard clinical practitioners and administrative staff. Assign and revoke scoped organization roles (Physician, Nurse, Pharmacist, Receptionist, Billing).
               </p>

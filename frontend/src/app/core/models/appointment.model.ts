@@ -2,6 +2,40 @@ import { User } from './auth-user.model';
 import { Patient } from './patient.model';
 import { Vitals } from './clinical.model';
 
+export interface PractitionerOrgInfo {
+  id: string;
+  name: string;
+  code: string;
+  employmentType?: string;
+}
+
+export interface PractitionerSpecialtyInfo {
+  id?: string;
+  specialtyCode?: string;
+  specialtyName?: string;
+  isPrimary?: boolean;
+}
+
+export interface PractitionerDTO {
+  id: string;
+  personId?: string;
+  userId?: string;
+  email?: string;
+  identifier?: string;
+  firstName?: string;
+  lastName?: string;
+  middleName?: string;
+  fullName?: string;
+  gender?: string;
+  practitionerType?: string;
+  primarySpecialty?: string;
+  status?: string;
+  specialties?: PractitionerSpecialtyInfo[];
+  organizations?: PractitionerOrgInfo[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
 export interface DoctorRecommendationDTO {
   doctor: User;
   matchScore: number;
@@ -25,13 +59,11 @@ export interface Appointment {
   patientCode?: string;
   patient?: Patient;
   organizationId?: string;
-  facilityId?: string;
   departmentId?: string;
   departmentName?: string;
   practitionerId?: string;
   doctorId?: string;
   doctorName?: string;
-  doctorUsername?: string;
   doctorSpecialization?: string;
   doctor?: User;
   appointmentDate?: string;
@@ -65,7 +97,6 @@ export interface AppointmentRequestDTO {
   startsAt?: string;
   endsAt?: string;
   organizationId?: string;
-  facilityId?: string;
   departmentId?: string;
   appointmentType?: string;
   status?: string;
@@ -111,7 +142,6 @@ export interface AppointmentRescheduleRequestDTO {
 export interface ScheduleSlot {
   id: string;
   organizationId?: string;
-  facilityId?: string;
   practitionerId: string;
   startTime: string;
   endTime: string;

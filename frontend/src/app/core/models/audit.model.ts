@@ -1,7 +1,6 @@
 export interface AuditLog {
   id: string;
   organizationId?: string;
-  facilityId?: string;
   userId?: string;
   patientId?: string;
   encounterId?: string;

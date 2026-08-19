@@ -42,7 +42,8 @@ public class AppointmentMapper {
         }
 
         if (entity.getCreatedBy() != null) {
-            dto.setDoctorUsername(entity.getCreatedBy().getUsername());
+            dto.setDoctorId(entity.getCreatedBy().getId());
+            dto.setDoctorName(entity.getCreatedBy().getFullName());
         }
 
         return dto;

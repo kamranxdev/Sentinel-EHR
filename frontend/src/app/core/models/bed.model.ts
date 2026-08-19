@@ -3,7 +3,6 @@ import { Encounter } from './clinical.model';
 export interface Bed {
   id?: string;
   organizationId?: string;
-  facilityId?: string;
   wardId?: string;
   wardName?: string;
   roomId?: string;

@@ -18,6 +18,13 @@ public class OrganizationMapper {
         org.setPhone(dto.getPhone());
         org.setEmail(dto.getEmail());
         org.setWebsite(dto.getWebsite());
+        org.setAddressLine1(dto.getAddressLine1());
+        org.setAddressLine2(dto.getAddressLine2());
+        org.setLandmark(dto.getLandmark());
+        org.setCity(dto.getCity());
+        org.setDistrict(dto.getDistrict());
+        org.setState(dto.getState());
+        org.setPostalCode(dto.getPostalCode());
         return org;
     }
 
@@ -35,6 +42,13 @@ public class OrganizationMapper {
         dto.setPhone(entity.getPhone());
         dto.setEmail(entity.getEmail());
         dto.setWebsite(entity.getWebsite());
+        dto.setAddressLine1(entity.getAddressLine1());
+        dto.setAddressLine2(entity.getAddressLine2());
+        dto.setLandmark(entity.getLandmark());
+        dto.setCity(entity.getCity());
+        dto.setDistrict(entity.getDistrict());
+        dto.setState(entity.getState());
+        dto.setPostalCode(entity.getPostalCode());
         dto.setCreatedAt(entity.getCreatedAt());
         return dto;
     }

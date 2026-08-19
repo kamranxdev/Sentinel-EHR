@@ -6,17 +6,17 @@ import java.util.UUID;
 public class AppointmentResponseDTO {
     private UUID id;
     private UUID organizationId;
-    private UUID facilityId;
     private UUID departmentId;
     private UUID patientId;
     private String patientName;
-    private String doctorUsername;
     private OffsetDateTime startsAt;
     private OffsetDateTime endsAt;
     private String status;
     private String stage;
     private String reason;
     private String notes;
+    private UUID doctorId;
+    private String doctorName;
     private OffsetDateTime checkedInAt;
     private OffsetDateTime arrivedAt;
     private OffsetDateTime completedAt;
@@ -29,16 +29,16 @@ public class AppointmentResponseDTO {
     public void setId(UUID id) { this.id = id; }
     public UUID getOrganizationId() { return organizationId; }
     public void setOrganizationId(UUID organizationId) { this.organizationId = organizationId; }
-    public UUID getFacilityId() { return facilityId; }
-    public void setFacilityId(UUID facilityId) { this.facilityId = facilityId; }
     public UUID getDepartmentId() { return departmentId; }
     public void setDepartmentId(UUID departmentId) { this.departmentId = departmentId; }
     public UUID getPatientId() { return patientId; }
     public void setPatientId(UUID patientId) { this.patientId = patientId; }
     public String getPatientName() { return patientName; }
     public void setPatientName(String patientName) { this.patientName = patientName; }
-    public String getDoctorUsername() { return doctorUsername; }
-    public void setDoctorUsername(String doctorUsername) { this.doctorUsername = doctorUsername; }
+    public UUID getDoctorId() { return doctorId; }
+    public void setDoctorId(UUID doctorId) { this.doctorId = doctorId; }
+    public String getDoctorName() { return doctorName; }
+    public void setDoctorName(String doctorName) { this.doctorName = doctorName; }
     public OffsetDateTime getStartsAt() { return startsAt; }
     public void setStartsAt(OffsetDateTime startsAt) { this.startsAt = startsAt; }
     public OffsetDateTime getEndsAt() { return endsAt; }

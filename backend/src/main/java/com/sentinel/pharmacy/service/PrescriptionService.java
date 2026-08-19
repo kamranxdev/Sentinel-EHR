@@ -138,7 +138,10 @@ public class PrescriptionService {
         dto.setIndication(p.getIndication());
         dto.setInstructions(p.getInstructions());
         dto.setRefills(p.getRefills());
-        if (p.getDoctor() != null) dto.setDoctorUsername(p.getDoctor().getUsername());
+        if (p.getDoctor() != null) {
+            dto.setDoctorId(p.getDoctor().getId());
+            dto.setDoctorName(p.getDoctor().getFullName());
+        }
         dto.setPrescribedAt(p.getPrescribedAt());
         dto.setStartAt(p.getStartAt());
         dto.setEndAt(p.getEndAt());

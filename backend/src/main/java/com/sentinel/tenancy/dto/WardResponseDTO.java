@@ -6,7 +6,7 @@ import java.util.UUID;
 public class WardResponseDTO {
     private UUID id;
     private UUID organizationId;
-    private UUID facilityId;
+    private String organizationName;
     private UUID departmentId;
     private String departmentName;
     private String code;
@@ -23,8 +23,8 @@ public class WardResponseDTO {
     public void setId(UUID id) { this.id = id; }
     public UUID getOrganizationId() { return organizationId; }
     public void setOrganizationId(UUID organizationId) { this.organizationId = organizationId; }
-    public UUID getFacilityId() { return facilityId; }
-    public void setFacilityId(UUID facilityId) { this.facilityId = facilityId; }
+    public String getOrganizationName() { return organizationName; }
+    public void setOrganizationName(String organizationName) { this.organizationName = organizationName; }
     public UUID getDepartmentId() { return departmentId; }
     public void setDepartmentId(UUID departmentId) { this.departmentId = departmentId; }
     public String getDepartmentName() { return departmentName; }

@@ -10,9 +10,8 @@ import java.util.UUID;
 
 @Repository
 public interface DepartmentRepository extends JpaRepository<Department, UUID> {
-    List<Department> findByFacilityId(UUID facilityId);
-    Optional<Department> findByCode(String code);
     List<Department> findByOrganizationId(UUID organizationId);
-    Optional<Department> findByFacilityIdAndCode(UUID facilityId, String code);
-    boolean existsByFacilityIdAndCode(UUID facilityId, String code);
+    Optional<Department> findByCode(String code);
+    Optional<Department> findByOrganizationIdAndCode(UUID organizationId, String code);
+    boolean existsByOrganizationIdAndCode(UUID organizationId, String code);
 }

@@ -31,7 +31,7 @@ Welcome to the comprehensive technical and operational documentation for **Senti
 - [**Receptionist & Front-Desk Workspace**](./workspaces/receptionist-workspace.md)
   - Patient registration, Master Patient Index (MPI) deduplication, appointment scheduling, and OPD arrival check-in.
 - [**Organization Administrator Workspace**](./workspaces/organization-admin-workspace.md)
-  - Facility settings, clinical staff roster & credentialing, spatial ward & bed topology provisioning, MPI duplicate governance, and facility schedule analytics.
+  - Hospital profile & details, clinical staff roster & credentialing, spatial ward & bed topology provisioning, MPI duplicate governance, and consultation schedule analytics.
 - [**Super Administrator Platform Workspace**](./workspaces/super-admin-workspace.md)
   - Multi-tenant hospital network onboarding, global cross-tenant RBAC, network-wide MPI indexing, platform analytics, and ABDM/DPDP compliance ledger.
 - [**Pharmacist Clinical Workspace**](./workspaces/pharmacist-workspace.md)

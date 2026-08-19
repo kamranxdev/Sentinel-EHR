@@ -6,7 +6,6 @@ import java.util.UUID;
 
 public class CreateAppointmentRequest {
     private UUID organizationId;
-    private UUID facilityId;
     private UUID departmentId;
     @NotNull(message = "Patient ID is required")
     private UUID patientId;
@@ -21,8 +20,6 @@ public class CreateAppointmentRequest {
 
     public UUID getOrganizationId() { return organizationId; }
     public void setOrganizationId(UUID organizationId) { this.organizationId = organizationId; }
-    public UUID getFacilityId() { return facilityId; }
-    public void setFacilityId(UUID facilityId) { this.facilityId = facilityId; }
     public UUID getDepartmentId() { return departmentId; }
     public void setDepartmentId(UUID departmentId) { this.departmentId = departmentId; }
     public UUID getPatientId() { return patientId; }

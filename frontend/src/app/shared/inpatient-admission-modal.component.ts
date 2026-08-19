@@ -97,8 +97,8 @@ import { lucideHospital, lucideUserPlus, lucideX, lucideUser, lucideStethoscope,
                 <option value="EMERGENCY_DEPARTMENT">Emergency Department (ED)</option>
                 <option value="OUTPATIENT_CLINIC">Outpatient Clinic (OPD Referral)</option>
                 <option value="ELECTIVE_SCHEDULED">Elective / Scheduled Booking</option>
-                <option value="INTER_FACILITY_TRANSFER">Inter-Facility Hospital Transfer</option>
-                <option value="INTRA_FACILITY_TRANSFER">Internal Department Transfer</option>
+                <option value="EXTERNAL_TRANSFER">External Hospital Transfer</option>
+                <option value="INTERNAL_TRANSFER">Internal Department Transfer</option>
               </select>
             </div>
           </div>

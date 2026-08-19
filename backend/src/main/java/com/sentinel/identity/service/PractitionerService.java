@@ -88,13 +88,40 @@ public class PractitionerService {
 
     @Transactional(readOnly = true)
     public List<PractitionerResponseDTO> searchPractitioners(PractitionerSearchCriteria criteria) {
-        List<Practitioner> list;
-        if (criteria != null && (criteria.getQuery() != null || criteria.getSpecialty() != null || criteria.getStatus() != null || criteria.getOrganizationId() != null)) {
-            list = practitionerRepository.search(criteria.getQuery(), criteria.getSpecialty(), criteria.getStatus(), criteria.getOrganizationId());
-        } else {
-            list = practitionerRepository.findAll();
+        List<Practitioner> list = practitionerRepository.findAll();
+        List<PractitionerResponseDTO> dtos = list.stream().map(this::mapToDTO).collect(Collectors.toList());
+
+        if (criteria != null) {
+            if (criteria.getQuery() != null && !criteria.getQuery().isBlank()) {
+                String q = criteria.getQuery().toLowerCase().trim();
+                dtos = dtos.stream().filter(d ->
+                    (d.getFullName() != null && d.getFullName().toLowerCase().contains(q)) ||
+                    (d.getFirstName() != null && d.getFirstName().toLowerCase().contains(q)) ||
+                    (d.getLastName() != null && d.getLastName().toLowerCase().contains(q)) ||
+                    (d.getIdentifier() != null && d.getIdentifier().toLowerCase().contains(q)) ||
+                    (d.getEmail() != null && d.getEmail().toLowerCase().contains(q))
+                ).collect(Collectors.toList());
+            }
+            if (criteria.getSpecialty() != null && !criteria.getSpecialty().isBlank()) {
+                String s = criteria.getSpecialty().toLowerCase().trim();
+                dtos = dtos.stream().filter(d ->
+                    d.getPrimarySpecialty() != null && d.getPrimarySpecialty().toLowerCase().contains(s)
+                ).collect(Collectors.toList());
+            }
+            if (criteria.getStatus() != null && !criteria.getStatus().isBlank()) {
+                String st = criteria.getStatus().trim();
+                dtos = dtos.stream().filter(d ->
+                    d.getStatus() != null && d.getStatus().equalsIgnoreCase(st)
+                ).collect(Collectors.toList());
+            }
+            if (criteria.getOrganizationId() != null) {
+                UUID targetOrgId = criteria.getOrganizationId();
+                dtos = dtos.stream().filter(d ->
+                    d.getOrganizations() != null && d.getOrganizations().stream().anyMatch(org -> targetOrgId.equals(org.getId()))
+                ).collect(Collectors.toList());
+            }
         }
-        return list.stream().map(this::mapToDTO).collect(Collectors.toList());
+        return dtos;
     }
 
     public PractitionerResponseDTO updatePractitioner(UUID practitionerId, UpdatePractitionerRequest request) {

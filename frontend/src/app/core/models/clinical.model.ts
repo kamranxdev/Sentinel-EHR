@@ -6,7 +6,6 @@ export interface Encounter {
   patient?: Patient;
   patientId?: string;
   organizationId?: string;
-  facilityId?: string;
   departmentId?: string;
   departmentName?: string;
   encounterNumber?: string;
@@ -134,7 +133,7 @@ export interface Prescription {
   encounterId?: string;
   practitionerId?: string;
   doctor?: User;
-  doctorUsername?: string;
+  doctorName?: string;
   medicationName: string;
   medicationCode?: string;
   rxNormCode?: string;

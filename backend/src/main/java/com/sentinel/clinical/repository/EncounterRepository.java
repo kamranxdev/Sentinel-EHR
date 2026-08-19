@@ -19,13 +19,11 @@ public interface EncounterRepository extends JpaRepository<Encounter, UUID> {
     @Query("SELECT e FROM Encounter e WHERE " +
            "(:patientId IS NULL OR e.patient.id = :patientId) AND " +
            "(:organizationId IS NULL OR e.organization.id = :organizationId) AND " +
-           "(:facilityId IS NULL OR e.facility.id = :facilityId) AND " +
            "(:status IS NULL OR e.status = :status) AND " +
            "(:encounterType IS NULL OR e.encounterType = :encounterType) " +
            "ORDER BY e.startedAt DESC")
     List<Encounter> searchEncounters(@Param("patientId") UUID patientId,
                                      @Param("organizationId") UUID organizationId,
-                                     @Param("facilityId") UUID facilityId,
                                      @Param("status") String status,
                                      @Param("encounterType") String encounterType);
 }

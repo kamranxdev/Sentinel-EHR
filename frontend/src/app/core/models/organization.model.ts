@@ -9,11 +9,18 @@ export interface Organization {
   email?: string;
   phone?: string;
   address?: string;
+  addressLine1?: string;
+  addressLine2?: string;
+  landmark?: string;
+  city?: string;
+  district?: string;
+  state?: string;
+  postalCode?: string;
   website?: string;
   timezone?: string;
   countryCode?: string;
   status: 'ACTIVE' | 'PENDING_VERIFICATION' | 'VERIFIED' | 'SUSPENDED' | string;
-  createdAt: string;
+  createdAt?: string;
   updatedAt?: string;
 }
 
@@ -28,6 +35,13 @@ export interface OrganizationRegistrationRequest {
   email?: string;
   phone?: string;
   address?: string;
+  addressLine1?: string;
+  addressLine2?: string;
+  landmark?: string;
+  city?: string;
+  district?: string;
+  state?: string;
+  postalCode?: string;
   website?: string;
   countryCode?: string;
   timezone?: string;

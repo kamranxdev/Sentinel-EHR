@@ -24,11 +24,11 @@ public class JwtAuthResponse {
         private String organizationType;
         private String employeeCode;
         private String employmentType;
-        private List<FacilityContextDTO> facilities;
+        private List<DepartmentContextDTO> departments;
 
         public OrganizationContextDTO() {}
 
-        public OrganizationContextDTO(UUID id, String code, String name, String legalName, String organizationType, String employeeCode, String employmentType, List<FacilityContextDTO> facilities) {
+        public OrganizationContextDTO(UUID id, String code, String name, String legalName, String organizationType, String employeeCode, String employmentType, List<DepartmentContextDTO> departments) {
             this.id = id;
             this.code = code;
             this.name = name;
@@ -36,7 +36,7 @@ public class JwtAuthResponse {
             this.organizationType = organizationType;
             this.employeeCode = employeeCode;
             this.employmentType = employmentType;
-            this.facilities = facilities;
+            this.departments = departments;
         }
 
         public UUID getId() { return id; }
@@ -53,35 +53,6 @@ public class JwtAuthResponse {
         public void setEmployeeCode(String employeeCode) { this.employeeCode = employeeCode; }
         public String getEmploymentType() { return employmentType; }
         public void setEmploymentType(String employmentType) { this.employmentType = employmentType; }
-        public List<FacilityContextDTO> getFacilities() { return facilities; }
-        public void setFacilities(List<FacilityContextDTO> facilities) { this.facilities = facilities; }
-    }
-
-    public static class FacilityContextDTO {
-        private UUID id;
-        private String code;
-        private String name;
-        private String facilityType;
-        private List<DepartmentContextDTO> departments;
-
-        public FacilityContextDTO() {}
-
-        public FacilityContextDTO(UUID id, String code, String name, String facilityType, List<DepartmentContextDTO> departments) {
-            this.id = id;
-            this.code = code;
-            this.name = name;
-            this.facilityType = facilityType;
-            this.departments = departments;
-        }
-
-        public UUID getId() { return id; }
-        public void setId(UUID id) { this.id = id; }
-        public String getCode() { return code; }
-        public void setCode(String code) { this.code = code; }
-        public String getName() { return name; }
-        public void setName(String name) { this.name = name; }
-        public String getFacilityType() { return facilityType; }
-        public void setFacilityType(String facilityType) { this.facilityType = facilityType; }
         public List<DepartmentContextDTO> getDepartments() { return departments; }
         public void setDepartments(List<DepartmentContextDTO> departments) { this.departments = departments; }
     }

@@ -81,9 +81,9 @@ public class BedController {
     @GetMapping("/api/v1/beds/available")
     @Operation(summary = "Find available beds")
     public ResponseEntity<ApiResponse<List<BedResponseDTO>>> findAvailableBeds(
-            @RequestParam(required = false) UUID facilityId,
+            @RequestParam(required = false) UUID organizationId,
             @RequestParam(required = false) UUID wardId) {
-        List<BedResponseDTO> response = bedService.findAvailableBeds(facilityId, wardId);
+        List<BedResponseDTO> response = bedService.findAvailableBeds(organizationId, wardId);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 }

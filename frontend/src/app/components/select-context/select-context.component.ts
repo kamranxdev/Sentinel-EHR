@@ -6,7 +6,6 @@ import { PatientContextService } from '../../core/services/patient-context.servi
 import { ThemeService } from '../../core/services/theme.service';
 import {
   DepartmentContextDTO,
-  FacilityContextDTO,
   OrganizationContextDTO,
   SelectedContext,
 } from '../../core/models/auth-user.model';
@@ -124,15 +123,13 @@ export class SelectContextComponent implements OnInit {
     }
   }
 
-  handleSelectOrganization(org: OrganizationContextDTO, facility?: FacilityContextDTO): void {
+  handleSelectOrganization(org: OrganizationContextDTO): void {
     const context: SelectedContext = {
       organizationId: org.id,
       organizationName: org.name,
       organizationCode: org.code,
-      facilityId: facility?.id,
-      facilityName: facility?.name,
-      departmentId: facility?.departments && facility.departments.length > 0 ? facility.departments[0].id : undefined,
-      departmentName: facility?.departments && facility.departments.length > 0 ? facility.departments[0].name : undefined,
+      departmentId: org.departments && org.departments.length > 0 ? org.departments[0].id : undefined,
+      departmentName: org.departments && org.departments.length > 0 ? org.departments[0].name : undefined,
       roleName: this.authService.getPrimaryRole(),
     };
 
@@ -140,7 +137,7 @@ export class SelectContextComponent implements OnInit {
     this.patientContext.loadContext();
 
     toast.success('Workspace Context Activated', {
-      description: `Active organization: ${org.name}${facility ? ' • ' + facility.name : ''}`,
+      description: `Active Hospital / Clinic: ${org.name}`,
     });
 
     this.navigateToDashboard();

@@ -10,7 +10,6 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
 
   const token = authService.getToken();
   const orgId = authService.getActiveOrganizationId();
-  const facId = authService.getActiveFacilityId();
   let authReq = req;
 
   const headers: Record<string, string> = {};
@@ -19,9 +18,6 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
   }
   if (orgId) {
     headers['X-Organization-ID'] = orgId;
-  }
-  if (facId) {
-    headers['X-Facility-ID'] = facId;
   }
 
   if (Object.keys(headers).length > 0) {

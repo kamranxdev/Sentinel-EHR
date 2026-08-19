@@ -132,7 +132,7 @@ export interface NursingShiftTask {
           <div class="flex items-center flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
             <span>Assigned Unit: <strong class="text-foreground">Ward 3A - Acute Internal Medicine</strong></span>
             <span class="text-border">•</span>
-            <span>Facility: <strong class="text-foreground">{{ currentUser?.facilityId || 'Main Medical Center' }}</strong></span>
+            <span>Hospital / Clinic: <strong class="text-foreground">{{ authService.activeContext()?.organizationName || 'Main Hospital' }}</strong></span>
             <span class="text-border">•</span>
             <span>Station: <strong class="font-mono text-foreground">STATION-3A-N01</strong></span>
           </div>

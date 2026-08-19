@@ -146,7 +146,7 @@ export interface ClinicalTaskItem {
           <div class="flex items-center flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
             <span>Clinical Scope: <strong class="text-foreground">Encounter & Assignment Driven</strong></span>
             <span class="text-border">•</span>
-            <span>Facility: <strong class="text-foreground">{{ currentUser?.facilityId || 'Main Medical Center' }}</strong></span>
+            <span>Hospital / Clinic: <strong class="text-foreground">{{ authService.activeContext()?.organizationName || 'Main Hospital' }}</strong></span>
             <span class="text-border">•</span>
             <span>License: <strong class="font-mono text-foreground">{{ currentUser?.licenseNumber || 'MD-ACTIVE-2026' }}</strong></span>
           </div>

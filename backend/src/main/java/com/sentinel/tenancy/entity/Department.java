@@ -19,10 +19,6 @@ public class Department {
     @JoinColumn(name = "organization_id", nullable = false)
     private Organization organization;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "facility_id", nullable = false)
-    private Facility facility;
-
     @Column(nullable = false, length = 50)
     private String code;
 
@@ -48,9 +44,6 @@ public class Department {
 
     public Organization getOrganization() { return organization; }
     public void setOrganization(Organization organization) { this.organization = organization; }
-
-    public Facility getFacility() { return facility; }
-    public void setFacility(Facility facility) { this.facility = facility; }
 
     public String getCode() { return code; }
     public void setCode(String code) { this.code = code; }

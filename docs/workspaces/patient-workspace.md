@@ -54,7 +54,7 @@ Patient Signs In to Patient Portal (`/patient/dashboard`)
   │     └── Immunization & Allergy Records
   │
   ├── 3. Self-Service Appointment Booking (`/patient/appointments`)
-  │     ├── Select Specialty, Doctor, Facility & Preferred Time
+  │     ├── Select Hospital / Clinic, Specialty, Doctor & Preferred Time
   │     └── Instant Confirmation & SMS/Email Reminders
   │
   └── 4. Health Data Consent Directives

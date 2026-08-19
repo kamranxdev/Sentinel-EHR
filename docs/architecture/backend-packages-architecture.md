@@ -11,7 +11,7 @@ Sentinel-EHR is structured into modular domain packages within Spring Boot 3 / J
        ┌────────────────────────────────────────────────────────┐
        │             1. SECURITY & TENANCY LAYER                │
        │  • JwtAuthenticationFilter (Token & Claims Validation) │
-       │  • TenantContextHolder (Organization & Facility Scoping│
+       │  • TenantContextHolder (Organization Scoping)          │
        │  • SentinelAuditInterceptor (Request Pre-Capture)      │
        └────────────────────────────┬───────────────────────────┘
                                     │
@@ -43,19 +43,19 @@ Sentinel-EHR is structured into modular domain packages within Spring Boot 3 / J
 
 ## 2. Package-by-Package Deep Dive
 
-### 1. `com.sentinel.identity`
+### 1. `com.sentinel.identity` & `com.sentinel.tenancy`
 * **Purpose**: Manages enterprise user identity, clinical practitioner credentials, and multi-tenant organizational structure.
 * **Key Entities**:
-  - `Organization`: Root tenant entity (Hospital system, network).
-  - `Facility`: Physical medical center or campus under an organization.
+  - `Organization`: Root tenant entity (Hospital / Clinic e.g. AIIMS Delhi, AIIMS Gorakhpur).
   - `Department`: Clinical unit (e.g. Cardiology, Emergency, Pathology).
+  - `Ward`, `Room`, `Bed`: Spatial inpatient infrastructure.
   - `User`: Global login credentials, password hashes, email, and assigned roles.
   - `Practitioner`: Licensed clinician details (State license #, specialty, NPI, affiliations).
   - `UserOrganization`: Bridges users to organizations with tenant-scoped roles.
 * **Key Services & Controllers**:
   - `UserService`, `UserController`: User account lifecycle, status updates, password resets.
   - `PractitionerService`, `PractitionerController`: Clinician credentialing and specialty assignments.
-  - `OrganizationService`, `FacilityService`: Tenant infrastructure provisioning.
+  - `OrganizationService`, `DepartmentService`, `BedService`: Tenant and spatial infrastructure provisioning.
 * **Internal Data Flow**:
   1. `User` logs in $\rightarrow$ `AuthService` verifies credentials.
   2. `UserOrganization` resolves active tenant membership and roles.

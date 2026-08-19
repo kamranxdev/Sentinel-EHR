@@ -34,7 +34,6 @@ public class WardService {
 
         Ward ward = new Ward();
         ward.setOrganization(department.getOrganization());
-        ward.setFacility(department.getFacility());
         ward.setDepartment(department);
         ward.setCode(request.getCode());
         ward.setName(request.getName());
@@ -49,6 +48,13 @@ public class WardService {
     @Transactional(readOnly = true)
     public List<WardResponseDTO> getDepartmentWards(UUID departmentId) {
         return wardRepository.findByDepartmentId(departmentId).stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<WardResponseDTO> getOrganizationWards(UUID organizationId) {
+        return wardRepository.findByOrganizationId(organizationId).stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
     }
@@ -82,8 +88,10 @@ public class WardService {
     public WardResponseDTO mapToDTO(Ward ward) {
         WardResponseDTO dto = new WardResponseDTO();
         dto.setId(ward.getId());
-        if (ward.getOrganization() != null) dto.setOrganizationId(ward.getOrganization().getId());
-        if (ward.getFacility() != null) dto.setFacilityId(ward.getFacility().getId());
+        if (ward.getOrganization() != null) {
+            dto.setOrganizationId(ward.getOrganization().getId());
+            dto.setOrganizationName(ward.getOrganization().getName());
+        }
         if (ward.getDepartment() != null) {
             dto.setDepartmentId(ward.getDepartment().getId());
             dto.setDepartmentName(ward.getDepartment().getName());

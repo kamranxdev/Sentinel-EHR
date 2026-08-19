@@ -73,17 +73,17 @@ Sentinel-EHR uses a normalized relational PostgreSQL 16 schema designed for high
 
 ### C. Spatial Ward & Bed Management (ADT)
 1. **`wards`**: Clinical wards (e.g. Ward 3A, ICU).
-   - `id` (UUID PK), `facility_id` (FK), `department_id` (FK), `ward_name` (VARCHAR), `ward_type` (GENERAL, ICU, SURGICAL, MATERNITY), `capacity` (INT).
+   - `id` (UUID PK), `organization_id` (FK), `department_id` (FK), `ward_name` (VARCHAR), `ward_type` (GENERAL, ICU, SURGICAL, MATERNITY), `capacity` (INT).
 2. **`rooms`**: Physical rooms within a ward.
    - `id` (UUID PK), `ward_id` (FK), `room_number` (VARCHAR), `room_type` (SINGLE, DOUBLE, QUAD, NEGATIVE_PRESSURE).
 3. **`beds`**: Individual spatial inpatient beds.
-   - `id` (UUID PK), `room_id` (FK), `ward_id` (FK), `bed_number` / `bed_code` (VARCHAR), `status` (AVAILABLE, OCCUPIED, CLEANING, MAINTENANCE), `current_encounter_id` (FK encounters nullable).
+   - `id` (UUID PK), `organization_id` (FK), `room_id` (FK), `ward_id` (FK), `bed_number` / `bed_code` (VARCHAR), `status` (AVAILABLE, OCCUPIED, CLEANING, MAINTENANCE), `current_encounter_id` (FK encounters nullable).
 
 ---
 
 ### D. Encounters & Clinical Core
 1. **`encounters`**: Clinical care episodes.
-   - `id` (UUID PK), `patient_id` (FK), `organization_id` (FK), `facility_id` (FK), `encounter_type` (OUTPATIENT, INPATIENT, EMERGENCY), `status` (PLANNED, IN_PROGRESS, COMPLETED, CANCELLED), `chief_complaint` (TEXT), `admit_date` (TIMESTAMP), `discharge_date` (TIMESTAMP nullable), `primary_practitioner_id` (FK practitioners).
+   - `id` (UUID PK), `patient_id` (FK), `organization_id` (FK), `encounter_type` (OUTPATIENT, INPATIENT, EMERGENCY), `status` (PLANNED, IN_PROGRESS, COMPLETED, CANCELLED), `chief_complaint` (TEXT), `admit_date` (TIMESTAMP), `discharge_date` (TIMESTAMP nullable), `primary_practitioner_id` (FK practitioners).
 2. **`vitals`**: Physiological measurements.
    - `id` (UUID PK), `encounter_id` (FK), `patient_id` (FK), `systolic_bp` (INT), `diastolic_bp` (INT), `heart_rate` (INT), `temperature` (DECIMAL), `respiratory_rate` (INT), `oxygen_saturation` (INT), `blood_glucose` (INT), `pain_score` (INT 0-10), `bmi` (DECIMAL), `news2_score` (INT), `recorded_by` (FK users), `recorded_at` (TIMESTAMP).
 3. **`diagnoses`**: Problem list & encounter diagnoses.

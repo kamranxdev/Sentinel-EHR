@@ -261,7 +261,7 @@ export const routes: Routes = [
   {
     path: 'organization-admin/facility-settings',
     loadComponent: () =>
-      import('./workspaces/organization-admin/organization-admin-facility-settings.component').then((m) => m.OrganizationAdminFacilitySettingsComponent),
+      import('./workspaces/organization-admin/organization-admin-settings.component').then((m) => m.OrganizationAdminSettingsComponent),
     canActivate: [authGuard, roleGuard],
     data: { roles: ['ORGANIZATION_ADMIN'] },
   },

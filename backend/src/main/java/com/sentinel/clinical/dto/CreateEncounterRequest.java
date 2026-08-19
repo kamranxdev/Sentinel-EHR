@@ -5,7 +5,6 @@ import java.util.UUID;
 public class CreateEncounterRequest {
     private UUID patientId;
     private UUID organizationId;
-    private UUID facilityId;
     private UUID departmentId;
     private String encounterType;
     private String chiefComplaint;
@@ -20,8 +19,6 @@ public class CreateEncounterRequest {
     public void setPatientId(UUID patientId) { this.patientId = patientId; }
     public UUID getOrganizationId() { return organizationId; }
     public void setOrganizationId(UUID organizationId) { this.organizationId = organizationId; }
-    public UUID getFacilityId() { return facilityId; }
-    public void setFacilityId(UUID facilityId) { this.facilityId = facilityId; }
     public UUID getDepartmentId() { return departmentId; }
     public void setDepartmentId(UUID departmentId) { this.departmentId = departmentId; }
     public String getEncounterType() { return encounterType; }

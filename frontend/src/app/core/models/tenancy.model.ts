@@ -1,21 +1,27 @@
-export interface Facility {
+export interface Organization {
   id: string;
-  organizationId: string;
+  code?: string;
   name: string;
-  facilityCode?: string;
-  facilityType?: 'HOSPITAL' | 'CLINIC' | 'OUTPATIENT_CENTER' | 'DIAGNOSTIC_LAB';
-  status: 'ACTIVE' | 'INACTIVE';
+  legalName?: string;
+  organizationType?: string;
+  status: string;
+  timezone?: string;
+  countryCode?: string;
+  phone?: string;
+  email?: string;
+  website?: string;
   addressLine1?: string;
+  addressLine2?: string;
+  landmark?: string;
   city?: string;
+  district?: string;
   state?: string;
   postalCode?: string;
-  phone?: string;
-  departments?: Department[];
 }
 
 export interface Department {
   id: string;
-  facilityId: string;
+  organizationId: string;
   name: string;
   departmentCode?: string;
   specialty?: string;
@@ -54,7 +60,7 @@ export interface BedDetail {
 
 export interface PriceList {
   id: number | string;
-  facilityId: string;
+  organizationId: string;
   name: string;
   currency: string;
   effectiveFrom: string;

@@ -13,6 +13,7 @@ import { ClinicalDocument } from '../../core/models/document.model';
 import { Invoice } from '../../core/models/billing.model';
 import { PatientConsent } from '../../core/models/consent.model';
 import { PatientInsurancePolicy } from '../../core/models/patient.model';
+import { toast } from '@spartan-ng/brain/sonner';
 
 import { HlmCardImports } from '@spartan-ng/helm/card';
 import { HlmBadgeImports } from '@spartan-ng/helm/badge';
@@ -205,7 +206,7 @@ import {
 
           <div *ngIf="nextAppointment()" class="space-y-1">
             <div class="text-sm font-bold text-foreground truncate">
-              Dr. {{ nextAppointment()?.doctor?.fullName || nextAppointment()?.doctorName || 'Attending Physician' }}
+              {{ nextAppointment()?.doctor?.fullName || nextAppointment()?.doctorName || 'Attending Physician' }}
             </div>
             <div class="text-xs text-primary font-semibold flex items-center gap-1.5">
               <ng-icon name="lucideClock" size="13" />
@@ -613,7 +614,7 @@ export class PatientDashboardComponent implements OnInit {
     public authService: AuthService,
     private apiService: ApiService,
     public patientContext: PatientContextService,
-  ) {}
+  ) { }
 
   get currentUser() {
     return this.authService.currentUser();
@@ -628,7 +629,8 @@ export class PatientDashboardComponent implements OnInit {
         }
       },
       error: (err) => {
-        console.warn('Could not load patient record for dashboard', err);
+        console.error('Could not load patient record for dashboard', err);
+        toast.error('Failed to load dashboard profile: ' + (err.error?.message || 'Unknown network error'));
       },
     });
   }

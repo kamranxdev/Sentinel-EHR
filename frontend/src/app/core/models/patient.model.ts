@@ -170,6 +170,8 @@ export interface PatientMedicalHistory {
   diagnosis?: string;
   notes?: string;
   pastMedicalHistory?: string;
+  pastSurgicalHistory?: string;
+  familyHistory?: string;
   seriousConditions?: string;
   surgeriesAndProcedures?: string;
   familyMedicalHistory?: string;
@@ -181,7 +183,9 @@ export interface PatientSocialHistory {
   patientId?: string;
   smokingStatus?: string;
   alcoholConsumption?: string;
+  alcoholStatus?: string;
   exerciseRoutine?: string;
+  exerciseFrequency?: string;
   occupationalHazards?: string;
   updatedAt?: string;
 }
@@ -193,6 +197,7 @@ export interface PatientDietaryHistory {
   dietaryHabits?: string;
   foodAllergies?: string;
   restrictions?: string;
+  dietaryRestrictions?: string;
   nutritionalRestrictions?: string;
   notes?: string;
   updatedAt?: string;
