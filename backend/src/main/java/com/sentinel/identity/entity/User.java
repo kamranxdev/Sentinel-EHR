@@ -22,9 +22,6 @@ public class User {
     @JoinColumn(name = "person_id", unique = true)
     private Person person;
 
-    @Column(nullable = false, unique = true, length = 150)
-    private String username;
-
     @Column(nullable = false, unique = true)
     private String email;
 
@@ -57,8 +54,7 @@ public class User {
 
     public User() {}
 
-    public User(String username, String email, String password, Person person) {
-        this.username = username;
+    public User(String email, String password, Person person) {
         this.email = email;
         this.password = password;
         this.person = person;
@@ -70,11 +66,10 @@ public class User {
     public Person getPerson() { return person; }
     public void setPerson(Person person) { this.person = person; }
 
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
-
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
+
+    public String getUsername() { return email; }
 
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
@@ -96,7 +91,7 @@ public class User {
     public void setUpdatedAt(OffsetDateTime updatedAt) { this.updatedAt = updatedAt; }
 
     public String getFullName() {
-        return person != null ? person.getFullName() : username;
+        return person != null ? person.getFullName() : email;
     }
 
     public Set<Role> getRoles() { return roles; }

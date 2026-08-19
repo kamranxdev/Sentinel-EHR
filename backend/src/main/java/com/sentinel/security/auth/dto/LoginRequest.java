@@ -1,43 +1,30 @@
 package com.sentinel.security.auth.dto;
 
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
 public class LoginRequest {
 
-    private String username;
-    private String usernameOrEmail;
+    @NotBlank(message = "Email is required")
+    @Email(message = "Email must be a valid email address")
+    private String email;
 
     @NotBlank(message = "Password is required")
     private String password;
 
     public LoginRequest() {}
 
-    public LoginRequest(String username, String password) {
-        this.username = username;
-        this.usernameOrEmail = username;
+    public LoginRequest(String email, String password) {
+        this.email = email;
         this.password = password;
     }
 
-    public String getUsername() {
-        return username != null && !username.isBlank() ? username : usernameOrEmail;
+    public String getEmail() {
+        return email;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
-        if (this.usernameOrEmail == null || this.usernameOrEmail.isBlank()) {
-            this.usernameOrEmail = username;
-        }
-    }
-
-    public String getUsernameOrEmail() {
-        return usernameOrEmail != null && !usernameOrEmail.isBlank() ? usernameOrEmail : username;
-    }
-
-    public void setUsernameOrEmail(String usernameOrEmail) {
-        this.usernameOrEmail = usernameOrEmail;
-        if (this.username == null || this.username.isBlank()) {
-            this.username = usernameOrEmail;
-        }
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getPassword() {

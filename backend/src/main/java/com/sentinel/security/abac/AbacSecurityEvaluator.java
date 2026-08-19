@@ -50,7 +50,7 @@ public class AbacSecurityEvaluator implements ABACEvaluator {
         }
 
         // Path 3: Active Emergency Break-Glass Access
-        return userRepository.findByUsername(authentication.getName())
+        return userRepository.findByEmail(authentication.getName())
                 .map(user -> breakGlassService.hasActiveBreakGlass(user.getId(), patientId))
                 .orElse(false);
     }
@@ -72,7 +72,7 @@ public class AbacSecurityEvaluator implements ABACEvaluator {
     @Override
     public boolean isSelf(Authentication authentication, UUID userId) {
         if (authentication == null || !authentication.isAuthenticated()) return false;
-        return userRepository.findByUsername(authentication.getName())
+        return userRepository.findByEmail(authentication.getName())
                 .map(u -> u.getId().equals(userId))
                 .orElse(false);
     }

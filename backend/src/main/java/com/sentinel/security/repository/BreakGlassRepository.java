@@ -10,6 +10,6 @@ import java.util.UUID;
 @Repository
 public interface BreakGlassRepository extends JpaRepository<BreakGlassRecord, Long> {
     List<BreakGlassRecord> findByPatientIdOrderByRequestedAtDesc(UUID patientId);
-    List<BreakGlassRecord> findByUserUsernameOrderByRequestedAtDesc(String username);
+    List<BreakGlassRecord> findByUserEmailOrderByRequestedAtDesc(String email);
     List<BreakGlassRecord> findByStatusOrderByRequestedAtDesc(String status);
 }

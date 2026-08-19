@@ -12,7 +12,7 @@ public class AuditLogMapper {
 
         AuditLogResponseDTO dto = new AuditLogResponseDTO();
         dto.setId(entity.getId());
-        dto.setUsername(entity.getUsername());
+        dto.setEmail(entity.getUserEmail() != null ? entity.getUserEmail() : entity.getEmail());
         dto.setUserRole(entity.getUserRole());
         dto.setAction(entity.getAction());
         dto.setEntityName(entity.getEntityName());

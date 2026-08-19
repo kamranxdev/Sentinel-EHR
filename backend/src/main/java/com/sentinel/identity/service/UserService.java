@@ -53,15 +53,12 @@ public class UserService {
     }
 
     public UserResponseDTO createUser(CreateUserRequest request) {
-        if (userRepository.existsByUsername(request.getUsername())) {
-            throw new IllegalArgumentException("Username already taken: " + request.getUsername());
-        }
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new IllegalArgumentException("Email already taken: " + request.getEmail());
         }
 
         Person person = new Person();
-        person.setFirstName(request.getFirstName() != null ? request.getFirstName() : request.getUsername());
+        person.setFirstName(request.getFirstName() != null ? request.getFirstName() : request.getEmail());
         person.setLastName(request.getLastName());
         person.setMiddleName(request.getMiddleName());
         person.setSexAtBirth(request.getGender());
@@ -72,7 +69,6 @@ public class UserService {
         Person savedPerson = personRepository.save(person);
 
         User user = new User();
-        user.setUsername(request.getUsername());
         user.setEmail(request.getEmail());
         String encodedPassword = passwordEncoder.encode(request.getPassword() != null ? request.getPassword() : "Sentinel@123");
         user.setPassword(encodedPassword);
@@ -176,7 +172,6 @@ public class UserService {
     public UserResponseDTO mapToDTO(User user) {
         UserResponseDTO dto = new UserResponseDTO();
         dto.setId(user.getId());
-        dto.setUsername(user.getUsername());
         dto.setEmail(user.getEmail());
         dto.setStatus(user.getStatus());
         dto.setMfaEnabled(user.getMfaEnabled());
@@ -193,7 +188,7 @@ public class UserService {
             dto.setGender(user.getPerson().getSexAtBirth());
             dto.setPhone(user.getPerson().getPhone());
         } else {
-            dto.setFullName(user.getUsername());
+            dto.setFullName(user.getEmail());
         }
 
         if (user.getRoles() != null) {

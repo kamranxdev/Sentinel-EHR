@@ -9,14 +9,23 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
 
   const token = authService.getToken();
+  const orgId = authService.getActiveOrganizationId();
+  const facId = authService.getActiveFacilityId();
   let authReq = req;
 
+  const headers: Record<string, string> = {};
   if (token) {
-    authReq = req.clone({
-      setHeaders: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  if (orgId) {
+    headers['X-Organization-ID'] = orgId;
+  }
+  if (facId) {
+    headers['X-Facility-ID'] = facId;
+  }
+
+  if (Object.keys(headers).length > 0) {
+    authReq = req.clone({ setHeaders: headers });
   }
 
   return next(authReq).pipe(

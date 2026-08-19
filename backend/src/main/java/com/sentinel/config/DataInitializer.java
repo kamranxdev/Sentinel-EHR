@@ -611,6 +611,7 @@ public class DataInitializer implements ApplicationRunner {
         public Facility aiimsOpd;
         public Facility aiimsTrauma;
         public Facility apolloMumbai;
+        public Facility maxSaket;
 
         public Department cardio;
         public Department neuro;
@@ -618,6 +619,14 @@ public class DataInitializer implements ApplicationRunner {
         public Department genmed;
         public Department rad;
         public Department path;
+
+        public Department apolloCardio;
+        public Department apolloOnco;
+        public Department apolloEmer;
+
+        public Department maxCardio;
+        public Department maxGenMed;
+        public Department maxEmer;
 
         public Ward cardWard;
         public Ward ccu;
@@ -739,7 +748,24 @@ public class DataInitializer implements ApplicationRunner {
             return facilityRepository.save(f);
         });
 
-        // Departments
+        ctx.maxSaket = facilityRepository.findByCode("MAX-SAKET").orElseGet(() -> {
+            Facility f = new Facility();
+            f.setOrganization(ctx.maxHealthcare);
+            f.setCode("MAX-SAKET");
+            f.setName("Max Super Speciality Hospital Saket");
+            f.setFacilityType("INPATIENT");
+            f.setAddressLine1("1, 2, Press Enclave Marg");
+            f.setAddressLine2("Saket");
+            f.setCity("New Delhi");
+            f.setState("Delhi");
+            f.setPostalCode("110017");
+            f.setPhone("+91-11-26515050");
+            f.setEmail("saket@maxhealthcare.com");
+            f.setStatus("ACTIVE");
+            return facilityRepository.save(f);
+        });
+
+        // AIIMS Departments
         ctx.cardio = departmentRepository.findByFacilityIdAndCode(ctx.aiimsMain.getId(), "CARD").orElseGet(() -> {
             Department d = new Department();
             d.setOrganization(ctx.aiims);
@@ -802,6 +828,74 @@ public class DataInitializer implements ApplicationRunner {
             d.setCode("PATH");
             d.setName("Pathology & Clinical Biochemistry");
             d.setDepartmentType("LABORATORY");
+            d.setStatus("ACTIVE");
+            return departmentRepository.save(d);
+        });
+
+        // Apollo Departments
+        ctx.apolloCardio = departmentRepository.findByFacilityIdAndCode(ctx.apolloMumbai.getId(), "CARD").orElseGet(() -> {
+            Department d = new Department();
+            d.setOrganization(ctx.apollo);
+            d.setFacility(ctx.apolloMumbai);
+            d.setCode("CARD");
+            d.setName("Cardiology & Cath Lab");
+            d.setDepartmentType("CLINICAL");
+            d.setStatus("ACTIVE");
+            return departmentRepository.save(d);
+        });
+
+        ctx.apolloOnco = departmentRepository.findByFacilityIdAndCode(ctx.apolloMumbai.getId(), "ONCO").orElseGet(() -> {
+            Department d = new Department();
+            d.setOrganization(ctx.apollo);
+            d.setFacility(ctx.apolloMumbai);
+            d.setCode("ONCO");
+            d.setName("Medical Oncology & Cancer Center");
+            d.setDepartmentType("CLINICAL");
+            d.setStatus("ACTIVE");
+            return departmentRepository.save(d);
+        });
+
+        ctx.apolloEmer = departmentRepository.findByFacilityIdAndCode(ctx.apolloMumbai.getId(), "EMER").orElseGet(() -> {
+            Department d = new Department();
+            d.setOrganization(ctx.apollo);
+            d.setFacility(ctx.apolloMumbai);
+            d.setCode("EMER");
+            d.setName("Emergency & Trauma Center");
+            d.setDepartmentType("EMERGENCY");
+            d.setStatus("ACTIVE");
+            return departmentRepository.save(d);
+        });
+
+        // Max Healthcare Departments
+        ctx.maxCardio = departmentRepository.findByFacilityIdAndCode(ctx.maxSaket.getId(), "CARD").orElseGet(() -> {
+            Department d = new Department();
+            d.setOrganization(ctx.maxHealthcare);
+            d.setFacility(ctx.maxSaket);
+            d.setCode("CARD");
+            d.setName("Cardiology Institute");
+            d.setDepartmentType("CLINICAL");
+            d.setStatus("ACTIVE");
+            return departmentRepository.save(d);
+        });
+
+        ctx.maxGenMed = departmentRepository.findByFacilityIdAndCode(ctx.maxSaket.getId(), "GENMED").orElseGet(() -> {
+            Department d = new Department();
+            d.setOrganization(ctx.maxHealthcare);
+            d.setFacility(ctx.maxSaket);
+            d.setCode("GENMED");
+            d.setName("Internal Medicine & Outpatient");
+            d.setDepartmentType("CLINICAL");
+            d.setStatus("ACTIVE");
+            return departmentRepository.save(d);
+        });
+
+        ctx.maxEmer = departmentRepository.findByFacilityIdAndCode(ctx.maxSaket.getId(), "EMER").orElseGet(() -> {
+            Department d = new Department();
+            d.setOrganization(ctx.maxHealthcare);
+            d.setFacility(ctx.maxSaket);
+            d.setCode("EMER");
+            d.setName("24x7 Emergency Care Unit");
+            d.setDepartmentType("EMERGENCY");
             d.setStatus("ACTIVE");
             return departmentRepository.save(d);
         });
@@ -1189,8 +1283,25 @@ public class DataInitializer implements ApplicationRunner {
         public User sureshAuditor;
         public User orgAdminVikram;
 
+        public User siddharthDoc;
+        public User meeraNurse;
+        public User rohanRec;
+        public User poojaPharm;
+        public User kunalLab;
+        public User ananyaBilling;
+
+        public User nehaOrgAdmin;
+        public User kabirDoc;
+        public User kavitaNurse;
+        public User manishRec;
+
         public User rameshUser;
         public User anitaUser;
+        public User sureshUser;
+        public User priyankaUser;
+        public User sunilUser;
+        public User deepikaUser;
+        public User azharUser;
 
         public Practitioner arjunPrac;
         public Practitioner priyaPrac;
@@ -1198,6 +1309,8 @@ public class DataInitializer implements ApplicationRunner {
         public Practitioner vikramPrac;
         public Practitioner sunitaPrac;
         public Practitioner rahulPrac;
+        public Practitioner siddharthPrac;
+        public Practitioner kabirPrac;
     }
 
     private IdentityContext initIdentity(Map<String, Role> roles, TenancyContext tenancy) {
@@ -1205,71 +1318,113 @@ public class DataInitializer implements ApplicationRunner {
         IdentityContext ctx = new IdentityContext();
 
         // 1. Admin
-        ctx.admin = createStaffUser("admin", "admin@sentinel.local", defaultPass, "System", "Administrator", "MALE", LocalDate.of(1980, 1, 1), roles.get("SUPER_ADMIN"));
+        ctx.admin = createStaffUser("admin@sentinel.local", defaultPass, "System", "Administrator", "MALE", LocalDate.of(1980, 1, 1), roles.get("SUPER_ADMIN"));
 
-        // 2. Dr. Arjun Sharma (Cardiologist)
-        ctx.arjun = createStaffUser("arjun.sharma", "arjun.sharma@aiims.edu", defaultPass, "Arjun", "Sharma", "MALE", LocalDate.of(1982, 6, 15), roles.get("PHYSICIAN"));
+        // 2. Dr. Arjun Sharma (Multi-tenant Cardiologist: AIIMS + Apollo Mumbai + Max Healthcare)
+        ctx.arjun = createStaffUser("arjun.sharma@aiims.edu", defaultPass, "Arjun", "Sharma", "MALE", LocalDate.of(1982, 6, 15), roles.get("PHYSICIAN"));
         linkStaffToTenancy(ctx.arjun, tenancy.aiims, tenancy.aiimsMain, tenancy.cardio, "EMP-AIIMS-CARD-01", "FULL_TIME");
+        linkStaffToTenancy(ctx.arjun, tenancy.apollo, tenancy.apolloMumbai, tenancy.apolloCardio, "EMP-APL-CARD-02", "CONSULTANT");
+        linkStaffToTenancy(ctx.arjun, tenancy.maxHealthcare, tenancy.maxSaket, tenancy.maxCardio, "EMP-MAX-CARD-01", "VISITING");
         ctx.arjunPrac = createPractitioner(ctx.arjun.getPerson(), "MCI-2010-12345", "PHYSICIAN", "Cardiology", "DMC-DL-11029", "Delhi Medical Council", "Interventional Cardiology", "CARD_INTERV");
 
-        // 3. Dr. Priya Kapoor (Neurologist)
-        ctx.priya = createStaffUser("priya.kapoor", "priya.kapoor@aiims.edu", defaultPass, "Priya", "Kapoor", "FEMALE", LocalDate.of(1988, 3, 22), roles.get("PHYSICIAN"));
+        // 3. Dr. Priya Kapoor (Multi-tenant Neurologist: AIIMS + Max Healthcare)
+        ctx.priya = createStaffUser("priya.kapoor@aiims.edu", defaultPass, "Priya", "Kapoor", "FEMALE", LocalDate.of(1988, 3, 22), roles.get("PHYSICIAN"));
         linkStaffToTenancy(ctx.priya, tenancy.aiims, tenancy.aiimsOpd, tenancy.neuro, "EMP-AIIMS-NEURO-01", "FULL_TIME");
+        linkStaffToTenancy(ctx.priya, tenancy.maxHealthcare, tenancy.maxSaket, tenancy.maxGenMed, "EMP-MAX-NEURO-02", "CONSULTANT");
         ctx.priyaPrac = createPractitioner(ctx.priya.getPerson(), "MCI-2015-67890", "PHYSICIAN", "Neurology", "DMC-DL-18842", "Delhi Medical Council", "Clinical Neurology & Stroke", "NEURO_STROKE");
 
-        // 4. Dr. Rajesh Patel (Emergency Medicine)
-        ctx.rajesh = createStaffUser("rajesh.patel", "rajesh.patel@aiims.edu", defaultPass, "Rajesh", "Patel", "MALE", LocalDate.of(1978, 11, 8), roles.get("PHYSICIAN"));
+        // 4. Dr. Rajesh Patel (Multi-tenant Emergency: AIIMS + Apollo)
+        ctx.rajesh = createStaffUser("rajesh.patel@aiims.edu", defaultPass, "Rajesh", "Patel", "MALE", LocalDate.of(1978, 11, 8), roles.get("PHYSICIAN"));
         linkStaffToTenancy(ctx.rajesh, tenancy.aiims, tenancy.aiimsTrauma, tenancy.emer, "EMP-AIIMS-EMER-01", "FULL_TIME");
+        linkStaffToTenancy(ctx.rajesh, tenancy.apollo, tenancy.apolloMumbai, tenancy.apolloEmer, "EMP-APL-EMER-02", "VISITING");
         ctx.rajeshPrac = createPractitioner(ctx.rajesh.getPerson(), "MCI-2008-33445", "PHYSICIAN", "Emergency Medicine", "DMC-DL-09912", "Delhi Medical Council", "Trauma & Resuscitation", "EMER_TRAUMA");
 
         // 5. Dr. Vikram Sethi (Radiologist)
-        ctx.vikramRad = createStaffUser("vikram.sethi", "vikram.sethi@aiims.edu", defaultPass, "Vikram", "Sethi", "MALE", LocalDate.of(1984, 5, 12), roles.get("RADIOLOGIST"));
+        ctx.vikramRad = createStaffUser("vikram.sethi@aiims.edu", defaultPass, "Vikram", "Sethi", "MALE", LocalDate.of(1984, 5, 12), roles.get("RADIOLOGIST"));
         linkStaffToTenancy(ctx.vikramRad, tenancy.aiims, tenancy.aiimsMain, tenancy.rad, "EMP-AIIMS-RAD-01", "FULL_TIME");
         ctx.vikramPrac = createPractitioner(ctx.vikramRad.getPerson(), "MCI-2012-77889", "PHYSICIAN", "Radiology", "DMC-DL-14401", "Delhi Medical Council", "Diagnostic Neuroradiology", "RAD_DIAG");
 
         // 6. Nurse Sunita Verma (CCU Senior Nurse)
-        ctx.sunita = createStaffUser("sunita.verma", "sunita.verma@aiims.edu", defaultPass, "Sunita", "Verma", "FEMALE", LocalDate.of(1985, 7, 30), roles.get("NURSE"));
+        ctx.sunita = createStaffUser("sunita.verma@aiims.edu", defaultPass, "Sunita", "Verma", "FEMALE", LocalDate.of(1985, 7, 30), roles.get("NURSE"));
         linkStaffToTenancy(ctx.sunita, tenancy.aiims, tenancy.aiimsMain, tenancy.cardio, "EMP-AIIMS-NUR-01", "FULL_TIME");
         ctx.sunitaPrac = createPractitioner(ctx.sunita.getPerson(), "INC-2006-55555", "NURSE", "Critical Care Nursing", "DNC-NUR-5501", "Delhi Nursing Council", "Cardiac Intensive Care", "NUR_CCU");
 
         // 7. Nurse Rahul Nair (Emergency / Triage Nurse)
-        ctx.rahul = createStaffUser("rahul.nair", "rahul.nair@aiims.edu", defaultPass, "Rahul", "Nair", "MALE", LocalDate.of(1991, 9, 10), roles.get("NURSE"));
+        ctx.rahul = createStaffUser("rahul.nair@aiims.edu", defaultPass, "Rahul", "Nair", "MALE", LocalDate.of(1991, 9, 10), roles.get("NURSE"));
         linkStaffToTenancy(ctx.rahul, tenancy.aiims, tenancy.aiimsTrauma, tenancy.emer, "EMP-AIIMS-NUR-02", "FULL_TIME");
         ctx.rahulPrac = createPractitioner(ctx.rahul.getPerson(), "INC-2014-99881", "NURSE", "Emergency Nursing", "DNC-NUR-8820", "Delhi Nursing Council", "Emergency Triage", "NUR_EMER");
 
-        // 8. Front Desk Receptionist Sarita Gupta
-        ctx.sarita = createStaffUser("sarita.gupta", "sarita.gupta@aiims.edu", defaultPass, "Sarita", "Gupta", "FEMALE", LocalDate.of(1992, 9, 14), roles.get("RECEPTIONIST"));
+        // 8. Front Desk Receptionist Sarita Gupta (AIIMS)
+        ctx.sarita = createStaffUser("sarita.gupta@aiims.edu", defaultPass, "Sarita", "Gupta", "FEMALE", LocalDate.of(1992, 9, 14), roles.get("RECEPTIONIST"));
         linkStaffToTenancy(ctx.sarita, tenancy.aiims, tenancy.aiimsOpd, tenancy.genmed, "EMP-AIIMS-REC-01", "FULL_TIME");
 
-        // 9. Senior Lab Technologist Amit Roy
-        ctx.amit = createStaffUser("amit.roy", "amit.roy@aiims.edu", defaultPass, "Amit", "Roy", "MALE", LocalDate.of(1989, 4, 18), roles.get("LAB_TECHNICIAN"));
+        // 9. Senior Lab Technologist Amit Roy (AIIMS)
+        ctx.amit = createStaffUser("amit.roy@aiims.edu", defaultPass, "Amit", "Roy", "MALE", LocalDate.of(1989, 4, 18), roles.get("LAB_TECHNICIAN"));
         linkStaffToTenancy(ctx.amit, tenancy.aiims, tenancy.aiimsMain, tenancy.path, "EMP-AIIMS-LAB-01", "FULL_TIME");
 
-        // 10. Chief Pharmacist Anita Deshmukh
-        ctx.anitaPharm = createStaffUser("anita.deshmukh", "anita.deshmukh@aiims.edu", defaultPass, "Anita", "Deshmukh", "FEMALE", LocalDate.of(1986, 12, 5), roles.get("PHARMACIST"));
+        // 10. Chief Pharmacist Anita Deshmukh (AIIMS)
+        ctx.anitaPharm = createStaffUser("anita.deshmukh@aiims.edu", defaultPass, "Anita", "Deshmukh", "FEMALE", LocalDate.of(1986, 12, 5), roles.get("PHARMACIST"));
         linkStaffToTenancy(ctx.anitaPharm, tenancy.aiims, tenancy.aiimsMain, tenancy.cardio, "EMP-AIIMS-PHARM-01", "FULL_TIME");
 
-        // 11. Financial Officer Vikas Mehta
-        ctx.vikas = createStaffUser("vikas.mehta", "vikas.mehta@aiims.edu", defaultPass, "Vikas", "Mehta", "MALE", LocalDate.of(1984, 8, 27), roles.get("BILLING_STAFF"));
+        // 11. Financial Officer Vikas Mehta (AIIMS)
+        ctx.vikas = createStaffUser("vikas.mehta@aiims.edu", defaultPass, "Vikas", "Mehta", "MALE", LocalDate.of(1984, 8, 27), roles.get("BILLING_STAFF"));
         linkStaffToTenancy(ctx.vikas, tenancy.aiims, tenancy.aiimsMain, tenancy.genmed, "EMP-AIIMS-FIN-01", "FULL_TIME");
 
         // 12. Compliance Auditor Suresh Nair
-        ctx.sureshAuditor = createStaffUser("suresh.nair", "suresh.nair@aiims.edu", defaultPass, "Suresh", "Nair", "MALE", LocalDate.of(1979, 3, 11), roles.get("AUDITOR"));
+        ctx.sureshAuditor = createStaffUser("suresh.nair@aiims.edu", defaultPass, "Suresh", "Nair", "MALE", LocalDate.of(1979, 3, 11), roles.get("AUDITOR"));
         linkStaffToTenancy(ctx.sureshAuditor, tenancy.aiims, tenancy.aiimsMain, tenancy.genmed, "EMP-AIIMS-AUD-01", "FULL_TIME");
 
-        // 13. Org Admin Vikram Singh (Apollo)
-        ctx.orgAdminVikram = createStaffUser("vikram.singh", "vikram.singh@apollo.com", defaultPass, "Vikram", "Singh", "MALE", LocalDate.of(1975, 1, 20), roles.get("ORGANIZATION_ADMIN"));
+        // 13. Apollo Hospitals Mumbai Staff Seeding
+        ctx.orgAdminVikram = createStaffUser("vikram.singh@apollo.com", defaultPass, "Vikram", "Singh", "MALE", LocalDate.of(1975, 1, 20), roles.get("ORGANIZATION_ADMIN"));
         linkStaffToTenancy(ctx.orgAdminVikram, tenancy.apollo, tenancy.apolloMumbai, null, "EMP-APL-MUM-01", "FULL_TIME");
 
-        // 14. Patient Portal Users
-        ctx.rameshUser = createStaffUser("ramesh.kumar", "ramesh.kumar@gmail.com", defaultPass, "Ramesh", "Kumar", "MALE", LocalDate.of(1960, 4, 10), roles.get("PATIENT"));
-        ctx.anitaUser = createStaffUser("anita.sharma", "anita.sharma@gmail.com", defaultPass, "Anita", "Sharma", "FEMALE", LocalDate.of(1975, 9, 25), roles.get("PATIENT"));
+        ctx.siddharthDoc = createStaffUser("siddharth.m@apollo.com", defaultPass, "Siddharth", "Mukherjee", "MALE", LocalDate.of(1980, 5, 14), roles.get("PHYSICIAN"));
+        linkStaffToTenancy(ctx.siddharthDoc, tenancy.apollo, tenancy.apolloMumbai, tenancy.apolloOnco, "EMP-APL-ONCO-01", "FULL_TIME");
+        ctx.siddharthPrac = createPractitioner(ctx.siddharthDoc.getPerson(), "MCI-2009-44112", "PHYSICIAN", "Medical Oncology", "MMC-MH-44112", "Maharashtra Medical Council", "Clinical Oncology", "ONCO_CLIN");
+
+        ctx.meeraNurse = createStaffUser("meera.nair@apollo.com", defaultPass, "Meera", "Nair", "FEMALE", LocalDate.of(1990, 8, 19), roles.get("NURSE"));
+        linkStaffToTenancy(ctx.meeraNurse, tenancy.apollo, tenancy.apolloMumbai, tenancy.apolloCardio, "EMP-APL-NUR-01", "FULL_TIME");
+
+        ctx.rohanRec = createStaffUser("rohan.deshmukh@apollo.com", defaultPass, "Rohan", "Deshmukh", "MALE", LocalDate.of(1993, 2, 11), roles.get("RECEPTIONIST"));
+        linkStaffToTenancy(ctx.rohanRec, tenancy.apollo, tenancy.apolloMumbai, tenancy.apolloEmer, "EMP-APL-REC-01", "FULL_TIME");
+
+        ctx.poojaPharm = createStaffUser("pooja.patel@apollo.com", defaultPass, "Pooja", "Patel", "FEMALE", LocalDate.of(1987, 10, 24), roles.get("PHARMACIST"));
+        linkStaffToTenancy(ctx.poojaPharm, tenancy.apollo, tenancy.apolloMumbai, tenancy.apolloCardio, "EMP-APL-PHARM-01", "FULL_TIME");
+
+        ctx.kunalLab = createStaffUser("kunal.sen@apollo.com", defaultPass, "Kunal", "Sen", "MALE", LocalDate.of(1992, 11, 30), roles.get("LAB_TECHNICIAN"));
+        linkStaffToTenancy(ctx.kunalLab, tenancy.apollo, tenancy.apolloMumbai, tenancy.apolloCardio, "EMP-APL-LAB-01", "FULL_TIME");
+
+        ctx.ananyaBilling = createStaffUser("ananya.roy@apollo.com", defaultPass, "Ananya", "Roy", "FEMALE", LocalDate.of(1991, 6, 8), roles.get("BILLING_STAFF"));
+        linkStaffToTenancy(ctx.ananyaBilling, tenancy.apollo, tenancy.apolloMumbai, tenancy.apolloEmer, "EMP-APL-BIL-01", "FULL_TIME");
+
+        // 14. Max Healthcare Saket Staff Seeding
+        ctx.nehaOrgAdmin = createStaffUser("neha.singhal@maxhealthcare.com", defaultPass, "Neha", "Singhal", "FEMALE", LocalDate.of(1977, 4, 18), roles.get("ORGANIZATION_ADMIN"));
+        linkStaffToTenancy(ctx.nehaOrgAdmin, tenancy.maxHealthcare, tenancy.maxSaket, null, "EMP-MAX-ADM-01", "FULL_TIME");
+
+        ctx.kabirDoc = createStaffUser("kabir.anand@maxhealthcare.com", defaultPass, "Kabir", "Anand", "MALE", LocalDate.of(1983, 7, 29), roles.get("PHYSICIAN"));
+        linkStaffToTenancy(ctx.kabirDoc, tenancy.maxHealthcare, tenancy.maxSaket, tenancy.maxCardio, "EMP-MAX-CARD-02", "FULL_TIME");
+        ctx.kabirPrac = createPractitioner(ctx.kabirDoc.getPerson(), "MCI-2011-99882", "PHYSICIAN", "Cardiology", "DMC-DL-23091", "Delhi Medical Council", "Interventional Cardiology", "CARD_INTERV");
+
+        ctx.kavitaNurse = createStaffUser("kavita.joshi@maxhealthcare.com", defaultPass, "Kavita", "Joshi", "FEMALE", LocalDate.of(1989, 1, 14), roles.get("NURSE"));
+        linkStaffToTenancy(ctx.kavitaNurse, tenancy.maxHealthcare, tenancy.maxSaket, tenancy.maxEmer, "EMP-MAX-NUR-01", "FULL_TIME");
+
+        ctx.manishRec = createStaffUser("manish.verma@maxhealthcare.com", defaultPass, "Manish", "Verma", "MALE", LocalDate.of(1994, 3, 5), roles.get("RECEPTIONIST"));
+        linkStaffToTenancy(ctx.manishRec, tenancy.maxHealthcare, tenancy.maxSaket, tenancy.maxGenMed, "EMP-MAX-REC-01", "FULL_TIME");
+
+        // 15. Patient Portal Accounts
+        ctx.rameshUser = createStaffUser("ramesh.kumar@gmail.com", defaultPass, "Ramesh", "Kumar", "MALE", LocalDate.of(1960, 4, 10), roles.get("PATIENT"));
+        ctx.anitaUser = createStaffUser("anita.sharma@gmail.com", defaultPass, "Anita", "Sharma", "FEMALE", LocalDate.of(1975, 9, 25), roles.get("PATIENT"));
+        ctx.sureshUser = createStaffUser("suresh.naidu95@gmail.com", defaultPass, "Suresh", "Naidu", "MALE", LocalDate.of(1995, 2, 28), roles.get("PATIENT"));
+        ctx.priyankaUser = createStaffUser("priyanka.sen@gmail.com", defaultPass, "Priyanka", "Sen", "FEMALE", LocalDate.of(1992, 11, 15), roles.get("PATIENT"));
+        ctx.sunilUser = createStaffUser("sunil.chawla@gmail.com", defaultPass, "Sunil", "Chawla", "MALE", LocalDate.of(1968, 6, 20), roles.get("PATIENT"));
+        ctx.deepikaUser = createStaffUser("deepika.p@gmail.com", defaultPass, "Deepika", "Padukone", "FEMALE", LocalDate.of(1986, 1, 5), roles.get("PATIENT"));
+        ctx.azharUser = createStaffUser("mohammed.azhar.dev@gmail.com", defaultPass, "Mohammed", "Azhar", "MALE", LocalDate.of(1988, 12, 3), roles.get("PATIENT"));
 
         return ctx;
     }
 
-    private User createStaffUser(String username, String email, String passwordHash, String first, String last, String sex, LocalDate dob, Role role) {
-        return userRepository.findByUsername(username).orElseGet(() -> {
+    private User createStaffUser(String email, String passwordHash, String first, String last, String sex, LocalDate dob, Role role) {
+        return userRepository.findByEmail(email).orElseGet(() -> {
             Person p = new Person();
             p.setFirstName(first);
             p.setLastName(last);
@@ -1282,7 +1437,6 @@ public class DataInitializer implements ApplicationRunner {
             p = personRepository.save(p);
 
             User u = new User();
-            u.setUsername(username);
             u.setEmail(email);
             u.setPassword(passwordHash);
             u.setPerson(p);
@@ -1372,6 +1526,7 @@ public class DataInitializer implements ApplicationRunner {
         List<PatientContext> list = new ArrayList<>();
 
         Object[][] patientDefs = {
+            // --- AIIMS NEW DELHI PATIENTS ---
             {
                 "Ramesh", "Kumar", "MALE", LocalDate.of(1960, 4, 10), "AIIMS-2024-001001", tenancy.aiims,
                 "B+", "POSITIVE", "Asian Indian", "Hindu", "Retired Govt Officer",
@@ -1386,7 +1541,7 @@ public class DataInitializer implements ApplicationRunner {
                 "Anita", "Sharma", "FEMALE", LocalDate.of(1975, 9, 25), "AIIMS-2024-001002", tenancy.aiims,
                 "O+", "POSITIVE", "Asian Indian", "Hindu", "Senior High School Teacher",
                 "Flat 304, Green Valley Apts", "Pocket D, Mayur Vihar Phase 2", "New Delhi", "Delhi", "110091",
-                "+91-9820022002", "anita.sharma75@gmail.com",
+                "+91-9820022002", "anita.sharma@gmail.com",
                 "Ravi Sharma", "SPOUSE", "+91-9820022003", "ravi.sharma75@gmail.com",
                 "Peanut Allergy with Bronchospasm", "Peanuts", "MODERATE",
                 "Chronic Tension Headaches, Mild Cervical Spondylosis", "Cholecystectomy (2020)", "Mother had Hypertension",
@@ -1413,6 +1568,18 @@ public class DataInitializer implements ApplicationRunner {
                 "Non-smoker, Vegetarian diet", "YES", "PHONE", "Tamil, English, Hindi"
             },
             {
+                "Arun", "Gupta", "MALE", LocalDate.of(1972, 3, 15), "AIIMS-2024-001005", tenancy.aiims,
+                "O+", "POSITIVE", "Asian Indian", "Hindu", "Chartered Accountant",
+                "C-12, Hauz Khas Enclave", "Near Aurobindo Market", "New Delhi", "Delhi", "110016",
+                "+91-9811122334", "arun.gupta@gmail.com",
+                "Pooja Gupta", "SPOUSE", "+91-9811122335", "pooja.gupta@gmail.com",
+                "Aspirin Induced Bronchospasm", "Aspirin", "HIGH",
+                "Coronary Artery Disease, Dyslipidemia", "Angioplasty (2022)", "Father had Myocardial Infarction at 60",
+                "Non-smoker", "YES", "EMAIL", "English, Hindi"
+            },
+
+            // --- APOLLO HOSPITALS MUMBAI PATIENTS ---
+            {
                 "Suresh", "Naidu", "MALE", LocalDate.of(1995, 2, 28), "APL-2024-005001", tenancy.apollo,
                 "O-", "NEGATIVE", "Asian Indian", "Hindu", "Postgraduate Student",
                 "Room 402, PG Hostel, Sector 15", "CBD Belapur", "Navi Mumbai", "Maharashtra", "400614",
@@ -1421,6 +1588,48 @@ public class DataInitializer implements ApplicationRunner {
                 "NSAID Induced Gastritis", "Ibuprofen", "LOW",
                 "Seasonal Allergic Rhinitis", "None", "No known chronic illnesses in first-degree relatives",
                 "Occasional tobacco use, gym enthusiast", "NO", "WHATSAPP", "English, Telugu, Marathi"
+            },
+            {
+                "Priyanka", "Sen", "FEMALE", LocalDate.of(1992, 11, 15), "APL-2024-005002", tenancy.apollo,
+                "A+", "POSITIVE", "Asian Indian", "Hindu", "Marketing Executive",
+                "A-502, Palm Beach Residency", "Sector 19D, Vashi", "Navi Mumbai", "Maharashtra", "400703",
+                "+91-9820055112", "priyanka.sen@gmail.com",
+                "Rahul Sen", "SPOUSE", "+91-9820055113", "rahul.sen@gmail.com",
+                "Latex Contact Dermatitis", "Latex", "MODERATE",
+                "Migraine with Aura, Iron Deficiency Anemia", "None", "Mother has Thyroid Disorder",
+                "Non-smoker, Vegetarian", "YES", "EMAIL", "English, Bengali, Hindi"
+            },
+            {
+                "Rohan", "Verma", "MALE", LocalDate.of(1985, 8, 20), "APL-2024-005003", tenancy.apollo,
+                "B+", "POSITIVE", "Asian Indian", "Hindu", "Financial Analyst",
+                "Flat 101, Sea View Towers", "Nerul West", "Navi Mumbai", "Maharashtra", "400706",
+                "+91-9833344556", "rohan.verma@gmail.com",
+                "Smita Verma", "SPOUSE", "+91-9833344557", "smita.verma@gmail.com",
+                "Ciprofloxacin Allergic Rash", "Ciprofloxacin", "MODERATE",
+                "Stage 1 Hypertension, Fatty Liver Grade 1", "None", "Father has Diabetes",
+                "Occasional Alcohol", "NO", "SMS", "English, Hindi"
+            },
+
+            // --- MAX HEALTHCARE SAKET PATIENTS ---
+            {
+                "Sunil", "Chawla", "MALE", LocalDate.of(1968, 6, 20), "MAX-2024-009001", tenancy.maxHealthcare,
+                "AB+", "POSITIVE", "Asian Indian", "Hindu", "Business Owner",
+                "M-45, Greater Kailash 2", "M Block Market", "New Delhi", "Delhi", "110048",
+                "+91-9818822334", "sunil.chawla@gmail.com",
+                "Kavita Chawla", "SPOUSE", "+91-9818822335", "kavita.chawla@gmail.com",
+                "Codeine Nausea & Vomiting", "Codeine", "LOW",
+                "Type 2 Diabetes Mellitus, Mild Nephropathy", "Hernia Repair (2016)", "Both parents had Diabetes",
+                "Non-smoker", "YES", "WHATSAPP", "English, Hindi, Punjabi"
+            },
+            {
+                "Deepika", "Padukone", "FEMALE", LocalDate.of(1986, 1, 5), "MAX-2024-009002", tenancy.maxHealthcare,
+                "O+", "POSITIVE", "Asian Indian", "Hindu", "Creative Producer",
+                "Villa 14, Westend Greens", "Near Rajokri", "New Delhi", "Delhi", "110037",
+                "+91-9811998877", "deepika.p@gmail.com",
+                "Ranveer Singh", "SPOUSE", "+91-9811998878", "ranveer.s@gmail.com",
+                "Dust Mite & Pollen Allergy", "Pollen / Dust", "LOW",
+                "Cervical Neck Strain, Vitamin D Deficiency", "None", "No significant family illnesses",
+                "Non-smoker, Yoga Practitioner", "YES", "EMAIL", "English, Hindi, Kannada"
             }
         };
 
@@ -1434,11 +1643,11 @@ public class DataInitializer implements ApplicationRunner {
             Organization org = (Organization) pRow[5];
 
             // Re-use Person from user if matched, otherwise create
+            String pEmail = (String) pRow[17];
             Person pPerson;
-            if (i == 0 && identity.rameshUser != null && identity.rameshUser.getPerson() != null) {
-                pPerson = identity.rameshUser.getPerson();
-            } else if (i == 1 && identity.anitaUser != null && identity.anitaUser.getPerson() != null) {
-                pPerson = identity.anitaUser.getPerson();
+            Optional<User> matchedUser = userRepository.findByEmail(pEmail);
+            if (matchedUser.isPresent() && matchedUser.get().getPerson() != null) {
+                pPerson = matchedUser.get().getPerson();
             } else {
                 Person newPerson = new Person(firstName, lastName, sex, dob);
                 newPerson.setNationality("Indian");
@@ -2956,7 +3165,7 @@ public class DataInitializer implements ApplicationRunner {
             a1.setIpAddress("192.168.10.45");
             a1.setUserAgent("Sentinel-EHR-Client/2.4");
             a1.setOccurredAt(OffsetDateTime.now().minusDays(1));
-            a1.setUsername("arjun.sharma");
+            a1.setUserEmail("arjun.sharma@aiims.edu");
             a1.setUserRole("PHYSICIAN");
             a1.setEntityName("PATIENT_CHART");
             a1.setDetails("Accessed complete clinical record and allergy history prior to emergency catheterization");
@@ -2975,7 +3184,7 @@ public class DataInitializer implements ApplicationRunner {
             a2.setIpAddress("192.168.10.45");
             a2.setUserAgent("Sentinel-EHR-Client/2.4");
             a2.setOccurredAt(OffsetDateTime.now().minusDays(1).plusHours(2));
-            a2.setUsername("arjun.sharma");
+            a2.setUserEmail("arjun.sharma@aiims.edu");
             a2.setUserRole("PHYSICIAN");
             a2.setEntityName("PRESCRIPTION");
             a2.setDetails("Issued electronic prescription for Aspirin 75mg and Atorvastatin 40mg post PCI");
@@ -2993,7 +3202,7 @@ public class DataInitializer implements ApplicationRunner {
             a3.setResult("SUCCESS");
             a3.setIpAddress("192.168.10.50");
             a3.setOccurredAt(OffsetDateTime.now().minusDays(3));
-            a3.setUsername("priya.kapoor");
+            a3.setUserEmail("priya.kapoor@aiims.edu");
             a3.setUserRole("PHYSICIAN");
             a3.setEntityName("PATIENT_DEMOGRAPHICS");
             a3.setDetails("Outpatient consult chart open for chronic headache review");

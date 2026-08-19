@@ -7,9 +7,6 @@ import java.util.Set;
 
 public class RegisterRequest {
 
-    @NotBlank(message = "Username is required")
-    private String username;
-
     @NotBlank(message = "Email is required")
     @Email(message = "Email must be a valid email address")
     private String email;
@@ -30,14 +27,6 @@ public class RegisterRequest {
     private Set<String> roles;
 
     public RegisterRequest() {}
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
 
     public String getEmail() {
         return email;

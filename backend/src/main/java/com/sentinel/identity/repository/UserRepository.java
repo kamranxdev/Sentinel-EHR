@@ -12,11 +12,9 @@ import java.util.UUID;
 
 @Repository
 public interface UserRepository extends JpaRepository<User, UUID> {
-    Optional<User> findByUsername(String username);
     Optional<User> findByEmail(String email);
-    Optional<User> findByUsernameOrEmail(String username, String email);
+    Optional<User> findByPersonId(UUID personId);
     List<User> findByRolesName(String roleName);
-    boolean existsByUsername(String username);
     boolean existsByEmail(String email);
 
     @Query("SELECT u FROM User u JOIN UserOrganization uo ON uo.user.id = u.id WHERE uo.organization.id = :organizationId")
@@ -26,7 +24,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
            "LEFT JOIN u.person p " +
            "LEFT JOIN u.roles r " +
            "LEFT JOIN UserOrganization uo ON uo.user.id = u.id " +
-           "WHERE (:query IS NULL OR LOWER(u.username) LIKE LOWER(CONCAT('%', :query, '%')) OR LOWER(u.email) LIKE LOWER(CONCAT('%', :query, '%')) OR (p IS NOT NULL AND (LOWER(p.firstName) LIKE LOWER(CONCAT('%', :query, '%')) OR LOWER(p.lastName) LIKE LOWER(CONCAT('%', :query, '%'))))) " +
+           "WHERE (:query IS NULL OR LOWER(u.email) LIKE LOWER(CONCAT('%', :query, '%')) OR (p IS NOT NULL AND (LOWER(p.firstName) LIKE LOWER(CONCAT('%', :query, '%')) OR LOWER(p.lastName) LIKE LOWER(CONCAT('%', :query, '%'))))) " +
            "AND (:status IS NULL OR u.status = :status) " +
            "AND (:role IS NULL OR r.name = :role) " +
            "AND (:orgId IS NULL OR uo.organization.id = :orgId)")

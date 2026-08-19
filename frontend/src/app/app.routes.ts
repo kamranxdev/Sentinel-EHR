@@ -22,6 +22,18 @@ export const routes: Routes = [
     data: { standalone: true },
   },
   {
+    path: 'select-context',
+    loadComponent: () =>
+      import('./components/select-context/select-context.component').then((m) => m.SelectContextComponent),
+    canActivate: [authGuard],
+    data: { standalone: true },
+  },
+  {
+    path: 'auth/select-context',
+    redirectTo: 'select-context',
+    pathMatch: 'full',
+  },
+  {
     path: 'onboarding',
     loadComponent: () =>
       import('./workspaces/patient/patient-profile.component').then((m) => m.PatientProfileComponent),

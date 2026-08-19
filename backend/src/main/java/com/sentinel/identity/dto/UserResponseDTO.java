@@ -7,7 +7,6 @@ import java.util.UUID;
 public class UserResponseDTO {
     private UUID id;
     private UUID personId;
-    private String username;
     private String email;
     private String firstName;
     private String lastName;
@@ -28,8 +27,6 @@ public class UserResponseDTO {
     public void setId(UUID id) { this.id = id; }
     public UUID getPersonId() { return personId; }
     public void setPersonId(UUID personId) { this.personId = personId; }
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
     public String getFirstName() { return firstName; }

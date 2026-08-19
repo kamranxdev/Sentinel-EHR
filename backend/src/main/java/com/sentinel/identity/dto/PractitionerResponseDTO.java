@@ -8,6 +8,8 @@ import java.util.UUID;
 public class PractitionerResponseDTO {
     private UUID id;
     private UUID personId;
+    private UUID userId;
+    private String email;
     private String identifier;
     private String firstName;
     private String lastName;
@@ -19,10 +21,36 @@ public class PractitionerResponseDTO {
     private String status;
     private List<SpecialtyDTO> specialties;
     private List<LicenseDTO> licenses;
+    private List<PractitionerOrgDTO> organizations;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
 
     public PractitionerResponseDTO() {}
+
+    public static class PractitionerOrgDTO {
+        private UUID id;
+        private String name;
+        private String code;
+        private String employmentType;
+
+        public PractitionerOrgDTO() {}
+
+        public PractitionerOrgDTO(UUID id, String name, String code, String employmentType) {
+            this.id = id;
+            this.name = name;
+            this.code = code;
+            this.employmentType = employmentType;
+        }
+
+        public UUID getId() { return id; }
+        public void setId(UUID id) { this.id = id; }
+        public String getName() { return name; }
+        public void setName(String name) { this.name = name; }
+        public String getCode() { return code; }
+        public void setCode(String code) { this.code = code; }
+        public String getEmploymentType() { return employmentType; }
+        public void setEmploymentType(String employmentType) { this.employmentType = employmentType; }
+    }
 
     public static class SpecialtyDTO {
         private UUID id;
@@ -108,6 +136,12 @@ public class PractitionerResponseDTO {
     public void setSpecialties(List<SpecialtyDTO> specialties) { this.specialties = specialties; }
     public List<LicenseDTO> getLicenses() { return licenses; }
     public void setLicenses(List<LicenseDTO> licenses) { this.licenses = licenses; }
+    public UUID getUserId() { return userId; }
+    public void setUserId(UUID userId) { this.userId = userId; }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+    public List<PractitionerOrgDTO> getOrganizations() { return organizations; }
+    public void setOrganizations(List<PractitionerOrgDTO> organizations) { this.organizations = organizations; }
     public OffsetDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(OffsetDateTime createdAt) { this.createdAt = createdAt; }
     public OffsetDateTime getUpdatedAt() { return updatedAt; }

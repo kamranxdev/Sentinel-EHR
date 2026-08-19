@@ -61,7 +61,6 @@ import {
 export class RegisterComponent implements OnInit {
   fullName = '';
   email = '';
-  username = '';
   password = '';
   confirmPassword = '';
 
@@ -78,7 +77,7 @@ export class RegisterComponent implements OnInit {
 
   ngOnInit(): void {
     if (this.authService.isLoggedIn()) {
-      this.router.navigate(['/dashboard']);
+      this.router.navigate(['/select-context']);
     }
   }
 
@@ -86,7 +85,6 @@ export class RegisterComponent implements OnInit {
     return (
       !!this.fullName &&
       !!this.email &&
-      !!this.username &&
       !!this.password &&
       this.password === this.confirmPassword &&
       this.password.length >= 6
@@ -114,7 +112,6 @@ export class RegisterComponent implements OnInit {
     const payload = {
       fullName: this.fullName,
       email: this.email,
-      username: this.username,
       password: this.password,
     };
 
@@ -128,12 +125,12 @@ export class RegisterComponent implements OnInit {
         });
 
         // Automatically log in newly registered patient
-        this.authService.login({ username: this.username, password: this.password }).subscribe({
+        this.authService.login({ email: this.email, password: this.password }).subscribe({
           next: () => {
             this.loading.set(false);
             this.patientContext.loadContext();
             setTimeout(() => {
-              this.router.navigate(['/patient/profile']);
+              this.router.navigate(['/select-context']);
             }, 1200);
           },
           error: () => {

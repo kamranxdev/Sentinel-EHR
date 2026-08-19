@@ -80,7 +80,6 @@ public class UserOrganizationService {
         dto.setId(uo.getId());
         if (uo.getUser() != null) {
             dto.setUserId(uo.getUser().getId());
-            dto.setUsername(uo.getUser().getUsername());
             dto.setUserFullName(uo.getUser().getFullName());
             dto.setUserEmail(uo.getUser().getEmail());
         }

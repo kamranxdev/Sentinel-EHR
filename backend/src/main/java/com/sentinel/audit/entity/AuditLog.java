@@ -40,7 +40,7 @@ public class AuditLog {
     private OffsetDateTime occurredAt = OffsetDateTime.now();
 
     @Transient
-    private String username;
+    private String userEmail;
 
     @Transient
     private String userRole;
@@ -53,8 +53,8 @@ public class AuditLog {
 
     public AuditLog() {}
 
-    public AuditLog(String username, String userRole, String action, String entityName, String details) {
-        this.username = username;
+    public AuditLog(String userEmail, String userRole, String action, String entityName, String details) {
+        this.userEmail = userEmail;
         this.userRole = userRole;
         this.action = action;
         this.entityName = entityName;
@@ -62,8 +62,8 @@ public class AuditLog {
         this.details = details;
     }
 
-    public AuditLog(String username, String userRole, String action, String entityName, String resourceId, String details) {
-        this.username = username;
+    public AuditLog(String userEmail, String userRole, String action, String entityName, String resourceId, String details) {
+        this.userEmail = userEmail;
         this.userRole = userRole;
         this.action = action;
         this.entityName = entityName;
@@ -116,8 +116,14 @@ public class AuditLog {
     public OffsetDateTime getOccurredAt() { return occurredAt; }
     public void setOccurredAt(OffsetDateTime occurredAt) { this.occurredAt = occurredAt; }
 
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
+    public String getUserEmail() { return userEmail; }
+    public void setUserEmail(String userEmail) { this.userEmail = userEmail; }
+
+    public String getEmail() { return userEmail; }
+    public void setEmail(String email) { this.userEmail = email; }
+
+    public String getUsername() { return userEmail; }
+    public void setUsername(String username) { this.userEmail = username; }
 
     public String getUserRole() { return userRole; }
     public void setUserRole(String userRole) { this.userRole = userRole; }

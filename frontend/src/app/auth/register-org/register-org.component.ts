@@ -686,39 +686,22 @@ interface StepItem {
                 </div>
               </div>
 
-              <!-- Admin Username & Email Grid -->
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                <div class="space-y-1.5">
-                  <label class="text-xs font-semibold text-foreground block">Admin Username *</label>
-                  <div class="relative">
-                    <input
-                      hlmInput
-                      type="text"
-                      [(ngModel)]="formData.adminUsername"
-                      name="adminUsername"
-                      required
-                      placeholder="e.g. orgadmin_vikram"
-                      class="w-full h-10 text-xs pl-9 font-mono"
-                    />
-                    <ng-icon name="lucideUserCheck" size="15" class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                  </div>
+              <!-- Admin Official Work Email -->
+              <div class="space-y-1.5">
+                <label class="text-xs font-semibold text-foreground block">Admin Official Work Email *</label>
+                <div class="relative">
+                  <input
+                    hlmInput
+                    type="email"
+                    [(ngModel)]="formData.adminEmail"
+                    name="adminEmail"
+                    required
+                    placeholder="vikram.singh@facility.org"
+                    class="w-full h-10 text-xs pl-9"
+                  />
+                  <ng-icon name="lucideMail" size="15" class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
                 </div>
-
-                <div class="space-y-1.5">
-                  <label class="text-xs font-semibold text-foreground block">Admin Official Work Email *</label>
-                  <div class="relative">
-                    <input
-                      hlmInput
-                      type="email"
-                      [(ngModel)]="formData.adminEmail"
-                      name="adminEmail"
-                      required
-                      placeholder="vikram.singh@facility.org"
-                      class="w-full h-10 text-xs pl-9"
-                    />
-                    <ng-icon name="lucideMail" size="15" class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                  </div>
-                </div>
+                <p class="text-[10px] text-muted-foreground">This email address will be used to log into the Sentinel Organization Admin Console.</p>
               </div>
 
               <!-- Password & Confirm Password Grid -->
@@ -1000,7 +983,6 @@ export class RegisterOrgComponent {
 
     return (
       !!this.formData.adminFullName?.trim() &&
-      !!this.formData.adminUsername?.trim() &&
       adminEmailValid &&
       passMatch &&
       passLength &&

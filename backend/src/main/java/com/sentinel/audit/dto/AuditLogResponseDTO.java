@@ -6,7 +6,7 @@ import java.util.UUID;
 public class AuditLogResponseDTO {
 
     private UUID id;
-    private String username;
+    private String email;
     private String userRole;
     private String action;
     private String entityName;
@@ -20,8 +20,11 @@ public class AuditLogResponseDTO {
     public UUID getId() { return id; }
     public void setId(UUID id) { this.id = id; }
 
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+
+    public String getUsername() { return email; }
+    public void setUsername(String username) { this.email = username; }
 
     public String getUserRole() { return userRole; }
     public void setUserRole(String userRole) { this.userRole = userRole; }

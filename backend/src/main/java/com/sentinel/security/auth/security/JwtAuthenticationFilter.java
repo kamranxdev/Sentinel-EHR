@@ -33,8 +33,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = getTokenFromRequest(request);
 
         if (StringUtils.hasText(token) && tokenProvider.validateToken(token)) {
-            String username = tokenProvider.getUsernameFromJwt(token);
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            String email = tokenProvider.getEmailFromJwt(token);
+            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
             UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                     userDetails,
@@ -44,7 +44,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
             SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-            org.slf4j.MDC.put(com.sentinel.common.logging.MDCLoggingFilter.USER_ID_MDC_KEY, username);
+            org.slf4j.MDC.put(com.sentinel.common.logging.MDCLoggingFilter.USER_ID_MDC_KEY, email);
         }
 
         filterChain.doFilter(request, response);

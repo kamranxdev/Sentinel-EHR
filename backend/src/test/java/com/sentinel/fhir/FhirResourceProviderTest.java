@@ -33,7 +33,7 @@ public class FhirResourceProviderTest {
         p.setFirstName("Dr. Rajesh");
         p.setLastName("Sharma");
 
-        User user = new User("dr_sharma", "dr.sharma@hospital.com", "pass123", p);
+        User user = new User("dr.sharma@hospital.com", "pass123", p);
         UUID id = UUID.randomUUID();
         user.setId(id);
 

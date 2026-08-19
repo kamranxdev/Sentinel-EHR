@@ -24,19 +24,19 @@ public class JwtTokenProvider {
     }
 
     public String generateToken(Authentication authentication) {
-        String username = authentication.getName();
+        String email = authentication.getName();
         Date currentDate = new Date();
         Date expireDate = new Date(currentDate.getTime() + jwtExpirationDate);
 
         return Jwts.builder()
-                .setSubject(username)
+                .setSubject(email)
                 .setIssuedAt(new Date())
                 .setExpiration(expireDate)
                 .signWith(key(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    public String getUsernameFromJwt(String token) {
+    public String getEmailFromJwt(String token) {
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(key())
                 .build()
@@ -44,6 +44,10 @@ public class JwtTokenProvider {
                 .getBody();
 
         return claims.getSubject();
+    }
+
+    public String getUsernameFromJwt(String token) {
+        return getEmailFromJwt(token);
     }
 
     public boolean validateToken(String token) {

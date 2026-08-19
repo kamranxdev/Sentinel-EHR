@@ -10,9 +10,8 @@ import java.util.UUID;
 public class UserPrincipal implements UserDetails {
     private UUID id;
     private UUID organizationId;
-    private String username;
-    private String password;
     private String email;
+    private String password;
     private String fullName;
     private String department;
     private Collection<? extends GrantedAuthority> authorities;
@@ -21,13 +20,12 @@ public class UserPrincipal implements UserDetails {
 
     public UserPrincipal() {}
 
-    public UserPrincipal(UUID id, UUID organizationId, String username, String password, String email, String fullName, String department,
+    public UserPrincipal(UUID id, UUID organizationId, String email, String password, String fullName, String department,
                          Collection<? extends GrantedAuthority> authorities, Set<String> roles, Set<String> permissions) {
         this.id = id;
         this.organizationId = organizationId;
-        this.username = username;
-        this.password = password;
         this.email = email;
+        this.password = password;
         this.fullName = fullName;
         this.department = department;
         this.authorities = authorities;
@@ -91,10 +89,6 @@ public class UserPrincipal implements UserDetails {
         this.permissions = permissions;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
     public void setPassword(String password) {
         this.password = password;
     }
@@ -115,7 +109,7 @@ public class UserPrincipal implements UserDetails {
 
     @Override
     public String getUsername() {
-        return username;
+        return email;
     }
 
     @Override

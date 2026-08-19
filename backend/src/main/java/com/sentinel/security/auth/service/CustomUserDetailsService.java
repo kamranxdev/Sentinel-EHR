@@ -28,10 +28,9 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @Override
     @Transactional(readOnly = true)
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByUsername(username)
-                .or(() -> userRepository.findByEmail(username))
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with username or email: " + username));
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
 
         Set<GrantedAuthority> authorities = new HashSet<>();
         Set<String> roleNames = new HashSet<>();
@@ -52,10 +51,9 @@ public class CustomUserDetailsService implements UserDetailsService {
         return new UserPrincipal(
                 user.getId(),
                 null,
-                user.getUsername(),
-                user.getPassword(),
                 user.getEmail(),
-                user.getPerson() != null ? user.getPerson().getFullName() : user.getUsername(),
+                user.getPassword(),
+                user.getPerson() != null ? user.getPerson().getFullName() : user.getEmail(),
                 null,
                 authorities,
                 roleNames,

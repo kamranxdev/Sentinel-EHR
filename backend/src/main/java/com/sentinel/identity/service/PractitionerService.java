@@ -6,10 +6,13 @@ import com.sentinel.identity.entity.Person;
 import com.sentinel.identity.entity.Practitioner;
 import com.sentinel.identity.entity.PractitionerLicense;
 import com.sentinel.identity.entity.PractitionerSpecialty;
+import com.sentinel.identity.entity.UserOrganization;
 import com.sentinel.identity.repository.PersonRepository;
 import com.sentinel.identity.repository.PractitionerLicenseRepository;
 import com.sentinel.identity.repository.PractitionerRepository;
 import com.sentinel.identity.repository.PractitionerSpecialtyRepository;
+import com.sentinel.identity.repository.UserOrganizationRepository;
+import com.sentinel.identity.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,15 +29,21 @@ public class PractitionerService {
     private final PersonRepository personRepository;
     private final PractitionerSpecialtyRepository specialtyRepository;
     private final PractitionerLicenseRepository licenseRepository;
+    private final UserRepository userRepository;
+    private final UserOrganizationRepository userOrganizationRepository;
 
     public PractitionerService(PractitionerRepository practitionerRepository,
                                PersonRepository personRepository,
                                PractitionerSpecialtyRepository specialtyRepository,
-                               PractitionerLicenseRepository licenseRepository) {
+                               PractitionerLicenseRepository licenseRepository,
+                               UserRepository userRepository,
+                               UserOrganizationRepository userOrganizationRepository) {
         this.practitionerRepository = practitionerRepository;
         this.personRepository = personRepository;
         this.specialtyRepository = specialtyRepository;
         this.licenseRepository = licenseRepository;
+        this.userRepository = userRepository;
+        this.userOrganizationRepository = userOrganizationRepository;
     }
 
     public PractitionerResponseDTO createPractitioner(CreatePractitionerRequest request) {
@@ -153,6 +162,25 @@ public class PractitionerService {
             dto.setMiddleName(practitioner.getPerson().getMiddleName());
             dto.setFullName(practitioner.getPerson().getFullName());
             dto.setGender(practitioner.getPerson().getSexAtBirth());
+
+            userRepository.findByPersonId(practitioner.getPerson().getId()).ifPresent(u -> {
+                dto.setUserId(u.getId());
+                dto.setEmail(u.getEmail());
+
+                List<UserOrganization> userOrgs = userOrganizationRepository.findByUserId(u.getId());
+                if (userOrgs != null && !userOrgs.isEmpty()) {
+                    List<PractitionerResponseDTO.PractitionerOrgDTO> orgDTOs = userOrgs.stream()
+                            .filter(uo -> uo.getOrganization() != null)
+                            .map(uo -> new PractitionerResponseDTO.PractitionerOrgDTO(
+                                    uo.getOrganization().getId(),
+                                    uo.getOrganization().getName(),
+                                    uo.getOrganization().getCode(),
+                                    uo.getEmploymentType()
+                            ))
+                            .collect(Collectors.toList());
+                    dto.setOrganizations(orgDTOs);
+                }
+            });
         }
 
         List<PractitionerSpecialty> specialties = specialtyRepository.findByPractitionerId(practitioner.getId());

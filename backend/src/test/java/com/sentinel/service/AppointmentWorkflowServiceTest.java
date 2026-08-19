@@ -46,15 +46,15 @@ public class AppointmentWorkflowServiceTest {
         );
 
         authMock = mock(Authentication.class);
-        when(authMock.getName()).thenReturn("doctor_test");
+        when(authMock.getName()).thenReturn("doc@sentinel.com");
 
         Person p = new Person();
         p.setFirstName("Dr.");
         p.setLastName("Test");
 
-        testUser = new User("doctor_test", "doc@sentinel.com", "pass", p);
+        testUser = new User("doc@sentinel.com", "pass", p);
         testUser.setId(userId);
-        when(userRepository.findByUsername("doctor_test")).thenReturn(Optional.of(testUser));
+        when(userRepository.findByEmail("doc@sentinel.com")).thenReturn(Optional.of(testUser));
 
         testPatient = new Patient(p);
         testPatient.setId(patientId);

@@ -22,25 +22,25 @@ public class AuthControllerTest {
 
     @Test
     public void testPhysicianLogin() throws Exception {
-        String jsonRequest = "{\"usernameOrEmail\":\"arjun.sharma\",\"password\":\"Sentinel@123\"}";
+        String jsonRequest = "{\"email\":\"arjun.sharma@aiims.edu\",\"password\":\"Sentinel@123\"}";
 
         mockMvc.perform(post("/api/v1/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jsonRequest))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.username").value("arjun.sharma"))
+                .andExpect(jsonPath("$.data.email").value("arjun.sharma@aiims.edu"))
                 .andExpect(jsonPath("$.data.accessToken").exists());
     }
 
     @Test
     public void testAdminLogin() throws Exception {
-        String jsonRequest = "{\"usernameOrEmail\":\"admin\",\"password\":\"Sentinel@123\"}";
+        String jsonRequest = "{\"email\":\"admin@sentinel.local\",\"password\":\"Sentinel@123\"}";
 
         mockMvc.perform(post("/api/v1/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(jsonRequest))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.username").value("admin"))
+                .andExpect(jsonPath("$.data.email").value("admin@sentinel.local"))
                 .andExpect(jsonPath("$.data.accessToken").exists());
     }
 }

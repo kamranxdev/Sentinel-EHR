@@ -6,6 +6,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { User } from '../../core/models/auth-user.model';
 import { Patient } from '../../core/models/patient.model';
 import { Appointment, AppointmentRequestDTO, DoctorRecommendationDTO } from '../../core/models/appointment.model';
+import { Organization } from '../../core/models/organization.model';
 import { toast } from '@spartan-ng/brain/sonner';
 
 import { HlmCardImports } from '@spartan-ng/helm/card';
@@ -38,6 +39,7 @@ import {
   lucideUser,
   lucideActivity,
   lucideTrash2,
+  lucideBuilding2,
 } from '@ng-icons/lucide';
 
 @Component({
@@ -78,6 +80,7 @@ import {
       lucideUser,
       lucideActivity,
       lucideTrash2,
+      lucideBuilding2,
     }),
   ],
   template: `
@@ -307,6 +310,26 @@ import {
           <div class="p-6 space-y-5 max-h-[70vh] overflow-y-auto">
             <!-- ================= STEP 1 ================= -->
             <div *ngIf="bookingStep() === 1" class="space-y-4">
+              <!-- Hospital Selection -->
+              <div>
+                <label class="block text-xs font-bold text-foreground mb-1">
+                  Hospital / Health System Facility
+                </label>
+                <select
+                  [ngModel]="selectedHospitalFilter()"
+                  (ngModelChange)="onHospitalFilterChange($event)"
+                  class="w-full p-2.5 text-xs rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+                >
+                  <option value="ALL">All Network Hospitals & Facilities (Cross-Tenant)</option>
+                  <option *ngFor="let org of allOrganizations()" [value]="org.id">
+                    {{ org.name }} ({{ org.code }})
+                  </option>
+                </select>
+                <p class="text-[10px] text-muted-foreground mt-1">
+                  Select a specific hospital facility or leave as "All Network Hospitals" to view physicians across all locations.
+                </p>
+              </div>
+
               <div>
                 <label class="block text-xs font-bold text-foreground mb-1">
                   Chief Complaint / Reason for Consultation <span class="text-rose-500">*</span>
@@ -376,20 +399,70 @@ import {
                 <div>
                   <div class="flex items-center gap-2">
                     <h3 class="text-xs font-bold text-foreground">Smart Doctor Match Engine</h3>
-                    <span hlmBadge variant="outline" class="text-[9px] border-purple-500/40 text-purple-600 dark:text-purple-400">Match Score Active</span>
+                    <span hlmBadge variant="outline" class="text-[9px] border-purple-500/40 text-purple-600 dark:text-purple-400">Multi-Tenant Match Active</span>
                   </div>
                   <p class="text-[11px] text-muted-foreground mt-0.5">
-                    Analyzed complaint: "<span class="font-semibold text-foreground">{{ bookingReason }}</span>". Below are physician recommendations matched by specialty fit, clinical continuity, and workload.
+                    Analyzed complaint: "<span class="font-semibold text-foreground">{{ bookingReason }}</span>". Below are top-ranked physicians matched across all network hospital facilities.
                   </p>
                 </div>
               </div>
 
-              <!-- Recommended Doctors List -->
-              <div *ngIf="loadingRecommendations()" class="py-8 text-center text-xs text-muted-foreground flex items-center justify-center gap-2">
-                <ng-icon name="lucideClock" size="16" class="animate-spin text-primary" />
-                <span>Evaluating doctor matching engine...</span>
+              <!-- Hospital Filter Tabs in Step 2 -->
+              <div class="flex items-center gap-1.5 overflow-x-auto pb-1 border-b border-border/50">
+                <span class="text-[11px] font-bold text-muted-foreground shrink-0 flex items-center gap-1">
+                  <ng-icon name="lucideBuilding2" size="12" /> Hospital:
+                </span>
+                <button
+                  type="button"
+                  (click)="onHospitalFilterChange('ALL')"
+                  [class.bg-primary]="selectedHospitalFilter() === 'ALL'"
+                  [class.text-primary-foreground]="selectedHospitalFilter() === 'ALL'"
+                  [class.bg-muted]="selectedHospitalFilter() !== 'ALL'"
+                  class="px-2.5 py-1 rounded-full text-[10px] font-bold transition-all shrink-0"
+                >
+                  All Hospitals ({{ allDoctors().length }})
+                </button>
+                <button
+                  *ngFor="let org of allOrganizations()"
+                  type="button"
+                  (click)="onHospitalFilterChange(org.id)"
+                  [class.bg-primary]="selectedHospitalFilter() === org.id"
+                  [class.text-primary-foreground]="selectedHospitalFilter() === org.id"
+                  [class.bg-muted]="selectedHospitalFilter() !== org.id"
+                  class="px-2.5 py-1 rounded-full text-[10px] font-bold transition-all flex items-center gap-1 shrink-0"
+                >
+                  <span>{{ org.name || org.code }}</span>
+                </button>
               </div>
 
+              <!-- Recommended Doctors List Loading -->
+              <div *ngIf="loadingRecommendations()" class="py-8 text-center text-xs text-muted-foreground flex items-center justify-center gap-2">
+                <ng-icon name="lucideClock" size="16" class="animate-spin text-primary" />
+                <span>Evaluating doctor matching engine across hospital networks...</span>
+              </div>
+
+              <!-- Recommended Doctors Empty State -->
+              <div *ngIf="!loadingRecommendations() && recommendedDoctors().length === 0" class="p-6 text-center rounded-xl border border-dashed border-border bg-muted/20 space-y-3">
+                <div class="size-10 rounded-full bg-muted flex items-center justify-center mx-auto text-muted-foreground">
+                  <ng-icon name="lucideStethoscope" size="20" />
+                </div>
+                <div>
+                  <h4 class="text-xs font-bold text-foreground">No Physicians Found For This Facility Filter</h4>
+                  <p class="text-[11px] text-muted-foreground mt-0.5">
+                    No active physicians were found for the selected hospital facility filter.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  (click)="onHospitalFilterChange('ALL')"
+                  class="px-3.5 py-1.5 text-xs font-bold rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 transition-all inline-flex items-center gap-1.5"
+                >
+                  <ng-icon name="lucideBuilding2" size="13" />
+                  <span>Show All Network Physicians</span>
+                </button>
+              </div>
+
+              <!-- Recommended Doctors Cards -->
               <div *ngIf="!loadingRecommendations() && recommendedDoctors().length > 0" class="space-y-3">
                 <div
                   *ngFor="let rec of recommendedDoctors()"
@@ -423,6 +496,25 @@ import {
                         <ng-icon name="lucideSparkles" size="12" /> {{ rec.matchScore }}% Match
                       </span>
                     </div>
+                  </div>
+
+                  <!-- Hospital Network Affiliation Badges -->
+                  <div *ngIf="docHasOrgs(rec.doctor)" class="flex flex-wrap items-center gap-1.5 pt-0.5">
+                    <span class="text-[10px] text-muted-foreground font-medium">Hospitals:</span>
+                    <span
+                      *ngFor="let org of getDoctorOrgs(rec.doctor)"
+                      (click)="selectOrganizationForDoctor(rec.doctor, org, $event)"
+                      [class.bg-blue-500\/20]="selectedDoctor?.id === rec.doctor.id && selectedOrgId() === org.id"
+                      [class.text-blue-700]="selectedDoctor?.id === rec.doctor.id && selectedOrgId() === org.id"
+                      [class.dark:text-blue-300]="selectedDoctor?.id === rec.doctor.id && selectedOrgId() === org.id"
+                      [class.border-blue-500\/60]="selectedDoctor?.id === rec.doctor.id && selectedOrgId() === org.id"
+                      class="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-md font-semibold bg-muted text-foreground border border-border/80 hover:border-blue-400 transition-colors cursor-pointer"
+                      [title]="'Select ' + (org.name || org.code) + ' for consultation'"
+                    >
+                      <ng-icon name="lucideBuilding2" size="11" class="text-blue-500" />
+                      <span>{{ org.name || org.code }}</span>
+                      <span *ngIf="org.employmentType" class="text-[9px] opacity-75 font-normal">({{ org.employmentType | lowercase }})</span>
+                    </span>
                   </div>
 
                   <!-- Match Rationale -->
@@ -468,7 +560,7 @@ import {
                 >
                   <option [value]="undefined" disabled>-- Select Doctor --</option>
                   <option *ngFor="let doc of allDoctors()" [value]="doc.id">
-                    {{ formatDoctorName(doc) }} ({{ doc.specialization || 'General Practice' }})
+                    {{ formatDoctorName(doc) }} ({{ doc.specialization || 'General Practice' }}) - {{ getDoctorOrgsSummary(doc) }}
                   </option>
                 </select>
               </div>
@@ -490,11 +582,16 @@ import {
                   </div>
 
                   <div>
+                    <span class="text-muted-foreground block text-[11px]">Hospital Facility</span>
+                    <span class="font-bold text-foreground">{{ getSelectedOrgName() }}</span>
+                  </div>
+
+                  <div>
                     <span class="text-muted-foreground block text-[11px]">Scheduled Date & Time</span>
                     <span class="font-bold text-primary">{{ bookingDate }} • {{ getFormattedSelectedSlot() }}</span>
                   </div>
 
-                  <div class="sm:col-span-2">
+                  <div>
                     <span class="text-muted-foreground block text-[11px]">Reason for Visit</span>
                     <span class="font-medium text-foreground">{{ bookingReason }}</span>
                   </div>
@@ -665,6 +762,8 @@ export class PatientAppointmentsComponent implements OnInit {
   bookingNotes = '';
   selectedDoctor: User | null = null;
   selectedSlot = '';
+  selectedOrgId = signal<string>('');
+  selectedOrgName = signal<string>('');
 
   // Cancellation Modal State
   showCancelModal = signal<boolean>(false);
@@ -684,6 +783,41 @@ export class PatientAppointmentsComponent implements OnInit {
     'Back & Joint Pain',
     'Blood Pressure Consultation',
   ];
+
+  docHasOrgs(doctor?: User | null): boolean {
+    return !!(doctor && doctor.organizations && doctor.organizations.length > 0);
+  }
+
+  getDoctorOrgs(doctor?: User | null): any[] {
+    if (!doctor || !doctor.organizations) return [];
+    return doctor.organizations;
+  }
+
+  getDoctorOrgsSummary(doctor?: User | null): string {
+    if (!doctor || !doctor.organizations || doctor.organizations.length === 0) {
+      return 'Sentinel Network';
+    }
+    return doctor.organizations.map((o: any) => o.name || o.code).join(', ');
+  }
+
+  getSelectedOrgName(): string {
+    if (this.selectedOrgName()) return this.selectedOrgName();
+    if (this.selectedDoctor && this.selectedDoctor.organizations && this.selectedDoctor.organizations.length > 0) {
+      const found = this.selectedDoctor.organizations.find((o: any) => o.id === this.selectedOrgId());
+      if (found) return found.name || found.code;
+      return this.selectedDoctor.organizations[0].name || this.selectedDoctor.organizations[0].code;
+    }
+    return 'Sentinel Central Hospital';
+  }
+
+  selectOrganizationForDoctor(doctor: User, org: any, event: MouseEvent): void {
+    event.stopPropagation();
+    this.selectedDoctor = doctor;
+    if (org && org.id) {
+      this.selectedOrgId.set(org.id);
+      this.selectedOrgName.set(org.name || org.code);
+    }
+  }
 
   formatDoctorName(nameOrUser?: string | User | null): string {
     if (!nameOrUser) return '';
@@ -729,14 +863,29 @@ export class PatientAppointmentsComponent implements OnInit {
     return list;
   });
 
+  allOrganizations = signal<Organization[]>([]);
+  selectedHospitalFilter = signal<string>('ALL');
+
   constructor(
     private apiService: ApiService,
     public authService: AuthService
   ) { }
 
   ngOnInit(): void {
+    this.loadOrganizations();
     this.loadPatientAndAppointments();
     this.loadDoctors();
+  }
+
+  loadOrganizations(): void {
+    this.apiService.getOrganizations().subscribe({
+      next: (orgs) => {
+        if (Array.isArray(orgs)) {
+          this.allOrganizations.set(orgs);
+        }
+      },
+      error: (err) => console.warn('Could not load organizations list', err),
+    });
   }
 
   loadPatientAndAppointments(): void {
@@ -759,10 +908,28 @@ export class PatientAppointmentsComponent implements OnInit {
   }
 
   loadDoctors(): void {
-    this.apiService.getDoctors().subscribe({
+    this.apiService.getDoctors(this.selectedHospitalFilter()).subscribe({
       next: (docs) => this.allDoctors.set(Array.isArray(docs) ? docs : []),
       error: (err) => console.warn('Error fetching doctors list', err),
     });
+  }
+
+  onHospitalFilterChange(orgId: string): void {
+    this.selectedHospitalFilter.set(orgId);
+    this.selectedDoctor = null;
+    this.selectedSlot = '';
+    if (orgId !== 'ALL') {
+      this.selectedOrgId.set(orgId);
+      const found = this.allOrganizations().find((o) => o.id === orgId);
+      if (found) this.selectedOrgName.set(found.name || found.code || '');
+    } else {
+      this.selectedOrgId.set('');
+      this.selectedOrgName.set('');
+    }
+    this.loadDoctors();
+    if (this.bookingStep() === 2) {
+      this.fetchRecommendations();
+    }
   }
 
   // =========================================================
@@ -776,6 +943,10 @@ export class PatientAppointmentsComponent implements OnInit {
     this.bookingNotes = '';
     this.selectedDoctor = null;
     this.selectedSlot = '';
+    this.selectedHospitalFilter.set('ALL');
+    this.selectedOrgId.set('');
+    this.selectedOrgName.set('');
+    this.loadDoctors();
     this.showBookingModal.set(true);
   }
 
@@ -790,7 +961,7 @@ export class PatientAppointmentsComponent implements OnInit {
   getStepTitle(): string {
     switch (this.bookingStep()) {
       case 1:
-        return 'Enter Reason & Preferred Date';
+        return 'Enter Reason, Hospital & Date';
       case 2:
         return 'Smart Doctor Match & Slot';
       case 3:
@@ -838,7 +1009,7 @@ export class PatientAppointmentsComponent implements OnInit {
   fetchRecommendations(): void {
     const patientId = this.patientProfile()?.id;
     this.loadingRecommendations.set(true);
-    this.apiService.getRecommendedDoctors(patientId, this.bookingReason, this.bookingDate).subscribe({
+    this.apiService.getRecommendedDoctors(patientId, this.bookingReason, this.bookingDate, this.selectedHospitalFilter()).subscribe({
       next: (recs) => {
         this.recommendedDoctors.set(recs);
         this.loadingRecommendations.set(false);
@@ -846,10 +1017,10 @@ export class PatientAppointmentsComponent implements OnInit {
         // Auto select top recommendation if available
         if (recs.length > 0) {
           const top = recs[0];
-          this.selectedDoctor = top.doctor;
-          if (top.recommendedSlots && top.recommendedSlots.length > 0) {
-            this.selectedSlot = top.recommendedSlots[0];
-          }
+          this.selectDoctor(top.doctor, top.recommendedSlots?.[0]);
+        } else {
+          this.selectedDoctor = null;
+          this.selectedSlot = '';
         }
       },
       error: (err) => {
@@ -864,12 +1035,20 @@ export class PatientAppointmentsComponent implements OnInit {
     if (slot) {
       this.selectedSlot = slot;
     }
+    if (doctor.organizations && doctor.organizations.length > 0) {
+      this.selectedOrgId.set(doctor.organizations[0].id);
+      this.selectedOrgName.set(doctor.organizations[0].name || doctor.organizations[0].code);
+    }
   }
 
   selectDoctorAndSlot(doctor: User, slot: string, event: MouseEvent): void {
     event.stopPropagation();
     this.selectedDoctor = doctor;
     this.selectedSlot = slot;
+    if (doctor.organizations && doctor.organizations.length > 0) {
+      this.selectedOrgId.set(doctor.organizations[0].id);
+      this.selectedOrgName.set(doctor.organizations[0].name || doctor.organizations[0].code);
+    }
   }
 
   onManualDoctorChange(docId: any): void {
@@ -877,6 +1056,10 @@ export class PatientAppointmentsComponent implements OnInit {
     if (found) {
       this.selectedDoctor = found;
       this.selectedSlot = '';
+      if (found.organizations && found.organizations.length > 0) {
+        this.selectedOrgId.set(found.organizations[0].id);
+        this.selectedOrgName.set(found.organizations[0].name || found.organizations[0].code);
+      }
     }
   }
 
@@ -907,9 +1090,17 @@ export class PatientAppointmentsComponent implements OnInit {
       }
     } catch (e) {}
 
+    const chosenOrgId =
+      this.selectedOrgId() ||
+      (this.selectedDoctor.organizations && this.selectedDoctor.organizations.length > 0
+        ? this.selectedDoctor.organizations[0].id
+        : undefined);
+
     const appointmentPayload: AppointmentRequestDTO = {
       patientId: patient.id,
       doctorId: this.selectedDoctor.id,
+      practitionerId: (this.selectedDoctor as any).practitionerId || this.selectedDoctor.id,
+      organizationId: chosenOrgId,
       appointmentDate: dateTimeIso,
       startsAt: dateTimeIso,
       reason: this.bookingReason,
@@ -926,9 +1117,10 @@ export class PatientAppointmentsComponent implements OnInit {
         this.closeBookingModal();
 
         const docDisplayName = this.formatDoctorName(this.selectedDoctor?.fullName);
+        const hospitalName = this.getSelectedOrgName();
 
         toast.success('Consultation Scheduled Successfully!', {
-          description: `Appointment with ${docDisplayName} set for ${this.bookingDate}.`,
+          description: `Appointment with ${docDisplayName} at ${hospitalName} confirmed for ${this.bookingDate}.`,
         });
 
         // Refresh list

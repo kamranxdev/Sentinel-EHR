@@ -1,7 +1,7 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map, tap } from 'rxjs';
-import { JwtAuthResponse, User } from '../models/auth-user.model';
+import { JwtAuthResponse, OrganizationContextDTO, SelectedContext, User } from '../models/auth-user.model';
 import { StaffOnboardingRequestDTO } from '../models/organization.model';
 import { Capability, ROLE_CAPABILITY_MAP, UserRole } from '../models/permissions.model';
 
@@ -12,6 +12,7 @@ export class AuthService {
   private apiUrl = 'http://localhost:8080/api/v1/auth';
 
   currentUser = signal<JwtAuthResponse | null>(this.getStoredUser());
+  activeContext = signal<SelectedContext | null>(this.getStoredContext());
 
   constructor(private http: HttpClient) {}
 
@@ -51,7 +52,7 @@ export class AuthService {
     return true;
   }
 
-  login(credentials: { username: string; password: string }): Observable<JwtAuthResponse> {
+  login(credentials: { email: string; password: string }): Observable<JwtAuthResponse> {
     return this.http.post<any>(`${this.apiUrl}/login`, credentials).pipe(
       map((res: any) => {
         const authData: JwtAuthResponse = res && res.data ? res.data : res;
@@ -69,9 +70,8 @@ export class AuthService {
   }
 
   register(userData: {
-    username: string;
-    password: string;
     email: string;
+    password: string;
     fullName: string;
   }): Observable<JwtAuthResponse | { message: string }> {
     return this.http.post<JwtAuthResponse | { message: string }>(`${this.apiUrl}/register`, userData).pipe(
@@ -79,10 +79,40 @@ export class AuthService {
     );
   }
 
+  setContext(context: SelectedContext): void {
+    localStorage.setItem('sentinel_context', JSON.stringify(context));
+    this.activeContext.set(context);
+  }
+
+  clearContext(): void {
+    localStorage.removeItem('sentinel_context');
+    this.activeContext.set(null);
+  }
+
+  getStoredContext(): SelectedContext | null {
+    const data = localStorage.getItem('sentinel_context');
+    if (!data) return null;
+    try {
+      return JSON.parse(data);
+    } catch {
+      return null;
+    }
+  }
+
+  getActiveOrganizationId(): string | null {
+    return this.activeContext()?.organizationId || null;
+  }
+
+  getActiveFacilityId(): string | null {
+    return this.activeContext()?.facilityId || null;
+  }
+
   logout(): void {
     localStorage.removeItem('sentinel_token');
     localStorage.removeItem('sentinel_user');
+    localStorage.removeItem('sentinel_context');
     this.currentUser.set(null);
+    this.activeContext.set(null);
   }
 
   getToken(): string | null {

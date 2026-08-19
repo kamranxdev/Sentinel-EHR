@@ -53,7 +53,7 @@ import {
   styleUrl: './login.component.css',
 })
 export class LoginComponent implements OnInit {
-  username = '';
+  email = '';
   password = '';
   loading = signal(false);
   errorMessage = signal<string | null>(null);
@@ -66,35 +66,35 @@ export class LoginComponent implements OnInit {
 
   ngOnInit(): void {
     if (this.authService.isLoggedIn()) {
-      this.router.navigate(['/dashboard']);
+      this.router.navigate(['/select-context']);
     }
   }
 
-  fillDemoCredentials(u: string, p: string): void {
-    this.username = u;
+  fillDemoCredentials(e: string, p: string): void {
+    this.email = e;
     this.password = p;
     this.onLogin();
   }
 
   onLogin(): void {
-    if (!this.username || !this.password) return;
+    if (!this.email || !this.password) return;
     this.loading.set(true);
     this.errorMessage.set(null);
 
-    this.authService.login({ username: this.username, password: this.password }).subscribe({
+    this.authService.login({ email: this.email.trim(), password: this.password }).subscribe({
       next: () => {
         this.loading.set(false);
         this.patientContext.loadContext();
         toast.success('Authenticated Successfully', {
-          description: 'Welcome back to your Sentinel EHR Workspace.',
+          description: 'Please select your workspace context.',
         });
-        this.router.navigate(['/dashboard']);
+        this.router.navigate(['/select-context']);
       },
       error: (err) => {
         this.loading.set(false);
         const msg = err.status === 0
           ? 'Cannot connect to backend server. Please verify Spring Boot server is running on http://localhost:8080.'
-          : (typeof err.error === 'string' ? err.error : 'Invalid username or password.');
+          : (typeof err.error === 'string' ? err.error : (err.error?.message || 'Invalid email or password.'));
         this.errorMessage.set(msg);
         toast.error('Authentication Failed', { description: msg });
       },

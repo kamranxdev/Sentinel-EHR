@@ -20,8 +20,12 @@ import com.sentinel.tenancy.repository.OrganizationRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.sentinel.identity.entity.UserOrganization;
+import com.sentinel.identity.repository.PractitionerRepository;
+import com.sentinel.identity.repository.UserOrganizationRepository;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -32,6 +36,8 @@ public class AppointmentService {
     private final AppointmentRepository appointmentRepository;
     private final PatientRepository patientRepository;
     private final UserRepository userRepository;
+    private final PractitionerRepository practitionerRepository;
+    private final UserOrganizationRepository userOrganizationRepository;
     private final OrganizationRepository organizationRepository;
     private final FacilityRepository facilityRepository;
     private final DepartmentRepository departmentRepository;
@@ -40,6 +46,8 @@ public class AppointmentService {
     public AppointmentService(AppointmentRepository appointmentRepository,
                               PatientRepository patientRepository,
                               UserRepository userRepository,
+                              PractitionerRepository practitionerRepository,
+                              UserOrganizationRepository userOrganizationRepository,
                               OrganizationRepository organizationRepository,
                               FacilityRepository facilityRepository,
                               DepartmentRepository departmentRepository,
@@ -47,6 +55,8 @@ public class AppointmentService {
         this.appointmentRepository = appointmentRepository;
         this.patientRepository = patientRepository;
         this.userRepository = userRepository;
+        this.practitionerRepository = practitionerRepository;
+        this.userOrganizationRepository = userOrganizationRepository;
         this.organizationRepository = organizationRepository;
         this.facilityRepository = facilityRepository;
         this.departmentRepository = departmentRepository;
@@ -68,6 +78,17 @@ public class AppointmentService {
         appt.setCreatedAt(OffsetDateTime.now());
         appt.setUpdatedAt(OffsetDateTime.now());
 
+        // Resolve Doctor User
+        if (request.getPractitionerId() != null) {
+            Optional<User> doctorUser = userRepository.findById(request.getPractitionerId());
+            if (doctorUser.isEmpty()) {
+                doctorUser = practitionerRepository.findById(request.getPractitionerId())
+                        .filter(p -> p.getPerson() != null)
+                        .flatMap(p -> userRepository.findByPersonId(p.getPerson().getId()));
+            }
+            doctorUser.ifPresent(appt::setCreatedBy);
+        }
+
         if (request.getOrganizationId() != null) {
             organizationRepository.findById(request.getOrganizationId()).ifPresent(appt::setOrganization);
         }
@@ -77,8 +98,28 @@ public class AppointmentService {
         if (request.getDepartmentId() != null) {
             departmentRepository.findById(request.getDepartmentId()).ifPresent(appt::setDepartment);
         }
-        if (request.getPractitionerId() != null) {
-            userRepository.findById(request.getPractitionerId()).ifPresent(appt::setCreatedBy);
+
+        // Fallback for non-null constraints on organization & facility
+        if (appt.getOrganization() == null) {
+            if (appt.getCreatedBy() != null) {
+                userOrganizationRepository.findByUserId(appt.getCreatedBy().getId()).stream()
+                        .filter(uo -> uo.getOrganization() != null)
+                        .findFirst()
+                        .map(UserOrganization::getOrganization)
+                        .ifPresent(appt::setOrganization);
+            }
+            if (appt.getOrganization() == null && patient.getOrganization() != null) {
+                appt.setOrganization(patient.getOrganization());
+            }
+            if (appt.getOrganization() == null) {
+                organizationRepository.findAll().stream().findFirst().ifPresent(appt::setOrganization);
+            }
+        }
+
+        if (appt.getFacility() == null && appt.getOrganization() != null) {
+            facilityRepository.findByOrganizationId(appt.getOrganization().getId()).stream()
+                    .findFirst()
+                    .ifPresent(appt::setFacility);
         }
 
         Appointment saved = appointmentRepository.save(appt);

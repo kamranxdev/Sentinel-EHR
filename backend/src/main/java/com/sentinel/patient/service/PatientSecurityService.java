@@ -37,7 +37,7 @@ public class PatientSecurityService {
         if (authentication == null || !authentication.isAuthenticated() || userId == null) {
             return false;
         }
-        Optional<User> userOpt = userRepository.findByUsername(authentication.getName());
+        Optional<User> userOpt = userRepository.findByEmail(authentication.getName());
         return userOpt.isPresent() && userOpt.get().getId().equals(userId);
     }
 }

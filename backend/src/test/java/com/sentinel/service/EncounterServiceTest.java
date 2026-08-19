@@ -65,7 +65,7 @@ public class EncounterServiceTest {
         testPatient = new Patient(p);
         testPatient.setId(patientId);
 
-        testProvider = new User("doctor_mahtab", "doc@sentinel.com", "pass", p);
+        testProvider = new User("doc@sentinel.com", "pass", p);
         testProvider.setId(providerId);
 
         testEncounter = new Encounter();

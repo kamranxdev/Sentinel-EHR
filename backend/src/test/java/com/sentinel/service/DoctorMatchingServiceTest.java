@@ -42,7 +42,7 @@ public class DoctorMatchingServiceTest {
         p.setFirstName("Heart");
         p.setLastName("Specialist");
 
-        cardiologist = new User("dr_heart", "heart@sentinel.com", "pass", p);
+        cardiologist = new User("heart@sentinel.com", "pass", p);
         cardiologist.setId(UUID.randomUUID());
         cardiologist.setRoles(Set.of(doctorRole));
 

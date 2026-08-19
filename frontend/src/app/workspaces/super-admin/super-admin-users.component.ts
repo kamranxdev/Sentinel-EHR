@@ -268,15 +268,13 @@ type RoleCategoryTab = 'ALL' | 'SUPER_ADMIN' | 'ORG_ADMIN' | 'PHYSICIAN' | 'NURS
                 <td class="py-3.5 px-4">
                   <div class="flex items-center gap-3">
                     <div class="w-8 h-8 rounded-full bg-purple-500/10 text-purple-600 flex items-center justify-center font-bold text-xs shrink-0 border border-purple-500/20">
-                      {{ getInitials(u.fullName || u.username) }}
+                      {{ getInitials(u.fullName || u.email || 'User') }}
                     </div>
                     <div>
                       <div class="font-semibold text-foreground flex items-center gap-1.5">
-                        {{ u.fullName }}
+                        {{ u.fullName || u.email }}
                       </div>
                       <div class="text-[11px] text-muted-foreground flex items-center gap-2 font-mono">
-                        <span>&#64;{{ u.username }}</span>
-                        <span>&bull;</span>
                         <span>{{ u.email }}</span>
                       </div>
                     </div>

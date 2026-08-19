@@ -85,14 +85,11 @@ public class OrganizationService {
         Organization saved = organizationRepository.save(org);
 
         // Provision Primary Administrator Account if provided
-        if (request.getAdminUsername() != null && !request.getAdminUsername().isBlank()) {
-            String adminUsername = request.getAdminUsername().trim();
-            if (userRepository.existsByUsername(adminUsername)) {
-                throw new IllegalArgumentException("Admin username already exists: " + adminUsername);
-            }
-            String adminEmail = request.getAdminEmail() != null && !request.getAdminEmail().isBlank()
-                    ? request.getAdminEmail().trim()
-                    : adminUsername + "@" + code.toLowerCase() + ".org";
+        String adminEmail = request.getAdminEmail() != null && !request.getAdminEmail().isBlank()
+                ? request.getAdminEmail().trim()
+                : (request.getAdminUsername() != null && !request.getAdminUsername().isBlank() ? request.getAdminUsername().trim() : null);
+
+        if (adminEmail != null) {
             if (userRepository.existsByEmail(adminEmail)) {
                 throw new IllegalArgumentException("Admin email already in use: " + adminEmail);
             }
@@ -100,7 +97,7 @@ public class OrganizationService {
             Person person = new Person();
             String fullName = request.getAdminFullName() != null && !request.getAdminFullName().isBlank()
                     ? request.getAdminFullName().trim()
-                    : adminUsername;
+                    : adminEmail;
             person.setFirstName(fullName);
             person.setEmail(adminEmail);
             person.setPhone(request.getPhone());
@@ -109,7 +106,6 @@ public class OrganizationService {
             Person savedPerson = personRepository.save(person);
 
             User user = new User();
-            user.setUsername(adminUsername);
             user.setEmail(adminEmail);
             String rawPassword = request.getAdminPassword() != null && !request.getAdminPassword().isBlank()
                     ? request.getAdminPassword()

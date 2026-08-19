@@ -389,16 +389,14 @@ type RoleCategoryTab = 'ALL' | 'DOCTOR' | 'NURSE' | 'PHARMACIST' | 'RECEPTIONIST
                       [ngClass]="getUserAvatarBg(u)"
                       class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs shrink-0 shadow-2xs"
                     >
-                      {{ getInitials(u.fullName || u.username) }}
+                      {{ getInitials(u.fullName || u.email || 'User') }}
                     </div>
                     <div>
                       <div class="font-semibold text-foreground flex items-center gap-1.5">
-                        {{ u.fullName }}
+                        {{ u.fullName || u.email }}
                         <ng-icon *ngIf="isUserVerified(u)" name="lucideBadgeCheck" class="text-emerald-500" size="14" />
                       </div>
                       <div class="text-[11px] text-muted-foreground flex items-center gap-2">
-                        <span class="font-mono text-muted-foreground/80">&#64;{{ u.username }}</span>
-                        <span>&bull;</span>
                         <span>{{ u.email }}</span>
                       </div>
                     </div>

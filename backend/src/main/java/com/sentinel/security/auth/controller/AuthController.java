@@ -34,7 +34,7 @@ public class AuthController {
     public ResponseEntity<ApiResponse<JwtAuthResponse>> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
         JwtAuthResponse response = authService.login(loginRequest);
         String primaryRole = response.getRoles() != null && !response.getRoles().isEmpty() ? response.getRoles().iterator().next() : "PATIENT";
-        auditService.logAction(response.getUsername(), primaryRole, "LOGIN", "AUTH", String.valueOf(response.getId()), "User authenticated successfully");
+        auditService.logAction(response.getEmail(), primaryRole, "LOGIN", "AUTH", String.valueOf(response.getId()), "User authenticated successfully");
         return ResponseEntity.ok(ApiResponse.success("Authentication successful", response));
     }
 
@@ -42,7 +42,7 @@ public class AuthController {
     @Operation(summary = "Register a new patient")
     public ResponseEntity<ApiResponse<Map<String, Object>>> registerUser(@Valid @RequestBody RegisterRequest registerRequest) {
         Map<String, Object> result = authService.registerPatient(registerRequest);
-        auditService.logAction(registerRequest.getUsername(), "PATIENT", "REGISTER", "USER", String.valueOf(result.get("userId")), "Self-registered as patient");
+        auditService.logAction(registerRequest.getEmail(), "PATIENT", "REGISTER", "USER", String.valueOf(result.get("userId")), "Self-registered as patient");
         return new ResponseEntity<>(ApiResponse.success("User registered successfully", result), HttpStatus.CREATED);
     }
 }

@@ -284,7 +284,7 @@ export class PhysicianBreakGlassComponent implements OnInit {
     const user = this.authService.currentUser();
     if (!user) return;
     this.loadingHistory.set(true);
-    this.apiService.getBreakGlassByUser(user.username).subscribe({
+    this.apiService.getBreakGlassByUser(user.email || user.username || '').subscribe({
       next: (recs) => {
         this.auditRecords.set(recs || []);
         this.loadingHistory.set(false);

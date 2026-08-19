@@ -72,12 +72,12 @@ public class AbacSecurityEvaluatorTest {
     public void testNurseAccessRequiresTreatmentRelationshipOrBreakGlass() {
         Authentication auth = mock(Authentication.class);
         when(auth.isAuthenticated()).thenReturn(true);
-        when(auth.getName()).thenReturn("nurse_sunita");
+        when(auth.getName()).thenReturn("sunita.verma@aiims.edu");
         doReturn(List.of(new SimpleGrantedAuthority("NURSE"))).when(auth).getAuthorities();
 
         User user = new User();
         user.setId(userId);
-        when(userRepository.findByUsername("nurse_sunita")).thenReturn(Optional.of(user));
+        when(userRepository.findByEmail("sunita.verma@aiims.edu")).thenReturn(Optional.of(user));
 
         // Path A: No relationship, no break glass -> DENIED
         when(patientRepository.existsById(patientId)).thenReturn(false);

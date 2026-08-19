@@ -47,8 +47,8 @@ public class BreakGlassService {
 
         User user = null;
         if (request.getUsername() != null) {
-            user = userRepository.findByUsername(request.getUsername())
-                    .orElseThrow(() -> new ResourceNotFoundException("User with username " + request.getUsername() + " not found"));
+            user = userRepository.findByEmail(request.getUsername())
+                    .orElseThrow(() -> new ResourceNotFoundException("User with email " + request.getUsername() + " not found"));
         } else {
             List<User> users = userRepository.findAll();
             if (!users.isEmpty()) user = users.get(0);
@@ -103,8 +103,8 @@ public class BreakGlassService {
     }
 
     @Transactional(readOnly = true)
-    public boolean hasActiveBreakGlassOverride(UUID patientId, String username) {
-        return userRepository.findByUsername(username)
+    public boolean hasActiveBreakGlassOverride(UUID patientId, String email) {
+        return userRepository.findByEmail(email)
                 .map(user -> hasActiveBreakGlass(user.getId(), patientId))
                 .orElse(false);
     }
@@ -122,8 +122,8 @@ public class BreakGlassService {
     }
 
     @Transactional(readOnly = true)
-    public List<BreakGlassRecord> getRecordsByUser(String username) {
-        return breakGlassRepository.findByUserUsernameOrderByRequestedAtDesc(username);
+    public List<BreakGlassRecord> getRecordsByUser(String email) {
+        return breakGlassRepository.findByUserEmailOrderByRequestedAtDesc(email);
     }
 
     public BreakGlassResponseDTO mapToDTO(BreakGlassRecord r) {
@@ -135,7 +135,7 @@ public class BreakGlassService {
         }
         if (r.getUser() != null) {
             dto.setUserId(r.getUser().getId());
-            dto.setUsername(r.getUser().getUsername());
+            dto.setUsername(r.getUser().getEmail());
         }
         dto.setCategory(r.getCategory());
         dto.setJustification(r.getJustification());

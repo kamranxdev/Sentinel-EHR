@@ -1222,24 +1222,75 @@ export class ApiService {
     return this.post<ScheduleSlot>(`/practitioners/${practitionerId}/slots`, slot);
   }
 
-  getRecommendedDoctors(patientId?: string, reason?: string, date?: string): Observable<DoctorRecommendationDTO[]> {
-    return this.getDoctors().pipe(
+  getOrganizations(): Observable<Organization[]> {
+    return this.get<Organization[]>('/organizations').pipe(
+      catchError(() => this.get<Organization[]>('/sys-admin/organizations')),
+      catchError(() => of([])),
+    );
+  }
+
+  getRecommendedDoctors(patientId?: string, reason?: string, date?: string, organizationId?: string): Observable<DoctorRecommendationDTO[]> {
+    return this.getDoctors(organizationId).pipe(
       map((doctors) => {
         if (!doctors || doctors.length === 0) return [];
-        return doctors.map((doc, idx) => {
-          const matchScore = Math.max(70, 98 - idx * 6);
-          const specialty = doc.specialization || (doc as any).primarySpecialty || 'General Physician';
+
+        const q = (reason || '').toLowerCase().trim();
+
+        // Specialty keyword heuristic mapping
+        const isCardio = /chest|heart|cardio|blood pressure|hypertension|angioplasty|palpitation|ecg|pulse|vascular/i.test(q);
+        const isNeuro = /headache|migraine|neuro|stroke|brain|seizure|dizziness|cervical|nerve|numbness|spinal/i.test(q);
+        const isEmer = /fever|cough|flu|cold|trauma|emergency|accident|burn|wound|acute|injury|gastritis|rhinitis|vomit/i.test(q);
+        const isOnco = /cancer|onco|tumor|chemo|biopsy|lump|oncology|radiation/i.test(q);
+        const isRad = /x-ray|mri|ct scan|ultrasound|scan|radiology|imaging|fracture/i.test(q);
+
+        const scored = doctors.map((doc, idx) => {
+          const spec = (doc.specialization || doc.specialty || '').toLowerCase();
+          let matchScore = 78;
+          let matchReason = `Board-certified clinical specialist available for outpatient consultation.`;
+
+          if (isCardio && spec.includes('cardio')) {
+            matchScore = 98 - (idx % 2);
+            matchReason = `Highest clinical alignment: Senior Cardiologist with specialized expertise in cardiovascular symptoms & diagnostics.`;
+          } else if (isNeuro && spec.includes('neuro')) {
+            matchScore = 98 - (idx % 2);
+            matchReason = `Highest clinical alignment: Senior Neurologist specializing in headache, stroke, and neurological evaluations.`;
+          } else if (isOnco && (spec.includes('onco') || spec.includes('cancer'))) {
+            matchScore = 98 - (idx % 2);
+            matchReason = `Highest clinical alignment: Clinical Oncologist specializing in diagnosis, therapies, and treatment plans.`;
+          } else if (isEmer && (spec.includes('emerg') || spec.includes('trauma') || spec.includes('general'))) {
+            matchScore = 97 - (idx % 2);
+            matchReason = `Direct match: Emergency & Acute Care Specialist experienced with rapid triage and symptom resolution.`;
+          } else if (isRad && spec.includes('rad')) {
+            matchScore = 96 - (idx % 2);
+            matchReason = `Diagnostic match: Radiologist specializing in diagnostic medical imaging review.`;
+          } else if (spec.includes('general') || spec.includes('medicine')) {
+            matchScore = 88;
+            matchReason = `General medicine overview and initial clinical assessment.`;
+          } else {
+            matchScore = Math.max(72, 85 - idx * 3);
+            matchReason = `Board-certified physician available for comprehensive outpatient consultation.`;
+          }
+
+          const orgList = doc.organizations && doc.organizations.length > 0
+            ? doc.organizations.map((o: any) => o.name || o.code).join(', ')
+            : 'Sentinel Health Network';
+
+          const specialty = doc.specialization || 'Clinical Specialist';
+
           return {
             doctor: doc,
             matchScore,
-            specialtyFitScore: 95,
-            continuityScore: idx === 0 ? 92 : 80,
+            specialtyFitScore: matchScore,
+            continuityScore: 90,
             recommendedSpecialty: specialty,
-            matchReason: `High clinical alignment for "${reason || 'General Consultation'}" based on specialist qualifications.`,
+            matchReason: `${matchReason} (Affiliated: ${orgList})`,
             verifiedLicense: true,
-            recommendedSlots: ['09:00 AM', '10:30 AM', '02:00 PM', '04:15 PM'],
-          };
+            recommendedSlots: ['09:00 AM', '10:30 AM', '02:00 PM', '04:15 PM', '05:30 PM'],
+          } as DoctorRecommendationDTO;
         });
+
+        // Sort by match score descending
+        return scored.sort((a, b) => b.matchScore - a.matchScore);
       }),
       catchError(() => of([])),
     );
@@ -1261,23 +1312,65 @@ export class ApiService {
     };
   }
 
-  getDoctors(): Observable<User[]> {
-    return this.get<any[]>('/practitioners').pipe(
+  getDoctors(organizationId?: string): Observable<User[]> {
+    const hasOrgFilter = organizationId && organizationId !== 'ALL';
+    const query = hasOrgFilter ? `?organizationId=${organizationId}` : '';
+    return this.get<any[]>(`/practitioners${query}`).pipe(
       map((list) => {
         if (Array.isArray(list) && list.length > 0) {
-          return list.map((p) => ({
-            id: p.id,
-            username: p.identifier || p.firstName?.toLowerCase() || 'doctor',
-            fullName: p.fullName || `Dr. ${p.firstName || ''} ${p.lastName || ''}`.trim(),
-            specialization: p.primarySpecialty || 'General Practice',
-            roles: ['PHYSICIAN'],
-          } as User));
+          const physicians = list.filter((p) => !p.practitionerType || p.practitionerType === 'PHYSICIAN');
+          const targetList = physicians.length > 0 ? physicians : list;
+          let result = targetList.map((p) => {
+            const rawName = p.fullName || `${p.firstName || ''} ${p.lastName || ''}`.trim();
+            const cleanName = rawName.replace(/^(Dr\.?\s*)+/i, '');
+            return {
+              id: p.userId || p.id,
+              practitionerId: p.id,
+              personId: p.personId,
+              email: p.email,
+              username: p.email || p.identifier || cleanName.toLowerCase().replace(/\s+/g, '.'),
+              fullName: `Dr. ${cleanName}`,
+              specialization: p.primarySpecialty || (p.specialties && p.specialties.length > 0 ? p.specialties[0].specialtyName : 'General Physician'),
+              specialty: p.primarySpecialty || (p.specialties && p.specialties.length > 0 ? p.specialties[0].specialtyName : 'General Physician'),
+              organizations: p.organizations || [],
+              roles: ['PHYSICIAN'],
+              status: p.status || 'ACTIVE',
+            } as User;
+          });
+
+          if (hasOrgFilter) {
+            result = result.filter((d) =>
+              d.organizations && d.organizations.length > 0
+                ? d.organizations.some((o: any) => o.id === organizationId || o.code === organizationId)
+                : true
+            );
+          }
+          return result;
         }
         return [];
       }),
       catchError(() =>
-        this.get<any[]>('/users?role=PHYSICIAN').pipe(
-          map((list) => (Array.isArray(list) ? list : [])),
+        this.get<any[]>(`/users?role=PHYSICIAN${hasOrgFilter ? '&organizationId=' + organizationId : ''}`).pipe(
+          map((list) => {
+            if (Array.isArray(list)) {
+              let result = list.map((u) => ({
+                ...u,
+                fullName: u.fullName ? `Dr. ${u.fullName.replace(/^(Dr\.?\s*)+/i, '')}` : 'Dr. Physician',
+                specialization: u.specialization || 'Clinical Medicine',
+                organizations: u.organizations || [],
+              } as User));
+
+              if (hasOrgFilter) {
+                result = result.filter((d) =>
+                  d.organizations && d.organizations.length > 0
+                    ? d.organizations.some((o: any) => o.id === organizationId || o.code === organizationId)
+                    : true
+                );
+              }
+              return result;
+            }
+            return [];
+          }),
           catchError(() => of([])),
         ),
       ),
