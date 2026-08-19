@@ -25,7 +25,7 @@ public class VitalsResponseDTO {
     private String position;
     private String oxygenDeliveryMethod;
     private String notes;
-    private String recordedByUsername;
+    private String recordedByEmail;
     private OffsetDateTime recordedAt;
 
     public VitalsResponseDTO() {}
@@ -70,8 +70,8 @@ public class VitalsResponseDTO {
     public void setOxygenDeliveryMethod(String oxygenDeliveryMethod) { this.oxygenDeliveryMethod = oxygenDeliveryMethod; }
     public String getNotes() { return notes; }
     public void setNotes(String notes) { this.notes = notes; }
-    public String getRecordedByUsername() { return recordedByUsername; }
-    public void setRecordedByUsername(String recordedByUsername) { this.recordedByUsername = recordedByUsername; }
+    public String getRecordedByEmail() { return recordedByEmail; }
+    public void setRecordedByEmail(String recordedByEmail) { this.recordedByEmail = recordedByEmail; }
     public OffsetDateTime getRecordedAt() { return recordedAt; }
     public void setRecordedAt(OffsetDateTime recordedAt) { this.recordedAt = recordedAt; }
 }

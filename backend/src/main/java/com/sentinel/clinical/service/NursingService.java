@@ -94,7 +94,7 @@ public class NursingService {
         if (f.getEncounter() != null) dto.setEncounterId(f.getEncounter().getId());
         dto.setFlowsheetType(f.getFlowsheetType());
         dto.setStatus(f.getStatus());
-        if (f.getRecordedBy() != null) dto.setRecordedByUsername(f.getRecordedBy().getUsername());
+        if (f.getRecordedBy() != null) dto.setRecordedByEmail(f.getRecordedBy().getEmail());
         dto.setRecordedAt(f.getRecordedAt());
 
         List<NursingFlowsheetEntry> entries = flowsheetEntryRepository.findByFlowsheetId(f.getId());

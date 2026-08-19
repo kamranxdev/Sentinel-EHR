@@ -15,7 +15,7 @@ public class DocumentResponseDTO {
     private String mimeType;
     private Long fileSize;
     private String status;
-    private String uploadedByUsername;
+    private String uploadedByEmail;
     private OffsetDateTime uploadedAt;
 
     public DocumentResponseDTO() {}
@@ -42,8 +42,8 @@ public class DocumentResponseDTO {
     public void setFileSize(Long fileSize) { this.fileSize = fileSize; }
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
-    public String getUploadedByUsername() { return uploadedByUsername; }
-    public void setUploadedByUsername(String uploadedByUsername) { this.uploadedByUsername = uploadedByUsername; }
+    public String getUploadedByEmail() { return uploadedByEmail; }
+    public void setUploadedByEmail(String uploadedByEmail) { this.uploadedByEmail = uploadedByEmail; }
     public OffsetDateTime getUploadedAt() { return uploadedAt; }
     public void setUploadedAt(OffsetDateTime uploadedAt) { this.uploadedAt = uploadedAt; }
 }

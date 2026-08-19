@@ -8,7 +8,7 @@ public class LabOrderResponseDTO {
     private Long id;
     private UUID patientId;
     private UUID encounterId;
-    private String orderingProviderUsername;
+    private String orderingProviderEmail;
     private String testName;
     private String loincCode;
     private String category;
@@ -25,7 +25,7 @@ public class LabOrderResponseDTO {
     private String priority = "ROUTINE";
     private LocalDateTime inProcessAt;
     private LocalDateTime reviewedAt;
-    private String reviewedByUsername;
+    private String reviewedByEmail;
     private List<LabOrderItemDTO> items;
 
     public LabOrderResponseDTO() {}
@@ -61,8 +61,8 @@ public class LabOrderResponseDTO {
     public void setPatientId(UUID patientId) { this.patientId = patientId; }
     public UUID getEncounterId() { return encounterId; }
     public void setEncounterId(UUID encounterId) { this.encounterId = encounterId; }
-    public String getOrderingProviderUsername() { return orderingProviderUsername; }
-    public void setOrderingProviderUsername(String orderingProviderUsername) { this.orderingProviderUsername = orderingProviderUsername; }
+    public String getOrderingProviderEmail() { return orderingProviderEmail; }
+    public void setOrderingProviderEmail(String orderingProviderEmail) { this.orderingProviderEmail = orderingProviderEmail; }
     public String getTestName() { return testName; }
     public void setTestName(String testName) { this.testName = testName; }
     public String getLoincCode() { return loincCode; }
@@ -83,8 +83,8 @@ public class LabOrderResponseDTO {
     public void setResultedAt(LocalDateTime resultedAt) { this.resultedAt = resultedAt; }
     public LocalDateTime getReviewedAt() { return reviewedAt; }
     public void setReviewedAt(LocalDateTime reviewedAt) { this.reviewedAt = reviewedAt; }
-    public String getReviewedByUsername() { return reviewedByUsername; }
-    public void setReviewedByUsername(String reviewedByUsername) { this.reviewedByUsername = reviewedByUsername; }
+    public String getReviewedByEmail() { return reviewedByEmail; }
+    public void setReviewedByEmail(String reviewedByEmail) { this.reviewedByEmail = reviewedByEmail; }
     public String getClinicalNotes() { return clinicalNotes; }
     public void setClinicalNotes(String clinicalNotes) { this.clinicalNotes = clinicalNotes; }
     public String getPatientFullName() { return patientFullName; }

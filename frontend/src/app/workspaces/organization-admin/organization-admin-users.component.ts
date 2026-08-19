@@ -326,7 +326,7 @@ type RoleCategoryTab = 'ALL' | 'DOCTOR' | 'NURSE' | 'PHARMACIST' | 'RECEPTIONIST
             hlmInput
             type="text"
             [(ngModel)]="searchQuery"
-            placeholder="Search by name, username, email, dept, specialization, license..."
+            placeholder="Search by name, email, email, dept, specialization, license..."
             class="pl-9 h-9 w-full text-xs bg-background"
           />
         </div>
@@ -531,7 +531,6 @@ export class OrganizationAdminUsersComponent implements OnInit {
 
   newUserForm: {
     fullName: string;
-    username: string;
     email: string;
     password: string;
     role: string;
@@ -543,7 +542,6 @@ export class OrganizationAdminUsersComponent implements OnInit {
     medicalBoardState?: string;
   } = {
     fullName: '',
-    username: '',
     email: '',
     password: '',
     role: 'PHYSICIAN',
@@ -615,7 +613,7 @@ export class OrganizationAdminUsersComponent implements OnInit {
     if (q) {
       list = list.filter((u) =>
         (u.fullName || '').toLowerCase().includes(q) ||
-        (u.username || '').toLowerCase().includes(q) ||
+        (u.email || '').toLowerCase().includes(q) ||
         (u.email || '').toLowerCase().includes(q) ||
         (u.department || '').toLowerCase().includes(q) ||
         (u.specialization || '').toLowerCase().includes(q) ||
@@ -688,7 +686,6 @@ export class OrganizationAdminUsersComponent implements OnInit {
   openCreateModal(defaultRole = 'PHYSICIAN'): void {
     this.newUserForm = {
       fullName: '',
-      username: '',
       email: '',
       password: '',
       role: defaultRole,
@@ -710,8 +707,8 @@ export class OrganizationAdminUsersComponent implements OnInit {
   }
 
   submitCreateUser(): void {
-    if (!this.newUserForm.username || !this.newUserForm.email || !this.newUserForm.password) {
-      this.toastMessage.set({ text: 'Username, Email, and Password are required.', type: 'error' });
+    if (!this.newUserForm.email || !this.newUserForm.email || !this.newUserForm.password) {
+      this.toastMessage.set({ text: 'Email, Email, and Password are required.', type: 'error' });
       return;
     }
 
@@ -724,7 +721,7 @@ export class OrganizationAdminUsersComponent implements OnInit {
       next: () => {
         this.saving.set(false);
         this.showCreateModal.set(false);
-        this.toastMessage.set({ text: `Account for ${this.newUserForm.fullName || this.newUserForm.username} created successfully.`, type: 'success' });
+        this.toastMessage.set({ text: `Account for ${this.newUserForm.fullName || this.newUserForm.email} created successfully.`, type: 'success' });
         this.loadUsers();
       },
       error: (err: any) => {
@@ -797,7 +794,7 @@ export class OrganizationAdminUsersComponent implements OnInit {
       next: () => {
         this.saving.set(false);
         this.generatedTempPassword = pass;
-        this.toastMessage.set({ text: `Password reset successfully for @${u.username}.`, type: 'success' });
+        this.toastMessage.set({ text: `Password reset successfully for @${u.email}.`, type: 'success' });
       },
       error: () => {
         this.saving.set(false);
@@ -810,7 +807,7 @@ export class OrganizationAdminUsersComponent implements OnInit {
     const newStatus = u.verificationStatus === 'SUSPENDED' ? 'VERIFIED' : 'SUSPENDED';
     this.apiService.updateUserStatus(u.id, newStatus).subscribe({
       next: () => {
-        this.toastMessage.set({ text: `Account @${u.username} status updated to ${newStatus}.`, type: 'success' });
+        this.toastMessage.set({ text: `Account @${u.email} status updated to ${newStatus}.`, type: 'success' });
         this.loadUsers();
       },
     });

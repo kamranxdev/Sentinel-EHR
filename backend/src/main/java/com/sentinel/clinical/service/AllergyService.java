@@ -120,7 +120,7 @@ public class AllergyService {
         dto.setStatus(a.getStatus());
         dto.setVerificationStatus(a.getVerificationStatus());
         dto.setNotes(a.getNotes());
-        if (a.getRecordedBy() != null) dto.setRecordedByUsername(a.getRecordedBy().getUsername());
+        if (a.getRecordedBy() != null) dto.setRecordedByEmail(a.getRecordedBy().getEmail());
         dto.setRecordedAt(a.getRecordedAt());
         dto.setUpdatedAt(a.getUpdatedAt());
         return dto;

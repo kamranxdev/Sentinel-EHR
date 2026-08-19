@@ -104,13 +104,13 @@ public class ProcedureOrderService {
         dto.setId(o.getId());
         if (o.getPatient() != null) dto.setPatientId(o.getPatient().getId());
         if (o.getEncounter() != null) dto.setEncounterId(o.getEncounter().getId());
-        if (o.getOrderingProvider() != null) dto.setOrderingProviderUsername(o.getOrderingProvider().getUsername());
+        if (o.getOrderingProvider() != null) dto.setOrderingProviderEmail(o.getOrderingProvider().getEmail());
         dto.setProcedureName(o.getProcedureName());
         dto.setSnomedCode(o.getSnomedCode());
         dto.setCptCode(o.getCptCode());
         dto.setStatus(o.getStatus());
         dto.setOperativeReport(o.getOperativeReport());
-        if (o.getProceduralist() != null) dto.setProceduralistUsername(o.getProceduralist().getUsername());
+        if (o.getProceduralist() != null) dto.setProceduralistEmail(o.getProceduralist().getEmail());
         dto.setOrderedAt(o.getOrderedAt());
         dto.setScheduledAt(o.getScheduledAt());
         dto.setPerformedAt(o.getPerformedAt());

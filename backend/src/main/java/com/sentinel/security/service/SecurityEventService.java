@@ -31,7 +31,7 @@ public class SecurityEventService {
         if (e.getOrganization() != null) dto.setOrganizationId(e.getOrganization().getId());
         if (e.getUser() != null) {
             dto.setUserId(e.getUser().getId());
-            dto.setUsername(e.getUser().getUsername());
+            dto.setEmail(e.getUser().getEmail());
         }
         dto.setEventType(e.getEventType());
         dto.setIpAddress(e.getIpAddress());

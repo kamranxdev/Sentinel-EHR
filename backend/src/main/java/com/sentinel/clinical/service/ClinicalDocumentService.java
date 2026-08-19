@@ -128,7 +128,7 @@ public class ClinicalDocumentService {
         dto.setDocumentType(d.getDocumentType());
         dto.setTitle(d.getTitle());
         dto.setStatus(d.getStatus());
-        if (d.getAuthorUser() != null) dto.setAuthorUsername(d.getAuthorUser().getUsername());
+        if (d.getAuthorUser() != null) dto.setAuthorEmail(d.getAuthorUser().getEmail());
         dto.setAuthoredAt(d.getAuthoredAt());
         dto.setCreatedAt(d.getCreatedAt());
 
@@ -138,7 +138,7 @@ public class ClinicalDocumentService {
                         v.getId(),
                         v.getVersionNumber(),
                         v.getContent(),
-                        v.getAuthoredBy() != null ? v.getAuthoredBy().getUsername() : null,
+                        v.getAuthoredBy() != null ? v.getAuthoredBy().getEmail() : null,
                         v.getAmendmentReason(),
                         v.getAuthoredAt()
                 ))

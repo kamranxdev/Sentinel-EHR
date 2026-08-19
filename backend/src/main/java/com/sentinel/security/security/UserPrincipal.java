@@ -18,10 +18,12 @@ public class UserPrincipal implements UserDetails {
     private Set<String> roles;
     private Set<String> permissions;
 
-    public UserPrincipal() {}
+    public UserPrincipal() {
+    }
 
-    public UserPrincipal(UUID id, UUID organizationId, String email, String password, String fullName, String department,
-                         Collection<? extends GrantedAuthority> authorities, Set<String> roles, Set<String> permissions) {
+    public UserPrincipal(UUID id, UUID organizationId, String email, String password, String fullName,
+            String department,
+            Collection<? extends GrantedAuthority> authorities, Set<String> roles, Set<String> permissions) {
         this.id = id;
         this.organizationId = organizationId;
         this.email = email;

@@ -2,14 +2,14 @@ export interface ImagingOrder {
   id: number | string;
   patientId: string;
   encounterId?: string;
-  orderingProviderUsername?: string;
+  orderingProviderEmail?: string;
   modality: 'XR' | 'CT' | 'MRI' | 'US' | 'NM' | 'PET' | string;
   procedureName: string;
   cptCode?: string;
   status: 'ORDERED' | 'SCHEDULED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED';
   dicomStudyInstanceUid?: string;
   radiologistReport?: string;
-  radiologistUsername?: string;
+  radiologistEmail?: string;
   orderedAt?: string;
   scheduledAt?: string;
   performedAt?: string;
@@ -47,7 +47,7 @@ export interface ImagingSeries {
 export interface ImagingReport {
   id: number | string;
   imagingStudyId: number | string;
-  radiologistUsername: string;
+  radiologistEmail: string;
   reportText: string;
   impressionText?: string;
   status: 'DRAFT' | 'FINAL' | 'AMENDED' | 'CORRECTED';

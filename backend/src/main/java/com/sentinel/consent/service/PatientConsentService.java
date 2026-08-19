@@ -131,7 +131,7 @@ public class PatientConsentService {
         dto.setStatus(c.getStatus());
         dto.setGrantedAt(c.getGrantedAt());
         dto.setRevokedAt(c.getRevokedAt());
-        if (c.getGrantedBy() != null) dto.setGrantedByUsername(c.getGrantedBy().getUsername());
+        if (c.getGrantedBy() != null) dto.setGrantedByEmail(c.getGrantedBy().getEmail());
         dto.setScope(c.getScope());
         dto.setNotes(c.getNotes());
         return dto;

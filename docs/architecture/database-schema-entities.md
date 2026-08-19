@@ -57,7 +57,7 @@ Sentinel-EHR uses a normalized relational PostgreSQL 16 schema designed for high
 2. **`facilities`**: Hospital campus or physical branch.
    - `id` (UUID PK), `organization_id` (FK), `code` (VARCHAR), `name` (VARCHAR), `address` (TEXT), `phone` (VARCHAR).
 3. **`users`**: Login credentials and global identity.
-   - `id` (UUID PK), `organization_id` (FK), `username` (VARCHAR unique), `email` (VARCHAR unique), `password_hash` (VARCHAR), `full_name` (VARCHAR), `role` (VARCHAR: PHYSICIAN, NURSE, LAB_TECHNICIAN, RECEPTIONIST, ORGANIZATION_ADMIN, SUPER_ADMIN), `is_active` (BOOLEAN).
+   - `id` (UUID PK), `organization_id` (FK), `email` (VARCHAR unique), `email` (VARCHAR unique), `password_hash` (VARCHAR), `full_name` (VARCHAR), `role` (VARCHAR: PHYSICIAN, NURSE, LAB_TECHNICIAN, RECEPTIONIST, ORGANIZATION_ADMIN, SUPER_ADMIN), `is_active` (BOOLEAN).
 4. **`practitioners`**: Clinical credentials and license.
    - `id` (UUID PK), `user_id` (FK unique), `organization_id` (FK), `license_number` (VARCHAR), `specialty` (VARCHAR), `qualification` (VARCHAR), `status` (ACTIVE/INACTIVE).
 

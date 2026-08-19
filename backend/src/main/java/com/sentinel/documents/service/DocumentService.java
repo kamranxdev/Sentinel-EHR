@@ -146,7 +146,7 @@ public class DocumentService {
         dto.setMimeType(d.getMimeType());
         dto.setFileSize(d.getFileSize());
         dto.setStatus(d.getStatus());
-        if (d.getUploadedBy() != null) dto.setUploadedByUsername(d.getUploadedBy().getUsername());
+        if (d.getUploadedBy() != null) dto.setUploadedByEmail(d.getUploadedBy().getEmail());
         dto.setUploadedAt(d.getUploadedAt());
         return dto;
     }
@@ -159,7 +159,7 @@ public class DocumentService {
         dto.setStorageKey(v.getStorageKey());
         dto.setChecksum(v.getChecksum());
         dto.setFileSize(v.getFileSize());
-        if (v.getCreatedBy() != null) dto.setCreatedByUsername(v.getCreatedBy().getUsername());
+        if (v.getCreatedBy() != null) dto.setCreatedByEmail(v.getCreatedBy().getEmail());
         dto.setCreatedAt(v.getCreatedAt());
         return dto;
     }

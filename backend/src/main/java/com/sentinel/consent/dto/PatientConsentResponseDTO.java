@@ -14,7 +14,7 @@ public class PatientConsentResponseDTO {
     private String status;
     private OffsetDateTime grantedAt;
     private OffsetDateTime revokedAt;
-    private String grantedByUsername;
+    private String grantedByEmail;
     private String scope;
     private String notes;
 
@@ -40,8 +40,8 @@ public class PatientConsentResponseDTO {
     public void setGrantedAt(OffsetDateTime grantedAt) { this.grantedAt = grantedAt; }
     public OffsetDateTime getRevokedAt() { return revokedAt; }
     public void setRevokedAt(OffsetDateTime revokedAt) { this.revokedAt = revokedAt; }
-    public String getGrantedByUsername() { return grantedByUsername; }
-    public void setGrantedByUsername(String grantedByUsername) { this.grantedByUsername = grantedByUsername; }
+    public String getGrantedByEmail() { return grantedByEmail; }
+    public void setGrantedByEmail(String grantedByEmail) { this.grantedByEmail = grantedByEmail; }
     public String getScope() { return scope; }
     public void setScope(String scope) { this.scope = scope; }
     public String getNotes() { return notes; }

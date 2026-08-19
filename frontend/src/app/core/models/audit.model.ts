@@ -4,7 +4,7 @@ export interface AuditLog {
   userId?: string;
   patientId?: string;
   encounterId?: string;
-  username: string;
+  email: string;
   userRole: string;
   action: string;
   resourceType?: string;

@@ -32,8 +32,8 @@ public class BreakGlassController {
             @Valid @RequestBody BreakGlassRequestDTO payload,
             Authentication authentication,
             HttpServletRequest request) {
-        if (authentication != null && payload.getUsername() == null) {
-            payload.setUsername(authentication.getName());
+        if (authentication != null && payload.getEmail() == null) {
+            payload.setEmail(authentication.getName());
         }
         String clientIp = request != null ? request.getRemoteAddr() : "127.0.0.1";
         BreakGlassResponseDTO response = breakGlassService.requestEmergencyAccess(payload, clientIp);

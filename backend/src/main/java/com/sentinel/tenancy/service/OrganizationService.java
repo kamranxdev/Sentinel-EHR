@@ -94,7 +94,7 @@ public class OrganizationService {
         // Provision Primary Administrator Account if provided
         String adminEmail = request.getAdminEmail() != null && !request.getAdminEmail().isBlank()
                 ? request.getAdminEmail().trim()
-                : (request.getAdminUsername() != null && !request.getAdminUsername().isBlank() ? request.getAdminUsername().trim() : null);
+                : (request.getAdminEmail() != null && !request.getAdminEmail().isBlank() ? request.getAdminEmail().trim() : null);
 
         if (adminEmail != null) {
             if (userRepository.existsByEmail(adminEmail)) {

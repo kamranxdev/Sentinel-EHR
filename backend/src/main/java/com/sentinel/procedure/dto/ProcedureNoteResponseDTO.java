@@ -8,7 +8,7 @@ public class ProcedureNoteResponseDTO {
     private UUID performanceId;
     private String noteType;
     private String content;
-    private String createdByUsername;
+    private String createdByEmail;
     private OffsetDateTime createdAt;
 
     public ProcedureNoteResponseDTO() {}
@@ -21,8 +21,8 @@ public class ProcedureNoteResponseDTO {
     public void setNoteType(String noteType) { this.noteType = noteType; }
     public String getContent() { return content; }
     public void setContent(String content) { this.content = content; }
-    public String getCreatedByUsername() { return createdByUsername; }
-    public void setCreatedByUsername(String createdByUsername) { this.createdByUsername = createdByUsername; }
+    public String getCreatedByEmail() { return createdByEmail; }
+    public void setCreatedByEmail(String createdByEmail) { this.createdByEmail = createdByEmail; }
     public OffsetDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(OffsetDateTime createdAt) { this.createdAt = createdAt; }
 }

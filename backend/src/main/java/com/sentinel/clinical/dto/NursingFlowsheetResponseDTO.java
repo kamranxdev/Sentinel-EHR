@@ -10,7 +10,7 @@ public class NursingFlowsheetResponseDTO {
     private UUID encounterId;
     private String flowsheetType;
     private String status;
-    private String recordedByUsername;
+    private String recordedByEmail;
     private List<EntryDTO> entries;
     private OffsetDateTime recordedAt;
 
@@ -47,8 +47,8 @@ public class NursingFlowsheetResponseDTO {
     public void setFlowsheetType(String flowsheetType) { this.flowsheetType = flowsheetType; }
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
-    public String getRecordedByUsername() { return recordedByUsername; }
-    public void setRecordedByUsername(String recordedByUsername) { this.recordedByUsername = recordedByUsername; }
+    public String getRecordedByEmail() { return recordedByEmail; }
+    public void setRecordedByEmail(String recordedByEmail) { this.recordedByEmail = recordedByEmail; }
     public List<EntryDTO> getEntries() { return entries; }
     public void setEntries(List<EntryDTO> entries) { this.entries = entries; }
     public OffsetDateTime getRecordedAt() { return recordedAt; }

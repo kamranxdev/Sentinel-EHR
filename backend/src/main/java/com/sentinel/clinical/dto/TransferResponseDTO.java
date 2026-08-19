@@ -13,7 +13,7 @@ public class TransferResponseDTO {
     private UUID toWardId;
     private UUID toBedId;
     private String reason;
-    private String transferredByUsername;
+    private String transferredByEmail;
     private OffsetDateTime transferredAt;
 
     public TransferResponseDTO() {}
@@ -36,8 +36,8 @@ public class TransferResponseDTO {
     public void setToBedId(UUID toBedId) { this.toBedId = toBedId; }
     public String getReason() { return reason; }
     public void setReason(String reason) { this.reason = reason; }
-    public String getTransferredByUsername() { return transferredByUsername; }
-    public void setTransferredByUsername(String transferredByUsername) { this.transferredByUsername = transferredByUsername; }
+    public String getTransferredByEmail() { return transferredByEmail; }
+    public void setTransferredByEmail(String transferredByEmail) { this.transferredByEmail = transferredByEmail; }
     public OffsetDateTime getTransferredAt() { return transferredAt; }
     public void setTransferredAt(OffsetDateTime transferredAt) { this.transferredAt = transferredAt; }
 }

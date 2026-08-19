@@ -392,7 +392,7 @@ import {
                   <div class="min-w-0">
                     <div class="font-bold text-foreground truncate">{{ enc.chiefComplaint || enc.encounterType || 'Doctor Consultation' }}</div>
                     <div class="text-[11px] text-muted-foreground">
-                      {{ enc.startedAt || enc.createdAt | date:'mediumDate' }} • Dr. {{ enc.attendingProvider?.fullName || enc.createdByUsername || 'Attending Physician' }}
+                      {{ enc.startedAt || enc.createdAt | date:'mediumDate' }} • Dr. {{ enc.attendingProvider?.fullName || enc.createdByEmail || 'Attending Physician' }}
                     </div>
                   </div>
                 </div>

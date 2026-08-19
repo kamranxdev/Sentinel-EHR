@@ -45,9 +45,8 @@ export interface OrganizationRegistrationRequest {
   website?: string;
   countryCode?: string;
   timezone?: string;
-  adminUsername: string;
-  adminPassword: string;
   adminEmail: string;
+  adminPassword: string;
   adminFullName: string;
 }
 
@@ -74,9 +73,8 @@ export interface OrgAdminDashboardStatsDTO {
 }
 
 export interface StaffOnboardingRequestDTO {
-  username: string;
-  fullName: string;
   email: string;
+  fullName: string;
   password?: string;
   role?: string;
   roles?: string[];

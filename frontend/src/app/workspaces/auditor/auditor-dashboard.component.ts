@@ -102,7 +102,7 @@ import { lucideShieldCheck, lucideFileText, lucideUserCheck, lucideAlertTriangle
             <tbody hlmTableBody>
               <tr hlmTableRow *ngFor="let log of auditLogs().slice(0, 8)">
                 <td hlmTableCell class="font-mono text-muted-foreground whitespace-nowrap">{{ log.timestamp | date:'short' }}</td>
-                <td hlmTableCell class="font-semibold text-foreground">{{ log.username }}</td>
+                <td hlmTableCell class="font-semibold text-foreground">{{ log.email }}</td>
                 <td hlmTableCell>
                   <span [class]="'inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium border ' + getRoleBadgeClass(log.userRole)">
                     {{ formatRole(log.userRole) }}
@@ -133,7 +133,7 @@ export class AuditorDashboardComponent implements OnInit {
   auditLogs = signal<AuditLog[]>([]);
 
   deniedCount = computed(() => this.auditLogs().filter(l => l.action === 'ACCESS_DENIED').length);
-  uniqueActorsCount = computed(() => new Set(this.auditLogs().map(l => l.username)).size);
+  uniqueActorsCount = computed(() => new Set(this.auditLogs().map(l => l.email)).size);
 
   constructor(private apiService: ApiService) {}
 

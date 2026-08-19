@@ -9,7 +9,7 @@ export interface ProcedureOrder {
   priority?: 'ROUTINE' | 'URGENT' | 'EMERGENCY';
   indication?: string;
   notes?: string;
-  orderingProviderUsername?: string;
+  orderingProviderEmail?: string;
   orderedAt?: string;
   scheduledAt?: string;
   performances?: ProcedurePerformance[];
@@ -18,7 +18,7 @@ export interface ProcedureOrder {
 export interface ProcedurePerformance {
   id: number | string;
   procedureOrderId: number | string;
-  performedByUsername: string;
+  performedByEmail: string;
   performedAt: string;
   outcome: 'SUCCESSFUL' | 'PARTIALLY_SUCCESSFUL' | 'COMPLICATIONS' | 'ABORTED';
   complications?: string;
@@ -31,7 +31,7 @@ export interface ProcedureParticipant {
   id: number | string;
   procedurePerformanceId: number | string;
   practitionerId?: string;
-  username: string;
+  email: string;
   role: 'PRIMARY_SURGEON' | 'ASSISTING_SURGEON' | 'ANESTHESIOLOGIST' | 'SCRUB_NURSE' | 'CIRCULATING_NURSE';
 }
 
@@ -40,7 +40,7 @@ export interface ProcedureNote {
   procedurePerformanceId: number | string;
   noteType: 'PRE_OP' | 'OPERATIVE_NOTE' | 'POST_OP' | 'ANESTHESIA_NOTE' | 'DISCHARGE';
   content: string;
-  authorUsername: string;
+  authorEmail: string;
   createdAt?: string;
 }
 

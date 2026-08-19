@@ -113,7 +113,7 @@ public class CareTeamService {
                         m.getPractitioner() != null ? m.getPractitioner().getId() : null,
                         m.getPractitioner() != null && m.getPractitioner().getPerson() != null ? m.getPractitioner().getPerson().getFullName() : null,
                         m.getUser() != null ? m.getUser().getId() : null,
-                        m.getUser() != null ? m.getUser().getUsername() : null,
+                        m.getUser() != null ? m.getUser().getEmail() : null,
                         m.getRole(),
                         m.getStartedAt(),
                         m.getEndedAt()

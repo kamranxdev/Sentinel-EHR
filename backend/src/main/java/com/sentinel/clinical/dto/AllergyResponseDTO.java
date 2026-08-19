@@ -17,7 +17,7 @@ public class AllergyResponseDTO {
     private String status;
     private String verificationStatus;
     private String notes;
-    private String recordedByUsername;
+    private String recordedByEmail;
     private OffsetDateTime recordedAt;
     private OffsetDateTime updatedAt;
 
@@ -47,8 +47,8 @@ public class AllergyResponseDTO {
     public void setVerificationStatus(String verificationStatus) { this.verificationStatus = verificationStatus; }
     public String getNotes() { return notes; }
     public void setNotes(String notes) { this.notes = notes; }
-    public String getRecordedByUsername() { return recordedByUsername; }
-    public void setRecordedByUsername(String recordedByUsername) { this.recordedByUsername = recordedByUsername; }
+    public String getRecordedByEmail() { return recordedByEmail; }
+    public void setRecordedByEmail(String recordedByEmail) { this.recordedByEmail = recordedByEmail; }
     public OffsetDateTime getRecordedAt() { return recordedAt; }
     public void setRecordedAt(OffsetDateTime recordedAt) { this.recordedAt = recordedAt; }
     public OffsetDateTime getUpdatedAt() { return updatedAt; }

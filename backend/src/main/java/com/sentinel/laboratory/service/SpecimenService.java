@@ -122,7 +122,7 @@ public class SpecimenService {
         dto.setStatus(s.getStatus());
         dto.setCollectedAt(s.getCollectedAt());
         dto.setReceivedAt(s.getReceivedAt());
-        if (s.getCollectedBy() != null) dto.setCollectedByUsername(s.getCollectedBy().getUsername());
+        if (s.getCollectedBy() != null) dto.setCollectedByEmail(s.getCollectedBy().getEmail());
         return dto;
     }
 }

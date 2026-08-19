@@ -122,7 +122,7 @@ import {
               hlmInput
               type="text"
               [(ngModel)]="searchQuery"
-              placeholder="Filter audit logs by actor username, role, action, resource, IP address, or details..."
+              placeholder="Filter audit logs by actor email, role, action, resource, IP address, or details..."
               class="pl-9 h-10 w-full text-xs bg-background" />
           </div>
 
@@ -162,7 +162,7 @@ import {
               <tbody hlmTableBody class="divide-y divide-border">
                 <tr *ngFor="let log of filteredLogs()" (click)="selectedLog.set(log)" hlmTableRow class="hover:bg-muted/40 cursor-pointer transition-colors">
                   <td hlmTableCell class="py-3 px-4 font-mono text-muted-foreground whitespace-nowrap">{{ log.timestamp | date:'medium' }}</td>
-                  <td hlmTableCell class="py-3 px-4 font-semibold text-foreground">{{ log.username }}</td>
+                  <td hlmTableCell class="py-3 px-4 font-semibold text-foreground">{{ log.email }}</td>
                   <td hlmTableCell class="py-3 px-4"><span hlmBadge variant="outline" class="text-[10px]">{{ log.userRole }}</span></td>
                   <td hlmTableCell class="py-3 px-4"><span hlmBadge variant="secondary" class="text-[10px] font-mono">{{ log.action }}</span></td>
                   <td hlmTableCell class="py-3 px-4 font-medium text-foreground">{{ log.resourceType || log.entityName }}</td>
@@ -190,7 +190,7 @@ import {
                 <tr hlmTableRow class="bg-muted/50 border-b border-border">
                   <th hlmTableHead class="py-3 px-4 text-left">Occurred At</th>
                   <th hlmTableHead class="py-3 px-4 text-left">Event Type</th>
-                  <th hlmTableHead class="py-3 px-4 text-left">Actor Username</th>
+                  <th hlmTableHead class="py-3 px-4 text-left">Actor Email</th>
                   <th hlmTableHead class="py-3 px-4 text-left">Action</th>
                   <th hlmTableHead class="py-3 px-4 text-left">Status</th>
                   <th hlmTableHead class="py-3 px-4 text-left">IP Address</th>
@@ -200,7 +200,7 @@ import {
                 <tr *ngFor="let ev of securityEvents()" hlmTableRow class="hover:bg-muted/40">
                   <td hlmTableCell class="py-3 px-4 font-mono text-muted-foreground">{{ ev.occurredAt | date:'short' }}</td>
                   <td hlmTableCell class="py-3 px-4 font-bold text-foreground">{{ ev.eventType }}</td>
-                  <td hlmTableCell class="py-3 px-4 font-medium">{{ ev.username }}</td>
+                  <td hlmTableCell class="py-3 px-4 font-medium">{{ ev.email }}</td>
                   <td hlmTableCell class="py-3 px-4 font-mono">{{ ev.action }}</td>
                   <td hlmTableCell class="py-3 px-4">
                     <span hlmBadge [variant]="ev.status === 'SUCCESS' ? 'secondary' : 'destructive'" class="text-[10px]">
@@ -238,7 +238,7 @@ import {
               <tbody hlmTableBody class="divide-y divide-border">
                 <tr *ngFor="let bg of breakGlassLogs()" hlmTableRow class="hover:bg-muted/40">
                   <td hlmTableCell class="py-3 px-4 font-mono text-muted-foreground">{{ bg.accessedAt || (bg.createdAt | date:'short') }}</td>
-                  <td hlmTableCell class="py-3 px-4 font-bold text-foreground">{{ bg.username || bg.requestedBy }}</td>
+                  <td hlmTableCell class="py-3 px-4 font-bold text-foreground">{{ bg.email || bg.requestedBy }}</td>
                   <td hlmTableCell class="py-3 px-4 font-mono">{{ bg.patientId }}</td>
                   <td hlmTableCell class="py-3 px-4 text-foreground">{{ bg.reason || bg.justification }}</td>
                   <td hlmTableCell class="py-3 px-4">
@@ -285,7 +285,7 @@ export class AuditorLedgerComponent implements OnInit {
       const q = this.searchQuery.toLowerCase();
       result = result.filter(
         (l) =>
-          l.username?.toLowerCase().includes(q) ||
+          l.email?.toLowerCase().includes(q) ||
           l.action?.toLowerCase().includes(q) ||
           l.entityName?.toLowerCase().includes(q) ||
           l.details?.toLowerCase().includes(q) ||

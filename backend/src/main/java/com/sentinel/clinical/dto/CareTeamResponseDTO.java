@@ -20,19 +20,19 @@ public class CareTeamResponseDTO {
         private UUID practitionerId;
         private String practitionerName;
         private UUID userId;
-        private String userName;
+        private String userEmail;
         private String role;
         private OffsetDateTime startedAt;
         private OffsetDateTime endedAt;
 
         public MemberDTO() {}
 
-        public MemberDTO(UUID id, UUID practitionerId, String practitionerName, UUID userId, String userName, String role, OffsetDateTime startedAt, OffsetDateTime endedAt) {
+        public MemberDTO(UUID id, UUID practitionerId, String practitionerName, UUID userId, String userEmail, String role, OffsetDateTime startedAt, OffsetDateTime endedAt) {
             this.id = id;
             this.practitionerId = practitionerId;
             this.practitionerName = practitionerName;
             this.userId = userId;
-            this.userName = userName;
+            this.userEmail = userEmail;
             this.role = role;
             this.startedAt = startedAt;
             this.endedAt = endedAt;
@@ -46,8 +46,8 @@ public class CareTeamResponseDTO {
         public void setPractitionerName(String practitionerName) { this.practitionerName = practitionerName; }
         public UUID getUserId() { return userId; }
         public void setUserId(UUID userId) { this.userId = userId; }
-        public String getUserName() { return userName; }
-        public void setUserName(String userName) { this.userName = userName; }
+        public String getUserEmail() { return userEmail; }
+        public void setUserEmail(String userEmail) { this.userEmail = userEmail; }
         public String getRole() { return role; }
         public void setRole(String role) { this.role = role; }
         public OffsetDateTime getStartedAt() { return startedAt; }

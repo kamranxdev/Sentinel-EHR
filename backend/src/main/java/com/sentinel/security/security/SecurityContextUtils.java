@@ -7,7 +7,7 @@ import java.util.Optional;
 
 public class SecurityContextUtils {
 
-    public static Optional<String> getCurrentUsername() {
+    public static Optional<String> getCurrentEmail() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         if (auth == null || !auth.isAuthenticated()) {
             return Optional.empty();

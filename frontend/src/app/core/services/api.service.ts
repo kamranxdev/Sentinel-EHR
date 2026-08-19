@@ -178,7 +178,7 @@ export class ApiService {
       );
     }
 
-    const searchKey = storedUser?.fullName || storedUser?.username || storedUser?.email || '';
+    const searchKey = storedUser?.fullName || storedUser?.email || storedUser?.email || '';
 
     if (!searchKey) {
       return throwError(() => new Error('No active user profile found in session.'));
@@ -629,8 +629,8 @@ export class ApiService {
     return this.get<BreakGlassRecord[]>(`/break-glass/patient/${patientId}`);
   }
 
-  getBreakGlassByUser(username: string): Observable<BreakGlassRecord[]> {
-    return this.get<BreakGlassRecord[]>(`/break-glass/user/${username}`);
+  getBreakGlassByUser(email: string): Observable<BreakGlassRecord[]> {
+    return this.get<BreakGlassRecord[]>(`/break-glass/user/${email}`);
   }
 
   // =========================================================================
@@ -1345,8 +1345,7 @@ export class ApiService {
             return {
               id: p.userId || p.id,
               personId: p.personId,
-              email: p.email,
-              username: p.email || p.identifier || cleanName.toLowerCase().replace(/\s+/g, '.'),
+              email: p.email || p.identifier || cleanName.toLowerCase().replace(/\s+/g, '.'),
               fullName: `Dr. ${cleanName}`,
               specialization: p.primarySpecialty || (p.specialties && p.specialties.length > 0 ? p.specialties[0].specialtyName : 'General Physician'),
               specialty: p.primarySpecialty || (p.specialties && p.specialties.length > 0 ? p.specialties[0].specialtyName : 'General Physician'),
@@ -1603,7 +1602,7 @@ export class ApiService {
           userId: a.userId,
           patientId: a.patientId,
           encounterId: a.encounterId,
-          username: a.username || a.userId || 'SYSTEM_DAEMON',
+          email: a.email || a.userId || 'SYSTEM_DAEMON',
           userRole: a.userRole || 'SECURITY_STAFF',
           action: a.action || 'AUDIT_LOG_ENTRY',
           resourceType: a.resourceType || a.entityName || 'SECURITY_RESOURCE',
@@ -1622,7 +1621,7 @@ export class ApiService {
           const q = search.toLowerCase();
           items = items.filter(
             (l) =>
-              l.username?.toLowerCase().includes(q) ||
+              l.email?.toLowerCase().includes(q) ||
               l.action?.toLowerCase().includes(q) ||
               l.entityName?.toLowerCase().includes(q) ||
               l.details?.toLowerCase().includes(q) ||

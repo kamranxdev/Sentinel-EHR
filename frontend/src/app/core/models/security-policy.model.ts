@@ -22,7 +22,7 @@ export interface RbacRole {
 export interface SecurityEventLog {
   id: number | string;
   eventType: string;
-  username: string;
+  email: string;
   resourceType?: string;
   resourceId?: string;
   action: string;

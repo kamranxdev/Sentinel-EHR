@@ -7,7 +7,7 @@ public class SecurityEventResponseDTO {
     private UUID id;
     private UUID organizationId;
     private UUID userId;
-    private String username;
+    private String email;
     private String eventType;
     private String ipAddress;
     private String userAgent;
@@ -22,8 +22,8 @@ public class SecurityEventResponseDTO {
     public void setOrganizationId(UUID organizationId) { this.organizationId = organizationId; }
     public UUID getUserId() { return userId; }
     public void setUserId(UUID userId) { this.userId = userId; }
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
     public String getEventType() { return eventType; }
     public void setEventType(String eventType) { this.eventType = eventType; }
     public String getIpAddress() { return ipAddress; }

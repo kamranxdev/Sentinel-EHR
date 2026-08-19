@@ -409,7 +409,7 @@ export type PatientChartTab =
                   <div class="space-y-0.5 min-w-0">
                     <div class="font-bold text-foreground truncate">{{ enc.chiefComplaint || enc.encounterType || 'Clinical Consultation' }}</div>
                     <div class="text-[11px] text-muted-foreground">
-                      {{ enc.startedAt || enc.createdAt | date:'mediumDate' }} • Dr. {{ enc.attendingProvider?.fullName || enc.createdByUsername || 'Attending Physician' }}
+                      {{ enc.startedAt || enc.createdAt | date:'mediumDate' }} • Dr. {{ enc.attendingProvider?.fullName || enc.createdByEmail || 'Attending Physician' }}
                     </div>
                   </div>
                   <span hlmBadge variant="outline" class="text-[10px] shrink-0 font-bold">
@@ -675,7 +675,7 @@ export type PatientChartTab =
                       {{ enc.chiefComplaint || 'Routine Health Consultation' }}
                     </td>
                     <td hlmTableCell class="py-3.5 px-4 text-muted-foreground">
-                      {{ enc.startedAt || enc.createdAt | date:'mediumDate' }} • Dr. {{ enc.attendingProvider?.fullName || enc.createdByUsername || 'Attending Physician' }}
+                      {{ enc.startedAt || enc.createdAt | date:'mediumDate' }} • Dr. {{ enc.attendingProvider?.fullName || enc.createdByEmail || 'Attending Physician' }}
                     </td>
                     <td hlmTableCell class="py-3.5 px-4">
                       <span hlmBadge [variant]="enc.status === 'FINISHED' || enc.status === 'COMPLETED' ? 'secondary' : 'default'" class="text-[10px] font-bold">
@@ -807,7 +807,7 @@ export type PatientChartTab =
                       {{ doc.title }}
                     </td>
                     <td hlmTableCell class="py-3.5 px-4 text-muted-foreground">
-                      Dr. {{ doc.authorUsername || 'Attending Staff' }}
+                      Dr. {{ doc.authorEmail || 'Attending Staff' }}
                     </td>
                     <td hlmTableCell class="py-3.5 px-4 text-muted-foreground">
                       {{ doc.createdAt | date:'mediumDate' }}
@@ -865,7 +865,7 @@ export type PatientChartTab =
                     {{ member.fullName ? member.fullName[0] : 'Dr' }}
                   </div>
                   <div>
-                    <h3 class="font-bold text-foreground text-xs sm:text-sm">Dr. {{ member.fullName || member.username }}</h3>
+                    <h3 class="font-bold text-foreground text-xs sm:text-sm">Dr. {{ member.fullName || member.email }}</h3>
                     <p class="text-[11px] text-muted-foreground">{{ member.specialty || 'General Medicine' }}</p>
                   </div>
                 </div>
@@ -1246,7 +1246,7 @@ export type PatientChartTab =
             </div>
             <div class="flex justify-between">
               <span class="text-muted-foreground">Ordered By:</span>
-              <span class="text-foreground">Dr. {{ selectedLabReport.orderingProviderUsername || 'Staff Physician' }}</span>
+              <span class="text-foreground">Dr. {{ selectedLabReport.orderingProviderEmail || 'Staff Physician' }}</span>
             </div>
             <div class="flex justify-between">
               <span class="text-muted-foreground">Status:</span>
@@ -1356,7 +1356,7 @@ export type PatientChartTab =
             </div>
             <div class="flex justify-between">
               <span class="text-muted-foreground">Attending Doctor:</span>
-              <span class="text-foreground">Dr. {{ selectedEncounter.attendingProvider?.fullName || selectedEncounter.createdByUsername || 'Attending Physician' }}</span>
+              <span class="text-foreground">Dr. {{ selectedEncounter.attendingProvider?.fullName || selectedEncounter.createdByEmail || 'Attending Physician' }}</span>
             </div>
             <div class="flex justify-between">
               <span class="text-muted-foreground">Visit Date:</span>
@@ -1403,7 +1403,7 @@ export type PatientChartTab =
             </div>
             <div class="flex justify-between">
               <span class="text-muted-foreground">Author:</span>
-              <span class="text-foreground">Dr. {{ selectedDocument.authorUsername || 'Attending Physician' }}</span>
+              <span class="text-foreground">Dr. {{ selectedDocument.authorEmail || 'Attending Physician' }}</span>
             </div>
             <div class="flex justify-between">
               <span class="text-muted-foreground">Date Authored:</span>

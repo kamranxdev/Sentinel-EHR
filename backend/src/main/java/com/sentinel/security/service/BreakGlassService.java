@@ -46,9 +46,9 @@ public class BreakGlassService {
                 .orElseThrow(() -> new ResourceNotFoundException("Patient with ID " + request.getPatientId() + " not found"));
 
         User user = null;
-        if (request.getUsername() != null) {
-            user = userRepository.findByEmail(request.getUsername())
-                    .orElseThrow(() -> new ResourceNotFoundException("User with email " + request.getUsername() + " not found"));
+        if (request.getEmail() != null) {
+            user = userRepository.findByEmail(request.getEmail())
+                    .orElseThrow(() -> new ResourceNotFoundException("User with email " + request.getEmail() + " not found"));
         } else {
             List<User> users = userRepository.findAll();
             if (!users.isEmpty()) user = users.get(0);
@@ -135,7 +135,7 @@ public class BreakGlassService {
         }
         if (r.getUser() != null) {
             dto.setUserId(r.getUser().getId());
-            dto.setUsername(r.getUser().getEmail());
+            dto.setEmail(r.getUser().getEmail());
         }
         dto.setCategory(r.getCategory());
         dto.setJustification(r.getJustification());

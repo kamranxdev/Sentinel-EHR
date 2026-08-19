@@ -119,7 +119,7 @@ export interface BreakGlassRecord {
   patientId?: string;
   patient?: Patient;
   user?: User;
-  username?: string;
+  email?: string;
   requestedBy?: string;
   category: string;
   justification: string;

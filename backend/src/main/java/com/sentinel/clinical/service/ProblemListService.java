@@ -107,7 +107,7 @@ public class ProblemListService {
         dto.setOnsetDate(p.getOnsetDate());
         dto.setResolvedDate(p.getResolvedDate());
         dto.setNotes(p.getNotes());
-        if (p.getRecordedBy() != null) dto.setRecordedByUsername(p.getRecordedBy().getUsername());
+        if (p.getRecordedBy() != null) dto.setRecordedByEmail(p.getRecordedBy().getEmail());
         dto.setRecordedAt(p.getRecordedAt());
         return dto;
     }

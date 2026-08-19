@@ -15,35 +15,78 @@ public class AuditLogResponseDTO {
     private String details;
     private OffsetDateTime timestamp;
 
-    public AuditLogResponseDTO() {}
+    public AuditLogResponseDTO() {
+    }
 
-    public UUID getId() { return id; }
-    public void setId(UUID id) { this.id = id; }
+    public UUID getId() {
+        return id;
+    }
 
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
+    public void setId(UUID id) {
+        this.id = id;
+    }
 
-    public String getUsername() { return email; }
-    public void setUsername(String username) { this.email = username; }
+    public String getEmail() {
+        return email;
+    }
 
-    public String getUserRole() { return userRole; }
-    public void setUserRole(String userRole) { this.userRole = userRole; }
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
-    public String getAction() { return action; }
-    public void setAction(String action) { this.action = action; }
+    public String getUserRole() {
+        return userRole;
+    }
 
-    public String getEntityName() { return entityName; }
-    public void setEntityName(String entityName) { this.entityName = entityName; }
+    public void setUserRole(String userRole) {
+        this.userRole = userRole;
+    }
 
-    public String getResourceId() { return resourceId; }
-    public void setResourceId(String resourceId) { this.resourceId = resourceId; }
+    public String getAction() {
+        return action;
+    }
 
-    public String getIpAddress() { return ipAddress; }
-    public void setIpAddress(String ipAddress) { this.ipAddress = ipAddress; }
+    public void setAction(String action) {
+        this.action = action;
+    }
 
-    public String getDetails() { return details; }
-    public void setDetails(String details) { this.details = details; }
+    public String getEntityName() {
+        return entityName;
+    }
 
-    public OffsetDateTime getTimestamp() { return timestamp; }
-    public void setTimestamp(OffsetDateTime timestamp) { this.timestamp = timestamp; }
+    public void setEntityName(String entityName) {
+        this.entityName = entityName;
+    }
+
+    public String getResourceId() {
+        return resourceId;
+    }
+
+    public void setResourceId(String resourceId) {
+        this.resourceId = resourceId;
+    }
+
+    public String getIpAddress() {
+        return ipAddress;
+    }
+
+    public void setIpAddress(String ipAddress) {
+        this.ipAddress = ipAddress;
+    }
+
+    public String getDetails() {
+        return details;
+    }
+
+    public void setDetails(String details) {
+        this.details = details;
+    }
+
+    public OffsetDateTime getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(OffsetDateTime timestamp) {
+        this.timestamp = timestamp;
+    }
 }

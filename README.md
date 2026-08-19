@@ -50,7 +50,7 @@ Open **http://localhost:4200** and sign in with any demo credential below.
 
 ### Demo Credentials
 
-| Role | Username | Password |
+| Role | Email | Password |
 | :--- | :--- | :--- |
 | **Patient** | `user_kamran` | `patient123` |
 | **Doctor** | `doctor_mahtab` | `doctor123` |

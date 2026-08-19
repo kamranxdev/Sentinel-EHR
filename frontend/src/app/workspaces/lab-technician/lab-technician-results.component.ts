@@ -133,7 +133,7 @@ interface TestPanelPreset {
             <div class="text-xs text-foreground flex items-center gap-4 flex-wrap">
               <span><strong>Patient:</strong> {{ selectedOrder?.patientFullName || patientName || 'Patient' }}</span>
               <span><strong>MRN:</strong> <span class="font-mono">{{ selectedOrder?.patientMrn || 'MRN-88219' }}</span></span>
-              <span><strong>Ordering Doctor:</strong> Dr. {{ selectedOrder?.orderingProviderUsername || 'Physician' }}</span>
+              <span><strong>Ordering Doctor:</strong> Dr. {{ selectedOrder?.orderingProviderEmail || 'Physician' }}</span>
             </div>
 
             <div *ngIf="selectedOrder?.clinicalNotes" class="text-[11px] text-muted-foreground italic">

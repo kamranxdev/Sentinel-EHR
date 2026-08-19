@@ -196,7 +196,7 @@ public class LabOrderService {
             dto.setPatientMrn(o.getPatient().getId() != null ? "MRN-" + o.getPatient().getId().toString().substring(0, 8).toUpperCase() : null);
         }
         if (o.getEncounter() != null) dto.setEncounterId(o.getEncounter().getId());
-        if (o.getOrderingProvider() != null) dto.setOrderingProviderUsername(o.getOrderingProvider().getUsername());
+        if (o.getOrderingProvider() != null) dto.setOrderingProviderEmail(o.getOrderingProvider().getEmail());
         dto.setTestName(o.getTestName());
         dto.setLoincCode(o.getLoincCode());
         dto.setCategory(o.getCategory());
@@ -207,7 +207,7 @@ public class LabOrderService {
         dto.setInProcessAt(o.getInProcessAt());
         dto.setResultedAt(o.getResultedAt());
         dto.setReviewedAt(o.getReviewedAt());
-        if (o.getReviewedBy() != null) dto.setReviewedByUsername(o.getReviewedBy().getUsername());
+        if (o.getReviewedBy() != null) dto.setReviewedByEmail(o.getReviewedBy().getEmail());
         dto.setClinicalNotes(o.getClinicalNotes());
 
         // Determine priority from clinical notes / test name

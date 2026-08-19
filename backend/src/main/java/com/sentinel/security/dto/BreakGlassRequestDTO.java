@@ -14,7 +14,7 @@ public class BreakGlassRequestDTO {
     @NotBlank(message = "Clinical justification is required")
     private String justification;
     
-    private String username;
+    private String email;
 
     public UUID getPatientId() { return patientId; }
     public void setPatientId(UUID patientId) { this.patientId = patientId; }
@@ -25,6 +25,6 @@ public class BreakGlassRequestDTO {
     public String getJustification() { return justification; }
     public void setJustification(String justification) { this.justification = justification; }
     
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
 }

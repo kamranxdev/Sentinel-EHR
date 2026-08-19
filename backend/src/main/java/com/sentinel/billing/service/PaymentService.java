@@ -132,7 +132,7 @@ public class PaymentService {
         dto.setStatus(r.getStatus());
         dto.setRequestedAt(r.getRequestedAt());
         dto.setProcessedAt(r.getProcessedAt());
-        if (r.getProcessedBy() != null) dto.setProcessedByUsername(r.getProcessedBy().getUsername());
+        if (r.getProcessedBy() != null) dto.setProcessedByEmail(r.getProcessedBy().getEmail());
         return dto;
     }
 }

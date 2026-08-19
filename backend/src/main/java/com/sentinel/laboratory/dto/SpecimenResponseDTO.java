@@ -12,7 +12,7 @@ public class SpecimenResponseDTO {
     private String status;
     private OffsetDateTime collectedAt;
     private OffsetDateTime receivedAt;
-    private String collectedByUsername;
+    private String collectedByEmail;
 
     public SpecimenResponseDTO() {}
 
@@ -32,6 +32,6 @@ public class SpecimenResponseDTO {
     public void setCollectedAt(OffsetDateTime collectedAt) { this.collectedAt = collectedAt; }
     public OffsetDateTime getReceivedAt() { return receivedAt; }
     public void setReceivedAt(OffsetDateTime receivedAt) { this.receivedAt = receivedAt; }
-    public String getCollectedByUsername() { return collectedByUsername; }
-    public void setCollectedByUsername(String collectedByUsername) { this.collectedByUsername = collectedByUsername; }
+    public String getCollectedByEmail() { return collectedByEmail; }
+    public void setCollectedByEmail(String collectedByEmail) { this.collectedByEmail = collectedByEmail; }
 }

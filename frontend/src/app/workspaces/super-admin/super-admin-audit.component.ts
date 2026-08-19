@@ -119,7 +119,7 @@ import {
                 <td class="py-3.5 px-4">
                   <div class="font-semibold text-foreground flex items-center gap-1.5">
                     <ng-icon name="lucideUser" size="13" class="text-indigo-600" />
-                    {{ log.username || log.userId || 'SYSTEM' }}
+                    {{ log.email || log.userId || 'SYSTEM' }}
                   </div>
                   <div class="text-[10px] font-mono text-muted-foreground">{{ log.userRole || 'SUPER_ADMIN' }}</div>
                 </td>
@@ -175,7 +175,7 @@ import {
           <div class="space-y-2.5 text-xs">
             <div class="p-3 bg-muted/40 rounded-xl space-y-1.5 font-mono text-[11px]">
               <div><strong>Action:</strong> {{ selectedLog()?.action }}</div>
-              <div><strong>Actor:</strong> {{ selectedLog()?.username }} ({{ selectedLog()?.userRole }})</div>
+              <div><strong>Actor:</strong> {{ selectedLog()?.email }} ({{ selectedLog()?.userRole }})</div>
               <div><strong>Resource:</strong> {{ selectedLog()?.entityName || selectedLog()?.resourceType }} [ID: {{ selectedLog()?.resourceId || 'N/A' }}]</div>
               <div><strong>Timestamp:</strong> {{ selectedLog()?.timestamp }}</div>
               <div><strong>IP Address:</strong> {{ selectedLog()?.ipAddress }}</div>
@@ -218,7 +218,7 @@ export class SuperAdminAuditComponent implements OnInit {
       list = this.securityEvents().map((s: SecurityEventLog) => ({
         id: String(s.id),
         timestamp: s.occurredAt || new Date().toISOString(),
-        username: s.username || 'SECURITY_SYSTEM',
+        email: s.email || 'SECURITY_SYSTEM',
         userRole: 'SECURITY_MONITOR',
         action: s.action || s.eventType || 'SECURITY_POLICY_EVALUATION',
         entityName: s.resourceType || 'ABAC_RESOURCE',
@@ -231,7 +231,7 @@ export class SuperAdminAuditComponent implements OnInit {
     if (q) {
       list = list.filter(
         (l: AuditLog) =>
-          (l.username || '').toLowerCase().includes(q) ||
+          (l.email || '').toLowerCase().includes(q) ||
           (l.action || '').toLowerCase().includes(q) ||
           (l.entityName || '').toLowerCase().includes(q) ||
           (l.details || '').toLowerCase().includes(q) ||

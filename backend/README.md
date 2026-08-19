@@ -29,7 +29,7 @@ Java 17 / Spring Boot RESTful API service powering the Sentinel Electronic Healt
    
    * **H2 Web Console**: `http://localhost:8080/h2-console`
      - **JDBC URL**: `jdbc:h2:mem:sentineldb`
-     - **Username**: `sa` | **Password**: *(leave blank)*
+     - **Email**: `sa` | **Password**: *(leave blank)*
 
 2. **Local PostgreSQL Container (Docker Compose)**:
    ```bash
@@ -39,7 +39,7 @@ Java 17 / Spring Boot RESTful API service powering the Sentinel Electronic Healt
    # Run backend pointing to container
    SPRING_DATASOURCE_URL=jdbc:postgresql://localhost:5432/sentinel \
    SPRING_DATASOURCE_DRIVER=org.postgresql.Driver \
-   SPRING_DATASOURCE_USERNAME=sentinel \
+   SPRING_DATASOURCE_EMAIL=sentinel \
    SPRING_DATASOURCE_PASSWORD=SentinelPass123! \
    SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.PostgreSQLDialect \
    ./mvnw spring-boot:run
@@ -49,7 +49,7 @@ Java 17 / Spring Boot RESTful API service powering the Sentinel Electronic Healt
    ```bash
    export SPRING_DATASOURCE_URL="jdbc:postgresql://db.<your-project-ref>.supabase.co:5432/postgres?sslmode=require"
    export SPRING_DATASOURCE_DRIVER="org.postgresql.Driver"
-   export SPRING_DATASOURCE_USERNAME="postgres"
+   export SPRING_DATASOURCE_EMAIL="postgres"
    export SPRING_DATASOURCE_PASSWORD="YourSupabasePassword123!"
    export SPRING_JPA_DATABASE_PLATFORM="org.hibernate.dialect.PostgreSQLDialect"
 

@@ -6,7 +6,7 @@ export interface ClinicalDocument {
   title: string;
   content: string;
   status: 'DRAFT' | 'PRELIMINARY' | 'FINAL' | 'AMENDED';
-  authorUsername: string;
+  authorEmail: string;
   authorFullName?: string;
   signedAt?: string;
   versionNumber?: number;
@@ -36,5 +36,5 @@ export interface CreateClinicalDocumentRequest {
   documentType: string;
   title: string;
   content: string;
-  authorUsername?: string;
+  authorEmail?: string;
 }

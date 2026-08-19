@@ -69,7 +69,7 @@ public class TriageService {
         dto.setTriagePriority(r.getTriagePriority());
         dto.setVitalsSummary(r.getVitalsSummary());
         dto.setNotes(r.getNotes());
-        if (r.getRecordedBy() != null) dto.setRecordedByUsername(r.getRecordedBy().getUsername());
+        if (r.getRecordedBy() != null) dto.setRecordedByEmail(r.getRecordedBy().getEmail());
         dto.setRecordedAt(r.getRecordedAt());
         return dto;
     }

@@ -31,9 +31,8 @@ public class SecurityIntegrationTest {
     public void testUnauthenticatedAdminCreateUserFails() throws Exception {
         String regJson = """
                 {
-                    "username": "unauth_created_doctor",
-                    "password": "Password123!",
                     "email": "unauth_doc@example.com",
+                    "password": "Password123!",
                     "fullName": "Unauth Doctor"
                 }
                 """;

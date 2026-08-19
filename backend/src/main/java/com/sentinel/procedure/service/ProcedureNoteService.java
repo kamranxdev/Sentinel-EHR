@@ -64,7 +64,7 @@ public class ProcedureNoteService {
         if (n.getPerformance() != null) dto.setPerformanceId(n.getPerformance().getId());
         dto.setNoteType(n.getNoteType());
         dto.setContent(n.getContent());
-        if (n.getCreatedBy() != null) dto.setCreatedByUsername(n.getCreatedBy().getUsername());
+        if (n.getCreatedBy() != null) dto.setCreatedByEmail(n.getCreatedBy().getEmail());
         dto.setCreatedAt(n.getCreatedAt());
         return dto;
     }

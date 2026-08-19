@@ -37,11 +37,11 @@ public class AuditLogAspect {
         if (auth == null || !auth.isAuthenticated()) return;
 
         try {
-            String username = auth.getName();
+            String email = auth.getName();
             String role = com.sentinel.audit.service.AuditTrailService.resolvePrimaryRole(auth);
 
             logger.debug("[API_ACCESS] endpoint={} user='{}' role='{}' status=AUTHORIZED", 
-                    joinPoint.getSignature().toShortString(), username, role);
+                    joinPoint.getSignature().toShortString(), email, role);
         } catch (Exception ex) {
             logger.error("AOP AUDIT LOG ERROR: Failed to log authorized access: {}", ex.getMessage());
         }
@@ -52,14 +52,14 @@ public class AuditLogAspect {
         if (!(ex instanceof AccessDeniedException)) return;
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String username = (auth != null && auth.isAuthenticated()) ? auth.getName() : "ANONYMOUS";
+        String email = (auth != null && auth.isAuthenticated()) ? auth.getName() : "ANONYMOUS";
         String role = (auth != null && auth.isAuthenticated()) ? com.sentinel.audit.service.AuditTrailService.resolvePrimaryRole(auth) : "NONE";
 
         try {
-            AuditLog log = new AuditLog(username, role, "ACCESS_DENIED", joinPoint.getSignature().getDeclaringType().getSimpleName(), "127.0.0.1", "Access denied on endpoint: " + joinPoint.getSignature().toShortString());
+            AuditLog log = new AuditLog(email, role, "ACCESS_DENIED", joinPoint.getSignature().getDeclaringType().getSimpleName(), "127.0.0.1", "Access denied on endpoint: " + joinPoint.getSignature().toShortString());
             auditLogRepository.save(log);
             logger.warn("[SECURITY_AUDIT] status=DENIED action=ACCESS_DENIED endpoint={} user='{}' role='{}'", 
-                    joinPoint.getSignature().toShortString(), username, role);
+                    joinPoint.getSignature().toShortString(), email, role);
         } catch (Exception loggingEx) {
             logger.error("AOP AUDIT LOG ERROR: Failed to log access denial: {}", loggingEx.getMessage());
         }

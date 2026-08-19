@@ -8,7 +8,7 @@ public class BreakGlassResponseDTO {
     private UUID patientId;
     private String patientName;
     private UUID userId;
-    private String username;
+    private String email;
     private String category;
     private String justification;
     private LocalDateTime requestedAt;
@@ -26,8 +26,8 @@ public class BreakGlassResponseDTO {
     public void setPatientName(String patientName) { this.patientName = patientName; }
     public UUID getUserId() { return userId; }
     public void setUserId(UUID userId) { this.userId = userId; }
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
     public String getCategory() { return category; }
     public void setCategory(String category) { this.category = category; }
     public String getJustification() { return justification; }

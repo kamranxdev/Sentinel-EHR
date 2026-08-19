@@ -37,7 +37,7 @@ public class OrganizationRegistrationTest {
                 "countryCode": "IN",
                 "timezone": "Asia/Kolkata",
                 "adminFullName": "Dr. Rohit Verma",
-                "adminUsername": "orgadmin_rohit",
+                "adminEmail": "orgadmin_rohit",
                 "adminEmail": "rohit.verma@fortisgurgaon.com",
                 "adminPassword": "Sentinel@Admin2026"
             }

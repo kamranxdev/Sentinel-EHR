@@ -33,7 +33,7 @@ public class SmartSafetyService {
         this.auditService = auditService;
     }
 
-    public SafetyCheckResultDTO checkPrescriptionSafety(UUID patientId, String medicationName, String actorUsername, String actorRole) {
+    public SafetyCheckResultDTO checkPrescriptionSafety(UUID patientId, String medicationName, String actorEmail, String actorRole) {
         if (patientId == null || medicationName == null || medicationName.trim().isEmpty()) {
             return new SafetyCheckResultDTO(true, "NONE", null, "No medication specified for check.");
         }

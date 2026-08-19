@@ -106,7 +106,7 @@ public class VitalService {
         dto.setPosition(v.getPosition());
         dto.setOxygenDeliveryMethod(v.getOxygenDeliveryMethod());
         dto.setNotes(v.getNotes());
-        if (v.getRecordedBy() != null) dto.setRecordedByUsername(v.getRecordedBy().getUsername());
+        if (v.getRecordedBy() != null) dto.setRecordedByEmail(v.getRecordedBy().getEmail());
         dto.setRecordedAt(v.getRecordedAt());
         return dto;
     }

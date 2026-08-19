@@ -45,7 +45,7 @@ public class ProviderScheduleService {
         ScheduleSlot saved = scheduleSlotRepository.save(slot);
 
         if (auditService != null) {
-            auditService.logEvent(saved.getId(), "SCHEDULE_SLOT_CREATED", "Created slot for " + practitioner.getUsername());
+            auditService.logEvent(saved.getId(), "SCHEDULE_SLOT_CREATED", "Created slot for " + practitioner.getEmail());
         }
 
         return mapToDTO(saved);

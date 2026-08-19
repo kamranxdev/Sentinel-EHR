@@ -28,7 +28,7 @@ export interface Encounter {
   endedAt?: string;
   status: 'ACTIVE' | 'COMPLETED' | 'DISCHARGED' | 'CANCELLED' | string;
   encounterDate?: string;
-  createdByUsername?: string;
+  createdByEmail?: string;
   createdAt?: string;
 }
 
@@ -49,7 +49,7 @@ export interface Allergy {
   verificationStatus?: string;
   notes?: string;
   recordedBy?: User;
-  recordedByUsername?: string;
+  recordedByEmail?: string;
   recordedAt?: string;
   updatedAt?: string;
 }
@@ -100,7 +100,7 @@ export interface Vitals {
   recordedBy?: User;
   recordedById?: string;
   recordedByName?: string;
-  recordedByUsername?: string;
+  recordedByEmail?: string;
   systolicBp?: number;
   diastolicBp?: number;
   meanArterialPressure?: number;

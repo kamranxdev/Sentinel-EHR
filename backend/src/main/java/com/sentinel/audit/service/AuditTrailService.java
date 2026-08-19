@@ -19,21 +19,21 @@ public class AuditTrailService {
     }
 
     @Transactional
-    public void logAction(String username, String userRole, String action, String entityName, String resourceId, String details) {
-        AuditLog log = new AuditLog(username, userRole, action, entityName, resourceId, details);
+    public void logAction(String email, String userRole, String action, String entityName, String resourceId, String details) {
+        AuditLog log = new AuditLog(email, userRole, action, entityName, resourceId, details);
         auditLogRepository.save(log);
     }
 
     @Transactional
-    public void logAction(String username, String action, String entityName, String resourceId, String details) {
-        logAction(username, "USER", action, entityName, resourceId, details);
+    public void logAction(String email, String action, String entityName, String resourceId, String details) {
+        logAction(email, "USER", action, entityName, resourceId, details);
     }
 
     @Transactional
     public void logAction(Authentication auth, String action, String entityName, String resourceId, String details) {
-        String username = auth != null && auth.isAuthenticated() ? auth.getName() : "SYSTEM";
+        String email = auth != null && auth.isAuthenticated() ? auth.getName() : "SYSTEM";
         String role = auth != null && auth.isAuthenticated() ? resolvePrimaryRole(auth) : "SYSTEM";
-        logAction(username, role, action, entityName, resourceId, details);
+        logAction(email, role, action, entityName, resourceId, details);
     }
 
     public static String resolvePrimaryRole(Authentication auth) {

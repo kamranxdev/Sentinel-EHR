@@ -137,7 +137,7 @@ public class TransferService {
         if (t.getToWard() != null) dto.setToWardId(t.getToWard().getId());
         if (t.getToBed() != null) dto.setToBedId(t.getToBed().getId());
         dto.setReason(t.getReason());
-        if (t.getTransferredBy() != null) dto.setTransferredByUsername(t.getTransferredBy().getUsername());
+        if (t.getTransferredBy() != null) dto.setTransferredByEmail(t.getTransferredBy().getEmail());
         dto.setTransferredAt(t.getTransferredAt());
         return dto;
     }

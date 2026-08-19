@@ -24,90 +24,194 @@ public class CreateOrganizationRequest {
     private String district;
     private String state;
     private String postalCode;
-    private String adminUsername;
-    private String adminPassword;
     private String adminEmail;
+    private String adminPassword;
     private String adminFullName;
 
-    public CreateOrganizationRequest() {}
+    public CreateOrganizationRequest() {
+    }
 
     public String getCode() {
         return code != null && !code.isBlank() ? code : orgCode;
     }
 
-    public void setCode(String code) { this.code = code; }
+    public void setCode(String code) {
+        this.code = code;
+    }
 
-    public String getOrgCode() { return orgCode; }
-    public void setOrgCode(String orgCode) { this.orgCode = orgCode; }
+    public String getOrgCode() {
+        return orgCode;
+    }
+
+    public void setOrgCode(String orgCode) {
+        this.orgCode = orgCode;
+    }
 
     public String getName() {
         return name != null && !name.isBlank() ? name : orgName;
     }
 
-    public void setName(String name) { this.name = name; }
+    public void setName(String name) {
+        this.name = name;
+    }
 
-    public String getOrgName() { return orgName; }
-    public void setOrgName(String orgName) { this.orgName = orgName; }
+    public String getOrgName() {
+        return orgName;
+    }
 
-    public String getLegalName() { return legalName; }
-    public void setLegalName(String legalName) { this.legalName = legalName; }
+    public void setOrgName(String orgName) {
+        this.orgName = orgName;
+    }
 
-    public String getOrganizationType() { return organizationType; }
-    public void setOrganizationType(String organizationType) { this.organizationType = organizationType; }
+    public String getLegalName() {
+        return legalName;
+    }
 
-    public String getTimezone() { return timezone; }
-    public void setTimezone(String timezone) { this.timezone = timezone; }
+    public void setLegalName(String legalName) {
+        this.legalName = legalName;
+    }
 
-    public String getCountryCode() { return countryCode; }
-    public void setCountryCode(String countryCode) { this.countryCode = countryCode; }
+    public String getOrganizationType() {
+        return organizationType;
+    }
 
-    public String getPhone() { return phone; }
-    public void setPhone(String phone) { this.phone = phone; }
+    public void setOrganizationType(String organizationType) {
+        this.organizationType = organizationType;
+    }
 
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
+    public String getTimezone() {
+        return timezone;
+    }
 
-    public String getWebsite() { return website; }
-    public void setWebsite(String website) { this.website = website; }
+    public void setTimezone(String timezone) {
+        this.timezone = timezone;
+    }
 
-    public String getLicenseNumber() { return licenseNumber; }
-    public void setLicenseNumber(String licenseNumber) { this.licenseNumber = licenseNumber; }
+    public String getCountryCode() {
+        return countryCode;
+    }
 
-    public String getAddress() { return address; }
-    public void setAddress(String address) { this.address = address; }
+    public void setCountryCode(String countryCode) {
+        this.countryCode = countryCode;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getWebsite() {
+        return website;
+    }
+
+    public void setWebsite(String website) {
+        this.website = website;
+    }
+
+    public String getLicenseNumber() {
+        return licenseNumber;
+    }
+
+    public void setLicenseNumber(String licenseNumber) {
+        this.licenseNumber = licenseNumber;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
 
     public String getAddressLine1() {
         return addressLine1 != null && !addressLine1.isBlank() ? addressLine1 : address;
     }
-    public void setAddressLine1(String addressLine1) { this.addressLine1 = addressLine1; }
 
-    public String getAddressLine2() { return addressLine2; }
-    public void setAddressLine2(String addressLine2) { this.addressLine2 = addressLine2; }
+    public void setAddressLine1(String addressLine1) {
+        this.addressLine1 = addressLine1;
+    }
 
-    public String getLandmark() { return landmark; }
-    public void setLandmark(String landmark) { this.landmark = landmark; }
+    public String getAddressLine2() {
+        return addressLine2;
+    }
 
-    public String getCity() { return city; }
-    public void setCity(String city) { this.city = city; }
+    public void setAddressLine2(String addressLine2) {
+        this.addressLine2 = addressLine2;
+    }
 
-    public String getDistrict() { return district; }
-    public void setDistrict(String district) { this.district = district; }
+    public String getLandmark() {
+        return landmark;
+    }
 
-    public String getState() { return state; }
-    public void setState(String state) { this.state = state; }
+    public void setLandmark(String landmark) {
+        this.landmark = landmark;
+    }
 
-    public String getPostalCode() { return postalCode; }
-    public void setPostalCode(String postalCode) { this.postalCode = postalCode; }
+    public String getCity() {
+        return city;
+    }
 
-    public String getAdminUsername() { return adminUsername; }
-    public void setAdminUsername(String adminUsername) { this.adminUsername = adminUsername; }
+    public void setCity(String city) {
+        this.city = city;
+    }
 
-    public String getAdminPassword() { return adminPassword; }
-    public void setAdminPassword(String adminPassword) { this.adminPassword = adminPassword; }
+    public String getDistrict() {
+        return district;
+    }
 
-    public String getAdminEmail() { return adminEmail; }
-    public void setAdminEmail(String adminEmail) { this.adminEmail = adminEmail; }
+    public void setDistrict(String district) {
+        this.district = district;
+    }
 
-    public String getAdminFullName() { return adminFullName; }
-    public void setAdminFullName(String adminFullName) { this.adminFullName = adminFullName; }
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+    }
+
+    public String getPostalCode() {
+        return postalCode;
+    }
+
+    public void setPostalCode(String postalCode) {
+        this.postalCode = postalCode;
+    }
+
+    public String getAdminPassword() {
+        return adminPassword;
+    }
+
+    public void setAdminPassword(String adminPassword) {
+        this.adminPassword = adminPassword;
+    }
+
+    public String getAdminEmail() {
+        return adminEmail;
+    }
+
+    public void setAdminEmail(String adminEmail) {
+        this.adminEmail = adminEmail;
+    }
+
+    public String getAdminFullName() {
+        return adminFullName;
+    }
+
+    public void setAdminFullName(String adminFullName) {
+        this.adminFullName = adminFullName;
+    }
 }

@@ -12,7 +12,7 @@ public class ClinicalObservationResponseDTO {
     private String valueString;
     private String valueUnit;
     private String status;
-    private String recordedByUsername;
+    private String recordedByEmail;
     private OffsetDateTime observedAt;
 
     public ClinicalObservationResponseDTO() {}
@@ -33,8 +33,8 @@ public class ClinicalObservationResponseDTO {
     public void setValueUnit(String valueUnit) { this.valueUnit = valueUnit; }
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
-    public String getRecordedByUsername() { return recordedByUsername; }
-    public void setRecordedByUsername(String recordedByUsername) { this.recordedByUsername = recordedByUsername; }
+    public String getRecordedByEmail() { return recordedByEmail; }
+    public void setRecordedByEmail(String recordedByEmail) { this.recordedByEmail = recordedByEmail; }
     public OffsetDateTime getObservedAt() { return observedAt; }
     public void setObservedAt(OffsetDateTime observedAt) { this.observedAt = observedAt; }
 }

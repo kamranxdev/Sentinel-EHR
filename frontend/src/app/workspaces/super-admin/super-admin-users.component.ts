@@ -225,7 +225,7 @@ type RoleCategoryTab = 'ALL' | 'SUPER_ADMIN' | 'ORG_ADMIN' | 'PHYSICIAN' | 'NURS
           <input
             type="text"
             [(ngModel)]="searchQuery"
-            placeholder="Search by name, username, email, department..."
+            placeholder="Search by name, email, email, department..."
             class="pl-9 pr-3 h-9 w-full rounded-lg border border-input text-xs bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-purple-500/40"
           />
         </div>
@@ -358,8 +358,8 @@ type RoleCategoryTab = 'ALL' | 'SUPER_ADMIN' | 'ORG_ADMIN' | 'PHYSICIAN' | 'NURS
 
             <div class="grid grid-cols-2 gap-3">
               <div>
-                <label class="block font-semibold text-foreground mb-1">Username *</label>
-                <input type="text" [(ngModel)]="newUserForm.username" placeholder="rverma" class="w-full px-3 py-2 rounded-lg border border-input bg-background font-mono" />
+                <label class="block font-semibold text-foreground mb-1">Email *</label>
+                <input type="text" [(ngModel)]="newUserForm.email" placeholder="rverma" class="w-full px-3 py-2 rounded-lg border border-input bg-background font-mono" />
               </div>
               <div>
                 <label class="block font-semibold text-foreground mb-1">Temporary Password *</label>
@@ -389,7 +389,7 @@ type RoleCategoryTab = 'ALL' | 'SUPER_ADMIN' | 'ORG_ADMIN' | 'PHYSICIAN' | 'NURS
 
           <div class="flex justify-end gap-2 pt-3 border-t border-border">
             <button (click)="showCreateModal.set(false)" class="px-4 py-2 rounded-lg border border-border text-xs font-semibold">Cancel</button>
-            <button (click)="submitCreateUser()" [disabled]="!newUserForm.username || !newUserForm.email || !newUserForm.password" class="px-4 py-2 rounded-lg bg-purple-600 text-white text-xs font-semibold hover:bg-purple-700 transition-colors disabled:opacity-50">
+            <button (click)="submitCreateUser()" [disabled]="!newUserForm.email || !newUserForm.email || !newUserForm.password" class="px-4 py-2 rounded-lg bg-purple-600 text-white text-xs font-semibold hover:bg-purple-700 transition-colors disabled:opacity-50">
               Create User
             </button>
           </div>
@@ -407,7 +407,6 @@ export class SuperAdminUsersComponent implements OnInit {
 
   newUserForm = {
     fullName: '',
-    username: '',
     email: '',
     password: '',
     role: 'PHYSICIAN',
@@ -447,7 +446,7 @@ export class SuperAdminUsersComponent implements OnInit {
       list = list.filter(
         (u) =>
           (u.fullName || '').toLowerCase().includes(q) ||
-          (u.username || '').toLowerCase().includes(q) ||
+          (u.email || '').toLowerCase().includes(q) ||
           (u.email || '').toLowerCase().includes(q) ||
           (u.department || '').toLowerCase().includes(q),
       );
@@ -491,10 +490,10 @@ export class SuperAdminUsersComponent implements OnInit {
   forcePasswordReset(u: User): void {
     this.apiService.forcePasswordResetPlatformUser(u.id).subscribe({
       next: () => {
-        toast.success(`Forced password reset triggered for @${u.username}. User will be prompted on next login.`);
+        toast.success(`Forced password reset triggered for @${u.email}. User will be prompted on next login.`);
       },
       error: () => {
-        toast.success(`Password reset flagged for @${u.username}.`);
+        toast.success(`Password reset flagged for @${u.email}.`);
       },
     });
   }
@@ -503,11 +502,11 @@ export class SuperAdminUsersComponent implements OnInit {
     this.apiService.updateUserStatus(String(u.id), 'ACTIVE').subscribe({
       next: () => {
         u.verificationStatus = 'VERIFIED';
-        toast.success(`Account @${u.username} activated.`);
+        toast.success(`Account @${u.email} activated.`);
       },
       error: () => {
         u.verificationStatus = 'VERIFIED';
-        toast.success(`Account @${u.username} activated.`);
+        toast.success(`Account @${u.email} activated.`);
       },
     });
   }
@@ -516,11 +515,11 @@ export class SuperAdminUsersComponent implements OnInit {
     this.apiService.updateUserStatus(String(u.id), 'SUSPENDED').subscribe({
       next: () => {
         u.verificationStatus = 'SUSPENDED';
-        toast.error(`Account @${u.username} suspended.`);
+        toast.error(`Account @${u.email} suspended.`);
       },
       error: () => {
         u.verificationStatus = 'SUSPENDED';
-        toast.error(`Account @${u.username} suspended.`);
+        toast.error(`Account @${u.email} suspended.`);
       },
     });
   }
@@ -528,7 +527,6 @@ export class SuperAdminUsersComponent implements OnInit {
   openCreateModal(): void {
     this.newUserForm = {
       fullName: '',
-      username: '',
       email: '',
       password: '',
       role: 'PHYSICIAN',
@@ -543,7 +541,7 @@ export class SuperAdminUsersComponent implements OnInit {
     };
     this.authService.createStaffUser(payload).subscribe({
       next: () => {
-        toast.success(`User @${this.newUserForm.username} created successfully.`);
+        toast.success(`User @${this.newUserForm.email} created successfully.`);
         this.showCreateModal.set(false);
         this.loadUsers();
       },
@@ -551,14 +549,13 @@ export class SuperAdminUsersComponent implements OnInit {
         const created: User = {
           id: String(Date.now()),
           fullName: this.newUserForm.fullName,
-          username: this.newUserForm.username,
           email: this.newUserForm.email,
           roles: [this.newUserForm.role],
           verificationStatus: 'VERIFIED',
         };
         this.users.update((list) => [created, ...list]);
         this.showCreateModal.set(false);
-        toast.success(`User @${this.newUserForm.username} created.`);
+        toast.success(`User @${this.newUserForm.email} created.`);
       },
     });
   }

@@ -7,7 +7,7 @@ public class AppointmentCancellationResponseDTO {
     private Long id;
     private Long appointmentId;
     private Long cancelledByUserId;
-    private String cancelledByUserName;
+    private String cancelledByUserEmail;
     private String cancelledByRole;
     private String cancellationReason;
     private String additionalComment;
@@ -40,12 +40,12 @@ public class AppointmentCancellationResponseDTO {
         this.cancelledByUserId = cancelledByUserId;
     }
 
-    public String getCancelledByUserName() {
-        return cancelledByUserName;
+    public String getCancelledByUserEmail() {
+        return cancelledByUserEmail;
     }
 
-    public void setCancelledByUserName(String cancelledByUserName) {
-        this.cancelledByUserName = cancelledByUserName;
+    public void setCancelledByUserEmail(String cancelledByUserEmail) {
+        this.cancelledByUserEmail = cancelledByUserEmail;
     }
 
     public String getCancelledByRole() {

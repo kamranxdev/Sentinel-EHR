@@ -366,8 +366,8 @@ interface StepItem {
                 </span>
               </div>
               <div class="flex justify-between items-center pb-2 border-b border-border text-xs">
-                <span class="text-muted-foreground">Primary Admin Username:</span>
-                <span class="font-mono font-semibold">{{ formData.adminUsername }}</span>
+                <span class="text-muted-foreground">Primary Admin Email:</span>
+                <span class="font-mono font-semibold">{{ formData.adminEmail }}</span>
               </div>
               <div class="flex justify-between items-center text-xs">
                 <span class="text-muted-foreground">Tenant Status:</span>
@@ -881,9 +881,8 @@ export class RegisterOrgComponent {
     website: '',
     countryCode: 'IN',
     timezone: 'Asia/Kolkata',
-    adminUsername: '',
-    adminPassword: '',
     adminEmail: '',
+    adminPassword: '',
     adminFullName: '',
   };
 
@@ -953,7 +952,6 @@ export class RegisterOrgComponent {
       countryCode: 'IN',
       timezone: 'Asia/Kolkata',
       adminFullName: 'Dr. Vikramaditya Singh',
-      adminUsername: 'orgadmin_vikram',
       adminEmail: 'vikram.singh@apollomumbai.org',
       adminPassword: 'Sentinel@Admin2026',
     };
@@ -1033,7 +1031,6 @@ export class RegisterOrgComponent {
       address: this.formData.address?.trim(),
       website: this.formData.website?.trim(),
       adminFullName: this.formData.adminFullName.trim(),
-      adminUsername: this.formData.adminUsername.trim(),
       adminEmail: this.formData.adminEmail.trim(),
       adminPassword: this.formData.adminPassword,
     };
@@ -1044,7 +1041,7 @@ export class RegisterOrgComponent {
         const facilityName = res.name || this.formData.orgName;
         const tenantCode = res.orgCode || res.code || code;
         this.successMessage.set(
-          `Your healthcare organization '${facilityName}' (Tenant Code: ${tenantCode}) has been registered in PENDING_VERIFICATION status. Primary Admin credentials for '${this.formData.adminUsername}' are configured.`
+          `Your healthcare organization '${facilityName}' (Tenant Code: ${tenantCode}) has been registered in PENDING_VERIFICATION status. Primary Admin credentials for '${this.formData.adminEmail}' are configured.`
         );
       },
       error: (err) => {
@@ -1077,9 +1074,8 @@ export class RegisterOrgComponent {
       website: '',
       countryCode: 'IN',
       timezone: 'Asia/Kolkata',
-      adminUsername: '',
-      adminPassword: '',
       adminEmail: '',
+      adminPassword: '',
       adminFullName: '',
     };
   }

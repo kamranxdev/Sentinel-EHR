@@ -70,7 +70,7 @@ public class ClinicalObservationService {
         dto.setValueString(o.getValueString());
         dto.setValueUnit(o.getValueUnit());
         dto.setStatus(o.getStatus());
-        if (o.getRecordedBy() != null) dto.setRecordedByUsername(o.getRecordedBy().getUsername());
+        if (o.getRecordedBy() != null) dto.setRecordedByEmail(o.getRecordedBy().getEmail());
         dto.setObservedAt(o.getObservedAt());
         return dto;
     }

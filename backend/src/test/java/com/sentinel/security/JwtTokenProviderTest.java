@@ -30,7 +30,7 @@ public class JwtTokenProviderTest {
 
         assertNotNull(token);
         assertTrue(tokenProvider.validateToken(token));
-        assertEquals("doctor_mahtab", tokenProvider.getUsernameFromJwt(token));
+        assertEquals("doctor_mahtab", tokenProvider.getEmailFromJwt(token));
     }
 
     @Test

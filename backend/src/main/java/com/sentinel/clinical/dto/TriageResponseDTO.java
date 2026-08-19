@@ -10,7 +10,7 @@ public class TriageResponseDTO {
     private String triagePriority;
     private String vitalsSummary;
     private String notes;
-    private String recordedByUsername;
+    private String recordedByEmail;
     private OffsetDateTime recordedAt;
 
     public TriageResponseDTO() {}
@@ -27,8 +27,8 @@ public class TriageResponseDTO {
     public void setVitalsSummary(String vitalsSummary) { this.vitalsSummary = vitalsSummary; }
     public String getNotes() { return notes; }
     public void setNotes(String notes) { this.notes = notes; }
-    public String getRecordedByUsername() { return recordedByUsername; }
-    public void setRecordedByUsername(String recordedByUsername) { this.recordedByUsername = recordedByUsername; }
+    public String getRecordedByEmail() { return recordedByEmail; }
+    public void setRecordedByEmail(String recordedByEmail) { this.recordedByEmail = recordedByEmail; }
     public OffsetDateTime getRecordedAt() { return recordedAt; }
     public void setRecordedAt(OffsetDateTime recordedAt) { this.recordedAt = recordedAt; }
 }

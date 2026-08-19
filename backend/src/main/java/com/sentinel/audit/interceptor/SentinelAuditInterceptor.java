@@ -31,7 +31,7 @@ public class SentinelAuditInterceptor {
     public void recordAccess(RequestDetails req, ResponseDetails resp) {
         try {
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            String username = (auth != null && auth.isAuthenticated()) ? auth.getName() : "ANONYMOUS";
+            String email = (auth != null && auth.isAuthenticated()) ? auth.getName() : "ANONYMOUS";
             String userRole = com.sentinel.audit.service.AuditTrailService.resolvePrimaryRole(auth);
 
             AuditEvent event = new AuditEvent();
@@ -40,7 +40,7 @@ public class SentinelAuditInterceptor {
             event.setRecorded(new Date());
 
             AuditEvent.AuditEventAgentComponent agent = new AuditEvent.AuditEventAgentComponent();
-            agent.setWho(new Reference("Practitioner/" + username));
+            agent.setWho(new Reference("Practitioner/" + email));
             agent.setRequestor(true);
             event.addAgent(agent);
 
@@ -54,9 +54,9 @@ public class SentinelAuditInterceptor {
 
             String actionName = (req.getRequestType() != null ? req.getRequestType().name() : "ACCESS") + " " + req.getCompleteUrl();
             String resourceName = req.getResourceName() != null ? req.getResourceName() : "RESOURCE";
-            auditService.logAction(username, userRole, actionName, "FHIR_R4", resourceName, "HTTP " + statusCode);
+            auditService.logAction(email, userRole, actionName, "FHIR_R4", resourceName, "HTTP " + statusCode);
 
-            log.debug("FHIR AuditEvent recorded: user='{}' role='{}' action='{}' status={}", username, userRole, actionName, statusCode);
+            log.debug("FHIR AuditEvent recorded: user='{}' role='{}' action='{}' status={}", email, userRole, actionName, statusCode);
         } catch (Exception e) {
             log.warn("Failed to record FHIR AuditEvent: {}", e.getMessage());
         }

@@ -7,7 +7,7 @@ import java.util.UUID;
 
 @Entity
 @Table(name = "audit_events", schema = "audit")
-@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+@JsonIgnoreProperties({ "hibernateLazyInitializer", "handler" })
 public class AuditLog {
 
     @Id
@@ -50,7 +50,8 @@ public class AuditLog {
     @Transient
     private String details;
 
-    public AuditLog() {}
+    public AuditLog() {
+    }
 
     public AuditLog(String userEmail, String userRole, String action, String entityName, String details) {
         this.userEmail = userEmail;
@@ -61,7 +62,8 @@ public class AuditLog {
         this.details = details;
     }
 
-    public AuditLog(String userEmail, String userRole, String action, String entityName, String resourceId, String details) {
+    public AuditLog(String userEmail, String userRole, String action, String entityName, String resourceId,
+            String details) {
         this.userEmail = userEmail;
         this.userRole = userRole;
         this.action = action;
@@ -69,67 +71,154 @@ public class AuditLog {
         this.resourceType = entityName != null ? entityName : "GENERAL";
         this.details = details;
         try {
-            if (resourceId != null) this.resourceId = UUID.fromString(resourceId);
-        } catch (Exception ignored) {}
+            if (resourceId != null)
+                this.resourceId = UUID.fromString(resourceId);
+        } catch (Exception ignored) {
+        }
     }
 
-    public UUID getId() { return id; }
-    public void setId(UUID id) { this.id = id; }
+    public UUID getId() {
+        return id;
+    }
 
-    public UUID getOrganizationId() { return organizationId; }
-    public void setOrganizationId(UUID organizationId) { this.organizationId = organizationId; }
+    public void setId(UUID id) {
+        this.id = id;
+    }
 
-    public UUID getUserId() { return userId; }
-    public void setUserId(UUID userId) { this.userId = userId; }
+    public UUID getOrganizationId() {
+        return organizationId;
+    }
 
-    public UUID getPatientId() { return patientId; }
-    public void setPatientId(UUID patientId) { this.patientId = patientId; }
+    public void setOrganizationId(UUID organizationId) {
+        this.organizationId = organizationId;
+    }
 
-    public UUID getEncounterId() { return encounterId; }
-    public void setEncounterId(UUID encounterId) { this.encounterId = encounterId; }
+    public UUID getUserId() {
+        return userId;
+    }
 
-    public String getAction() { return action; }
-    public void setAction(String action) { this.action = action; }
+    public void setUserId(UUID userId) {
+        this.userId = userId;
+    }
 
-    public String getResourceType() { return resourceType; }
-    public void setResourceType(String resourceType) { this.resourceType = resourceType; }
+    public UUID getPatientId() {
+        return patientId;
+    }
 
-    public UUID getResourceId() { return resourceId; }
-    public void setResourceId(UUID resourceId) { this.resourceId = resourceId; }
+    public void setPatientId(UUID patientId) {
+        this.patientId = patientId;
+    }
 
-    public String getPurposeOfUse() { return purposeOfUse; }
-    public void setPurposeOfUse(String purposeOfUse) { this.purposeOfUse = purposeOfUse; }
+    public UUID getEncounterId() {
+        return encounterId;
+    }
 
-    public String getResult() { return result; }
-    public void setResult(String result) { this.result = result; }
+    public void setEncounterId(UUID encounterId) {
+        this.encounterId = encounterId;
+    }
 
-    public String getIpAddress() { return ipAddress; }
-    public void setIpAddress(String ipAddress) { this.ipAddress = ipAddress; }
+    public String getAction() {
+        return action;
+    }
 
-    public String getUserAgent() { return userAgent; }
-    public void setUserAgent(String userAgent) { this.userAgent = userAgent; }
+    public void setAction(String action) {
+        this.action = action;
+    }
 
-    public OffsetDateTime getOccurredAt() { return occurredAt; }
-    public void setOccurredAt(OffsetDateTime occurredAt) { this.occurredAt = occurredAt; }
+    public String getResourceType() {
+        return resourceType;
+    }
 
-    public String getUserEmail() { return userEmail; }
-    public void setUserEmail(String userEmail) { this.userEmail = userEmail; }
+    public void setResourceType(String resourceType) {
+        this.resourceType = resourceType;
+    }
 
-    public String getEmail() { return userEmail; }
-    public void setEmail(String email) { this.userEmail = email; }
+    public UUID getResourceId() {
+        return resourceId;
+    }
 
-    public String getUsername() { return userEmail; }
-    public void setUsername(String username) { this.userEmail = username; }
+    public void setResourceId(UUID resourceId) {
+        this.resourceId = resourceId;
+    }
 
-    public String getUserRole() { return userRole; }
-    public void setUserRole(String userRole) { this.userRole = userRole; }
+    public String getPurposeOfUse() {
+        return purposeOfUse;
+    }
 
-    public String getEntityName() { return entityName != null ? entityName : resourceType; }
+    public void setPurposeOfUse(String purposeOfUse) {
+        this.purposeOfUse = purposeOfUse;
+    }
+
+    public String getResult() {
+        return result;
+    }
+
+    public void setResult(String result) {
+        this.result = result;
+    }
+
+    public String getIpAddress() {
+        return ipAddress;
+    }
+
+    public void setIpAddress(String ipAddress) {
+        this.ipAddress = ipAddress;
+    }
+
+    public String getUserAgent() {
+        return userAgent;
+    }
+
+    public void setUserAgent(String userAgent) {
+        this.userAgent = userAgent;
+    }
+
+    public OffsetDateTime getOccurredAt() {
+        return occurredAt;
+    }
+
+    public void setOccurredAt(OffsetDateTime occurredAt) {
+        this.occurredAt = occurredAt;
+    }
+
+    public String getUserEmail() {
+        return userEmail;
+    }
+
+    public void setUserEmail(String userEmail) {
+        this.userEmail = userEmail;
+    }
+
+    public String getEmail() {
+        return userEmail;
+    }
+
+    public void setEmail(String email) {
+        this.userEmail = email;
+    }
+
+    public String getUserRole() {
+        return userRole;
+    }
+
+    public void setUserRole(String userRole) {
+        this.userRole = userRole;
+    }
+
+    public String getEntityName() {
+        return entityName != null ? entityName : resourceType;
+    }
+
     public void setEntityName(String entityName) {
         this.entityName = entityName;
         this.resourceType = entityName;
     }
 
-    public String getDetails() { return details; }
-    public void setDetails(String details) { this.details = details; }
+    public String getDetails() {
+        return details;
+    }
+
+    public void setDetails(String details) {
+        this.details = details;
+    }
 }

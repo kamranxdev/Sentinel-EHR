@@ -7,7 +7,7 @@ export interface CriticalPhoneLog {
   contactTime?: string;
   readBackConfirmed: boolean;
   notes?: string;
-  loggedByUsername?: string;
+  loggedByEmail?: string;
 }
 
 export interface LabResultComponent {
@@ -39,7 +39,7 @@ export interface LabResult {
   abnormalFlag?: 'NORMAL' | 'HIGH' | 'LOW' | 'CRITICAL_PANIC' | string | boolean;
   isCritical?: boolean;
   verified?: boolean;
-  verifiedByUsername?: string;
+  verifiedByEmail?: string;
   verifiedAt?: string;
   notes?: string;
   recordedBy?: string;
@@ -72,7 +72,7 @@ export interface Specimen {
   storageLocation?: string;
   status?: 'COLLECTED' | 'RECEIVED' | 'ACCESSIONED' | 'REJECTED' | 'PROCESSING' | string;
   notes?: string;
-  collectedByUsername?: string;
+  collectedByEmail?: string;
   collectedAt?: string;
   receivedAt?: string;
 }
@@ -112,15 +112,15 @@ export interface LabOrder {
   container?: string;
   specimenType?: string;
   analyzerName?: string;
-  orderingProviderUsername?: string;
-  orderedByUsername?: string;
+  orderingProviderEmail?: string;
+  orderedByEmail?: string;
   orderedBy?: string;
   orderedAt?: string;
   specimenCollectedAt?: string;
   inProcessAt?: string;
   resultedAt?: string;
   reviewedAt?: string;
-  reviewedByUsername?: string;
+  reviewedByEmail?: string;
   results?: LabResult[];
   specimens?: Specimen[];
 }

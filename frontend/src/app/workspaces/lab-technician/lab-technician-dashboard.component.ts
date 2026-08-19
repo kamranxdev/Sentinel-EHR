@@ -476,7 +476,7 @@ interface AnalyzerStatus {
                     </span>
                   </div>
                   <span class="text-[10px] text-muted-foreground block mt-0.5">
-                    Dr. {{ order.orderingProviderUsername || 'Staff Physician' }}
+                    Dr. {{ order.orderingProviderEmail || 'Staff Physician' }}
                   </span>
                 </td>
 

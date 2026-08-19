@@ -30,7 +30,6 @@ export interface User {
   personId?: string;
   email?: string;
   fullName?: string;
-  username?: string;
   specialization?: string;
   specialty?: string;
   department?: string;
@@ -51,7 +50,6 @@ export interface JwtAuthResponse {
   tokenType: string;
   email: string;
   fullName: string;
-  username?: string;
   roles: string[];
   permissions?: string[];
   userId?: string;

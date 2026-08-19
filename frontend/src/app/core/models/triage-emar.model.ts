@@ -18,7 +18,7 @@ export interface TriageEwsRecord {
   oxygenSaturation?: number;
   consciousnessLevel?: string;
   notes?: string;
-  triagedByUsername?: string;
+  triagedByEmail?: string;
   recordedBy?: string;
   recordedAt?: string;
   triagedAt?: string;
@@ -49,7 +49,7 @@ export interface TriageEwsResponseDTO {
   vitalsSummary?: string;
   notes?: string;
   ewsScore?: number;
-  triagedByUsername?: string;
+  triagedByEmail?: string;
   recordedBy?: string;
   triagedAt?: string;
   recordedAt?: string;
@@ -68,7 +68,7 @@ export interface EmarRecord {
   site?: string;
   route?: string;
   administeredBy?: string;
-  administeredByUsername?: string;
+  administeredByEmail?: string;
   scheduledAt?: string;
   administeredAt?: string;
   status?: string;
@@ -99,7 +99,7 @@ export interface EmarRecordResponseDTO {
   site?: string;
   route?: string;
   administeredBy?: string;
-  administeredByUsername?: string;
+  administeredByEmail?: string;
   scheduledAt?: string;
   administeredAt: string;
   status: string;
@@ -119,7 +119,7 @@ export interface NursingFlowsheet {
   id: string;
   encounterId: string;
   shift: string;
-  nurseUsername?: string;
+  nurseEmail?: string;
   createdAt: string;
   entries: NursingFlowsheetEntry[];
 }

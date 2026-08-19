@@ -10,7 +10,7 @@ public class DocumentVersionResponseDTO {
     private String storageKey;
     private String checksum;
     private Long fileSize;
-    private String createdByUsername;
+    private String createdByEmail;
     private OffsetDateTime createdAt;
 
     public DocumentVersionResponseDTO() {}
@@ -27,8 +27,8 @@ public class DocumentVersionResponseDTO {
     public void setChecksum(String checksum) { this.checksum = checksum; }
     public Long getFileSize() { return fileSize; }
     public void setFileSize(Long fileSize) { this.fileSize = fileSize; }
-    public String getCreatedByUsername() { return createdByUsername; }
-    public void setCreatedByUsername(String createdByUsername) { this.createdByUsername = createdByUsername; }
+    public String getCreatedByEmail() { return createdByEmail; }
+    public void setCreatedByEmail(String createdByEmail) { this.createdByEmail = createdByEmail; }
     public OffsetDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(OffsetDateTime createdAt) { this.createdAt = createdAt; }
 }

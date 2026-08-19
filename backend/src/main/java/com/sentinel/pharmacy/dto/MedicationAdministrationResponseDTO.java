@@ -11,7 +11,7 @@ public class MedicationAdministrationResponseDTO {
     private String dose;
     private String route;
     private String status;
-    private String administeredByUsername;
+    private String administeredByEmail;
     private OffsetDateTime administeredAt;
 
     public MedicationAdministrationResponseDTO() {}
@@ -30,8 +30,8 @@ public class MedicationAdministrationResponseDTO {
     public void setRoute(String route) { this.route = route; }
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
-    public String getAdministeredByUsername() { return administeredByUsername; }
-    public void setAdministeredByUsername(String administeredByUsername) { this.administeredByUsername = administeredByUsername; }
+    public String getAdministeredByEmail() { return administeredByEmail; }
+    public void setAdministeredByEmail(String administeredByEmail) { this.administeredByEmail = administeredByEmail; }
     public OffsetDateTime getAdministeredAt() { return administeredAt; }
     public void setAdministeredAt(OffsetDateTime administeredAt) { this.administeredAt = administeredAt; }
 }

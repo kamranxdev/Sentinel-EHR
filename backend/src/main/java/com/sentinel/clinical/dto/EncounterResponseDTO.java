@@ -21,7 +21,7 @@ public class EncounterResponseDTO {
     private OffsetDateTime startedAt;
     private OffsetDateTime endedAt;
     private String disposition;
-    private String createdByUsername;
+    private String createdByEmail;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
 
@@ -61,8 +61,8 @@ public class EncounterResponseDTO {
     public void setEndedAt(OffsetDateTime endedAt) { this.endedAt = endedAt; }
     public String getDisposition() { return disposition; }
     public void setDisposition(String disposition) { this.disposition = disposition; }
-    public String getCreatedByUsername() { return createdByUsername; }
-    public void setCreatedByUsername(String createdByUsername) { this.createdByUsername = createdByUsername; }
+    public String getCreatedByEmail() { return createdByEmail; }
+    public void setCreatedByEmail(String createdByEmail) { this.createdByEmail = createdByEmail; }
     public OffsetDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(OffsetDateTime createdAt) { this.createdAt = createdAt; }
     public OffsetDateTime getUpdatedAt() { return updatedAt; }

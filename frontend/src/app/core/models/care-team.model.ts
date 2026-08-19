@@ -13,7 +13,7 @@ export interface CareTeamMember {
   id: number | string;
   careTeamId?: number | string;
   practitionerId?: string;
-  username: string;
+  email: string;
   fullName?: string;
   role: 'PRIMARY_ATTENDING' | 'CONSULTING_PHYSICIAN' | 'PRIMARY_NURSE' | 'CASE_MANAGER' | 'PHARMACIST' | 'SOCIAL_WORKER' | string;
   specialty?: string;
@@ -23,7 +23,7 @@ export interface CareTeamMember {
 
 export interface AddCareTeamMemberRequest {
   practitionerId?: string;
-  username: string;
+  email: string;
   fullName?: string;
   role: string;
   specialty?: string;

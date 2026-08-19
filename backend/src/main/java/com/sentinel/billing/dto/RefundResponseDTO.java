@@ -12,7 +12,7 @@ public class RefundResponseDTO {
     private String status;
     private OffsetDateTime requestedAt;
     private OffsetDateTime processedAt;
-    private String processedByUsername;
+    private String processedByEmail;
 
     public RefundResponseDTO() {}
 
@@ -30,6 +30,6 @@ public class RefundResponseDTO {
     public void setRequestedAt(OffsetDateTime requestedAt) { this.requestedAt = requestedAt; }
     public OffsetDateTime getProcessedAt() { return processedAt; }
     public void setProcessedAt(OffsetDateTime processedAt) { this.processedAt = processedAt; }
-    public String getProcessedByUsername() { return processedByUsername; }
-    public void setProcessedByUsername(String processedByUsername) { this.processedByUsername = processedByUsername; }
+    public String getProcessedByEmail() { return processedByEmail; }
+    public void setProcessedByEmail(String processedByEmail) { this.processedByEmail = processedByEmail; }
 }

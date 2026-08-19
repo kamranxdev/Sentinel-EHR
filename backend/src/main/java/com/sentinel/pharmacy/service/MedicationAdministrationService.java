@@ -101,7 +101,7 @@ public class MedicationAdministrationService {
         dto.setDose(a.getDose());
         dto.setRoute(a.getRoute());
         dto.setStatus(a.getStatus());
-        if (a.getAdministeredBy() != null) dto.setAdministeredByUsername(a.getAdministeredBy().getUsername());
+        if (a.getAdministeredBy() != null) dto.setAdministeredByEmail(a.getAdministeredBy().getEmail());
         dto.setAdministeredAt(a.getAdministeredAt());
         return dto;
     }

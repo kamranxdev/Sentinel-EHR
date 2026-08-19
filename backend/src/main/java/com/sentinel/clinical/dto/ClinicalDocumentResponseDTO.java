@@ -11,7 +11,7 @@ public class ClinicalDocumentResponseDTO {
     private String documentType;
     private String title;
     private String status;
-    private String authorUsername;
+    private String authorEmail;
     private OffsetDateTime authoredAt;
     private OffsetDateTime createdAt;
     private List<VersionDTO> versions;
@@ -22,17 +22,17 @@ public class ClinicalDocumentResponseDTO {
         private UUID id;
         private Integer versionNumber;
         private String content;
-        private String authoredByUsername;
+        private String authoredByEmail;
         private String amendmentReason;
         private OffsetDateTime authoredAt;
 
         public VersionDTO() {}
 
-        public VersionDTO(UUID id, Integer versionNumber, String content, String authoredByUsername, String amendmentReason, OffsetDateTime authoredAt) {
+        public VersionDTO(UUID id, Integer versionNumber, String content, String authoredByEmail, String amendmentReason, OffsetDateTime authoredAt) {
             this.id = id;
             this.versionNumber = versionNumber;
             this.content = content;
-            this.authoredByUsername = authoredByUsername;
+            this.authoredByEmail = authoredByEmail;
             this.amendmentReason = amendmentReason;
             this.authoredAt = authoredAt;
         }
@@ -43,8 +43,8 @@ public class ClinicalDocumentResponseDTO {
         public void setVersionNumber(Integer versionNumber) { this.versionNumber = versionNumber; }
         public String getContent() { return content; }
         public void setContent(String content) { this.content = content; }
-        public String getAuthoredByUsername() { return authoredByUsername; }
-        public void setAuthoredByUsername(String authoredByUsername) { this.authoredByUsername = authoredByUsername; }
+        public String getAuthoredByEmail() { return authoredByEmail; }
+        public void setAuthoredByEmail(String authoredByEmail) { this.authoredByEmail = authoredByEmail; }
         public String getAmendmentReason() { return amendmentReason; }
         public void setAmendmentReason(String amendmentReason) { this.amendmentReason = amendmentReason; }
         public OffsetDateTime getAuthoredAt() { return authoredAt; }
@@ -63,8 +63,8 @@ public class ClinicalDocumentResponseDTO {
     public void setTitle(String title) { this.title = title; }
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
-    public String getAuthorUsername() { return authorUsername; }
-    public void setAuthorUsername(String authorUsername) { this.authorUsername = authorUsername; }
+    public String getAuthorEmail() { return authorEmail; }
+    public void setAuthorEmail(String authorEmail) { this.authorEmail = authorEmail; }
     public OffsetDateTime getAuthoredAt() { return authoredAt; }
     public void setAuthoredAt(OffsetDateTime authoredAt) { this.authoredAt = authoredAt; }
     public OffsetDateTime getCreatedAt() { return createdAt; }

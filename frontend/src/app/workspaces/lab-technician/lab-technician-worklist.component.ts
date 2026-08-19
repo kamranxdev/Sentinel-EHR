@@ -214,7 +214,7 @@ import {
                     </span>
                   </div>
                   <div class="text-[10px] text-muted-foreground mt-0.5">
-                    Ordered: {{ order.orderedAt | date: 'shortTime' }} • Dr. {{ order.orderingProviderUsername || 'Physician' }}
+                    Ordered: {{ order.orderedAt | date: 'shortTime' }} • Dr. {{ order.orderingProviderEmail || 'Physician' }}
                   </div>
                 </td>
 
@@ -387,7 +387,7 @@ import {
             </div>
             <div class="flex justify-between">
               <span class="text-muted-foreground">Ordering Doctor:</span>
-              <span class="text-foreground">Dr. {{ activeOrder?.orderingProviderUsername || 'Staff Physician' }}</span>
+              <span class="text-foreground">Dr. {{ activeOrder?.orderingProviderEmail || 'Staff Physician' }}</span>
             </div>
             <div class="flex justify-between">
               <span class="text-muted-foreground">Priority Acuity:</span>

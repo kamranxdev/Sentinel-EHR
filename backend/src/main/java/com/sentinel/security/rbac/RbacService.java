@@ -116,7 +116,7 @@ public class RbacService {
         userRepository.save(user);
 
         if (auditService != null) {
-            auditService.logEvent(user.getId(), "USER_ROLE_ASSIGNED", "Assigned role " + role.getName() + " to user " + user.getUsername());
+            auditService.logEvent(user.getId(), "USER_ROLE_ASSIGNED", "Assigned role " + role.getName() + " to user " + user.getEmail());
         }
     }
 

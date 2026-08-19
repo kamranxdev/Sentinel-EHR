@@ -436,8 +436,8 @@ export class ReceptionistIntakeComponent implements OnInit {
         if (docs && docs.length > 0) {
           const list: User[] = docs.map((d: any) => ({
             id: String(d.id),
-            username: d.username || d.fullName?.toLowerCase() || 'doctor',
-            fullName: d.fullName || d.username || 'Doctor',
+            email: d.email || d.fullName?.toLowerCase() || 'doctor',
+            fullName: d.fullName || d.email || 'Doctor',
             specialization: d.specialization || d.specialty || 'General Physician',
             specialty: d.specialty || d.specialization || 'General Physician',
             roles: ['PHYSICIAN'],

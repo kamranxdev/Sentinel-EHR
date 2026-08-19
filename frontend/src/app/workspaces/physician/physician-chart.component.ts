@@ -686,7 +686,7 @@ export type PhysicianChartTab =
                   {{ m.fullName ? m.fullName[0] : 'Dr' }}
                 </div>
                 <div>
-                  <h4 class="font-bold text-foreground text-xs">{{ m.fullName || m.username }}</h4>
+                  <h4 class="font-bold text-foreground text-xs">{{ m.fullName || m.email }}</h4>
                   <p class="text-[11px] text-muted-foreground">{{ m.specialty || 'Clinical Medicine' }}</p>
                 </div>
               </div>
@@ -745,7 +745,7 @@ export type PhysicianChartTab =
                 <tr *ngFor="let doc of clinicalDocuments()" hlmTableRow class="hover:bg-muted/40 transition-colors">
                   <td hlmTableCell class="py-3 px-4"><span hlmBadge variant="outline">{{ doc.documentType }}</span></td>
                   <td hlmTableCell class="py-3 px-4 font-semibold text-foreground">{{ doc.title }}</td>
-                  <td hlmTableCell class="py-3 px-4 text-muted-foreground">{{ doc.authorUsername }}</td>
+                  <td hlmTableCell class="py-3 px-4 text-muted-foreground">{{ doc.authorEmail }}</td>
                   <td hlmTableCell class="py-3 px-4 text-muted-foreground">{{ doc.createdAt | date:'short' }}</td>
                   <td hlmTableCell class="py-3 px-4">
                     <span hlmBadge [variant]="doc.status === 'FINAL' ? 'secondary' : 'default'" class="text-[10px]">{{ doc.status }}</span>
@@ -1195,8 +1195,8 @@ export type PhysicianChartTab =
 
           <div class="space-y-3 text-xs">
             <div>
-              <label class="font-medium text-foreground block mb-1">Clinician / Practitioner Username *</label>
-              <input type="text" [(ngModel)]="newCareMember.username" placeholder="e.g. dr_smith, nurse_sarah" class="w-full p-2 rounded-md border border-input bg-background" />
+              <label class="font-medium text-foreground block mb-1">Clinician / Practitioner Email *</label>
+              <input type="text" [(ngModel)]="newCareMember.email" placeholder="e.g. dr_smith, nurse_sarah" class="w-full p-2 rounded-md border border-input bg-background" />
             </div>
 
             <div>
@@ -1223,7 +1223,7 @@ export type PhysicianChartTab =
 
           <div class="flex justify-end gap-2 pt-2 border-t border-border">
             <button hlmBtn variant="outline" size="sm" (click)="showCareTeamModal.set(false)">Cancel</button>
-            <button hlmBtn variant="default" size="sm" [disabled]="savingCareMember() || !newCareMember.username" (click)="saveCareMember()" class="bg-cyan-600 hover:bg-cyan-700 text-white">
+            <button hlmBtn variant="default" size="sm" [disabled]="savingCareMember() || !newCareMember.email" (click)="saveCareMember()" class="bg-cyan-600 hover:bg-cyan-700 text-white">
               <ng-icon name="lucideSave" size="14" class="mr-1" /> {{ savingCareMember() ? 'Assigning...' : 'Assign Member' }}
             </button>
           </div>
@@ -1352,7 +1352,7 @@ export class PhysicianChartComponent implements OnInit {
 
   showCareTeamModal = signal(false);
   savingCareMember = signal(false);
-  newCareMember = { username: '', fullName: '', role: 'PRIMARY_ATTENDING', specialty: 'General Practice' };
+  newCareMember = { email: '', fullName: '', role: 'PRIMARY_ATTENDING', specialty: 'General Practice' };
 
   showConsentModal = signal(false);
   savingConsent = signal(false);
@@ -1738,7 +1738,7 @@ export class PhysicianChartComponent implements OnInit {
 
   saveCareMember(): void {
     const active = this.patientContext.activePatient();
-    if (!active?.id || !this.newCareMember.username || this.savingCareMember()) return;
+    if (!active?.id || !this.newCareMember.email || this.savingCareMember()) return;
 
     this.savingCareMember.set(true);
     this.apiService.getEncountersByPatient(active.id).subscribe((encs) => {
@@ -1753,7 +1753,7 @@ export class PhysicianChartComponent implements OnInit {
         const teamId = team?.id || 1;
         this.apiService
           .addCareTeamMember(teamId, {
-            username: this.newCareMember.username,
+            email: this.newCareMember.email,
             fullName: this.newCareMember.fullName,
             role: this.newCareMember.role,
             specialty: this.newCareMember.specialty,
@@ -1762,7 +1762,7 @@ export class PhysicianChartComponent implements OnInit {
             next: (member) => {
               this.savingCareMember.set(false);
               this.showCareTeamModal.set(false);
-              this.newCareMember = { username: '', fullName: '', role: 'PRIMARY_ATTENDING', specialty: 'General Practice' };
+              this.newCareMember = { email: '', fullName: '', role: 'PRIMARY_ATTENDING', specialty: 'General Practice' };
               toast.success('Care team member assigned');
               if (member) this.careTeamMembers.update((list) => [member, ...list]);
             },

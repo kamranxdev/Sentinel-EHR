@@ -180,7 +180,7 @@ public class EncounterService {
         dto.setStartedAt(e.getStartedAt());
         dto.setEndedAt(e.getEndedAt());
         dto.setDisposition(e.getDisposition());
-        if (e.getCreatedBy() != null) dto.setCreatedByUsername(e.getCreatedBy().getUsername());
+        if (e.getCreatedBy() != null) dto.setCreatedByEmail(e.getCreatedBy().getEmail());
         dto.setCreatedAt(e.getCreatedAt());
         dto.setUpdatedAt(e.getUpdatedAt());
         return dto;
