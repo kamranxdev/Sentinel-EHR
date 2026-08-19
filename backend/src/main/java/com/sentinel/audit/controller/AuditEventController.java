@@ -25,8 +25,15 @@ public class AuditEventController {
 
     @GetMapping
     @Operation(summary = "Get recent audit events")
-    public ResponseEntity<ApiResponse<List<AuditLog>>> getRecentAuditLogs() {
-        List<AuditLog> response = auditTrailService.getRecentAuditLogs();
+    public ResponseEntity<ApiResponse<List<AuditLog>>> getRecentAuditLogs(
+            @org.springframework.web.bind.annotation.RequestParam(required = false) java.util.UUID organizationId) {
+        
+        List<AuditLog> response;
+        if (organizationId != null) {
+            response = auditTrailService.getRecentAuditLogsByOrganization(organizationId);
+        } else {
+            response = auditTrailService.getRecentAuditLogs();
+        }
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 }

@@ -80,10 +80,10 @@ import {
             <ng-icon name="lucideServer" size="18" class="text-emerald-600" />
           </div>
           <div class="mt-3 flex items-baseline justify-between">
-            <span class="text-2xl font-bold text-emerald-600 font-mono">ONLINE</span>
-            <span class="text-[11px] font-semibold text-emerald-600">99.98% Uptime</span>
+            <span class="text-2xl font-bold text-emerald-600 font-mono">{{ healthData()?.services?.core?.status || 'ONLINE' }}</span>
+            <span class="text-[11px] font-semibold text-emerald-600">{{ healthData() ? '99.98%' : '--' }} Uptime</span>
           </div>
-          <p class="text-[10px] text-muted-foreground mt-1">Spring Boot 3.3.4 (Java 21)</p>
+          <p class="text-[10px] text-muted-foreground mt-1">{{ healthData()?.services?.core?.details || 'Spring Boot 3.3.4' }}</p>
         </div>
 
         <div class="p-4 rounded-xl border border-blue-500/30 bg-blue-500/5 shadow-xs">
@@ -94,10 +94,10 @@ import {
             <ng-icon name="lucideDatabase" size="18" class="text-blue-600" />
           </div>
           <div class="mt-3 flex items-baseline justify-between">
-            <span class="text-2xl font-bold text-blue-600 font-mono">2.4 ms</span>
-            <span class="text-[11px] font-semibold text-blue-600">RLS Active</span>
+            <span class="text-2xl font-bold text-blue-600 font-mono">{{ healthData() ? '2.4 ms' : '--' }}</span>
+            <span class="text-[11px] font-semibold text-blue-600">{{ healthData()?.services?.database?.status === 'ONLINE' ? 'RLS Active' : 'Offline' }}</span>
           </div>
-          <p class="text-[10px] text-muted-foreground mt-1">Connection Pool: 18 / 50</p>
+          <p class="text-[10px] text-muted-foreground mt-1">{{ healthData()?.services?.database?.details || 'Connection Pool' }}</p>
         </div>
 
         <div class="p-4 rounded-xl border border-purple-500/30 bg-purple-500/5 shadow-xs">
@@ -108,10 +108,10 @@ import {
             <ng-icon name="lucideShieldCheck" size="18" class="text-purple-600" />
           </div>
           <div class="mt-3 flex items-baseline justify-between">
-            <span class="text-2xl font-bold text-purple-600 font-mono">IMMUTABLE</span>
+            <span class="text-2xl font-bold text-purple-600 font-mono">{{ healthData()?.services?.audit?.status || 'IMMUTABLE' }}</span>
             <span class="text-[11px] font-semibold text-purple-600">ABDM L3</span>
           </div>
-          <p class="text-[10px] text-muted-foreground mt-1">Write-Once-Read-Many active</p>
+          <p class="text-[10px] text-muted-foreground mt-1">{{ healthData()?.services?.audit?.details || 'Write-Once-Read-Many active' }}</p>
         </div>
 
         <div class="p-4 rounded-xl border border-amber-500/30 bg-amber-500/5 shadow-xs">
@@ -122,10 +122,10 @@ import {
             <ng-icon name="lucideGlobe" size="18" class="text-amber-600" />
           </div>
           <div class="mt-3 flex items-baseline justify-between">
-            <span class="text-2xl font-bold text-amber-600 font-mono">INTEROP</span>
+            <span class="text-2xl font-bold text-amber-600 font-mono">{{ healthData()?.services?.fhir?.status || 'INTEROP' }}</span>
             <span class="text-[11px] font-semibold text-amber-600">RESTful</span>
           </div>
-          <p class="text-[10px] text-muted-foreground mt-1">HAPI FHIR R4 Compliant</p>
+          <p class="text-[10px] text-muted-foreground mt-1">{{ healthData()?.services?.fhir?.details || 'HAPI FHIR R4 Compliant' }}</p>
         </div>
       </div>
 
@@ -144,64 +144,23 @@ import {
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div class="p-4 rounded-xl border border-border bg-muted/20 space-y-2">
+          <div *ngFor="let sys of codeSystems()" class="p-4 rounded-xl border border-border bg-muted/20 space-y-2">
             <div class="flex justify-between items-center">
-              <span class="font-bold text-xs text-foreground">ICD-10-CM</span>
+              <span class="font-bold text-xs text-foreground">{{ sys.name }}</span>
               <span
                 class="px-2 py-0.5 rounded text-[10px] bg-emerald-500/10 text-emerald-600 font-mono font-bold"
-                >2026 Release</span
+                >{{ sys.version || 'Active' }}</span
               >
             </div>
             <p class="text-[11px] text-muted-foreground">
-              International Classification of Diseases 10th Revision Clinical Modification.
+              {{ sys.description || 'Standardized clinical ontology.' }}
             </p>
             <div class="text-[10px] font-mono text-muted-foreground pt-1">
-              72,000+ Diagnosis Codes
+              {{ sys.systemUri }}
             </div>
           </div>
-
-          <div class="p-4 rounded-xl border border-border bg-muted/20 space-y-2">
-            <div class="flex justify-between items-center">
-              <span class="font-bold text-xs text-foreground">SNOMED CT</span>
-              <span
-                class="px-2 py-0.5 rounded text-[10px] bg-emerald-500/10 text-emerald-600 font-mono font-bold"
-                >US Edition</span
-              >
-            </div>
-            <p class="text-[11px] text-muted-foreground">
-              Systematized Nomenclature of Medicine Clinical Terms ontology.
-            </p>
-            <div class="text-[10px] font-mono text-muted-foreground pt-1">350,000+ Concepts</div>
-          </div>
-
-          <div class="p-4 rounded-xl border border-border bg-muted/20 space-y-2">
-            <div class="flex justify-between items-center">
-              <span class="font-bold text-xs text-foreground">LOINC</span>
-              <span
-                class="px-2 py-0.5 rounded text-[10px] bg-emerald-500/10 text-emerald-600 font-mono font-bold"
-                >v2.77</span
-              >
-            </div>
-            <p class="text-[11px] text-muted-foreground">
-              Logical Observation Identifiers Names and Codes for Laboratory & Radiology.
-            </p>
-            <div class="text-[10px] font-mono text-muted-foreground pt-1">98,000+ Lab Codes</div>
-          </div>
-
-          <div class="p-4 rounded-xl border border-border bg-muted/20 space-y-2">
-            <div class="flex justify-between items-center">
-              <span class="font-bold text-xs text-foreground">RxNorm</span>
-              <span
-                class="px-2 py-0.5 rounded text-[10px] bg-emerald-500/10 text-emerald-600 font-mono font-bold"
-                >NLM Monthly</span
-              >
-            </div>
-            <p class="text-[11px] text-muted-foreground">
-              Standardized nomenclature for clinical drugs and active pharmaceutical ingredients.
-            </p>
-            <div class="text-[10px] font-mono text-muted-foreground pt-1">
-              RxCUI Mappings Active
-            </div>
+          <div *ngIf="codeSystems().length === 0" class="col-span-4 p-8 text-center text-muted-foreground">
+            No terminology systems loaded.
           </div>
         </div>
       </div>
@@ -211,6 +170,7 @@ import {
 export class SuperAdminSystemHealthComponent implements OnInit {
   loading = signal(false);
   codeSystems = signal<CodeSystem[]>([]);
+  healthData = signal<any>(null);
 
   constructor(private apiService: ApiService) {}
 
@@ -223,6 +183,13 @@ export class SuperAdminSystemHealthComponent implements OnInit {
     this.apiService.getCodeSystems().subscribe({
       next: (systems: CodeSystem[]) => {
         this.codeSystems.set(systems);
+      },
+      error: () => {},
+    });
+
+    this.apiService.getPlatformHealth().subscribe({
+      next: (h) => {
+        this.healthData.set(h);
         this.loading.set(false);
       },
       error: () => this.loading.set(false),

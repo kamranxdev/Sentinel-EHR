@@ -18,6 +18,8 @@ import {
   lucideActivity,
 } from '@ng-icons/lucide';
 
+import { AuthService } from '../../core/services/auth.service';
+
 @Component({
   selector: 'app-organization-admin-audit',
   standalone: true,
@@ -180,10 +182,11 @@ export class OrganizationAdminAuditComponent implements OnInit {
   deniedCount = computed(() => this.auditLogs().filter((l) => l.action === 'ACCESS_DENIED').length);
   uniqueActorsCount = computed(() => new Set(this.auditLogs().map((l) => l.email)).size);
 
-  constructor(private apiService: ApiService) {}
+  constructor(private apiService: ApiService, private authService: AuthService) {}
 
   ngOnInit(): void {
-    this.apiService.getAuditLogs().subscribe((logs) => this.auditLogs.set(logs));
+    const orgId = this.authService.getActiveOrganizationId() || undefined;
+    this.apiService.getAuditLogs(orgId).subscribe((logs) => this.auditLogs.set(logs));
   }
 
   formatRole(role: string): string {

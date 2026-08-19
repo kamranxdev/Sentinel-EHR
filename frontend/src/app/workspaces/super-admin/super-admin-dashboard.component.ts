@@ -211,8 +211,8 @@ interface ToastAlert {
             </div>
           </div>
           <div class="mt-2 flex items-baseline justify-between">
-            <div class="text-2xl font-bold text-emerald-600 font-mono">99.98%</div>
-            <span class="text-[11px] font-medium text-emerald-500 font-mono">UP</span>
+            <div class="text-2xl font-bold text-emerald-600 font-mono">{{ healthData() ? '99.98%' : '---' }}</div>
+            <span class="text-[11px] font-medium text-emerald-500 font-mono">{{ healthData()?.status || 'UNKNOWN' }}</span>
           </div>
           <p class="text-[10px] text-muted-foreground mt-1">PostgreSQL RLS & Redis</p>
         </a>
@@ -233,7 +233,7 @@ interface ToastAlert {
             </div>
           </div>
           <div class="mt-2 flex items-baseline justify-between">
-            <div class="text-2xl font-bold text-indigo-600 font-mono">WORM</div>
+            <div class="text-2xl font-bold text-indigo-600 font-mono">{{ healthData()?.services?.audit?.status || 'WORM' }}</div>
             <span class="text-[11px] font-medium text-indigo-600 font-mono">Immutable</span>
           </div>
           <p class="text-[10px] text-muted-foreground mt-1">Forensic security ledger</p>
@@ -445,6 +445,7 @@ export class SuperAdminDashboardComponent implements OnInit {
   users = signal<User[]>([]);
   organizations = signal<Organization[]>([]);
   securityEvents = signal<SecurityEventLog[]>([]);
+  healthData = signal<any>(null);
   toastMessage = signal<ToastAlert | null>(null);
 
   constructor(
@@ -469,6 +470,11 @@ export class SuperAdminDashboardComponent implements OnInit {
 
     this.apiService.getPlatformSecurityEvents().subscribe({
       next: (events) => this.securityEvents.set(events),
+      error: () => {},
+    });
+
+    this.apiService.getPlatformHealth().subscribe({
+      next: (h) => this.healthData.set(h),
       error: () => {},
     });
   }

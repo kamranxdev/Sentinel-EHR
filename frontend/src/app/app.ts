@@ -581,6 +581,16 @@ export class App implements OnInit, OnDestroy {
               routerLink: '/super-admin/dashboard',
             },
             {
+              icon: 'lucideServer',
+              label: 'System Health & Terminology',
+              routerLink: '/super-admin/system-health',
+            },
+          ],
+        },
+        {
+          label: 'Tenant & User Management',
+          items: [
+            {
               icon: 'lucideBuilding2',
               label: 'Organizations & Tenants',
               routerLink: '/super-admin/organizations',
@@ -590,15 +600,15 @@ export class App implements OnInit, OnDestroy {
               label: 'Platform Users & RBAC',
               routerLink: '/super-admin/users',
             },
+          ],
+        },
+        {
+          label: 'Security & Compliance',
+          items: [
             {
               icon: 'lucideShieldCheck',
               label: 'Platform Audit Vault',
               routerLink: '/super-admin/audit',
-            },
-            {
-              icon: 'lucideServer',
-              label: 'System Health & Terminology',
-              routerLink: '/super-admin/system-health',
             },
           ],
         },
@@ -619,6 +629,11 @@ export class App implements OnInit, OnDestroy {
               label: 'Hospital Layout & Units',
               routerLink: '/organization-admin/facility-settings',
             },
+          ],
+        },
+        {
+          label: 'Staff & Patients',
+          items: [
             {
               icon: 'lucideUsers',
               label: 'Staff Roster & Users',
@@ -634,6 +649,11 @@ export class App implements OnInit, OnDestroy {
               label: 'Consultation Load Analytics',
               routerLink: '/organization-admin/schedule-analytics',
             },
+          ],
+        },
+        {
+          label: 'Security & Compliance',
+          items: [
             {
               icon: 'lucideShieldCheck',
               label: 'Organization Audit Log',

@@ -380,7 +380,7 @@ export class SuperAdminAuditComponent implements OnInit {
 
   loadAllData(): void {
     this.loading.set(true);
-    this.apiService.getAuditLogs().subscribe({
+    this.apiService.getPlatformAuditEvents().subscribe({
       next: (logs) => {
         this.logs.set(logs || []);
         this.loading.set(false);
@@ -388,7 +388,7 @@ export class SuperAdminAuditComponent implements OnInit {
       error: () => this.loading.set(false),
     });
 
-    this.apiService.getSecurityEvents().subscribe({
+    this.apiService.getPlatformSecurityEvents().subscribe({
       next: (events) => this.securityEvents.set(events || []),
       error: () => this.securityEvents.set([]),
     });

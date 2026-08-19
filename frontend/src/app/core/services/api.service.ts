@@ -1944,8 +1944,12 @@ export class ApiService {
     return this.post<User>(`/users/${id}/deactivate`, {});
   }
 
-  getAuditLogs(search?: string): Observable<AuditLog[]> {
-    return this.get<any[]>('/audit-events').pipe(
+  getAuditLogs(organizationId?: string, search?: string): Observable<AuditLog[]> {
+    let url = '/audit-events';
+    if (organizationId) {
+      url += `?organizationId=${encodeURIComponent(organizationId)}`;
+    }
+    return this.get<any[]>(url).pipe(
       map((list) => {
         if (!Array.isArray(list)) return [];
         let items: AuditLog[] = list.map((a: any) => ({
@@ -1986,48 +1990,6 @@ export class ApiService {
         return items;
       }),
       catchError(() => of([])),
-    );
-  }
-
-  getSecurityEvents(): Observable<SecurityEventLog[]> {
-    return this.get<any[]>('/security-events').pipe(
-      map(list => Array.isArray(list) ? list.map((e: any) => ({
-        id: e.id,
-        eventType: e.eventType || 'SECURITY_ALERT',
-        email: e.email || e.userId || 'SYSTEM',
-        action: e.action || 'THREAT_DETECTED',
-        status: e.status || 'FAILED',
-        ipAddress: e.ipAddress || '127.0.0.1',
-        details: e.details,
-        occurredAt: e.occurredAt || new Date().toISOString()
-      })) : []),
-      catchError(() => of([]))
-    );
-  }
-
-  getBreakGlassByUser(userId: string): Observable<BreakGlassRecord[]> {
-    return this.get<any[]>('/break-glass').pipe(
-      map(list => {
-        if (!Array.isArray(list)) return [];
-        let mapped = list.map((b: any) => ({
-          id: b.id,
-          userId: b.userId,
-          email: b.email || b.requestedBy,
-          patientId: b.patientId,
-          reason: b.reason || b.justification,
-          justification: b.justification || b.reason,
-          accessedAt: b.accessedAt || b.createdAt,
-          createdAt: b.createdAt || new Date().toISOString(),
-          revokedAt: b.revokedAt,
-          status: b.status || (b.revokedAt ? 'REVOKED' : 'ACTIVE'),
-          ipAddress: b.ipAddress
-        }));
-        if (userId !== 'all') {
-           mapped = mapped.filter(b => b.userId === userId || b.email === userId);
-        }
-        return mapped;
-      }),
-      catchError(() => of([]))
     );
   }
 

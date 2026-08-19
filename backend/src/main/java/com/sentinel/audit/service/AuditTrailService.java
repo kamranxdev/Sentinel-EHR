@@ -52,4 +52,8 @@ public class AuditTrailService {
     public List<AuditLog> getRecentAuditLogs() {
         return auditLogRepository.findTop100ByOrderByOccurredAtDesc();
     }
+
+    public List<AuditLog> getRecentAuditLogsByOrganization(java.util.UUID organizationId) {
+        return auditLogRepository.findTop100ByOrganizationIdOrderByOccurredAtDesc(organizationId);
+    }
 }
