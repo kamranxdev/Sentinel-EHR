@@ -75,16 +75,23 @@ import {
   template: `
     <div class="space-y-6">
       <!-- Worklist Header -->
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-border">
+      <div
+        class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-border"
+      >
         <div>
           <h1 class="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
             Laboratory Specimen Queue & Multi-Stage Lifecycle Board
-            <span hlmBadge variant="secondary" class="text-[11px] bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-500/20">
+            <span
+              hlmBadge
+              variant="secondary"
+              class="text-[11px] bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-500/20"
+            >
               LIS Worklist
             </span>
           </h1>
           <p class="text-xs text-muted-foreground mt-0.5">
-            5-stage chain of custody: Receive Order ➔ Collect Specimen ➔ Accession & Barcode ➔ Process on Analyzer ➔ Enter & Validate LOINC Result.
+            5-stage chain of custody: Receive Order ➔ Collect Specimen ➔ Accession & Barcode ➔
+            Process on Analyzer ➔ Enter & Validate LOINC Result.
           </p>
         </div>
 
@@ -93,7 +100,12 @@ import {
             <ng-icon name="lucideRefreshCw" [class.animate-spin]="loading()" size="14" />
             <span>Refresh Board</span>
           </button>
-          <a routerLink="/lab-technician/results" hlmBtn size="sm" class="gap-2 text-xs bg-teal-600 hover:bg-teal-700 text-white">
+          <a
+            routerLink="/lab-technician/results"
+            hlmBtn
+            size="sm"
+            class="gap-2 text-xs bg-teal-600 hover:bg-teal-700 text-white"
+          >
             <ng-icon name="lucideCheckCircle2" size="14" />
             <span>Result Entry Desk</span>
           </a>
@@ -127,7 +139,9 @@ import {
       </div>
 
       <!-- Filters & Search Toolbar -->
-      <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-muted/20 p-3 rounded-xl border border-border">
+      <div
+        class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-muted/20 p-3 rounded-xl border border-border"
+      >
         <div class="relative flex-1 max-w-md">
           <input
             hlmInput
@@ -136,7 +150,11 @@ import {
             placeholder="Search by Order ID, Patient Name, MRN, Test, Barcode..."
             class="w-full text-xs h-8 pl-8 pr-3 bg-background"
           />
-          <ng-icon name="lucideSearch" size="13" class="absolute left-2.5 top-2.5 text-muted-foreground" />
+          <ng-icon
+            name="lucideSearch"
+            size="13"
+            class="absolute left-2.5 top-2.5 text-muted-foreground"
+          />
         </div>
 
         <div class="flex items-center gap-2">
@@ -174,9 +192,15 @@ import {
               <tr hlmTableRow class="bg-muted/50 border-b border-border">
                 <th hlmTableHead class="py-3 px-4 text-left font-semibold">Order / Priority</th>
                 <th hlmTableHead class="py-3 px-4 text-left font-semibold">Patient Demographics</th>
-                <th hlmTableHead class="py-3 px-4 text-left font-semibold">Diagnostic Test (LOINC)</th>
-                <th hlmTableHead class="py-3 px-4 text-left font-semibold">Specimen Accession Barcode</th>
-                <th hlmTableHead class="py-3 px-4 text-left font-semibold">Current Lifecycle Stage</th>
+                <th hlmTableHead class="py-3 px-4 text-left font-semibold">
+                  Diagnostic Test (LOINC)
+                </th>
+                <th hlmTableHead class="py-3 px-4 text-left font-semibold">
+                  Specimen Accession Barcode
+                </th>
+                <th hlmTableHead class="py-3 px-4 text-left font-semibold">
+                  Current Lifecycle Stage
+                </th>
                 <th hlmTableHead class="py-3 px-4 text-right font-semibold">Action</th>
               </tr>
             </thead>
@@ -184,7 +208,11 @@ import {
               <tr *ngIf="loading()" hlmTableRow>
                 <td colspan="6" class="py-12 text-center text-xs text-muted-foreground">
                   <div class="flex items-center justify-center gap-2">
-                    <ng-icon name="lucideFlaskConical" class="animate-spin text-teal-600" size="18" />
+                    <ng-icon
+                      name="lucideFlaskConical"
+                      class="animate-spin text-teal-600"
+                      size="18"
+                    />
                     <span>Loading LIS orders and chain of custody...</span>
                   </div>
                 </td>
@@ -193,38 +221,66 @@ import {
               <tr *ngIf="!loading() && filteredOrders().length === 0" hlmTableRow>
                 <td colspan="6" class="py-12 text-center text-muted-foreground text-xs">
                   <div class="space-y-1">
-                    <ng-icon name="lucideCheckCircle2" size="24" class="text-muted-foreground/40 mx-auto" />
-                    <p class="font-medium">No laboratory orders in this stage matching your criteria.</p>
-                    <p class="text-[11px]">Select another stage tab or clear your search filters.</p>
+                    <ng-icon
+                      name="lucideCheckCircle2"
+                      size="24"
+                      class="text-muted-foreground/40 mx-auto"
+                    />
+                    <p class="font-medium">
+                      No laboratory orders in this stage matching your criteria.
+                    </p>
+                    <p class="text-[11px]">
+                      Select another stage tab or clear your search filters.
+                    </p>
                   </div>
                 </td>
               </tr>
 
-              <tr *ngFor="let order of filteredOrders()" hlmTableRow class="hover:bg-muted/30 transition-colors">
+              <tr
+                *ngFor="let order of filteredOrders()"
+                hlmTableRow
+                class="hover:bg-muted/30 transition-colors"
+              >
                 <!-- Order ID & Priority -->
                 <td hlmTableCell class="py-3.5 px-4">
                   <div class="flex items-center gap-1.5">
                     <span class="font-mono font-bold text-foreground">#LAB-{{ order.id }}</span>
                     <span
                       hlmBadge
-                      [variant]="order.priority === 'STAT' ? 'destructive' : order.priority === 'URGENT' ? 'secondary' : 'outline'"
+                      [variant]="
+                        order.priority === 'STAT'
+                          ? 'destructive'
+                          : order.priority === 'URGENT'
+                            ? 'secondary'
+                            : 'outline'
+                      "
                       class="text-[9px] font-bold px-1.5 py-0"
                     >
                       {{ order.priority || 'ROUTINE' }}
                     </span>
                   </div>
                   <div class="text-[10px] text-muted-foreground mt-0.5">
-                    Ordered: {{ order.orderedAt | date: 'shortTime' }} • Dr. {{ order.orderingProviderEmail || 'Physician' }}
+                    Ordered: {{ order.orderedAt | date: 'shortTime' }} • Dr.
+                    {{ order.orderingProviderEmail || 'Physician' }}
                   </div>
                 </td>
 
                 <!-- Patient & MRN -->
                 <td hlmTableCell class="py-3.5 px-4">
                   <div class="font-bold text-foreground">
-                    {{ order.patientFullName || order.patient?.fullName || 'Patient #' + order.patientId }}
+                    {{
+                      order.patientFullName ||
+                        order.patient?.fullName ||
+                        'Patient #' + order.patientId
+                    }}
                   </div>
                   <div class="text-[10px] font-mono text-muted-foreground">
-                    {{ order.patientMrn || (order.patient?.id ? 'MRN-' + order.patient?.id?.substring(0, 6)?.toUpperCase() : 'MRN-EHR') }}
+                    {{
+                      order.patientMrn ||
+                        (order.patient?.id
+                          ? 'MRN-' + order.patient?.id?.substring(0, 6)?.toUpperCase()
+                          : 'MRN-EHR')
+                    }}
                     <span *ngIf="order.patientGender"> • {{ order.patientGender }}</span>
                     <span *ngIf="order.patientBirthDate"> • {{ order.patientBirthDate }}</span>
                   </div>
@@ -233,11 +289,22 @@ import {
                 <!-- Diagnostic Test & LOINC -->
                 <td hlmTableCell class="py-3.5 px-4">
                   <div class="font-semibold text-foreground">{{ order.testName }}</div>
-                  <div class="text-[10px] font-mono text-muted-foreground flex items-center gap-1.5">
-                    <span class="bg-muted px-1 rounded">LOINC: {{ order.loincCode || '4548-4' }}</span>
-                    <span *ngIf="order.category" class="text-teal-600 dark:text-teal-400 font-sans font-medium">{{ order.category }}</span>
+                  <div
+                    class="text-[10px] font-mono text-muted-foreground flex items-center gap-1.5"
+                  >
+                    <span class="bg-muted px-1 rounded"
+                      >LOINC: {{ order.loincCode || '4548-4' }}</span
+                    >
+                    <span
+                      *ngIf="order.category"
+                      class="text-teal-600 dark:text-teal-400 font-sans font-medium"
+                      >{{ order.category }}</span
+                    >
                   </div>
-                  <div *ngIf="order.clinicalNotes" class="text-[10px] text-muted-foreground italic truncate max-w-[200px] mt-0.5">
+                  <div
+                    *ngIf="order.clinicalNotes"
+                    class="text-[10px] text-muted-foreground italic truncate max-w-[200px] mt-0.5"
+                  >
                     Notes: {{ order.clinicalNotes }}
                   </div>
                 </td>
@@ -247,7 +314,9 @@ import {
                   <div *ngIf="order.specimenBarcode" class="space-y-1">
                     <div class="flex items-center gap-1.5">
                       <ng-icon name="lucideBarcode" size="14" class="text-teal-600" />
-                      <span class="font-mono text-[11px] font-bold bg-muted px-1.5 py-0.5 rounded border border-border text-foreground">
+                      <span
+                        class="font-mono text-[11px] font-bold bg-muted px-1.5 py-0.5 rounded border border-border text-foreground"
+                      >
                         {{ order.specimenBarcode }}
                       </span>
                     </div>
@@ -255,7 +324,10 @@ import {
                       Container: {{ order.container }}
                     </span>
                   </div>
-                  <span *ngIf="!order.specimenBarcode" class="text-muted-foreground/60 italic text-[11px]">
+                  <span
+                    *ngIf="!order.specimenBarcode"
+                    class="text-muted-foreground/60 italic text-[11px]"
+                  >
                     Not yet accessioned
                   </span>
                 </td>
@@ -340,7 +412,11 @@ import {
 
                   <!-- View Result -->
                   <button
-                    *ngIf="order.status === 'RESULTED' || order.status === 'COMPLETED' || order.status === 'VERIFIED'"
+                    *ngIf="
+                      order.status === 'RESULTED' ||
+                      order.status === 'COMPLETED' ||
+                      order.status === 'VERIFIED'
+                    "
                     hlmBtn
                     variant="ghost"
                     size="xs"
@@ -360,14 +436,22 @@ import {
       <!-- ========================================================================= -->
       <!-- MODAL 1: RECEIVE / ACKNOWLEDGE ORDER                                      -->
       <!-- ========================================================================= -->
-      <div *ngIf="isReceiveModalOpen()" class="fixed inset-0 z-50 bg-background/80 backdrop-blur-xs flex items-center justify-center p-4">
-        <div class="bg-card border border-border rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-xl">
+      <div
+        *ngIf="isReceiveModalOpen()"
+        class="fixed inset-0 z-50 bg-background/80 backdrop-blur-xs flex items-center justify-center p-4"
+      >
+        <div
+          class="bg-card border border-border rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-xl"
+        >
           <div class="flex items-center justify-between pb-3 border-b border-border">
             <div class="flex items-center gap-2 text-sky-600">
               <ng-icon name="lucideFileSpreadsheet" size="20" />
               <h3 class="text-base font-bold text-foreground">Acknowledge Laboratory Order</h3>
             </div>
-            <button (click)="isReceiveModalOpen.set(false)" class="text-muted-foreground hover:text-foreground">
+            <button
+              (click)="isReceiveModalOpen.set(false)"
+              class="text-muted-foreground hover:text-foreground"
+            >
               <ng-icon name="lucideX" size="18" />
             </button>
           </div>
@@ -379,19 +463,29 @@ import {
             </div>
             <div class="flex justify-between">
               <span class="text-muted-foreground">Patient:</span>
-              <span class="font-semibold text-foreground">{{ activeOrder?.patientFullName || activeOrder?.patient?.fullName }}</span>
+              <span class="font-semibold text-foreground">{{
+                activeOrder?.patientFullName || activeOrder?.patient?.fullName
+              }}</span>
             </div>
             <div class="flex justify-between">
               <span class="text-muted-foreground">Diagnostic Test:</span>
-              <span class="font-semibold text-foreground">{{ activeOrder?.testName }} (LOINC {{ activeOrder?.loincCode || '4548-4' }})</span>
+              <span class="font-semibold text-foreground"
+                >{{ activeOrder?.testName }} (LOINC {{ activeOrder?.loincCode || '4548-4' }})</span
+              >
             </div>
             <div class="flex justify-between">
               <span class="text-muted-foreground">Ordering Doctor:</span>
-              <span class="text-foreground">Dr. {{ activeOrder?.orderingProviderEmail || 'Staff Physician' }}</span>
+              <span class="text-foreground"
+                >Dr. {{ activeOrder?.orderingProviderEmail || 'Staff Physician' }}</span
+              >
             </div>
             <div class="flex justify-between">
               <span class="text-muted-foreground">Priority Acuity:</span>
-              <span hlmBadge [variant]="activeOrder?.priority === 'STAT' ? 'destructive' : 'secondary'" class="text-[9px]">
+              <span
+                hlmBadge
+                [variant]="activeOrder?.priority === 'STAT' ? 'destructive' : 'secondary'"
+                class="text-[9px]"
+              >
                 {{ activeOrder?.priority || 'ROUTINE' }}
               </span>
             </div>
@@ -401,7 +495,9 @@ import {
           </div>
 
           <div class="space-y-1.5">
-            <label class="block font-semibold text-xs text-foreground">Laboratory Intake Notes / Instructions</label>
+            <label class="block font-semibold text-xs text-foreground"
+              >Laboratory Intake Notes / Instructions</label
+            >
             <input
               hlmInput
               type="text"
@@ -412,8 +508,15 @@ import {
           </div>
 
           <div class="flex justify-end gap-2 pt-3 border-t border-border">
-            <button hlmBtn variant="outline" size="sm" (click)="isReceiveModalOpen.set(false)">Cancel</button>
-            <button hlmBtn size="sm" (click)="submitReceiveOrder()" class="bg-sky-600 hover:bg-sky-700 text-white">
+            <button hlmBtn variant="outline" size="sm" (click)="isReceiveModalOpen.set(false)">
+              Cancel
+            </button>
+            <button
+              hlmBtn
+              size="sm"
+              (click)="submitReceiveOrder()"
+              class="bg-sky-600 hover:bg-sky-700 text-white"
+            >
               Confirm Receipt & Queue for Collection
             </button>
           </div>
@@ -423,14 +526,24 @@ import {
       <!-- ========================================================================= -->
       <!-- MODAL 2: COLLECT / RECEIVE SPECIMEN                                       -->
       <!-- ========================================================================= -->
-      <div *ngIf="isCollectModalOpen()" class="fixed inset-0 z-50 bg-background/80 backdrop-blur-xs flex items-center justify-center p-4">
-        <div class="bg-card border border-border rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-xl">
+      <div
+        *ngIf="isCollectModalOpen()"
+        class="fixed inset-0 z-50 bg-background/80 backdrop-blur-xs flex items-center justify-center p-4"
+      >
+        <div
+          class="bg-card border border-border rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-xl"
+        >
           <div class="flex items-center justify-between pb-3 border-b border-border">
             <div class="flex items-center gap-2 text-amber-600">
               <ng-icon name="lucideTestTube" size="20" />
-              <h3 class="text-base font-bold text-foreground">Specimen Collection & Phlebotomy Log</h3>
+              <h3 class="text-base font-bold text-foreground">
+                Specimen Collection & Phlebotomy Log
+              </h3>
             </div>
-            <button (click)="isCollectModalOpen.set(false)" class="text-muted-foreground hover:text-foreground">
+            <button
+              (click)="isCollectModalOpen.set(false)"
+              class="text-muted-foreground hover:text-foreground"
+            >
               <ng-icon name="lucideX" size="18" />
             </button>
           </div>
@@ -438,18 +551,25 @@ import {
           <div class="p-3 bg-muted/40 rounded-xl space-y-1 text-xs">
             <div class="flex justify-between">
               <span class="text-muted-foreground">Order & Test:</span>
-              <span class="font-bold text-foreground">#LAB-{{ activeOrder?.id }} • {{ activeOrder?.testName }}</span>
+              <span class="font-bold text-foreground"
+                >#LAB-{{ activeOrder?.id }} • {{ activeOrder?.testName }}</span
+              >
             </div>
             <div class="flex justify-between">
               <span class="text-muted-foreground">Patient:</span>
-              <span class="font-semibold text-foreground">{{ activeOrder?.patientFullName || activeOrder?.patient?.fullName }}</span>
+              <span class="font-semibold text-foreground">{{
+                activeOrder?.patientFullName || activeOrder?.patient?.fullName
+              }}</span>
             </div>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
             <div class="space-y-1">
               <label class="font-semibold text-foreground">Specimen Type *</label>
-              <select [(ngModel)]="specimenType" class="w-full h-8 rounded-md border border-input bg-background px-2 text-xs">
+              <select
+                [(ngModel)]="specimenType"
+                class="w-full h-8 rounded-md border border-input bg-background px-2 text-xs"
+              >
                 <option value="BLOOD">Whole Blood (Venous)</option>
                 <option value="SERUM">Serum (Clotted)</option>
                 <option value="PLASMA">Plasma (Anticoagulated)</option>
@@ -463,12 +583,21 @@ import {
 
             <div class="space-y-1">
               <label class="font-semibold text-foreground">Collection Anatomical Site</label>
-              <input hlmInput type="text" [(ngModel)]="collectionSite" placeholder="e.g. Left Antecubital Fossa" class="w-full text-xs h-8" />
+              <input
+                hlmInput
+                type="text"
+                [(ngModel)]="collectionSite"
+                placeholder="e.g. Left Antecubital Fossa"
+                class="w-full text-xs h-8"
+              />
             </div>
 
             <div class="space-y-1">
               <label class="font-semibold text-foreground">Collection Method</label>
-              <select [(ngModel)]="collectionMethod" class="w-full h-8 rounded-md border border-input bg-background px-2 text-xs">
+              <select
+                [(ngModel)]="collectionMethod"
+                class="w-full h-8 rounded-md border border-input bg-background px-2 text-xs"
+              >
                 <option value="VENIPUNCTURE">Venipuncture (Vacutainer)</option>
                 <option value="CAPILLARY">Capillary Fingerstick</option>
                 <option value="CLEAN_CATCH">Clean-Catch Void</option>
@@ -479,7 +608,10 @@ import {
 
             <div class="space-y-1">
               <label class="font-semibold text-foreground">Patient Fasting Status</label>
-              <select [(ngModel)]="fastingStatus" class="w-full h-8 rounded-md border border-input bg-background px-2 text-xs">
+              <select
+                [(ngModel)]="fastingStatus"
+                class="w-full h-8 rounded-md border border-input bg-background px-2 text-xs"
+              >
                 <option value="FASTING_8H">Fasting 8-12 Hours (Verified)</option>
                 <option value="NON_FASTING">Non-Fasting / Random</option>
                 <option value="POST_PRANDIAL">2-Hour Post-Prandial</option>
@@ -488,13 +620,22 @@ import {
           </div>
 
           <div class="space-y-1">
-            <label class="font-semibold text-xs text-foreground">Phlebotomist / Collector Name</label>
+            <label class="font-semibold text-xs text-foreground"
+              >Phlebotomist / Collector Name</label
+            >
             <input hlmInput type="text" [(ngModel)]="phlebotomistName" class="w-full text-xs h-8" />
           </div>
 
           <div class="flex justify-end gap-2 pt-3 border-t border-border">
-            <button hlmBtn variant="outline" size="sm" (click)="isCollectModalOpen.set(false)">Cancel</button>
-            <button hlmBtn size="sm" (click)="submitCollectSpecimen()" class="bg-amber-600 hover:bg-amber-700 text-white">
+            <button hlmBtn variant="outline" size="sm" (click)="isCollectModalOpen.set(false)">
+              Cancel
+            </button>
+            <button
+              hlmBtn
+              size="sm"
+              (click)="submitCollectSpecimen()"
+              class="bg-amber-600 hover:bg-amber-700 text-white"
+            >
               Log Specimen Collected
             </button>
           </div>
@@ -504,27 +645,45 @@ import {
       <!-- ========================================================================= -->
       <!-- MODAL 3: ACCESSION SPECIMEN & BARCODE                                     -->
       <!-- ========================================================================= -->
-      <div *ngIf="isAccessionModalOpen()" class="fixed inset-0 z-50 bg-background/80 backdrop-blur-xs flex items-center justify-center p-4">
-        <div class="bg-card border border-border rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-xl">
+      <div
+        *ngIf="isAccessionModalOpen()"
+        class="fixed inset-0 z-50 bg-background/80 backdrop-blur-xs flex items-center justify-center p-4"
+      >
+        <div
+          class="bg-card border border-border rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-xl"
+        >
           <div class="flex items-center justify-between pb-3 border-b border-border">
             <div class="flex items-center gap-2 text-indigo-600">
               <ng-icon name="lucideBarcode" size="20" />
-              <h3 class="text-base font-bold text-foreground">Specimen Accessioning & Chain of Custody</h3>
+              <h3 class="text-base font-bold text-foreground">
+                Specimen Accessioning & Chain of Custody
+              </h3>
             </div>
-            <button (click)="isAccessionModalOpen.set(false)" class="text-muted-foreground hover:text-foreground">
+            <button
+              (click)="isAccessionModalOpen.set(false)"
+              class="text-muted-foreground hover:text-foreground"
+            >
               <ng-icon name="lucideX" size="18" />
             </button>
           </div>
 
           <!-- Barcode Visual Label Preview -->
-          <div class="p-4 rounded-xl border border-dashed border-indigo-500/40 bg-indigo-500/5 space-y-2 text-center">
-            <div class="flex items-center justify-between text-[11px] text-muted-foreground font-mono">
+          <div
+            class="p-4 rounded-xl border border-dashed border-indigo-500/40 bg-indigo-500/5 space-y-2 text-center"
+          >
+            <div
+              class="flex items-center justify-between text-[11px] text-muted-foreground font-mono"
+            >
               <span>SENTINEL-LIS LAB ACCESSION</span>
               <span>{{ activeOrder?.priority || 'ROUTINE' }}</span>
             </div>
-            <div class="font-mono font-extrabold text-base tracking-widest text-foreground">{{ barcodeInput }}</div>
+            <div class="font-mono font-extrabold text-base tracking-widest text-foreground">
+              {{ barcodeInput }}
+            </div>
             <!-- Visual Barcode lines simulation -->
-            <div class="flex justify-center items-center gap-0.5 h-8 px-4 py-1 bg-white rounded dark:invert">
+            <div
+              class="flex justify-center items-center gap-0.5 h-8 px-4 py-1 bg-white rounded dark:invert"
+            >
               <div class="w-1 h-full bg-black"></div>
               <div class="w-0.5 h-full bg-black"></div>
               <div class="w-1.5 h-full bg-black"></div>
@@ -539,22 +698,33 @@ import {
               <div class="w-0.5 h-full bg-black"></div>
             </div>
             <div class="text-[10px] font-mono text-muted-foreground">
-              {{ activeOrder?.patientFullName || activeOrder?.patient?.fullName }} • {{ activeOrder?.testName }}
+              {{ activeOrder?.patientFullName || activeOrder?.patient?.fullName }} •
+              {{ activeOrder?.testName }}
             </div>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
             <div class="space-y-1">
               <label class="font-semibold text-foreground">Accession Identifier *</label>
-              <input hlmInput type="text" [(ngModel)]="accessionNumberInput" class="w-full text-xs h-8 font-mono" />
+              <input
+                hlmInput
+                type="text"
+                [(ngModel)]="accessionNumberInput"
+                class="w-full text-xs h-8 font-mono"
+              />
             </div>
 
             <div class="space-y-1">
               <label class="font-semibold text-foreground">Container / Color Tube *</label>
-              <select [(ngModel)]="containerType" class="w-full h-8 rounded-md border border-input bg-background px-2 text-xs">
+              <select
+                [(ngModel)]="containerType"
+                class="w-full h-8 rounded-md border border-input bg-background px-2 text-xs"
+              >
                 <option value="LAVENDER_EDTA">Lavender Top (K2-EDTA - Hematology)</option>
                 <option value="GOLD_SST">Gold Top (SST Gel Separator - Chemistry)</option>
-                <option value="LIGHT_BLUE_CITRATE">Light Blue Top (Sodium Citrate - Coagulation)</option>
+                <option value="LIGHT_BLUE_CITRATE">
+                  Light Blue Top (Sodium Citrate - Coagulation)
+                </option>
                 <option value="GREEN_HEPARIN">Green Top (Lithium Heparin - Stat Chem)</option>
                 <option value="RED_PLAIN">Red Top (Plain Clot Activator - Serology)</option>
                 <option value="STERILE_CUP">Sterile Cup (Urinalysis / Body Fluids)</option>
@@ -563,7 +733,10 @@ import {
 
             <div class="space-y-1">
               <label class="font-semibold text-foreground">Sample Adequacy Check *</label>
-              <select [(ngModel)]="sampleAdequacy" class="w-full h-8 rounded-md border border-input bg-background px-2 text-xs">
+              <select
+                [(ngModel)]="sampleAdequacy"
+                class="w-full h-8 rounded-md border border-input bg-background px-2 text-xs"
+              >
                 <option value="SATISFACTORY">Satisfactory / Adequate Volume</option>
                 <option value="HEMOLYZED">Hemolyzed Sample</option>
                 <option value="LIPEMIC">Lipemic Sample</option>
@@ -574,13 +747,26 @@ import {
 
             <div class="space-y-1">
               <label class="font-semibold text-foreground">Storage Location / Rack</label>
-              <input hlmInput type="text" [(ngModel)]="storageRack" placeholder="e.g. Centrifuge Rack B-04" class="w-full text-xs h-8" />
+              <input
+                hlmInput
+                type="text"
+                [(ngModel)]="storageRack"
+                placeholder="e.g. Centrifuge Rack B-04"
+                class="w-full text-xs h-8"
+              />
             </div>
           </div>
 
           <div class="flex justify-end gap-2 pt-3 border-t border-border">
-            <button hlmBtn variant="outline" size="sm" (click)="isAccessionModalOpen.set(false)">Cancel</button>
-            <button hlmBtn size="sm" (click)="submitAccession()" class="bg-indigo-600 hover:bg-indigo-700 text-white gap-1">
+            <button hlmBtn variant="outline" size="sm" (click)="isAccessionModalOpen.set(false)">
+              Cancel
+            </button>
+            <button
+              hlmBtn
+              size="sm"
+              (click)="submitAccession()"
+              class="bg-indigo-600 hover:bg-indigo-700 text-white gap-1"
+            >
               <ng-icon name="lucideCheckCircle2" size="14" />
               <span>Confirm Accession & Generate Label</span>
             </button>
@@ -591,14 +777,24 @@ import {
       <!-- ========================================================================= -->
       <!-- MODAL 4: PROCESS TEST ON ANALYZER                                         -->
       <!-- ========================================================================= -->
-      <div *ngIf="isProcessModalOpen()" class="fixed inset-0 z-50 bg-background/80 backdrop-blur-xs flex items-center justify-center p-4">
-        <div class="bg-card border border-border rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-xl">
+      <div
+        *ngIf="isProcessModalOpen()"
+        class="fixed inset-0 z-50 bg-background/80 backdrop-blur-xs flex items-center justify-center p-4"
+      >
+        <div
+          class="bg-card border border-border rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-xl"
+        >
           <div class="flex items-center justify-between pb-3 border-b border-border">
             <div class="flex items-center gap-2 text-purple-600">
               <ng-icon name="lucideCpu" size="20" />
-              <h3 class="text-base font-bold text-foreground">Automated Analyzer Test Processing</h3>
+              <h3 class="text-base font-bold text-foreground">
+                Automated Analyzer Test Processing
+              </h3>
             </div>
-            <button (click)="isProcessModalOpen.set(false)" class="text-muted-foreground hover:text-foreground">
+            <button
+              (click)="isProcessModalOpen.set(false)"
+              class="text-muted-foreground hover:text-foreground"
+            >
               <ng-icon name="lucideX" size="18" />
             </button>
           </div>
@@ -606,34 +802,60 @@ import {
           <div class="p-3 bg-muted/40 rounded-xl space-y-1 text-xs">
             <div class="flex justify-between">
               <span class="text-muted-foreground">Order & Test:</span>
-              <span class="font-bold text-foreground">#LAB-{{ activeOrder?.id }} • {{ activeOrder?.testName }}</span>
+              <span class="font-bold text-foreground"
+                >#LAB-{{ activeOrder?.id }} • {{ activeOrder?.testName }}</span
+              >
             </div>
             <div class="flex justify-between">
               <span class="text-muted-foreground">Accession Barcode:</span>
-              <span class="font-mono text-foreground">{{ activeOrder?.specimenBarcode || barcodeInput }}</span>
+              <span class="font-mono text-foreground">{{
+                activeOrder?.specimenBarcode || barcodeInput
+              }}</span>
             </div>
           </div>
 
           <div class="space-y-3 text-xs">
             <div class="space-y-1">
-              <label class="font-semibold text-foreground">Select Connected Analyzer Instrument *</label>
-              <select [(ngModel)]="selectedAnalyzer" class="w-full h-9 rounded-md border border-input bg-background px-3 text-xs">
-                <option value="Sysmex XN-1000 (Hematology)">Sysmex XN-1000 Automated Hematology Analyzer (Ready)</option>
-                <option value="Roche Cobas 6000 (Chemistry)">Roche Cobas 6000 Clinical Chemistry System (Ready)</option>
-                <option value="Abbott Architect i2000SR (Immuno)">Abbott Architect i2000SR Immunoassay Analyzer (Ready)</option>
-                <option value="Bio-Rad D-10 (HPLC HbA1c)">Bio-Rad D-10 HPLC Hemoglobin Testing System (Ready)</option>
-                <option value="Manual Microscopy / Bench">Manual Clinical Microscopy & Staining Bench</option>
+              <label class="font-semibold text-foreground"
+                >Select Connected Analyzer Instrument *</label
+              >
+              <select
+                [(ngModel)]="selectedAnalyzer"
+                class="w-full h-9 rounded-md border border-input bg-background px-3 text-xs"
+              >
+                <option value="Sysmex XN-1000 (Hematology)">
+                  Sysmex XN-1000 Automated Hematology Analyzer (Ready)
+                </option>
+                <option value="Roche Cobas 6000 (Chemistry)">
+                  Roche Cobas 6000 Clinical Chemistry System (Ready)
+                </option>
+                <option value="Abbott Architect i2000SR (Immuno)">
+                  Abbott Architect i2000SR Immunoassay Analyzer (Ready)
+                </option>
+                <option value="Bio-Rad D-10 (HPLC HbA1c)">
+                  Bio-Rad D-10 HPLC Hemoglobin Testing System (Ready)
+                </option>
+                <option value="Manual Microscopy / Bench">
+                  Manual Clinical Microscopy & Staining Bench
+                </option>
               </select>
             </div>
 
             <div class="grid grid-cols-2 gap-3">
               <div class="space-y-1">
                 <label class="font-semibold text-foreground">Batch Run ID</label>
-                <input hlmInput type="text" [(ngModel)]="batchRunId" class="w-full text-xs h-8 font-mono" />
+                <input
+                  hlmInput
+                  type="text"
+                  [(ngModel)]="batchRunId"
+                  class="w-full text-xs h-8 font-mono"
+                />
               </div>
               <div class="space-y-1">
                 <label class="font-semibold text-foreground">QC Status</label>
-                <div class="h-8 flex items-center gap-1.5 px-3 rounded-md bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 font-semibold text-[11px]">
+                <div
+                  class="h-8 flex items-center gap-1.5 px-3 rounded-md bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 font-semibold text-[11px]"
+                >
                   <ng-icon name="lucideShieldCheck" size="14" />
                   <span>QC Passed & Calibrated</span>
                 </div>
@@ -642,8 +864,15 @@ import {
           </div>
 
           <div class="flex justify-end gap-2 pt-3 border-t border-border">
-            <button hlmBtn variant="outline" size="sm" (click)="isProcessModalOpen.set(false)">Cancel</button>
-            <button hlmBtn size="sm" (click)="submitProcessTest()" class="bg-purple-600 hover:bg-purple-700 text-white gap-1">
+            <button hlmBtn variant="outline" size="sm" (click)="isProcessModalOpen.set(false)">
+              Cancel
+            </button>
+            <button
+              hlmBtn
+              size="sm"
+              (click)="submitProcessTest()"
+              class="bg-purple-600 hover:bg-purple-700 text-white gap-1"
+            >
               <ng-icon name="lucidePlay" size="14" />
               <span>Start Analysis Run</span>
             </button>
@@ -713,7 +942,9 @@ export class LabTechnicianWorklistComponent implements OnInit {
     } else if (tab === 'PROCESS') {
       list = list.filter((o) => o.status === 'ACCESSIONED');
     } else if (tab === 'RESULT') {
-      list = list.filter((o) => o.status === 'IN_PROCESS' || o.status === 'IN_ANALYSIS' || o.status === 'RESULTED');
+      list = list.filter(
+        (o) => o.status === 'IN_PROCESS' || o.status === 'IN_ANALYSIS' || o.status === 'RESULTED',
+      );
     }
 
     // Priority Filter
@@ -732,7 +963,9 @@ export class LabTechnicianWorklistComponent implements OnInit {
         const idMatch = String(o.id).includes(query);
         const testMatch = o.testName?.toLowerCase().includes(query);
         const loincMatch = o.loincCode?.toLowerCase().includes(query);
-        const patientMatch = (o.patientFullName || o.patient?.fullName || '').toLowerCase().includes(query);
+        const patientMatch = (o.patientFullName || o.patient?.fullName || '')
+          .toLowerCase()
+          .includes(query);
         const mrnMatch = (o.patientMrn || '').toLowerCase().includes(query);
         const barcodeMatch = (o.specimenBarcode || '').toLowerCase().includes(query);
         return idMatch || testMatch || loincMatch || patientMatch || mrnMatch || barcodeMatch;
@@ -746,7 +979,7 @@ export class LabTechnicianWorklistComponent implements OnInit {
     private apiService: ApiService,
     public authService: AuthService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
   ) {}
 
   ngOnInit(): void {
@@ -787,47 +1020,73 @@ export class LabTechnicianWorklistComponent implements OnInit {
   getTabCount(tabKey: string): number {
     const list = this.labOrders();
     switch (tabKey) {
-      case 'ALL': return list.length;
-      case 'RECEIVE': return list.filter((o) => o.status === 'ORDERED').length;
-      case 'COLLECT': return list.filter((o) => o.status === 'RECEIVED').length;
-      case 'ACCESSION': return list.filter((o) => o.status === 'SPECIMEN_COLLECTED' || o.status === 'COLLECTED').length;
-      case 'PROCESS': return list.filter((o) => o.status === 'ACCESSIONED').length;
-      case 'RESULT': return list.filter((o) => o.status === 'IN_PROCESS' || o.status === 'IN_ANALYSIS' || o.status === 'RESULTED').length;
-      default: return 0;
+      case 'ALL':
+        return list.length;
+      case 'RECEIVE':
+        return list.filter((o) => o.status === 'ORDERED').length;
+      case 'COLLECT':
+        return list.filter((o) => o.status === 'RECEIVED').length;
+      case 'ACCESSION':
+        return list.filter((o) => o.status === 'SPECIMEN_COLLECTED' || o.status === 'COLLECTED')
+          .length;
+      case 'PROCESS':
+        return list.filter((o) => o.status === 'ACCESSIONED').length;
+      case 'RESULT':
+        return list.filter(
+          (o) => o.status === 'IN_PROCESS' || o.status === 'IN_ANALYSIS' || o.status === 'RESULTED',
+        ).length;
+      default:
+        return 0;
     }
   }
 
   formatStage(status: string): string {
     switch (status) {
-      case 'ORDERED': return '1. Doctor Ordered';
-      case 'RECEIVED': return '1. Order Received';
+      case 'ORDERED':
+        return '1. Doctor Ordered';
+      case 'RECEIVED':
+        return '1. Order Received';
       case 'SPECIMEN_COLLECTED':
-      case 'COLLECTED': return '2. Specimen Collected';
-      case 'ACCESSIONED': return '3. Accessioned';
+      case 'COLLECTED':
+        return '2. Specimen Collected';
+      case 'ACCESSIONED':
+        return '3. Accessioned';
       case 'IN_PROCESS':
-      case 'IN_ANALYSIS': return '4. In Analysis';
-      case 'RESULTED': return '5. Resulted';
+      case 'IN_ANALYSIS':
+        return '4. In Analysis';
+      case 'RESULTED':
+        return '5. Resulted';
       case 'COMPLETED':
-      case 'VERIFIED': return '5. Verified & Released';
-      case 'CANCELLED': return 'Cancelled';
-      default: return status;
+      case 'VERIFIED':
+        return '5. Verified & Released';
+      case 'CANCELLED':
+        return 'Cancelled';
+      default:
+        return status;
     }
   }
 
   getStageBadgeVariant(status: string): 'default' | 'secondary' | 'outline' | 'destructive' {
     switch (status) {
       case 'ORDERED':
-      case 'RECEIVED': return 'outline';
+      case 'RECEIVED':
+        return 'outline';
       case 'SPECIMEN_COLLECTED':
-      case 'COLLECTED': return 'secondary';
-      case 'ACCESSIONED': return 'secondary';
+      case 'COLLECTED':
+        return 'secondary';
+      case 'ACCESSIONED':
+        return 'secondary';
       case 'IN_PROCESS':
-      case 'IN_ANALYSIS': return 'default';
+      case 'IN_ANALYSIS':
+        return 'default';
       case 'RESULTED':
       case 'COMPLETED':
-      case 'VERIFIED': return 'secondary';
-      case 'CANCELLED': return 'destructive';
-      default: return 'outline';
+      case 'VERIFIED':
+        return 'secondary';
+      case 'CANCELLED':
+        return 'destructive';
+      default:
+        return 'outline';
     }
   }
 
@@ -853,7 +1112,12 @@ export class LabTechnicianWorklistComponent implements OnInit {
 
   openCollectModal(order: LabOrder): void {
     this.activeOrder = order;
-    this.specimenType = order.category === 'HEMATOLOGY' ? 'BLOOD' : order.category === 'CHEMISTRY' ? 'SERUM' : 'BLOOD';
+    this.specimenType =
+      order.category === 'HEMATOLOGY'
+        ? 'BLOOD'
+        : order.category === 'CHEMISTRY'
+          ? 'SERUM'
+          : 'BLOOD';
     this.collectionSite = 'Left Antecubital Fossa';
     this.phlebotomistName = this.authService.currentUser()?.fullName || 'Phlebotomy Desk';
     this.isCollectModalOpen.set(true);
@@ -864,12 +1128,14 @@ export class LabTechnicianWorklistComponent implements OnInit {
     const orderId = this.activeOrder.id!;
     const barcode = `BAR-LAB-${orderId}-${Math.floor(1000 + Math.random() * 9000)}`;
 
-    this.apiService.createSpecimen(orderId, {
-      specimenBarcode: barcode,
-      specimenType: this.specimenType,
-      collectionSite: this.collectionSite,
-      fastingStatus: this.fastingStatus,
-    }).subscribe({ error: () => {} });
+    this.apiService
+      .createSpecimen(orderId, {
+        specimenBarcode: barcode,
+        specimenType: this.specimenType,
+        collectionSite: this.collectionSite,
+        fastingStatus: this.fastingStatus,
+      })
+      .subscribe({ error: () => {} });
 
     this.apiService.updateLabOrderStatus(orderId, 'SPECIMEN_COLLECTED', barcode).subscribe({
       next: () => {
@@ -883,7 +1149,8 @@ export class LabTechnicianWorklistComponent implements OnInit {
 
   openAccessionModal(order: LabOrder): void {
     this.activeOrder = order;
-    this.barcodeInput = order.specimenBarcode || `BAR-LAB-${order.id}-${Math.floor(1000 + Math.random() * 9000)}`;
+    this.barcodeInput =
+      order.specimenBarcode || `BAR-LAB-${order.id}-${Math.floor(1000 + Math.random() * 9000)}`;
     this.accessionNumberInput = `ACC-${new Date().getFullYear()}-${String(order.id).padStart(4, '0')}`;
     this.containerType = order.category === 'HEMATOLOGY' ? 'LAVENDER_EDTA' : 'GOLD_SST';
     this.sampleAdequacy = 'SATISFACTORY';
@@ -896,7 +1163,9 @@ export class LabTechnicianWorklistComponent implements OnInit {
 
     this.apiService.updateLabOrderStatus(orderId, 'ACCESSIONED', this.barcodeInput).subscribe({
       next: () => {
-        toast.success(`Specimen accessioned (#${this.accessionNumberInput}). Container: ${this.containerType}`);
+        toast.success(
+          `Specimen accessioned (#${this.accessionNumberInput}). Container: ${this.containerType}`,
+        );
         this.isAccessionModalOpen.set(false);
         this.loadOrders();
       },
@@ -907,7 +1176,10 @@ export class LabTechnicianWorklistComponent implements OnInit {
   openProcessModal(order: LabOrder): void {
     this.activeOrder = order;
     this.batchRunId = `BATCH-${new Date().toISOString().substring(0, 10)}-${order.id}`;
-    this.selectedAnalyzer = order.category === 'HEMATOLOGY' ? 'Sysmex XN-1000 (Hematology)' : 'Roche Cobas 6000 (Chemistry)';
+    this.selectedAnalyzer =
+      order.category === 'HEMATOLOGY'
+        ? 'Sysmex XN-1000 (Hematology)'
+        : 'Roche Cobas 6000 (Chemistry)';
     this.isProcessModalOpen.set(true);
   }
 
@@ -917,7 +1189,9 @@ export class LabTechnicianWorklistComponent implements OnInit {
 
     this.apiService.updateLabOrderStatus(orderId, 'IN_PROCESS').subscribe({
       next: () => {
-        toast.success(`Test analysis started on ${this.selectedAnalyzer} (Batch: ${this.batchRunId}).`);
+        toast.success(
+          `Test analysis started on ${this.selectedAnalyzer} (Batch: ${this.batchRunId}).`,
+        );
         this.isProcessModalOpen.set(false);
         this.loadOrders();
       },

@@ -15,7 +15,14 @@ export interface CareTeamMember {
   practitionerId?: string;
   email: string;
   fullName?: string;
-  role: 'PRIMARY_ATTENDING' | 'CONSULTING_PHYSICIAN' | 'PRIMARY_NURSE' | 'CASE_MANAGER' | 'PHARMACIST' | 'SOCIAL_WORKER' | string;
+  role:
+    | 'PRIMARY_ATTENDING'
+    | 'CONSULTING_PHYSICIAN'
+    | 'PRIMARY_NURSE'
+    | 'CASE_MANAGER'
+    | 'PHARMACIST'
+    | 'SOCIAL_WORKER'
+    | string;
   specialty?: string;
   periodStart?: string;
   periodEnd?: string;

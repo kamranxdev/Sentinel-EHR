@@ -49,19 +49,26 @@ import {
   template: `
     <div class="space-y-6 max-w-5xl">
       <!-- Header -->
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-border">
+      <div
+        class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-border"
+      >
         <div>
           <div class="flex items-center gap-2">
-            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20">
+            <span
+              class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-primary/10 text-primary border border-primary/20"
+            >
               Hospital Admin Desk
             </span>
-            <span class="text-xs text-muted-foreground font-mono">Hospital Profile & Departments</span>
+            <span class="text-xs text-muted-foreground font-mono"
+              >Hospital Profile & Departments</span
+            >
           </div>
           <h1 class="text-2xl font-bold tracking-tight text-foreground mt-1">
             Hospital Profile & Clinical Departments
           </h1>
           <p class="text-xs text-muted-foreground mt-0.5">
-            Configure hospital / clinic profile (e.g. AIIMS Delhi, AIIMS Gorakhpur), contact details, clinical departments, and inpatient units.
+            Configure hospital / clinic profile (e.g. AIIMS Delhi, AIIMS Gorakhpur), contact
+            details, clinical departments, and inpatient units.
           </p>
         </div>
 
@@ -70,14 +77,24 @@ import {
           <button
             type="button"
             (click)="activeTab.set('profile')"
-            [class]="'px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ' + (activeTab() === 'profile' ? 'bg-primary text-primary-foreground border-primary' : 'bg-card text-muted-foreground border-border hover:text-foreground')"
+            [class]="
+              'px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ' +
+              (activeTab() === 'profile'
+                ? 'bg-primary text-primary-foreground border-primary'
+                : 'bg-card text-muted-foreground border-border hover:text-foreground')
+            "
           >
             <ng-icon name="lucideHospital" size="14" class="mr-1 inline" /> Hospital Profile
           </button>
           <button
             type="button"
             (click)="activeTab.set('hierarchy')"
-            [class]="'px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ' + (activeTab() === 'hierarchy' ? 'bg-primary text-primary-foreground border-primary' : 'bg-card text-muted-foreground border-border hover:text-foreground')"
+            [class]="
+              'px-3 py-1.5 rounded-lg text-xs font-semibold border transition-colors ' +
+              (activeTab() === 'hierarchy'
+                ? 'bg-primary text-primary-foreground border-primary'
+                : 'bg-card text-muted-foreground border-border hover:text-foreground')
+            "
           >
             <ng-icon name="lucideBuilding2" size="14" class="mr-1 inline" /> Departments & Wards
           </button>
@@ -85,11 +102,16 @@ import {
       </div>
 
       <!-- TAB 1: Hospital Profile Form -->
-      <div *ngIf="activeTab() === 'profile'" class="bg-card rounded-2xl border border-border shadow-xs p-6 space-y-6">
+      <div
+        *ngIf="activeTab() === 'profile'"
+        class="bg-card rounded-2xl border border-border shadow-xs p-6 space-y-6"
+      >
         <form (ngSubmit)="onSave()" class="space-y-5">
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label class="block text-xs font-semibold text-foreground mb-1.5">Hospital / Clinic Name *</label>
+              <label class="block text-xs font-semibold text-foreground mb-1.5"
+                >Hospital / Clinic Name *</label
+              >
               <input
                 type="text"
                 name="name"
@@ -101,7 +123,9 @@ import {
             </div>
 
             <div>
-              <label class="block text-xs font-semibold text-foreground mb-1.5">Hospital Identifier Code</label>
+              <label class="block text-xs font-semibold text-foreground mb-1.5"
+                >Hospital Identifier Code</label
+              >
               <input
                 type="text"
                 [value]="facility.orgCode"
@@ -113,7 +137,9 @@ import {
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label class="block text-xs font-semibold text-foreground mb-1.5">Primary Contact Email</label>
+              <label class="block text-xs font-semibold text-foreground mb-1.5"
+                >Primary Contact Email</label
+              >
               <input
                 type="email"
                 name="email"
@@ -124,7 +150,9 @@ import {
             </div>
 
             <div>
-              <label class="block text-xs font-semibold text-foreground mb-1.5">Primary Phone Number</label>
+              <label class="block text-xs font-semibold text-foreground mb-1.5"
+                >Primary Phone Number</label
+              >
               <input
                 type="tel"
                 name="phone"
@@ -136,7 +164,9 @@ import {
           </div>
 
           <div>
-            <label class="block text-xs font-semibold text-foreground mb-1.5">Hospital Official Address</label>
+            <label class="block text-xs font-semibold text-foreground mb-1.5"
+              >Hospital Official Address</label
+            >
             <input
               type="text"
               name="address"
@@ -164,8 +194,12 @@ import {
         <div class="bg-card rounded-2xl border border-border shadow-xs p-6 space-y-6">
           <div class="flex justify-between items-center pb-4 border-b border-border">
             <div>
-              <h3 class="text-sm font-bold text-foreground">Clinical Departments & Inpatient Wards</h3>
-              <p class="text-xs text-muted-foreground">Manage departments, ward units, patient rooms, and bed configurations.</p>
+              <h3 class="text-sm font-bold text-foreground">
+                Clinical Departments & Inpatient Wards
+              </h3>
+              <p class="text-xs text-muted-foreground">
+                Manage departments, ward units, patient rooms, and bed configurations.
+              </p>
             </div>
 
             <button
@@ -178,35 +212,56 @@ import {
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div *ngFor="let dept of departments()" class="p-4 rounded-xl border border-border bg-muted/20 space-y-3">
+            <div
+              *ngFor="let dept of departments()"
+              class="p-4 rounded-xl border border-border bg-muted/20 space-y-3"
+            >
               <div class="flex justify-between items-start">
                 <div>
                   <h4 class="font-bold text-xs text-foreground flex items-center gap-1.5">
                     <ng-icon name="lucideHospital" size="14" class="text-primary" />
                     {{ dept.name }}
                   </h4>
-                  <p class="text-[11px] text-muted-foreground">Specialty: {{ dept.specialty || 'General' }}</p>
+                  <p class="text-[11px] text-muted-foreground">
+                    Specialty: {{ dept.specialty || 'General' }}
+                  </p>
                 </div>
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-mono bg-primary/10 text-primary border border-primary/20">
+                <span
+                  class="px-2 py-0.5 rounded-full text-[10px] font-mono bg-primary/10 text-primary border border-primary/20"
+                >
                   {{ dept.departmentCode }}
                 </span>
               </div>
 
               <!-- Wards list -->
               <div class="space-y-2 pt-2 border-t border-border/60">
-                <div class="flex justify-between items-center text-[11px] font-semibold text-muted-foreground">
+                <div
+                  class="flex justify-between items-center text-[11px] font-semibold text-muted-foreground"
+                >
                   <span>Wards & Units</span>
-                  <button (click)="openAddWard(dept)" class="text-primary hover:underline text-[10px]">+ Add Ward</button>
+                  <button
+                    (click)="openAddWard(dept)"
+                    class="text-primary hover:underline text-[10px]"
+                  >
+                    + Add Ward
+                  </button>
                 </div>
 
-                <div *ngFor="let w of dept.wards" class="p-2.5 bg-background rounded-lg border border-border/60 text-xs space-y-1">
+                <div
+                  *ngFor="let w of dept.wards"
+                  class="p-2.5 bg-background rounded-lg border border-border/60 text-xs space-y-1"
+                >
                   <div class="flex justify-between items-center">
                     <span class="font-semibold text-foreground">{{ w.name }}</span>
-                    <span class="text-[10px] font-mono text-muted-foreground">{{ w.wardType }}</span>
+                    <span class="text-[10px] font-mono text-muted-foreground">{{
+                      w.wardType
+                    }}</span>
                   </div>
                   <div class="text-[11px] text-muted-foreground flex justify-between">
                     <span>Floor: {{ w.floor || '1st' }}</span>
-                    <span class="text-emerald-600 font-medium">{{ w.rooms?.length || 4 }} Rooms Active</span>
+                    <span class="text-emerald-600 font-medium"
+                      >{{ w.rooms?.length || 4 }} Rooms Active</span
+                    >
                   </div>
                 </div>
               </div>
@@ -216,11 +271,19 @@ import {
       </div>
 
       <!-- Add Department Modal -->
-      <div *ngIf="showAddDeptModal()" class="fixed inset-0 z-50 bg-background/80 backdrop-blur-xs flex items-center justify-center p-4">
-        <div class="w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-lg space-y-4">
+      <div
+        *ngIf="showAddDeptModal()"
+        class="fixed inset-0 z-50 bg-background/80 backdrop-blur-xs flex items-center justify-center p-4"
+      >
+        <div
+          class="w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-lg space-y-4"
+        >
           <div class="flex justify-between items-center border-b border-border pb-3">
             <h3 class="text-sm font-bold text-foreground">Add Clinical Department</h3>
-            <button (click)="showAddDeptModal.set(false)" class="size-7 p-0 text-muted-foreground hover:text-foreground">
+            <button
+              (click)="showAddDeptModal.set(false)"
+              class="size-7 p-0 text-muted-foreground hover:text-foreground"
+            >
               <ng-icon name="lucideX" size="16" />
             </button>
           </div>
@@ -228,23 +291,47 @@ import {
           <div class="space-y-3 text-xs">
             <div>
               <label class="font-medium text-foreground block mb-1">Department Name *</label>
-              <input type="text" [(ngModel)]="newDept.name" placeholder="e.g. Cardiology, Intensive Care (ICU)" class="w-full p-2 rounded-md border border-input bg-background" />
+              <input
+                type="text"
+                [(ngModel)]="newDept.name"
+                placeholder="e.g. Cardiology, Intensive Care (ICU)"
+                class="w-full p-2 rounded-md border border-input bg-background"
+              />
             </div>
 
             <div>
               <label class="font-medium text-foreground block mb-1">Department Code *</label>
-              <input type="text" [(ngModel)]="newDept.departmentCode" placeholder="e.g. CARD, ICU, SURG" class="w-full p-2 rounded-md border border-input bg-background font-mono" />
+              <input
+                type="text"
+                [(ngModel)]="newDept.departmentCode"
+                placeholder="e.g. CARD, ICU, SURG"
+                class="w-full p-2 rounded-md border border-input bg-background font-mono"
+              />
             </div>
 
             <div>
               <label class="font-medium text-foreground block mb-1">Specialty</label>
-              <input type="text" [(ngModel)]="newDept.specialty" placeholder="e.g. Cardiovascular Medicine" class="w-full p-2 rounded-md border border-input bg-background" />
+              <input
+                type="text"
+                [(ngModel)]="newDept.specialty"
+                placeholder="e.g. Cardiovascular Medicine"
+                class="w-full p-2 rounded-md border border-input bg-background"
+              />
             </div>
           </div>
 
           <div class="flex justify-end gap-2 pt-2 border-t border-border">
-            <button (click)="showAddDeptModal.set(false)" class="px-3 py-1.5 rounded-lg border border-border text-xs">Cancel</button>
-            <button (click)="saveDepartment()" [disabled]="!newDept.name || !newDept.departmentCode" class="px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-semibold">
+            <button
+              (click)="showAddDeptModal.set(false)"
+              class="px-3 py-1.5 rounded-lg border border-border text-xs"
+            >
+              Cancel
+            </button>
+            <button
+              (click)="saveDepartment()"
+              [disabled]="!newDept.name || !newDept.departmentCode"
+              class="px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-semibold"
+            >
               Create Department
             </button>
           </div>
@@ -274,7 +361,7 @@ export class OrganizationAdminSettingsComponent implements OnInit {
   constructor(
     private organizationService: OrganizationService,
     private apiService: ApiService,
-    private authService: AuthService
+    private authService: AuthService,
   ) {}
 
   ngOnInit(): void {
@@ -328,7 +415,14 @@ export class OrganizationAdminSettingsComponent implements OnInit {
       specialty: this.newDept.specialty,
       status: 'ACTIVE',
       wards: [
-        { id: String(Date.now() + 1), departmentId: String(Date.now()), name: `${this.newDept.name} Unit 1`, wardType: 'GENERAL', floor: '1st', status: 'ACTIVE' },
+        {
+          id: String(Date.now() + 1),
+          departmentId: String(Date.now()),
+          name: `${this.newDept.name} Unit 1`,
+          wardType: 'GENERAL',
+          floor: '1st',
+          status: 'ACTIVE',
+        },
       ],
     };
 

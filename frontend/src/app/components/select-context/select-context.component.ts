@@ -44,14 +44,7 @@ import {
 @Component({
   selector: 'app-select-context',
   standalone: true,
-  imports: [
-    CommonModule,
-    RouterModule,
-    HlmButtonImports,
-    HlmCardImports,
-    HlmBadgeImports,
-    NgIcon,
-  ],
+  imports: [CommonModule, RouterModule, HlmButtonImports, HlmCardImports, HlmBadgeImports, NgIcon],
   providers: [
     provideIcons({
       lucideBuilding2,
@@ -87,9 +80,7 @@ export class SelectContextComponent implements OnInit {
   organizations = computed(() => this.user()?.organizations || []);
   isSuperAdmin = computed(() => this.authService.isSuperAdmin());
   isOrgAdmin = computed(() => this.authService.isOrganizationAdmin());
-  isAuditor = computed(() => this.authService.isAuditor());
   isPatient = computed(() => this.authService.isPatient() || !!this.user()?.patientId);
-
   isStrictPatientOnly = computed(() => {
     return (
       this.isPatient() &&
@@ -100,13 +91,12 @@ export class SelectContextComponent implements OnInit {
       !this.authService.isReceptionist() &&
       !this.authService.isPharmacist() &&
       !this.authService.isLabTechnician() &&
-      !this.authService.isBillingStaff() &&
-      !this.authService.isAuditor()
+      !this.authService.isBillingStaff()
     );
   });
 
   hasGovernanceAccess = computed(() => {
-    return this.isSuperAdmin() || this.isAuditor();
+    return this.isSuperAdmin();
   });
 
   constructor(
@@ -128,8 +118,10 @@ export class SelectContextComponent implements OnInit {
       organizationId: org.id,
       organizationName: org.name,
       organizationCode: org.code,
-      departmentId: org.departments && org.departments.length > 0 ? org.departments[0].id : undefined,
-      departmentName: org.departments && org.departments.length > 0 ? org.departments[0].name : undefined,
+      departmentId:
+        org.departments && org.departments.length > 0 ? org.departments[0].id : undefined,
+      departmentName:
+        org.departments && org.departments.length > 0 ? org.departments[0].name : undefined,
       roleName: this.authService.getPrimaryRole(),
     };
 
@@ -143,7 +135,7 @@ export class SelectContextComponent implements OnInit {
     this.navigateToDashboard();
   }
 
-  handleSelectGovernanceConsole(type: 'SUPER_ADMIN' | 'AUDITOR'): void {
+  handleSelectGovernanceConsole(type: 'SUPER_ADMIN'): void {
     const orgs = this.organizations();
     const primaryOrg = orgs.length > 0 ? orgs[0] : null;
 
@@ -157,16 +149,6 @@ export class SelectContextComponent implements OnInit {
         description: 'Global control plane and multi-tenant management active.',
       });
       this.router.navigate(['/super-admin/dashboard']);
-    } else {
-      this.authService.setContext({
-        organizationId: primaryOrg ? primaryOrg.id : 'AUDIT_VAULT',
-        organizationName: primaryOrg ? primaryOrg.name : 'Compliance & Audit Vault',
-        roleName: 'Auditor',
-      });
-      toast.success('Compliance Audit Vault Activated', {
-        description: 'Immutable forensic access logs enabled.',
-      });
-      this.router.navigate(['/auditor/dashboard']);
     }
   }
 
@@ -214,9 +196,7 @@ export class SelectContextComponent implements OnInit {
       case 'BillingStaff':
         this.router.navigate(['/billing-staff/dashboard']);
         break;
-      case 'Auditor':
-        this.router.navigate(['/auditor/dashboard']);
-        break;
+
       case 'Patient':
         this.router.navigate(['/patient/dashboard']);
         break;

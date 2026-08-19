@@ -129,26 +129,49 @@ export interface ClinicalTaskItem {
   template: `
     <div class="w-full space-y-6">
       <!-- 1. Physician Header & Identity Orientation (Full Width, Open Layout) -->
-      <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 pb-5 border-b border-border">
+      <div
+        class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 pb-5 border-b border-border"
+      >
         <div class="space-y-1">
           <div class="flex items-center flex-wrap gap-2.5">
             <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
               Dr. {{ currentUser?.fullName || 'Physician' }}
             </h1>
-            <span hlmBadge variant="secondary" class="bg-primary/10 text-primary border-primary/20 text-[11px] font-semibold py-0.5 px-2.5">
+            <span
+              hlmBadge
+              variant="secondary"
+              class="bg-primary/10 text-primary border-primary/20 text-[11px] font-semibold py-0.5 px-2.5"
+            >
               {{ currentUser?.specialty || currentUser?.specialization || 'Attending Physician' }}
             </span>
-            <span hlmBadge variant="outline" class="text-[11px] border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/5">
+            <span
+              hlmBadge
+              variant="outline"
+              class="text-[11px] border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/5"
+            >
               ● Active Shift
             </span>
           </div>
 
           <div class="flex items-center flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
-            <span>Clinical Scope: <strong class="text-foreground">Encounter & Assignment Driven</strong></span>
+            <span
+              >Clinical Scope:
+              <strong class="text-foreground">Encounter & Assignment Driven</strong></span
+            >
             <span class="text-border">•</span>
-            <span>Hospital / Clinic: <strong class="text-foreground">{{ authService.activeContext()?.organizationName || 'Main Hospital' }}</strong></span>
+            <span
+              >Hospital / Clinic:
+              <strong class="text-foreground">{{
+                authService.activeContext()?.organizationName || 'Main Hospital'
+              }}</strong></span
+            >
             <span class="text-border">•</span>
-            <span>License: <strong class="font-mono text-foreground">{{ currentUser?.licenseNumber || 'MD-ACTIVE-2026' }}</strong></span>
+            <span
+              >License:
+              <strong class="font-mono text-foreground">{{
+                currentUser?.licenseNumber || 'MD-ACTIVE-2026'
+              }}</strong></span
+            >
           </div>
         </div>
 
@@ -195,20 +218,36 @@ export interface ClinicalTaskItem {
           class="p-4 rounded-2xl border border-border bg-card shadow-2xs hover:border-primary/40 hover:shadow-xs transition-all space-y-2.5 group"
         >
           <div class="flex items-center justify-between">
-            <span class="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Today's Outpatients</span>
-            <div class="size-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-muted-foreground"
+              >Today's Outpatients</span
+            >
+            <div
+              class="size-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center"
+            >
               <ng-icon name="lucideCalendarClock" size="14" />
             </div>
           </div>
           <div class="flex items-baseline justify-between">
-            <span class="text-2xl font-extrabold text-foreground">{{ outpatientAppointments().length }}</span>
-            <span hlmBadge variant="secondary" class="text-[10px] bg-primary/10 text-primary border-primary/20 font-semibold">
+            <span class="text-2xl font-extrabold text-foreground">{{
+              outpatientAppointments().length
+            }}</span>
+            <span
+              hlmBadge
+              variant="secondary"
+              class="text-[10px] bg-primary/10 text-primary border-primary/20 font-semibold"
+            >
               {{ getCheckedInCount() }} Checked-In
             </span>
           </div>
-          <div class="text-[11px] text-muted-foreground flex items-center justify-between pt-1 border-t border-border/60 group-hover:text-primary">
+          <div
+            class="text-[11px] text-muted-foreground flex items-center justify-between pt-1 border-t border-border/60 group-hover:text-primary"
+          >
             <span>In-Clinic Care Queue</span>
-            <ng-icon name="lucideChevronRight" size="12" class="group-hover:translate-x-0.5 transition-transform" />
+            <ng-icon
+              name="lucideChevronRight"
+              size="12"
+              class="group-hover:translate-x-0.5 transition-transform"
+            />
           </div>
         </a>
 
@@ -218,20 +257,36 @@ export interface ClinicalTaskItem {
           class="p-4 rounded-2xl border border-border bg-card shadow-2xs hover:border-indigo-500/40 hover:shadow-xs transition-all space-y-2.5 group"
         >
           <div class="flex items-center justify-between">
-            <span class="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">My Inpatients</span>
-            <div class="size-7 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-muted-foreground"
+              >My Inpatients</span
+            >
+            <div
+              class="size-7 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center"
+            >
               <ng-icon name="lucideBed" size="14" />
             </div>
           </div>
           <div class="flex items-baseline justify-between">
-            <span class="text-2xl font-extrabold text-foreground">{{ inpatientsList().length }}</span>
-            <span hlmBadge variant="outline" class="text-[10px] font-semibold text-indigo-600 border-indigo-500/30">
+            <span class="text-2xl font-extrabold text-foreground">{{
+              inpatientsList().length
+            }}</span>
+            <span
+              hlmBadge
+              variant="outline"
+              class="text-[10px] font-semibold text-indigo-600 border-indigo-500/30"
+            >
               Ward Census
             </span>
           </div>
-          <div class="text-[11px] text-muted-foreground flex items-center justify-between pt-1 border-t border-border/60 group-hover:text-indigo-600">
+          <div
+            class="text-[11px] text-muted-foreground flex items-center justify-between pt-1 border-t border-border/60 group-hover:text-indigo-600"
+          >
             <span>Attending & Rounds</span>
-            <ng-icon name="lucideChevronRight" size="12" class="group-hover:translate-x-0.5 transition-transform" />
+            <ng-icon
+              name="lucideChevronRight"
+              size="12"
+              class="group-hover:translate-x-0.5 transition-transform"
+            />
           </div>
         </a>
 
@@ -241,8 +296,12 @@ export interface ClinicalTaskItem {
           class="p-4 rounded-2xl border border-border bg-card shadow-2xs hover:border-emerald-500/40 hover:shadow-xs transition-all space-y-2.5 group"
         >
           <div class="flex items-center justify-between">
-            <span class="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">EHR Patient Chart</span>
-            <div class="size-7 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-muted-foreground"
+              >EHR Patient Chart</span
+            >
+            <div
+              class="size-7 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center"
+            >
               <ng-icon name="lucideStethoscope" size="14" />
             </div>
           </div>
@@ -250,33 +309,49 @@ export interface ClinicalTaskItem {
             <span class="text-sm font-extrabold text-foreground truncate max-w-[150px]">
               {{ patientContext.activePatient()?.fullName || 'Select Patient' }}
             </span>
-            <span hlmBadge variant="secondary" class="text-[10px] bg-emerald-500/10 text-emerald-600 font-semibold">
+            <span
+              hlmBadge
+              variant="secondary"
+              class="text-[10px] bg-emerald-500/10 text-emerald-600 font-semibold"
+            >
               Active Context
             </span>
           </div>
-          <div class="text-[11px] text-muted-foreground flex items-center justify-between pt-1 border-t border-border/60 group-hover:text-emerald-600">
+          <div
+            class="text-[11px] text-muted-foreground flex items-center justify-between pt-1 border-t border-border/60 group-hover:text-emerald-600"
+          >
             <span>SOAP, eRx, Vitals</span>
-            <ng-icon name="lucideChevronRight" size="12" class="group-hover:translate-x-0.5 transition-transform" />
+            <ng-icon
+              name="lucideChevronRight"
+              size="12"
+              class="group-hover:translate-x-0.5 transition-transform"
+            />
           </div>
         </a>
 
         <!-- Metric 4: Action Tasks / Inbox -->
-        <div
-          class="p-4 rounded-2xl border border-border bg-card shadow-2xs space-y-2.5"
-        >
+        <div class="p-4 rounded-2xl border border-border bg-card shadow-2xs space-y-2.5">
           <div class="flex items-center justify-between">
-            <span class="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Clinical Tasks</span>
-            <div class="size-7 rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-muted-foreground"
+              >Clinical Tasks</span
+            >
+            <div
+              class="size-7 rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center"
+            >
               <ng-icon name="lucideFileText" size="14" />
             </div>
           </div>
           <div class="flex items-baseline justify-between">
-            <span class="text-2xl font-extrabold text-foreground">{{ clinicalTasks().length }}</span>
+            <span class="text-2xl font-extrabold text-foreground">{{
+              clinicalTasks().length
+            }}</span>
             <span hlmBadge variant="destructive" class="text-[10px] font-semibold">
               Action Required
             </span>
           </div>
-          <div class="text-[11px] text-muted-foreground flex items-center justify-between pt-1 border-t border-border/60">
+          <div
+            class="text-[11px] text-muted-foreground flex items-center justify-between pt-1 border-t border-border/60"
+          >
             <span>Abnormal Labs & Notes</span>
             <span class="text-[10px] font-bold text-rose-600">Review Below</span>
           </div>
@@ -285,13 +360,13 @@ export interface ClinicalTaskItem {
 
       <!-- 3. Primary Command Center Layout (2 Columns: 8 Cols Outpatient Queue + Inpatients, 4 Cols Tasks & Quick Workflows) -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        
         <!-- Left Column (8 Cols): In-Clinic Queue & Inpatient Snapshot -->
         <div class="lg:col-span-8 space-y-6">
-
           <!-- Section A: Today's In-Clinic Outpatient Queue -->
           <div class="rounded-2xl border border-border bg-card overflow-hidden shadow-xs">
-            <div class="p-4 border-b border-border bg-muted/20 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+            <div
+              class="p-4 border-b border-border bg-muted/20 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2"
+            >
               <div>
                 <h3 class="text-sm font-bold text-foreground flex items-center gap-2">
                   <ng-icon name="lucideCalendarClock" size="16" class="text-primary" />
@@ -301,7 +376,10 @@ export interface ClinicalTaskItem {
                   Patients with active appointment & consultation relationships scheduled today.
                 </p>
               </div>
-              <a routerLink="/physician/appointments" class="text-xs text-primary hover:underline font-semibold flex items-center gap-1">
+              <a
+                routerLink="/physician/appointments"
+                class="text-xs text-primary hover:underline font-semibold flex items-center gap-1"
+              >
                 <span>View Full Schedule</span>
                 <ng-icon name="lucideChevronRight" size="13" />
               </a>
@@ -326,11 +404,15 @@ export interface ClinicalTaskItem {
                     (click)="openPatientChart(apt.patient)"
                   >
                     <td hlmTableCell class="py-3 px-4 font-mono font-bold text-foreground">
-                      {{ apt.appointmentDate | date:'shortTime' }}
+                      {{ apt.appointmentDate | date: 'shortTime' }}
                     </td>
                     <td hlmTableCell class="py-3 px-4">
-                      <div class="font-bold text-foreground text-xs">{{ apt.patient?.fullName || apt.patientName || 'Patient' }}</div>
-                      <span class="text-[10px] font-mono text-muted-foreground">{{ apt.patient?.patientCode || 'MRN-VERIFIED' }}</span>
+                      <div class="font-bold text-foreground text-xs">
+                        {{ apt.patient?.fullName || apt.patientName || 'Patient' }}
+                      </div>
+                      <span class="text-[10px] font-mono text-muted-foreground">{{
+                        apt.patient?.patientCode || 'MRN-VERIFIED'
+                      }}</span>
                     </td>
                     <td hlmTableCell class="py-3 px-4 text-muted-foreground max-w-xs truncate">
                       {{ apt.reason || 'General Consultation' }}
@@ -339,8 +421,11 @@ export interface ClinicalTaskItem {
                       <span
                         hlmBadge
                         [variant]="
-                          apt.status === 'CHECKED_IN' || apt.stage === 'TRIAGED' ? 'secondary' :
-                          apt.status === 'IN_PROGRESS' || apt.stage === 'IN_CONSULTATION' ? 'default' : 'outline'
+                          apt.status === 'CHECKED_IN' || apt.stage === 'TRIAGED'
+                            ? 'secondary'
+                            : apt.status === 'IN_PROGRESS' || apt.stage === 'IN_CONSULTATION'
+                              ? 'default'
+                              : 'outline'
                         "
                         class="text-[10px]"
                       >
@@ -373,7 +458,9 @@ export interface ClinicalTaskItem {
 
           <!-- Section B: Inpatient Attending Rounds Snapshot -->
           <div class="rounded-2xl border border-border bg-card overflow-hidden shadow-xs">
-            <div class="p-4 border-b border-border bg-muted/20 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+            <div
+              class="p-4 border-b border-border bg-muted/20 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2"
+            >
               <div>
                 <h3 class="text-sm font-bold text-foreground flex items-center gap-2">
                   <ng-icon name="lucideBed" size="16" class="text-indigo-600" />
@@ -383,7 +470,10 @@ export interface ClinicalTaskItem {
                   Admitted patients under your primary attending or consultant care.
                 </p>
               </div>
-              <a routerLink="/physician/inpatients" class="text-xs text-indigo-600 hover:underline font-semibold flex items-center gap-1">
+              <a
+                routerLink="/physician/inpatients"
+                class="text-xs text-indigo-600 hover:underline font-semibold flex items-center gap-1"
+              >
                 <span>View Ward Census</span>
                 <ng-icon name="lucideChevronRight" size="13" />
               </a>
@@ -396,15 +486,21 @@ export interface ClinicalTaskItem {
                 (click)="openPatientChart(inp.patient)"
               >
                 <div class="flex items-center gap-3">
-                  <div class="size-8 rounded-lg bg-indigo-500/10 text-indigo-600 flex items-center justify-center font-mono font-bold text-xs shrink-0">
+                  <div
+                    class="size-8 rounded-lg bg-indigo-500/10 text-indigo-600 flex items-center justify-center font-mono font-bold text-xs shrink-0"
+                  >
                     {{ inp.bedCode }}
                   </div>
                   <div>
                     <div class="font-bold text-foreground flex items-center gap-2">
                       <span>{{ inp.patient.fullName }}</span>
-                      <span hlmBadge variant="outline" class="text-[10px] font-mono">{{ inp.patient.patientCode }}</span>
+                      <span hlmBadge variant="outline" class="text-[10px] font-mono">{{
+                        inp.patient.patientCode
+                      }}</span>
                     </div>
-                    <p class="text-[11px] text-muted-foreground">{{ inp.wardName }} • Dx: {{ inp.admissionDiagnosis }}</p>
+                    <p class="text-[11px] text-muted-foreground">
+                      {{ inp.wardName }} • Dx: {{ inp.admissionDiagnosis }}
+                    </p>
                   </div>
                 </div>
 
@@ -424,7 +520,10 @@ export interface ClinicalTaskItem {
                 </div>
               </div>
 
-              <div *ngIf="inpatientsList().length === 0" class="py-8 text-center text-xs text-muted-foreground">
+              <div
+                *ngIf="inpatientsList().length === 0"
+                class="py-8 text-center text-xs text-muted-foreground"
+              >
                 No active inpatients currently assigned.
               </div>
             </div>
@@ -433,11 +532,12 @@ export interface ClinicalTaskItem {
 
         <!-- Right Column (4 Cols): Tasks Inbox & Quick Clinical Navigation -->
         <div class="lg:col-span-4 space-y-6">
-
           <!-- Clinical Tasks Inbox -->
           <div class="rounded-2xl border border-border bg-card p-4 space-y-3 shadow-xs">
             <div class="flex items-center justify-between border-b border-border pb-3">
-              <h3 class="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+              <h3
+                class="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5"
+              >
                 <ng-icon name="lucideFileText" size="14" class="text-rose-600" />
                 <span>Action Inbox & Sign-Offs</span>
               </h3>
@@ -452,7 +552,9 @@ export interface ClinicalTaskItem {
                 class="p-3 rounded-xl border border-border/80 bg-muted/20 hover:bg-muted/40 transition-colors space-y-2 text-xs"
               >
                 <div class="flex items-start justify-between gap-2">
-                  <span class="font-bold text-foreground text-xs leading-snug">{{ task.title }}</span>
+                  <span class="font-bold text-foreground text-xs leading-snug">{{
+                    task.title
+                  }}</span>
                   <span
                     hlmBadge
                     [variant]="task.priority === 'HIGH' ? 'destructive' : 'secondary'"
@@ -462,7 +564,9 @@ export interface ClinicalTaskItem {
                   </span>
                 </div>
                 <p class="text-[11px] text-muted-foreground leading-snug">{{ task.detail }}</p>
-                <div class="flex items-center justify-between pt-1 border-t border-border/40 text-[10px]">
+                <div
+                  class="flex items-center justify-between pt-1 border-t border-border/40 text-[10px]"
+                >
                   <span class="text-muted-foreground">{{ task.patient.fullName }}</span>
                   <button
                     (click)="signOffTask(task)"
@@ -473,7 +577,10 @@ export interface ClinicalTaskItem {
                 </div>
               </div>
 
-              <div *ngIf="clinicalTasks().length === 0" class="py-6 text-center text-xs text-muted-foreground">
+              <div
+                *ngIf="clinicalTasks().length === 0"
+                class="py-6 text-center text-xs text-muted-foreground"
+              >
                 All results & notes signed.
               </div>
             </div>
@@ -481,8 +588,10 @@ export interface ClinicalTaskItem {
 
           <!-- Quick Clinical Shortcuts -->
           <div class="p-4 rounded-2xl border border-border bg-card space-y-2.5 shadow-xs">
-            <h4 class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Clinical Workspaces</h4>
-            
+            <h4 class="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+              Clinical Workspaces
+            </h4>
+
             <a
               routerLink="/physician/chart"
               class="p-2.5 rounded-xl border border-border hover:bg-accent/40 transition-all flex items-center justify-between text-xs font-semibold text-foreground group"
@@ -491,7 +600,11 @@ export interface ClinicalTaskItem {
                 <ng-icon name="lucideStethoscope" size="15" class="text-primary" />
                 Active Clinical Chart
               </span>
-              <ng-icon name="lucideChevronRight" size="14" class="text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
+              <ng-icon
+                name="lucideChevronRight"
+                size="14"
+                class="text-muted-foreground group-hover:translate-x-0.5 transition-transform"
+              />
             </a>
 
             <a
@@ -502,7 +615,11 @@ export interface ClinicalTaskItem {
                 <ng-icon name="lucideCalendarClock" size="15" class="text-purple-600" />
                 Outpatient Queue & Intake
               </span>
-              <ng-icon name="lucideChevronRight" size="14" class="text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
+              <ng-icon
+                name="lucideChevronRight"
+                size="14"
+                class="text-muted-foreground group-hover:translate-x-0.5 transition-transform"
+              />
             </a>
 
             <a
@@ -513,7 +630,11 @@ export interface ClinicalTaskItem {
                 <ng-icon name="lucideBed" size="15" class="text-indigo-600" />
                 Inpatient Ward Census
               </span>
-              <ng-icon name="lucideChevronRight" size="14" class="text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
+              <ng-icon
+                name="lucideChevronRight"
+                size="14"
+                class="text-muted-foreground group-hover:translate-x-0.5 transition-transform"
+              />
             </a>
 
             <a
@@ -524,10 +645,13 @@ export interface ClinicalTaskItem {
                 <ng-icon name="lucideShieldAlert" size="15" />
                 Emergency Break-Glass
               </span>
-              <ng-icon name="lucideChevronRight" size="14" class="group-hover:translate-x-0.5 transition-transform" />
+              <ng-icon
+                name="lucideChevronRight"
+                size="14"
+                class="group-hover:translate-x-0.5 transition-transform"
+              />
             </a>
           </div>
-
         </div>
       </div>
 
@@ -559,7 +683,7 @@ export class PhysicianDashboardComponent implements OnInit {
     public authService: AuthService,
     private apiService: ApiService,
     public patientContext: PatientContextService,
-    private router: Router
+    private router: Router,
   ) {}
 
   get currentUser() {
@@ -585,14 +709,21 @@ export class PhysicianDashboardComponent implements OnInit {
     // 2. Load Inpatients from occupied hospital beds
     this.apiService.getBeds().subscribe({
       next: (beds) => {
-        const occupied = Array.isArray(beds) ? beds.filter((b) => b.status === 'OCCUPIED' && b.currentEncounter?.patient) : [];
+        const occupied = Array.isArray(beds)
+          ? beds.filter((b) => b.status === 'OCCUPIED' && b.currentEncounter?.patient)
+          : [];
         if (occupied.length > 0) {
           const items: InpatientCareItem[] = occupied.map((b, idx) => ({
             patient: b.currentEncounter!.patient!,
             bedCode: b.bedNumber || b.bedCode || `Bed-${b.id?.substring(0, 4)}`,
             wardName: b.wardName || b.departmentName || 'General Medicine Ward',
             admissionDate: new Date(Date.now() - (idx + 1) * 86400000).toISOString(),
-            admissionDiagnosis: idx === 0 ? 'Acute Coronary Syndrome' : idx === 1 ? 'Community-Acquired Pneumonia' : 'Post-Op Observation',
+            admissionDiagnosis:
+              idx === 0
+                ? 'Acute Coronary Syndrome'
+                : idx === 1
+                  ? 'Community-Acquired Pneumonia'
+                  : 'Post-Op Observation',
             careRole: idx % 2 === 0 ? 'ATTENDING' : 'CONSULTANT',
             ewsScore: idx === 0 ? 4 : 1,
             acuityLevel: idx === 0 ? 'OBSERVED' : 'STABLE',
@@ -605,9 +736,19 @@ export class PhysicianDashboardComponent implements OnInit {
               const fallbackItems: InpatientCareItem[] = pts.slice(0, 3).map((p, idx) => ({
                 patient: p,
                 bedCode: `Ward-${idx + 1}-Bed-${10 + idx}`,
-                wardName: idx === 0 ? 'Cardiology ICU' : idx === 1 ? 'Internal Medicine Ward' : 'Surgical Step-Down',
+                wardName:
+                  idx === 0
+                    ? 'Cardiology ICU'
+                    : idx === 1
+                      ? 'Internal Medicine Ward'
+                      : 'Surgical Step-Down',
                 admissionDate: new Date(Date.now() - (idx + 2) * 86400000).toISOString(),
-                admissionDiagnosis: idx === 0 ? 'Acute Coronary Syndrome' : idx === 1 ? 'Type 2 Diabetes with Ketoacidosis' : 'Post-Op Laparoscopy',
+                admissionDiagnosis:
+                  idx === 0
+                    ? 'Acute Coronary Syndrome'
+                    : idx === 1
+                      ? 'Type 2 Diabetes with Ketoacidosis'
+                      : 'Post-Op Laparoscopy',
                 careRole: idx === 0 ? 'ATTENDING' : 'CONSULTANT',
                 ewsScore: idx === 0 ? 4 : idx === 1 ? 2 : 1,
                 acuityLevel: idx === 0 ? 'OBSERVED' : 'STABLE',
@@ -656,7 +797,8 @@ export class PhysicianDashboardComponent implements OnInit {
               patient: pts[0],
               type: 'ABNORMAL_LAB',
               title: 'Critical Lab: Serum Potassium 6.2 mEq/L (HIGH)',
-              detail: 'Lab accession LAB-9082 reported critical hyperkalemia. Immediate ECG & treatment required.',
+              detail:
+                'Lab accession LAB-9082 reported critical hyperkalemia. Immediate ECG & treatment required.',
               priority: 'HIGH',
               createdAt: new Date().toISOString(),
             },
@@ -665,7 +807,8 @@ export class PhysicianDashboardComponent implements OnInit {
               patient: pts.length > 1 ? pts[1] : pts[0],
               type: 'UNSIGNED_NOTE',
               title: 'Unsigned SOAP Progress Note',
-              detail: 'Consultation note from morning clinical shift pending physician final electronic sign-off.',
+              detail:
+                'Consultation note from morning clinical shift pending physician final electronic sign-off.',
               priority: 'NORMAL',
               createdAt: new Date(Date.now() - 10800000).toISOString(),
             },
@@ -678,7 +821,7 @@ export class PhysicianDashboardComponent implements OnInit {
 
   getCheckedInCount(): number {
     return this.outpatientAppointments().filter(
-      (a) => a.status === 'CHECKED_IN' || a.stage === 'TRIAGED' || a.stage === 'IN_CONSULTATION'
+      (a) => a.status === 'CHECKED_IN' || a.stage === 'TRIAGED' || a.stage === 'IN_CONSULTATION',
     ).length;
   }
 

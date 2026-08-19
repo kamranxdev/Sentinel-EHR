@@ -5,7 +5,13 @@ import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
 import { PatientContextService } from '../../core/services/patient-context.service';
 import { Patient } from '../../core/models/patient.model';
-import { Vitals, Prescription, Allergy, Diagnosis, Encounter } from '../../core/models/clinical.model';
+import {
+  Vitals,
+  Prescription,
+  Allergy,
+  Diagnosis,
+  Encounter,
+} from '../../core/models/clinical.model';
 import { Appointment } from '../../core/models/appointment.model';
 import { LabResult } from '../../core/models/lab.model';
 import { ImagingOrder, ImagingReport } from '../../core/models/imaging.model';
@@ -54,14 +60,7 @@ import {
 @Component({
   selector: 'app-patient-dashboard',
   standalone: true,
-  imports: [
-    CommonModule,
-    RouterModule,
-    HlmCardImports,
-    HlmBadgeImports,
-    HlmButtonImports,
-    NgIcon,
-  ],
+  imports: [CommonModule, RouterModule, HlmCardImports, HlmBadgeImports, HlmButtonImports, NgIcon],
   providers: [
     provideIcons({
       lucideUserRound,
@@ -98,13 +97,19 @@ import {
   template: `
     <div class="w-full space-y-6">
       <!-- 1. Open Header: Patient Welcome & Quick Actions (Full Width, No Card Wrapper) -->
-      <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 pb-5 border-b border-border">
+      <div
+        class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 pb-5 border-b border-border"
+      >
         <div class="space-y-1.5">
           <div class="flex items-center flex-wrap gap-2.5">
             <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
               {{ getGreeting() }}, {{ patient()?.fullName || currentUser?.fullName || 'Patient' }}
             </h1>
-            <span hlmBadge variant="secondary" class="bg-primary/10 text-primary border-primary/20 text-[11px] font-semibold py-0.5 px-2.5">
+            <span
+              hlmBadge
+              variant="secondary"
+              class="bg-primary/10 text-primary border-primary/20 text-[11px] font-semibold py-0.5 px-2.5"
+            >
               Verified EHR Portal
             </span>
           </div>
@@ -115,11 +120,24 @@ import {
               {{ patient()?.patientCode || 'MRN-VERIFIED' }}
             </span>
             <span class="text-border">•</span>
-            <span>DOB: <strong class="text-foreground">{{ patient()?.dateOfBirth || 'N/A' }}</strong> <span *ngIf="getAge(patient()?.dateOfBirth)" class="text-muted-foreground">({{ getAge(patient()?.dateOfBirth) }})</span></span>
+            <span
+              >DOB: <strong class="text-foreground">{{ patient()?.dateOfBirth || 'N/A' }}</strong>
+              <span *ngIf="getAge(patient()?.dateOfBirth)" class="text-muted-foreground"
+                >({{ getAge(patient()?.dateOfBirth) }})</span
+              ></span
+            >
             <span class="text-border">•</span>
-            <span>Blood Group: <strong class="text-foreground">{{ patient()?.bloodType || 'A+' }}</strong></span>
+            <span
+              >Blood Group:
+              <strong class="text-foreground">{{ patient()?.bloodType || 'A+' }}</strong></span
+            >
             <span class="text-border">•</span>
-            <span>Primary Coverage: <strong class="text-foreground">{{ patient()?.insuranceProvider || 'ABDM / Self-Pay' }}</strong></span>
+            <span
+              >Primary Coverage:
+              <strong class="text-foreground">{{
+                patient()?.insuranceProvider || 'ABDM / Self-Pay'
+              }}</strong></span
+            >
           </div>
         </div>
 
@@ -161,26 +179,46 @@ import {
 
       <!-- 2. Critical Health / Onboarding Alert Ribbons -->
       <!-- Profile Completion Banner -->
-      <div *ngIf="isProfileIncomplete()" class="p-4 rounded-2xl border border-amber-500/30 bg-amber-500/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
+      <div
+        *ngIf="isProfileIncomplete()"
+        class="p-4 rounded-2xl border border-amber-500/30 bg-amber-500/10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs"
+      >
         <div class="flex items-center gap-3">
-          <div class="size-8 rounded-lg bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+          <div
+            class="size-8 rounded-lg bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0"
+          >
             <ng-icon name="lucideTriangleAlert" size="16" />
           </div>
           <div>
-            <h4 class="text-xs font-bold text-foreground">Action Needed: Profile & Emergency Contact Setup</h4>
-            <p class="text-[11px] text-muted-foreground">Keep your emergency contacts and insurance details updated for faster clinical care.</p>
+            <h4 class="text-xs font-bold text-foreground">
+              Action Needed: Profile & Emergency Contact Setup
+            </h4>
+            <p class="text-[11px] text-muted-foreground">
+              Keep your emergency contacts and insurance details updated for faster clinical care.
+            </p>
           </div>
         </div>
-        <a routerLink="/patient/profile" hlmBtn variant="default" size="xs" class="bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs gap-1 self-end sm:self-center shrink-0">
+        <a
+          routerLink="/patient/profile"
+          hlmBtn
+          variant="default"
+          size="xs"
+          class="bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs gap-1 self-end sm:self-center shrink-0"
+        >
           <span>Complete Profile</span>
           <ng-icon name="lucideChevronRight" size="12" />
         </a>
       </div>
 
       <!-- Severe Allergy Warning Banner -->
-      <div *ngIf="hasCriticalSafetyAlert()" class="p-4 rounded-2xl border border-destructive/30 bg-destructive/10 flex items-center justify-between gap-3 shadow-xs">
+      <div
+        *ngIf="hasCriticalSafetyAlert()"
+        class="p-4 rounded-2xl border border-destructive/30 bg-destructive/10 flex items-center justify-between gap-3 shadow-xs"
+      >
         <div class="flex items-center gap-3">
-          <div class="size-8 rounded-lg bg-destructive/20 text-destructive flex items-center justify-center shrink-0">
+          <div
+            class="size-8 rounded-lg bg-destructive/20 text-destructive flex items-center justify-center shrink-0"
+          >
             <ng-icon name="lucideShieldAlert" size="16" />
           </div>
           <div>
@@ -188,7 +226,11 @@ import {
             <p class="text-[11px] text-foreground">{{ getCriticalAllergiesText() }}</p>
           </div>
         </div>
-        <a routerLink="/patient/chart" [queryParams]="{ tab: 'allergies' }" class="text-xs text-destructive hover:underline font-semibold shrink-0">
+        <a
+          routerLink="/patient/chart"
+          [queryParams]="{ tab: 'allergies' }"
+          class="text-xs text-destructive hover:underline font-semibold shrink-0"
+        >
           View Safety Record
         </a>
       </div>
@@ -196,35 +238,56 @@ import {
       <!-- 3. Key Health Vital Snapshot Cards (4 Airy Metric Tiles) -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <!-- Tile 1: Next Scheduled Consultation -->
-        <div class="p-4 rounded-2xl border border-border bg-card shadow-2xs hover:border-primary/40 hover:shadow-xs transition-all space-y-3">
+        <div
+          class="p-4 rounded-2xl border border-border bg-card shadow-2xs hover:border-primary/40 hover:shadow-xs transition-all space-y-3"
+        >
           <div class="flex items-center justify-between">
-            <span class="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Upcoming Visit</span>
-            <div class="size-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-muted-foreground"
+              >Upcoming Visit</span
+            >
+            <div
+              class="size-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center"
+            >
               <ng-icon name="lucideCalendarClock" size="14" />
             </div>
           </div>
 
           <div *ngIf="nextAppointment()" class="space-y-1">
             <div class="text-sm font-bold text-foreground truncate">
-              {{ nextAppointment()?.doctor?.fullName || nextAppointment()?.doctorName || 'Attending Physician' }}
+              {{
+                nextAppointment()?.doctor?.fullName ||
+                  nextAppointment()?.doctorName ||
+                  'Attending Physician'
+              }}
             </div>
             <div class="text-xs text-primary font-semibold flex items-center gap-1.5">
               <ng-icon name="lucideClock" size="13" />
-              <span>{{ nextAppointment()?.appointmentDate | date:'mediumDate' }} • {{ nextAppointment()?.appointmentDate | date:'shortTime' }}</span>
+              <span
+                >{{ nextAppointment()?.appointmentDate | date: 'mediumDate' }} •
+                {{ nextAppointment()?.appointmentDate | date: 'shortTime' }}</span
+              >
             </div>
           </div>
 
           <div *ngIf="!nextAppointment()" class="space-y-1">
             <div class="text-sm font-semibold text-muted-foreground">No upcoming visits</div>
-            <a routerLink="/patient/appointments" class="text-xs text-primary font-semibold hover:underline inline-flex items-center gap-1">
+            <a
+              routerLink="/patient/appointments"
+              class="text-xs text-primary font-semibold hover:underline inline-flex items-center gap-1"
+            >
               <span>Schedule now</span>
               <ng-icon name="lucideArrowRight" size="12" />
             </a>
           </div>
 
           <div class="pt-2 border-t border-border/60 flex items-center justify-between text-[11px]">
-            <span class="text-muted-foreground">{{ nextAppointment()?.status || 'Active Schedule' }}</span>
-            <a routerLink="/patient/appointments" class="text-primary hover:underline font-medium flex items-center gap-0.5">
+            <span class="text-muted-foreground">{{
+              nextAppointment()?.status || 'Active Schedule'
+            }}</span>
+            <a
+              routerLink="/patient/appointments"
+              class="text-primary hover:underline font-medium flex items-center gap-0.5"
+            >
               <span>Appointments</span>
               <ng-icon name="lucideChevronRight" size="12" />
             </a>
@@ -232,24 +295,40 @@ import {
         </div>
 
         <!-- Tile 2: Active Prescriptions -->
-        <div class="p-4 rounded-2xl border border-border bg-card shadow-2xs hover:border-primary/40 hover:shadow-xs transition-all space-y-3">
+        <div
+          class="p-4 rounded-2xl border border-border bg-card shadow-2xs hover:border-primary/40 hover:shadow-xs transition-all space-y-3"
+        >
           <div class="flex items-center justify-between">
-            <span class="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Active Medications</span>
-            <div class="size-7 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-muted-foreground"
+              >Active Medications</span
+            >
+            <div
+              class="size-7 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center"
+            >
               <ng-icon name="lucidePill" size="14" />
             </div>
           </div>
 
           <div class="flex items-baseline justify-between">
-            <span class="text-2xl font-extrabold text-foreground">{{ activePrescriptions().length }}</span>
-            <span hlmBadge variant="secondary" class="text-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 font-semibold">
+            <span class="text-2xl font-extrabold text-foreground">{{
+              activePrescriptions().length
+            }}</span>
+            <span
+              hlmBadge
+              variant="secondary"
+              class="text-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 font-semibold"
+            >
               Current eRx
             </span>
           </div>
 
           <div class="pt-2 border-t border-border/60 flex items-center justify-between text-[11px]">
             <span class="text-muted-foreground">Regimen active</span>
-            <a routerLink="/patient/chart" [queryParams]="{ tab: 'prescriptions' }" class="text-primary hover:underline font-medium flex items-center gap-0.5">
+            <a
+              routerLink="/patient/chart"
+              [queryParams]="{ tab: 'prescriptions' }"
+              class="text-primary hover:underline font-medium flex items-center gap-0.5"
+            >
               <span>Prescriptions</span>
               <ng-icon name="lucideChevronRight" size="12" />
             </a>
@@ -257,26 +336,47 @@ import {
         </div>
 
         <!-- Tile 3: Latest Blood Pressure -->
-        <div class="p-4 rounded-2xl border border-border bg-card shadow-2xs hover:border-primary/40 hover:shadow-xs transition-all space-y-3">
+        <div
+          class="p-4 rounded-2xl border border-border bg-card shadow-2xs hover:border-primary/40 hover:shadow-xs transition-all space-y-3"
+        >
           <div class="flex items-center justify-between">
-            <span class="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Blood Pressure</span>
-            <div class="size-7 rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-muted-foreground"
+              >Blood Pressure</span
+            >
+            <div
+              class="size-7 rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center"
+            >
               <ng-icon name="lucideHeartPulse" size="14" />
             </div>
           </div>
 
           <div class="flex items-baseline justify-between">
             <span class="text-xl font-extrabold font-mono text-foreground">
-              {{ latestVitals()?.systolicBp && latestVitals()?.diastolicBp ? latestVitals()!.systolicBp + '/' + latestVitals()!.diastolicBp : '120/80' }}
+              {{
+                latestVitals()?.systolicBp && latestVitals()?.diastolicBp
+                  ? latestVitals()!.systolicBp + '/' + latestVitals()!.diastolicBp
+                  : '120/80'
+              }}
             </span>
-            <span hlmBadge [variant]="getBpCategoryBadgeVariant(latestVitals())" class="text-[10px] font-semibold">
+            <span
+              hlmBadge
+              [variant]="getBpCategoryBadgeVariant(latestVitals())"
+              class="text-[10px] font-semibold"
+            >
               {{ getBpCategoryText(latestVitals()) }}
             </span>
           </div>
 
           <div class="pt-2 border-t border-border/60 flex items-center justify-between text-[11px]">
-            <span class="text-muted-foreground">{{ latestVitals()?.recordedAt ? (latestVitals()?.recordedAt | date:'shortDate') : 'Baseline' }}</span>
-            <a routerLink="/patient/vitals" class="text-primary hover:underline font-medium flex items-center gap-0.5">
+            <span class="text-muted-foreground">{{
+              latestVitals()?.recordedAt
+                ? (latestVitals()?.recordedAt | date: 'shortDate')
+                : 'Baseline'
+            }}</span>
+            <a
+              routerLink="/patient/vitals"
+              class="text-primary hover:underline font-medium flex items-center gap-0.5"
+            >
               <span>Flowsheet</span>
               <ng-icon name="lucideChevronRight" size="12" />
             </a>
@@ -284,16 +384,24 @@ import {
         </div>
 
         <!-- Tile 4: Diagnostic Tests & Labs -->
-        <div class="p-4 rounded-2xl border border-border bg-card shadow-2xs hover:border-primary/40 hover:shadow-xs transition-all space-y-3">
+        <div
+          class="p-4 rounded-2xl border border-border bg-card shadow-2xs hover:border-primary/40 hover:shadow-xs transition-all space-y-3"
+        >
           <div class="flex items-center justify-between">
-            <span class="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Lab & Radiology</span>
-            <div class="size-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-muted-foreground"
+              >Lab & Radiology</span
+            >
+            <div
+              class="size-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center"
+            >
               <ng-icon name="lucideMicroscope" size="14" />
             </div>
           </div>
 
           <div class="flex items-baseline justify-between">
-            <span class="text-2xl font-extrabold text-foreground">{{ labResults().length + imagingReports().length }}</span>
+            <span class="text-2xl font-extrabold text-foreground">{{
+              labResults().length + imagingReports().length
+            }}</span>
             <span hlmBadge variant="outline" class="text-[10px] font-semibold">
               Reports On File
             </span>
@@ -301,7 +409,11 @@ import {
 
           <div class="pt-2 border-t border-border/60 flex items-center justify-between text-[11px]">
             <span class="text-muted-foreground">Clinical tests</span>
-            <a routerLink="/patient/chart" [queryParams]="{ tab: 'labs' }" class="text-primary hover:underline font-medium flex items-center gap-0.5">
+            <a
+              routerLink="/patient/chart"
+              [queryParams]="{ tab: 'labs' }"
+              class="text-primary hover:underline font-medium flex items-center gap-0.5"
+            >
               <span>View Reports</span>
               <ng-icon name="lucideChevronRight" size="12" />
             </a>
@@ -313,41 +425,62 @@ import {
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <!-- LEFT COLUMN (8 Cols): Care Feed & Active Medications -->
         <div class="lg:col-span-8 space-y-6">
-
           <!-- Card A: Active Daily Medication Schedule -->
           <div class="rounded-2xl border border-border bg-card p-5 space-y-4 shadow-2xs">
             <div class="flex items-center justify-between pb-3 border-b border-border">
               <div class="flex items-center gap-2.5">
-                <div class="size-8 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+                <div
+                  class="size-8 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center"
+                >
                   <ng-icon name="lucidePill" size="16" />
                 </div>
                 <div>
                   <h3 class="text-sm font-bold text-foreground">Current Medications</h3>
-                  <p class="text-[11px] text-muted-foreground">Prescribed treatments and daily dose regimens</p>
+                  <p class="text-[11px] text-muted-foreground">
+                    Prescribed treatments and daily dose regimens
+                  </p>
                 </div>
               </div>
-              <a routerLink="/patient/chart" [queryParams]="{ tab: 'prescriptions' }" class="text-xs text-primary hover:underline font-semibold flex items-center gap-1">
+              <a
+                routerLink="/patient/chart"
+                [queryParams]="{ tab: 'prescriptions' }"
+                class="text-xs text-primary hover:underline font-semibold flex items-center gap-1"
+              >
                 <span>View Full eRx</span>
                 <ng-icon name="lucideChevronRight" size="12" />
               </a>
             </div>
 
-            <div *ngIf="activePrescriptions().length > 0; else noMeds" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div
+              *ngIf="activePrescriptions().length > 0; else noMeds"
+              class="grid grid-cols-1 sm:grid-cols-2 gap-3"
+            >
               <div
                 *ngFor="let rx of activePrescriptions().slice(0, 4)"
                 class="p-3.5 rounded-xl border border-border/80 bg-muted/20 hover:bg-muted/40 transition-colors space-y-2"
               >
                 <div class="flex items-start justify-between gap-2">
                   <div class="min-w-0">
-                    <span class="font-bold text-foreground text-xs block truncate">{{ rx.medicationName }}</span>
-                    <span class="text-[11px] font-mono text-muted-foreground">{{ rx.dosage }} • {{ rx.route || 'Oral' }}</span>
+                    <span class="font-bold text-foreground text-xs block truncate">{{
+                      rx.medicationName
+                    }}</span>
+                    <span class="text-[11px] font-mono text-muted-foreground"
+                      >{{ rx.dosage }} • {{ rx.route || 'Oral' }}</span
+                    >
                   </div>
-                  <span hlmBadge variant="secondary" class="text-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 shrink-0">
+                  <span
+                    hlmBadge
+                    variant="secondary"
+                    class="text-[10px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 shrink-0"
+                  >
                     {{ rx.frequency }}
                   </span>
                 </div>
 
-                <p *ngIf="rx.instructions" class="text-[11px] text-muted-foreground line-clamp-1 italic">
+                <p
+                  *ngIf="rx.instructions"
+                  class="text-[11px] text-muted-foreground line-clamp-1 italic"
+                >
                   "{{ rx.instructions }}"
                 </p>
               </div>
@@ -365,34 +498,53 @@ import {
           <div class="rounded-2xl border border-border bg-card p-5 space-y-4 shadow-2xs">
             <div class="flex items-center justify-between pb-3 border-b border-border">
               <div class="flex items-center gap-2.5">
-                <div class="size-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                <div
+                  class="size-8 rounded-xl bg-primary/10 text-primary flex items-center justify-center"
+                >
                   <ng-icon name="lucideStethoscope" size="16" />
                 </div>
                 <div>
                   <h3 class="text-sm font-bold text-foreground">Recent Clinical Care Activity</h3>
-                  <p class="text-[11px] text-muted-foreground">Consultations, lab releases, and clinical summaries</p>
+                  <p class="text-[11px] text-muted-foreground">
+                    Consultations, lab releases, and clinical summaries
+                  </p>
                 </div>
               </div>
-              <a routerLink="/patient/chart" class="text-xs text-primary hover:underline font-semibold flex items-center gap-1">
+              <a
+                routerLink="/patient/chart"
+                class="text-xs text-primary hover:underline font-semibold flex items-center gap-1"
+              >
                 <span>All Chart History</span>
                 <ng-icon name="lucideChevronRight" size="12" />
               </a>
             </div>
 
-            <div *ngIf="recentEncounters().length > 0 || labResults().length > 0; else noActivity" class="space-y-3">
+            <div
+              *ngIf="recentEncounters().length > 0 || labResults().length > 0; else noActivity"
+              class="space-y-3"
+            >
               <!-- Encounter Items -->
               <div
                 *ngFor="let enc of recentEncounters().slice(0, 3)"
                 class="p-3.5 rounded-xl border border-border/80 bg-muted/20 hover:bg-muted/40 transition-colors flex items-center justify-between gap-3 text-xs"
               >
                 <div class="flex items-center gap-3 min-w-0">
-                  <div class="size-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                  <div
+                    class="size-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0"
+                  >
                     <ng-icon name="lucideStethoscope" size="14" />
                   </div>
                   <div class="min-w-0">
-                    <div class="font-bold text-foreground truncate">{{ enc.chiefComplaint || enc.encounterType || 'Doctor Consultation' }}</div>
+                    <div class="font-bold text-foreground truncate">
+                      {{ enc.chiefComplaint || enc.encounterType || 'Doctor Consultation' }}
+                    </div>
                     <div class="text-[11px] text-muted-foreground">
-                      {{ enc.startedAt || enc.createdAt | date:'mediumDate' }} • Dr. {{ enc.attendingProvider?.fullName || enc.createdByEmail || 'Attending Physician' }}
+                      {{ enc.startedAt || enc.createdAt | date: 'mediumDate' }} • Dr.
+                      {{
+                        enc.attendingProvider?.fullName ||
+                          enc.createdByEmail ||
+                          'Attending Physician'
+                      }}
                     </div>
                   </div>
                 </div>
@@ -416,13 +568,16 @@ import {
                 class="p-3.5 rounded-xl border border-border/80 bg-muted/20 hover:bg-muted/40 transition-colors flex items-center justify-between gap-3 text-xs"
               >
                 <div class="flex items-center gap-3 min-w-0">
-                  <div class="size-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                  <div
+                    class="size-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0"
+                  >
                     <ng-icon name="lucideMicroscope" size="14" />
                   </div>
                   <div class="min-w-0">
                     <div class="font-bold text-foreground truncate">{{ lab.testName }}</div>
                     <div class="text-[11px] text-muted-foreground">
-                      Released: {{ lab.orderedAt | date:'mediumDate' }} • LOINC: {{ lab.loincCode || '4548-4' }}
+                      Released: {{ lab.orderedAt | date: 'mediumDate' }} • LOINC:
+                      {{ lab.loincCode || '4548-4' }}
                     </div>
                   </div>
                 </div>
@@ -448,12 +603,10 @@ import {
               </div>
             </ng-template>
           </div>
-
         </div>
 
         <!-- RIGHT COLUMN (4 Cols): Vitals Snapshot & Quick Hub -->
         <div class="lg:col-span-4 space-y-6">
-
           <!-- Card 1: Vitals & Physiology Snapshot -->
           <div class="rounded-2xl border border-border bg-card p-5 space-y-4 shadow-2xs">
             <div class="flex items-center justify-between pb-3 border-b border-border">
@@ -461,7 +614,10 @@ import {
                 <ng-icon name="lucideActivity" size="16" class="text-rose-500" />
                 <h3 class="text-sm font-bold text-foreground">Physiology & Vitals</h3>
               </div>
-              <a routerLink="/patient/vitals" class="text-xs text-primary hover:underline font-semibold flex items-center gap-0.5">
+              <a
+                routerLink="/patient/vitals"
+                class="text-xs text-primary hover:underline font-semibold flex items-center gap-0.5"
+              >
                 <span>Log Vitals</span>
                 <ng-icon name="lucideChevronRight" size="12" />
               </a>
@@ -469,23 +625,31 @@ import {
 
             <div class="grid grid-cols-2 gap-2.5 text-xs">
               <div class="p-3 rounded-xl bg-muted/20 border border-border/80 space-y-0.5">
-                <span class="text-[10px] uppercase font-bold text-muted-foreground block">Heart Rate</span>
+                <span class="text-[10px] uppercase font-bold text-muted-foreground block"
+                  >Heart Rate</span
+                >
                 <div class="text-base font-extrabold font-mono text-foreground">
-                  {{ latestVitals()?.heartRate || '72' }} <span class="text-[10px] font-normal text-muted-foreground">bpm</span>
+                  {{ latestVitals()?.heartRate || '72' }}
+                  <span class="text-[10px] font-normal text-muted-foreground">bpm</span>
                 </div>
               </div>
 
               <div class="p-3 rounded-xl bg-muted/20 border border-border/80 space-y-0.5">
-                <span class="text-[10px] uppercase font-bold text-muted-foreground block">Oxygen (SpO2)</span>
+                <span class="text-[10px] uppercase font-bold text-muted-foreground block"
+                  >Oxygen (SpO2)</span
+                >
                 <div class="text-base font-extrabold font-mono text-foreground">
                   {{ latestVitals()?.oxygenSaturation || '98' }}%
                 </div>
               </div>
 
               <div class="p-3 rounded-xl bg-muted/20 border border-border/80 space-y-0.5">
-                <span class="text-[10px] uppercase font-bold text-muted-foreground block">Temperature</span>
+                <span class="text-[10px] uppercase font-bold text-muted-foreground block"
+                  >Temperature</span
+                >
                 <div class="text-base font-extrabold font-mono text-foreground">
-                  {{ latestVitals()?.temperature || '98.6' }} <span class="text-[10px] font-normal text-muted-foreground">°F</span>
+                  {{ latestVitals()?.temperature || '98.6' }}
+                  <span class="text-[10px] font-normal text-muted-foreground">°F</span>
                 </div>
               </div>
 
@@ -499,7 +663,9 @@ import {
 
             <div class="pt-1 text-[11px] text-muted-foreground text-center">
               <span>Track historical trends in </span>
-              <a routerLink="/patient/vitals" class="text-primary font-semibold hover:underline">Interactive Flowsheet</a>
+              <a routerLink="/patient/vitals" class="text-primary font-semibold hover:underline"
+                >Interactive Flowsheet</a
+              >
             </div>
           </div>
 
@@ -515,15 +681,26 @@ import {
                 class="p-3 rounded-xl border border-border/80 bg-muted/20 hover:bg-primary/5 hover:border-primary/30 transition-all flex items-center justify-between group"
               >
                 <div class="flex items-center gap-3">
-                  <div class="size-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                  <div
+                    class="size-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0"
+                  >
                     <ng-icon name="lucideFileText" size="14" />
                   </div>
                   <div>
-                    <span class="text-xs font-bold text-foreground block group-hover:text-primary transition-colors">12-Tab Clinical Chart</span>
-                    <span class="text-[10px] text-muted-foreground block">Labs, PACS imaging & records</span>
+                    <span
+                      class="text-xs font-bold text-foreground block group-hover:text-primary transition-colors"
+                      >12-Tab Clinical Chart</span
+                    >
+                    <span class="text-[10px] text-muted-foreground block"
+                      >Labs, PACS imaging & records</span
+                    >
                   </div>
                 </div>
-                <ng-icon name="lucideChevronRight" size="14" class="text-muted-foreground group-hover:text-primary transition-transform group-hover:translate-x-0.5" />
+                <ng-icon
+                  name="lucideChevronRight"
+                  size="14"
+                  class="text-muted-foreground group-hover:text-primary transition-transform group-hover:translate-x-0.5"
+                />
               </a>
 
               <a
@@ -531,15 +708,26 @@ import {
                 class="p-3 rounded-xl border border-border/80 bg-muted/20 hover:bg-primary/5 hover:border-primary/30 transition-all flex items-center justify-between group"
               >
                 <div class="flex items-center gap-3">
-                  <div class="size-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                  <div
+                    class="size-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0"
+                  >
                     <ng-icon name="lucideCalendar" size="14" />
                   </div>
                   <div>
-                    <span class="text-xs font-bold text-foreground block group-hover:text-primary transition-colors">Book Consultations</span>
-                    <span class="text-[10px] text-muted-foreground block">Physician schedule & intake</span>
+                    <span
+                      class="text-xs font-bold text-foreground block group-hover:text-primary transition-colors"
+                      >Book Consultations</span
+                    >
+                    <span class="text-[10px] text-muted-foreground block"
+                      >Physician schedule & intake</span
+                    >
                   </div>
                 </div>
-                <ng-icon name="lucideChevronRight" size="14" class="text-muted-foreground group-hover:text-primary transition-transform group-hover:translate-x-0.5" />
+                <ng-icon
+                  name="lucideChevronRight"
+                  size="14"
+                  class="text-muted-foreground group-hover:text-primary transition-transform group-hover:translate-x-0.5"
+                />
               </a>
 
               <a
@@ -547,19 +735,29 @@ import {
                 class="p-3 rounded-xl border border-border/80 bg-muted/20 hover:bg-primary/5 hover:border-primary/30 transition-all flex items-center justify-between group"
               >
                 <div class="flex items-center gap-3">
-                  <div class="size-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                  <div
+                    class="size-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0"
+                  >
                     <ng-icon name="lucideUserCheck" size="14" />
                   </div>
                   <div>
-                    <span class="text-xs font-bold text-foreground block group-hover:text-primary transition-colors">Health Profile & Insurance</span>
-                    <span class="text-[10px] text-muted-foreground block">Emergency contacts & ABDM</span>
+                    <span
+                      class="text-xs font-bold text-foreground block group-hover:text-primary transition-colors"
+                      >Health Profile & Insurance</span
+                    >
+                    <span class="text-[10px] text-muted-foreground block"
+                      >Emergency contacts & ABDM</span
+                    >
                   </div>
                 </div>
-                <ng-icon name="lucideChevronRight" size="14" class="text-muted-foreground group-hover:text-primary transition-transform group-hover:translate-x-0.5" />
+                <ng-icon
+                  name="lucideChevronRight"
+                  size="14"
+                  class="text-muted-foreground group-hover:text-primary transition-transform group-hover:translate-x-0.5"
+                />
               </a>
             </div>
           </div>
-
         </div>
       </div>
     </div>
@@ -585,7 +783,8 @@ export class PatientDashboardComponent implements OnInit {
     const list = this.prescriptions();
     if (!Array.isArray(list)) return [];
     return list.filter(
-      (rx) => rx.status?.toUpperCase() !== 'CANCELLED' && rx.status?.toUpperCase() !== 'DISCONTINUED',
+      (rx) =>
+        rx.status?.toUpperCase() !== 'CANCELLED' && rx.status?.toUpperCase() !== 'DISCONTINUED',
     );
   });
 
@@ -614,7 +813,7 @@ export class PatientDashboardComponent implements OnInit {
     public authService: AuthService,
     private apiService: ApiService,
     public patientContext: PatientContextService,
-  ) { }
+  ) {}
 
   get currentUser() {
     return this.authService.currentUser();
@@ -630,7 +829,9 @@ export class PatientDashboardComponent implements OnInit {
       },
       error: (err) => {
         console.error('Could not load patient record for dashboard', err);
-        toast.error('Failed to load dashboard profile: ' + (err.error?.message || 'Unknown network error'));
+        toast.error(
+          'Failed to load dashboard profile: ' + (err.error?.message || 'Unknown network error'),
+        );
       },
     });
   }
@@ -735,26 +936,35 @@ export class PatientDashboardComponent implements OnInit {
   isProfileIncomplete(): boolean {
     const p = this.patient();
     if (!p) return true;
-    return !p.phone || !p.address || !p.emergencyContact || !p.emergencyContact?.name || !p.insuranceProvider;
+    return (
+      !p.phone ||
+      !p.address ||
+      !p.emergencyContact ||
+      !p.emergencyContact?.name ||
+      !p.insuranceProvider
+    );
   }
 
   hasCriticalSafetyAlert(): boolean {
     const p = this.patient();
     if (p?.medicalAlerts) return true;
     return this.allergies().some(
-      (a) => a.severity?.toUpperCase() === 'SEVERE' || a.severity?.toUpperCase() === 'LIFE_THREATENING',
+      (a) =>
+        a.severity?.toUpperCase() === 'SEVERE' || a.severity?.toUpperCase() === 'LIFE_THREATENING',
     );
   }
 
   hasSevereAllergy(): boolean {
     return this.allergies().some(
-      (a) => a.severity?.toUpperCase() === 'SEVERE' || a.severity?.toUpperCase() === 'LIFE_THREATENING',
+      (a) =>
+        a.severity?.toUpperCase() === 'SEVERE' || a.severity?.toUpperCase() === 'LIFE_THREATENING',
     );
   }
 
   getCriticalAllergiesText(): string {
     const severe = this.allergies().filter(
-      (a) => a.severity?.toUpperCase() === 'SEVERE' || a.severity?.toUpperCase() === 'LIFE_THREATENING',
+      (a) =>
+        a.severity?.toUpperCase() === 'SEVERE' || a.severity?.toUpperCase() === 'LIFE_THREATENING',
     );
     if (severe.length === 0) return 'High-priority medical safety alert.';
     return `Severe Allergy Alert: ${severe.map((s) => `${s.allergenName} (${s.reactionDescription || s.severity})`).join(', ')}`;
@@ -772,7 +982,9 @@ export class PatientDashboardComponent implements OnInit {
     return 'Observed';
   }
 
-  getBpCategoryBadgeVariant(v?: Vitals | null): 'secondary' | 'outline' | 'destructive' | 'default' {
+  getBpCategoryBadgeVariant(
+    v?: Vitals | null,
+  ): 'secondary' | 'outline' | 'destructive' | 'default' {
     const cat = this.getBpCategoryText(v);
     if (cat === 'Normal') return 'secondary';
     if (cat === 'Elevated') return 'outline';
@@ -785,7 +997,8 @@ export class PatientDashboardComponent implements OnInit {
     if (!patientId) return;
     this.apiService.getFhirPatientEverything(patientId).subscribe({
       next: (bundle) => {
-        const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(bundle, null, 2));
+        const dataStr =
+          'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(bundle, null, 2));
         const downloadAnchor = document.createElement('a');
         downloadAnchor.setAttribute('href', dataStr);
         downloadAnchor.setAttribute('download', `FHIR_Health_Summary_Patient_${patientId}.json`);

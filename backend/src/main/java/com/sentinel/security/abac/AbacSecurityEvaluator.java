@@ -38,8 +38,8 @@ public class AbacSecurityEvaluator implements ABACEvaluator {
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.toSet());
 
-        // Path 1: System Admin / Org Admin / Auditor / Physician override
-        if (roles.contains("SUPER_ADMIN") || roles.contains("ORGANIZATION_ADMIN") || roles.contains("AUDITOR") ||
+        // Path 1: System Admin / Org Admin / Physician override
+        if (roles.contains("SUPER_ADMIN") || roles.contains("ORGANIZATION_ADMIN") ||
             roles.contains("PHYSICIAN")) {
             return true;
         }
@@ -60,10 +60,10 @@ public class AbacSecurityEvaluator implements ABACEvaluator {
         if (authentication == null || !authentication.isAuthenticated()) {
             return false;
         }
-        boolean isAdminOrAuditor = authentication.getAuthorities().stream()
+        boolean isAdmin = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
-                .anyMatch(a -> a.equals("SUPER_ADMIN") || a.equals("ORGANIZATION_ADMIN") || a.equals("AUDITOR"));
-        if (isAdminOrAuditor) {
+                .anyMatch(a -> a.equals("SUPER_ADMIN") || a.equals("ORGANIZATION_ADMIN"));
+        if (isAdmin) {
             return true;
         }
         return patientRepository.existsById(patientId);

@@ -30,7 +30,6 @@ Sentinel-EHR provides tailored, highly optimized workspaces for every hospital r
 8. [**Billing & Revenue Cycle Workspace**](./billing-workspace.md)
    - Revenue Cycle Management (RCM), itemized invoicing, insurance claims submission, and multi-mode payment processing.
 
-9. [**Compliance & Security Auditor Workspace**](./auditor-workspace.md)
    - Immutable WORM audit trail surveillance, emergency break-glass override registry inspection, and regulatory compliance reporting (HIPAA, DPDP, NABH).
 
 10. [**Patient Self-Service Portal**](./patient-workspace.md)

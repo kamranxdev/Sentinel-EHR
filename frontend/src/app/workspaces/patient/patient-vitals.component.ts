@@ -60,7 +60,9 @@ import {
   template: `
     <div class="space-y-6">
       <!-- Top Banner Header -->
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-border">
+      <div
+        class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-border"
+      >
         <div>
           <h1 class="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
             <ng-icon name="lucideActivity" size="22" class="text-blue-500" />
@@ -68,7 +70,8 @@ import {
             <span hlmBadge variant="outline" class="text-[10px]">Patient Portal</span>
           </h1>
           <p class="text-xs text-muted-foreground mt-0.5">
-            Monitor real-time physiological vitals, auto-calculated BMI, blood pressure, heart rate, blood sugar, and SpO2 trends.
+            Monitor real-time physiological vitals, auto-calculated BMI, blood pressure, heart rate,
+            blood sugar, and SpO2 trends.
           </p>
         </div>
 
@@ -88,17 +91,26 @@ import {
         <!-- Card 1: Blood Pressure -->
         <div class="rounded-xl border border-border bg-card p-4 shadow-xs relative overflow-hidden">
           <div class="flex justify-between items-start mb-2">
-            <span class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Blood Pressure</span>
+            <span class="text-xs font-semibold text-muted-foreground uppercase tracking-wider"
+              >Blood Pressure</span
+            >
             <div class="p-1.5 rounded-md bg-blue-500/10 text-blue-500">
               <ng-icon name="lucideHeart" size="16" />
             </div>
           </div>
           <div class="text-xl font-bold text-foreground font-mono">
-            {{ latestVitals()?.systolicBp && latestVitals()?.diastolicBp ? latestVitals()!.systolicBp + '/' + latestVitals()!.diastolicBp : '120/80' }}
+            {{
+              latestVitals()?.systolicBp && latestVitals()?.diastolicBp
+                ? latestVitals()!.systolicBp + '/' + latestVitals()!.diastolicBp
+                : '120/80'
+            }}
             <span class="text-xs font-normal text-muted-foreground">mmHg</span>
           </div>
           <div class="mt-2 flex items-center gap-1.5">
-            <span [class]="getBpBadgeClass(latestVitals())" class="text-[10px] px-2 py-0.5 rounded-full font-semibold">
+            <span
+              [class]="getBpBadgeClass(latestVitals())"
+              class="text-[10px] px-2 py-0.5 rounded-full font-semibold"
+            >
               {{ getBpCategory(latestVitals()) }}
             </span>
           </div>
@@ -107,7 +119,9 @@ import {
         <!-- Card 2: Heart Rate -->
         <div class="rounded-xl border border-border bg-card p-4 shadow-xs relative overflow-hidden">
           <div class="flex justify-between items-start mb-2">
-            <span class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Heart Rate</span>
+            <span class="text-xs font-semibold text-muted-foreground uppercase tracking-wider"
+              >Heart Rate</span
+            >
             <div class="p-1.5 rounded-md bg-rose-500/10 text-rose-500">
               <ng-icon name="lucideActivity" size="16" />
             </div>
@@ -117,7 +131,10 @@ import {
             <span class="text-xs font-normal text-muted-foreground">bpm</span>
           </div>
           <div class="mt-2 flex items-center gap-1.5">
-            <span [class]="getHeartRateBadgeClass(latestVitals()?.heartRate)" class="text-[10px] px-2 py-0.5 rounded-full font-semibold">
+            <span
+              [class]="getHeartRateBadgeClass(latestVitals()?.heartRate)"
+              class="text-[10px] px-2 py-0.5 rounded-full font-semibold"
+            >
               {{ getHeartRateCategory(latestVitals()?.heartRate) }}
             </span>
           </div>
@@ -126,7 +143,9 @@ import {
         <!-- Card 3: Weight, Height & BMI (Auto-Calculated) -->
         <div class="rounded-xl border border-border bg-card p-4 shadow-xs relative overflow-hidden">
           <div class="flex justify-between items-start mb-2">
-            <span class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Body Mass Index (BMI)</span>
+            <span class="text-xs font-semibold text-muted-foreground uppercase tracking-wider"
+              >Body Mass Index (BMI)</span
+            >
             <div class="p-1.5 rounded-md bg-emerald-500/10 text-emerald-500">
               <ng-icon name="lucideScale" size="16" />
             </div>
@@ -136,10 +155,16 @@ import {
             <span class="text-xs font-normal text-muted-foreground">kg/m²</span>
           </div>
           <div class="mt-2 flex items-center gap-1.5">
-            <span [class]="getBmiBadgeClass(latestBmi())" class="text-[10px] px-2 py-0.5 rounded-full font-semibold">
+            <span
+              [class]="getBmiBadgeClass(latestBmi())"
+              class="text-[10px] px-2 py-0.5 rounded-full font-semibold"
+            >
               {{ getBmiCategory(latestBmi()) }}
             </span>
-            <span class="text-[11px] text-muted-foreground font-mono" *ngIf="latestVitals()?.weightKg">
+            <span
+              class="text-[11px] text-muted-foreground font-mono"
+              *ngIf="latestVitals()?.weightKg"
+            >
               ({{ latestVitals()?.weightKg }} kg / {{ latestVitals()?.heightCm }} cm)
             </span>
           </div>
@@ -148,7 +173,9 @@ import {
         <!-- Card 4: Temperature -->
         <div class="rounded-xl border border-border bg-card p-4 shadow-xs relative overflow-hidden">
           <div class="flex justify-between items-start mb-2">
-            <span class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Temperature</span>
+            <span class="text-xs font-semibold text-muted-foreground uppercase tracking-wider"
+              >Temperature</span
+            >
             <div class="p-1.5 rounded-md bg-amber-500/10 text-amber-500">
               <ng-icon name="lucideThermometer" size="16" />
             </div>
@@ -158,7 +185,10 @@ import {
             <span class="text-xs font-normal text-muted-foreground">°C</span>
           </div>
           <div class="mt-2 flex items-center gap-1.5">
-            <span [class]="getTempBadgeClass(latestVitals()?.temperature)" class="text-[10px] px-2 py-0.5 rounded-full font-semibold">
+            <span
+              [class]="getTempBadgeClass(latestVitals()?.temperature)"
+              class="text-[10px] px-2 py-0.5 rounded-full font-semibold"
+            >
               {{ getTempCategory(latestVitals()?.temperature) }}
             </span>
           </div>
@@ -167,7 +197,9 @@ import {
         <!-- Card 5: Blood Sugar / Glucose -->
         <div class="rounded-xl border border-border bg-card p-4 shadow-xs relative overflow-hidden">
           <div class="flex justify-between items-start mb-2">
-            <span class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Blood Sugar</span>
+            <span class="text-xs font-semibold text-muted-foreground uppercase tracking-wider"
+              >Blood Sugar</span
+            >
             <div class="p-1.5 rounded-md bg-purple-500/10 text-purple-500">
               <ng-icon name="lucideDroplet" size="16" />
             </div>
@@ -177,7 +209,10 @@ import {
             <span class="text-xs font-normal text-muted-foreground">mg/dL</span>
           </div>
           <div class="mt-2 flex items-center gap-1.5">
-            <span [class]="getGlucoseBadgeClass(latestVitals()?.bloodGlucose)" class="text-[10px] px-2 py-0.5 rounded-full font-semibold">
+            <span
+              [class]="getGlucoseBadgeClass(latestVitals()?.bloodGlucose)"
+              class="text-[10px] px-2 py-0.5 rounded-full font-semibold"
+            >
               {{ getGlucoseCategory(latestVitals()?.bloodGlucose) }}
             </span>
           </div>
@@ -186,7 +221,9 @@ import {
         <!-- Card 6: SpO2 Oxygen Saturation -->
         <div class="rounded-xl border border-border bg-card p-4 shadow-xs relative overflow-hidden">
           <div class="flex justify-between items-start mb-2">
-            <span class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">SpO2 Saturation</span>
+            <span class="text-xs font-semibold text-muted-foreground uppercase tracking-wider"
+              >SpO2 Saturation</span
+            >
             <div class="p-1.5 rounded-md bg-cyan-500/10 text-cyan-500">
               <ng-icon name="lucideTrendingUp" size="16" />
             </div>
@@ -196,22 +233,33 @@ import {
             <span class="text-xs font-normal text-muted-foreground">%</span>
           </div>
           <div class="mt-2 flex items-center gap-1.5">
-            <span [class]="getSpo2BadgeClass(latestVitals()?.oxygenSaturation)" class="text-[10px] px-2 py-0.5 rounded-full font-semibold">
+            <span
+              [class]="getSpo2BadgeClass(latestVitals()?.oxygenSaturation)"
+              class="text-[10px] px-2 py-0.5 rounded-full font-semibold"
+            >
               {{ getSpo2Category(latestVitals()?.oxygenSaturation) }}
             </span>
           </div>
         </div>
 
         <!-- Card 7: Vital Taken Time -->
-        <div class="rounded-xl border border-border bg-card p-4 shadow-xs relative overflow-hidden col-span-2 sm:col-span-2">
+        <div
+          class="rounded-xl border border-border bg-card p-4 shadow-xs relative overflow-hidden col-span-2 sm:col-span-2"
+        >
           <div class="flex justify-between items-start mb-2">
-            <span class="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Vital Taken Time</span>
+            <span class="text-xs font-semibold text-muted-foreground uppercase tracking-wider"
+              >Vital Taken Time</span
+            >
             <div class="p-1.5 rounded-md bg-indigo-500/10 text-indigo-500">
               <ng-icon name="lucideClock" size="16" />
             </div>
           </div>
           <div class="text-sm font-bold text-foreground font-mono">
-            {{ latestVitals()?.recordedAt ? (latestVitals()?.recordedAt | date:'medium') : (now | date:'medium') }}
+            {{
+              latestVitals()?.recordedAt
+                ? (latestVitals()?.recordedAt | date: 'medium')
+                : (now | date: 'medium')
+            }}
           </div>
           <p class="text-[11px] text-muted-foreground mt-1">
             Recorded by {{ latestVitals()?.recordedByName || 'Self Intake / Nurse Triage' }}
@@ -226,7 +274,9 @@ import {
             <ng-icon name="lucideActivity" size="16" class="text-blue-500" />
             Longitudinal Vitals Flowsheet & History
           </h2>
-          <span class="text-[11px] font-medium text-muted-foreground">{{ vitals().length }} records log</span>
+          <span class="text-[11px] font-medium text-muted-foreground"
+            >{{ vitals().length }} records log</span
+          >
         </div>
 
         <div class="overflow-x-auto">
@@ -245,9 +295,13 @@ import {
               </tr>
             </thead>
             <tbody hlmTableBody class="divide-y divide-border">
-              <tr *ngFor="let v of vitals()" hlmTableRow class="hover:bg-muted/40 transition-colors">
+              <tr
+                *ngFor="let v of vitals()"
+                hlmTableRow
+                class="hover:bg-muted/40 transition-colors"
+              >
                 <td hlmTableCell class="py-3 px-4 font-mono text-muted-foreground">
-                  {{ v.recordedAt | date:'medium' }}
+                  {{ v.recordedAt | date: 'medium' }}
                 </td>
                 <td hlmTableCell class="py-3 px-4 font-mono font-semibold text-foreground">
                   {{ v.systolicBp && v.diastolicBp ? v.systolicBp + '/' + v.diastolicBp : 'N/A' }}
@@ -268,11 +322,16 @@ import {
                   {{ v.bloodGlucose ? v.bloodGlucose + ' mg/dL' : 'N/A' }}
                 </td>
                 <td hlmTableCell class="py-3 px-4 font-mono text-muted-foreground">
-                  {{ v.weightKg ? v.weightKg + ' kg' : '-' }} / {{ v.heightCm ? v.heightCm + ' cm' : '-' }}
+                  {{ v.weightKg ? v.weightKg + ' kg' : '-' }} /
+                  {{ v.heightCm ? v.heightCm + ' cm' : '-' }}
                 </td>
                 <td hlmTableCell class="py-3 px-4 font-mono font-semibold">
                   {{ v.bmi || calculateBmiVal(v.weightKg, v.heightCm) || 'N/A' }}
-                  <span *ngIf="v.bmi || calculateBmiVal(v.weightKg, v.heightCm)" class="text-[10px] ml-1 font-normal" [class]="getBmiBadgeClass(v.bmi || calculateBmiVal(v.weightKg, v.heightCm))">
+                  <span
+                    *ngIf="v.bmi || calculateBmiVal(v.weightKg, v.heightCm)"
+                    class="text-[10px] ml-1 font-normal"
+                    [class]="getBmiBadgeClass(v.bmi || calculateBmiVal(v.weightKg, v.heightCm))"
+                  >
                     {{ getBmiCategory(v.bmi || calculateBmiVal(v.weightKg, v.heightCm)) }}
                   </span>
                 </td>
@@ -282,7 +341,11 @@ import {
               </tr>
 
               <tr *ngIf="vitals().length === 0" hlmTableRow>
-                <td colspan="9" hlmTableCell class="py-12 text-center text-muted-foreground text-xs">
+                <td
+                  colspan="9"
+                  hlmTableCell
+                  class="py-12 text-center text-muted-foreground text-xs"
+                >
                   No vital signs recorded yet. Click "Log New Vitals" above to add an entry.
                 </td>
               </tr>
@@ -292,14 +355,22 @@ import {
       </div>
 
       <!-- Log Vitals Modal -->
-      <div *ngIf="showModal()" class="fixed inset-0 z-50 bg-background/80 backdrop-blur-xs flex items-center justify-center p-4">
-        <div class="w-full max-w-xl rounded-2xl border border-border bg-card p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in duration-200">
+      <div
+        *ngIf="showModal()"
+        class="fixed inset-0 z-50 bg-background/80 backdrop-blur-xs flex items-center justify-center p-4"
+      >
+        <div
+          class="w-full max-w-xl rounded-2xl border border-border bg-card p-6 shadow-2xl space-y-5 animate-in fade-in zoom-in duration-200"
+        >
           <div class="flex justify-between items-center border-b border-border pb-3">
             <h3 class="text-base font-bold text-foreground flex items-center gap-2">
               <ng-icon name="lucideActivity" size="18" class="text-blue-500" />
               Log Bedside Patient Vitals
             </h3>
-            <button (click)="showModal.set(false)" class="text-muted-foreground hover:text-foreground">
+            <button
+              (click)="showModal.set(false)"
+              class="text-muted-foreground hover:text-foreground"
+            >
               <ng-icon name="lucideX" size="18" />
             </button>
           </div>
@@ -315,7 +386,9 @@ import {
                 required
                 class="w-full h-9 p-2 rounded-md border border-input bg-background font-mono text-xs"
               />
-              <p class="text-[10px] text-muted-foreground">Specify exact timestamp when measurements were taken.</p>
+              <p class="text-[10px] text-muted-foreground">
+                Specify exact timestamp when measurements were taken.
+              </p>
             </div>
 
             <!-- Systolic & Diastolic BP -->
@@ -435,17 +508,24 @@ import {
             </div>
 
             <!-- Live BMI Auto-Calculation Card -->
-            <div class="p-3 rounded-lg border border-border bg-emerald-500/5 flex justify-between items-center">
+            <div
+              class="p-3 rounded-lg border border-border bg-emerald-500/5 flex justify-between items-center"
+            >
               <div>
                 <span class="font-bold text-foreground block">Auto-Calculated BMI</span>
-                <span class="text-[11px] text-muted-foreground">Computed automatically from weight & height</span>
+                <span class="text-[11px] text-muted-foreground"
+                  >Computed automatically from weight & height</span
+                >
               </div>
               <div class="text-right">
                 <div class="text-lg font-bold font-mono text-foreground">
                   {{ computedFormBmi() ? computedFormBmi() : '--' }}
                   <span class="text-xs text-muted-foreground">kg/m²</span>
                 </div>
-                <span [class]="getBmiBadgeClass(computedFormBmi())" class="text-[10px] px-2 py-0.5 rounded-full font-semibold">
+                <span
+                  [class]="getBmiBadgeClass(computedFormBmi())"
+                  class="text-[10px] px-2 py-0.5 rounded-full font-semibold"
+                >
                   {{ getBmiCategory(computedFormBmi()) }}
                 </span>
               </div>
@@ -453,7 +533,15 @@ import {
 
             <!-- Modal Action Buttons -->
             <div class="flex justify-end gap-2 pt-3 border-t border-border">
-              <button hlmBtn type="button" variant="outline" size="sm" (click)="showModal.set(false)">Cancel</button>
+              <button
+                hlmBtn
+                type="button"
+                variant="outline"
+                size="sm"
+                (click)="showModal.set(false)"
+              >
+                Cancel
+              </button>
               <button
                 hlmBtn
                 type="submit"
@@ -518,7 +606,9 @@ export class PatientVitalsComponent implements OnInit {
       next: (p) => {
         if (p?.id) {
           this.patientId = p.id;
-          this.apiService.getVitalsByPatient(p.id).subscribe((v) => this.vitals.set(Array.isArray(v) ? v : []));
+          this.apiService
+            .getVitalsByPatient(p.id)
+            .subscribe((v) => this.vitals.set(Array.isArray(v) ? v : []));
         } else {
           console.warn('Patient profile loaded but no ID found.');
           toast.error('Could not verify patient profile identity.');
@@ -585,7 +675,10 @@ export class PatientVitalsComponent implements OnInit {
     });
   }
 
-  calculateBmiVal(weightKg: number | null | undefined, heightCm: number | null | undefined): number | null {
+  calculateBmiVal(
+    weightKg: number | null | undefined,
+    heightCm: number | null | undefined,
+  ): number | null {
     if (weightKg && heightCm && heightCm > 0) {
       const heightM = heightCm / 100.0;
       const bmiVal = weightKg / (heightM * heightM);
@@ -622,7 +715,8 @@ export class PatientVitalsComponent implements OnInit {
 
   getHeartRateBadgeClass(hr: number | null | undefined): string {
     const cat = this.getHeartRateCategory(hr);
-    if (cat === 'Normal Pulse') return 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20';
+    if (cat === 'Normal Pulse')
+      return 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20';
     return 'bg-rose-500/10 text-rose-600 border border-rose-500/20';
   }
 
@@ -636,8 +730,10 @@ export class PatientVitalsComponent implements OnInit {
 
   getBmiBadgeClass(bmi: number | null | undefined): string {
     const cat = this.getBmiCategory(bmi);
-    if (cat === 'Normal weight') return 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20';
-    if (cat === 'Overweight' || cat === 'Underweight') return 'bg-amber-500/10 text-amber-600 border border-amber-500/20';
+    if (cat === 'Normal weight')
+      return 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20';
+    if (cat === 'Overweight' || cat === 'Underweight')
+      return 'bg-amber-500/10 text-amber-600 border border-amber-500/20';
     return 'bg-rose-500/10 text-rose-600 border border-rose-500/20';
   }
 

@@ -90,7 +90,7 @@ import {
 export class LandingComponent {
   constructor(
     public theme: ThemeService,
-    public authService: AuthService
+    public authService: AuthService,
   ) {}
 
   toggleTheme(): void {

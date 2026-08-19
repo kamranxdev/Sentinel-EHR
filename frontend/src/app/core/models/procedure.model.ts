@@ -32,7 +32,12 @@ export interface ProcedureParticipant {
   procedurePerformanceId: number | string;
   practitionerId?: string;
   email: string;
-  role: 'PRIMARY_SURGEON' | 'ASSISTING_SURGEON' | 'ANESTHESIOLOGIST' | 'SCRUB_NURSE' | 'CIRCULATING_NURSE';
+  role:
+    | 'PRIMARY_SURGEON'
+    | 'ASSISTING_SURGEON'
+    | 'ANESTHESIOLOGIST'
+    | 'SCRUB_NURSE'
+    | 'CIRCULATING_NURSE';
 }
 
 export interface ProcedureNote {

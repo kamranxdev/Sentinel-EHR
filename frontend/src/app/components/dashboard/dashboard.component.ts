@@ -39,8 +39,6 @@ export class DashboardComponent implements OnInit {
       this.router.navigate(['/pharmacist/dashboard']);
     } else if (this.authService.isBillingStaff()) {
       this.router.navigate(['/billing-staff/dashboard']);
-    } else if (this.authService.isAuditor()) {
-      this.router.navigate(['/auditor/dashboard']);
     } else if (this.authService.isPatient()) {
       this.router.navigate(['/patient/dashboard']);
     } else {

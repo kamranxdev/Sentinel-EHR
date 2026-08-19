@@ -80,13 +80,18 @@ interface LabOrderItem {
   template: `
     <div class="space-y-6">
       <!-- Header Banner -->
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-border">
+      <div
+        class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-border"
+      >
         <div>
           <h1 class="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
             Physician Consultation Workstation
             <span hlmBadge variant="outline" class="text-[10px]">Clinical Care</span>
           </h1>
-          <p class="text-xs text-muted-foreground mt-0.5">Manage patient consultations: Triaged $\\rightarrow$ Start Consultation $\\rightarrow$ Finalize Clinical Notes, eRx & Lab Orders.</p>
+          <p class="text-xs text-muted-foreground mt-0.5">
+            Manage patient consultations: Triaged $\\rightarrow$ Start Consultation $\\rightarrow$
+            Finalize Clinical Notes, eRx & Lab Orders.
+          </p>
         </div>
       </div>
 
@@ -98,23 +103,39 @@ interface LabOrderItem {
               <tr hlmTableRow class="bg-muted/50 border-b border-border">
                 <th hlmTableHead class="py-3 px-4 text-left font-semibold">Date & Time</th>
                 <th hlmTableHead class="py-3 px-4 text-left font-semibold">Patient</th>
-                <th hlmTableHead class="py-3 px-4 text-left font-semibold">Chief Complaint / Reason</th>
+                <th hlmTableHead class="py-3 px-4 text-left font-semibold">
+                  Chief Complaint / Reason
+                </th>
                 <th hlmTableHead class="py-3 px-4 text-left font-semibold">Workflow Stage</th>
                 <th hlmTableHead class="py-3 px-4 text-right font-semibold">Action</th>
               </tr>
             </thead>
             <tbody hlmTableBody class="divide-y divide-border">
-              <tr *ngFor="let apt of appointments()" hlmTableRow class="hover:bg-muted/40 transition-colors">
-                <td hlmTableCell class="py-3 px-4 font-mono text-muted-foreground">{{ apt.appointmentDate | date:'short' }}</td>
-                <td hlmTableCell class="py-3 px-4 font-semibold text-foreground">{{ apt.patientName || apt.patient?.fullName || 'Patient Profile' }}</td>
-                <td hlmTableCell class="py-3 px-4 text-muted-foreground max-w-xs truncate">{{ apt.reason || 'General Consultation' }}</td>
+              <tr
+                *ngFor="let apt of appointments()"
+                hlmTableRow
+                class="hover:bg-muted/40 transition-colors"
+              >
+                <td hlmTableCell class="py-3 px-4 font-mono text-muted-foreground">
+                  {{ apt.appointmentDate | date: 'short' }}
+                </td>
+                <td hlmTableCell class="py-3 px-4 font-semibold text-foreground">
+                  {{ apt.patientName || apt.patient?.fullName || 'Patient Profile' }}
+                </td>
+                <td hlmTableCell class="py-3 px-4 text-muted-foreground max-w-xs truncate">
+                  {{ apt.reason || 'General Consultation' }}
+                </td>
                 <td hlmTableCell class="py-3 px-4">
                   <span
                     hlmBadge
                     [variant]="
-                      (apt.stage || apt.status) === 'TRIAGED' ? 'secondary' :
-                      (apt.stage || apt.status) === 'IN_CONSULTATION' ? 'default' :
-                      (apt.stage || apt.status) === 'COMPLETED' ? 'outline' : 'outline'
+                      (apt.stage || apt.status) === 'TRIAGED'
+                        ? 'secondary'
+                        : (apt.stage || apt.status) === 'IN_CONSULTATION'
+                          ? 'default'
+                          : (apt.stage || apt.status) === 'COMPLETED'
+                            ? 'outline'
+                            : 'outline'
                     "
                     class="text-[10px] font-mono uppercase"
                   >
@@ -147,19 +168,33 @@ interface LabOrderItem {
                       <span>Resume & Finalize</span>
                     </button>
 
-                    <span *ngIf="(apt.stage || apt.status) === 'COMPLETED'" class="text-xs text-emerald-600 font-semibold flex items-center gap-1 justify-end">
+                    <span
+                      *ngIf="(apt.stage || apt.status) === 'COMPLETED'"
+                      class="text-xs text-emerald-600 font-semibold flex items-center gap-1 justify-end"
+                    >
                       <ng-icon name="lucideCheckCircle2" size="14" />
                       Finalized
                     </span>
 
-                    <span *ngIf="['SCHEDULED', 'ARRIVED', 'CHECKED_IN'].includes(apt.stage || apt.status)" class="text-[11px] text-amber-600 font-medium">
+                    <span
+                      *ngIf="
+                        ['SCHEDULED', 'ARRIVED', 'CHECKED_IN'].includes(apt.stage || apt.status)
+                      "
+                      class="text-[11px] text-amber-600 font-medium"
+                    >
                       Awaiting Nurse Triage
                     </span>
                   </div>
                 </td>
               </tr>
               <tr *ngIf="appointments().length === 0" hlmTableRow>
-                <td colspan="5" hlmTableCell class="py-12 text-center text-muted-foreground text-xs">No appointments in physician queue.</td>
+                <td
+                  colspan="5"
+                  hlmTableCell
+                  class="py-12 text-center text-muted-foreground text-xs"
+                >
+                  No appointments in physician queue.
+                </td>
               </tr>
             </tbody>
           </table>
@@ -168,42 +203,65 @@ interface LabOrderItem {
     </div>
 
     <!-- Advanced Doctor Clinical Examination & Order Entry Modal -->
-    <div *ngIf="activeApt()" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-      <div class="bg-card border border-border rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150 my-auto">
-        
+    <div
+      *ngIf="activeApt()"
+      class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto"
+    >
+      <div
+        class="bg-card border border-border rounded-xl shadow-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden animate-in fade-in zoom-in-95 duration-150 my-auto"
+      >
         <!-- Modal Header -->
-        <div class="flex justify-between items-center px-6 py-4 border-b border-border bg-muted/40 shrink-0">
+        <div
+          class="flex justify-between items-center px-6 py-4 border-b border-border bg-muted/40 shrink-0"
+        >
           <div class="flex items-center gap-3">
-            <div class="size-10 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center border border-purple-500/20">
+            <div
+              class="size-10 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center border border-purple-500/20"
+            >
               <ng-icon name="lucideStethoscope" size="20" />
             </div>
             <div>
               <h2 class="text-base font-bold text-foreground flex items-center gap-2">
                 Physician Examination & Clinical Orders
-                <span hlmBadge variant="secondary" class="text-[10px]">Appt #{{ activeApt()?.id }}</span>
+                <span hlmBadge variant="secondary" class="text-[10px]"
+                  >Appt #{{ activeApt()?.id }}</span
+                >
               </h2>
               <p class="text-xs text-muted-foreground">
-                Patient: <strong class="text-foreground">{{ activeApt()?.patientName || activeApt()?.patient?.fullName }}</strong> 
-                <span *ngIf="activeApt()?.patient?.patientCode" class="font-mono text-[11px] ml-2">({{ activeApt()?.patient?.patientCode }})</span>
+                Patient:
+                <strong class="text-foreground">{{
+                  activeApt()?.patientName || activeApt()?.patient?.fullName
+                }}</strong>
+                <span *ngIf="activeApt()?.patient?.patientCode" class="font-mono text-[11px] ml-2"
+                  >({{ activeApt()?.patient?.patientCode }})</span
+                >
               </p>
             </div>
           </div>
-          <button (click)="closeModal()" class="text-muted-foreground hover:text-foreground p-1 rounded-md hover:bg-muted transition-colors">
+          <button
+            (click)="closeModal()"
+            class="text-muted-foreground hover:text-foreground p-1 rounded-md hover:bg-muted transition-colors"
+          >
             <ng-icon name="lucideX" size="18" />
           </button>
         </div>
 
         <!-- Modal Body (Scrollable Clinical Workstation) -->
         <div class="p-6 space-y-6 text-xs overflow-y-auto grow">
-
           <!-- 0. Patient Complaint & Nurse Triage Summary Card -->
           <div class="p-4 rounded-xl border border-amber-500/30 bg-amber-500/5 space-y-3">
             <div class="flex items-center justify-between border-b border-amber-500/20 pb-2">
-              <h3 class="text-xs font-bold text-amber-700 dark:text-amber-400 flex items-center gap-2 uppercase tracking-wide">
+              <h3
+                class="text-xs font-bold text-amber-700 dark:text-amber-400 flex items-center gap-2 uppercase tracking-wide"
+              >
                 <ng-icon name="lucideClipboardList" size="16" />
                 Patient Intake Complaint & Nurse Triage Summary
               </h3>
-              <span hlmBadge variant="outline" class="text-[10px] border-amber-500/40 text-amber-700 dark:text-amber-300">
+              <span
+                hlmBadge
+                variant="outline"
+                class="text-[10px] border-amber-500/40 text-amber-700 dark:text-amber-300"
+              >
                 Status: {{ getStageBadgeLabel(activeApt()?.stage || activeApt()?.status) }}
               </span>
             </div>
@@ -211,8 +269,12 @@ interface LabOrderItem {
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
               <!-- Patient Chief Complaint -->
               <div class="space-y-1">
-                <span class="font-semibold text-foreground block">Patient Chief Complaint / Visit Reason:</span>
-                <p class="p-2.5 rounded-lg bg-background border border-border text-foreground font-medium">
+                <span class="font-semibold text-foreground block"
+                  >Patient Chief Complaint / Visit Reason:</span
+                >
+                <p
+                  class="p-2.5 rounded-lg bg-background border border-border text-foreground font-medium"
+                >
                   {{ activeApt()?.reason || 'General Consultation & Routine Evaluation' }}
                 </p>
                 <p *ngIf="activeApt()?.notes" class="text-[11px] text-muted-foreground italic px-1">
@@ -222,27 +284,76 @@ interface LabOrderItem {
 
               <!-- Nurse Recorded Vitals Intake -->
               <div class="space-y-1">
-                <span class="font-semibold text-foreground block">Nurse Recorded Triage Vitals:</span>
-                <div *ngIf="activeApt()?.vitals; else defaultVitals" class="grid grid-cols-2 gap-1.5 p-2 rounded-lg bg-background border border-border font-mono text-[11px]">
-                  <div><span class="text-muted-foreground">BP:</span> <strong class="text-foreground">{{ activeApt()?.vitals?.systolicBp && activeApt()?.vitals?.diastolicBp ? activeApt()!.vitals!.systolicBp + '/' + activeApt()!.vitals!.diastolicBp : '120/80' }} mmHg</strong></div>
-                  <div><span class="text-muted-foreground">Heart Rate:</span> <strong class="text-foreground">{{ activeApt()?.vitals?.heartRate || '74' }} bpm</strong></div>
-                  <div><span class="text-muted-foreground">Temp:</span> <strong class="text-foreground">{{ activeApt()?.vitals?.temperature || '36.8' }} °C</strong></div>
-                  <div><span class="text-muted-foreground">SpO2:</span> <strong class="text-foreground">{{ activeApt()?.vitals?.oxygenSaturation || '98' }}%</strong></div>
+                <span class="font-semibold text-foreground block"
+                  >Nurse Recorded Triage Vitals:</span
+                >
+                <div
+                  *ngIf="activeApt()?.vitals; else defaultVitals"
+                  class="grid grid-cols-2 gap-1.5 p-2 rounded-lg bg-background border border-border font-mono text-[11px]"
+                >
+                  <div>
+                    <span class="text-muted-foreground">BP:</span>
+                    <strong class="text-foreground"
+                      >{{
+                        activeApt()?.vitals?.systolicBp && activeApt()?.vitals?.diastolicBp
+                          ? activeApt()!.vitals!.systolicBp + '/' + activeApt()!.vitals!.diastolicBp
+                          : '120/80'
+                      }}
+                      mmHg</strong
+                    >
+                  </div>
+                  <div>
+                    <span class="text-muted-foreground">Heart Rate:</span>
+                    <strong class="text-foreground"
+                      >{{ activeApt()?.vitals?.heartRate || '74' }} bpm</strong
+                    >
+                  </div>
+                  <div>
+                    <span class="text-muted-foreground">Temp:</span>
+                    <strong class="text-foreground"
+                      >{{ activeApt()?.vitals?.temperature || '36.8' }} °C</strong
+                    >
+                  </div>
+                  <div>
+                    <span class="text-muted-foreground">SpO2:</span>
+                    <strong class="text-foreground"
+                      >{{ activeApt()?.vitals?.oxygenSaturation || '98' }}%</strong
+                    >
+                  </div>
                 </div>
                 <ng-template #defaultVitals>
-                  <div class="grid grid-cols-2 gap-1.5 p-2 rounded-lg bg-background border border-border font-mono text-[11px]">
-                    <div><span class="text-muted-foreground">BP:</span> <strong class="text-foreground">120/80 mmHg</strong></div>
-                    <div><span class="text-muted-foreground">Heart Rate:</span> <strong class="text-foreground">74 bpm</strong></div>
-                    <div><span class="text-muted-foreground">Temp:</span> <strong class="text-foreground">36.8 °C</strong></div>
-                    <div><span class="text-muted-foreground">SpO2:</span> <strong class="text-foreground">98%</strong></div>
+                  <div
+                    class="grid grid-cols-2 gap-1.5 p-2 rounded-lg bg-background border border-border font-mono text-[11px]"
+                  >
+                    <div>
+                      <span class="text-muted-foreground">BP:</span>
+                      <strong class="text-foreground">120/80 mmHg</strong>
+                    </div>
+                    <div>
+                      <span class="text-muted-foreground">Heart Rate:</span>
+                      <strong class="text-foreground">74 bpm</strong>
+                    </div>
+                    <div>
+                      <span class="text-muted-foreground">Temp:</span>
+                      <strong class="text-foreground">36.8 °C</strong>
+                    </div>
+                    <div>
+                      <span class="text-muted-foreground">SpO2:</span>
+                      <strong class="text-foreground">98%</strong>
+                    </div>
                   </div>
                 </ng-template>
               </div>
             </div>
 
             <!-- Nursing Observations if recorded -->
-            <div *ngIf="nursingTriageNotes()" class="pt-2 text-[11px] border-t border-amber-500/15 flex items-start gap-1.5">
-              <span class="font-semibold text-amber-800 dark:text-amber-300 shrink-0">Nurse Triage Remarks:</span>
+            <div
+              *ngIf="nursingTriageNotes()"
+              class="pt-2 text-[11px] border-t border-amber-500/15 flex items-start gap-1.5"
+            >
+              <span class="font-semibold text-amber-800 dark:text-amber-300 shrink-0"
+                >Nurse Triage Remarks:</span
+              >
               <span class="text-foreground font-medium">{{ nursingTriageNotes() }}</span>
             </div>
           </div>
@@ -250,11 +361,15 @@ interface LabOrderItem {
           <!-- 1. Clinical Examination / SOAP Notes -->
           <div class="p-4 rounded-xl border border-border bg-card space-y-3">
             <div class="flex items-center justify-between border-b border-border pb-2">
-              <h3 class="text-xs font-bold text-foreground flex items-center gap-2 uppercase tracking-wide">
+              <h3
+                class="text-xs font-bold text-foreground flex items-center gap-2 uppercase tracking-wide"
+              >
                 <ng-icon name="lucideFileText" size="15" class="text-purple-500" />
                 SOAP Examination & Clinical Progress Notes
               </h3>
-              <span class="text-[10px] text-muted-foreground">Subjective • Objective • Assessment • Plan</span>
+              <span class="text-[10px] text-muted-foreground"
+                >Subjective • Objective • Assessment • Plan</span
+              >
             </div>
             <textarea
               [(ngModel)]="doctorNotes"
@@ -267,10 +382,14 @@ interface LabOrderItem {
           <!-- 2. Dynamic Diagnoses Manager -->
           <div class="p-4 rounded-xl border border-border bg-card space-y-3">
             <div class="flex items-center justify-between border-b border-border pb-2">
-              <h3 class="text-xs font-bold text-foreground flex items-center gap-2 uppercase tracking-wide">
+              <h3
+                class="text-xs font-bold text-foreground flex items-center gap-2 uppercase tracking-wide"
+              >
                 <ng-icon name="lucideActivity" size="15" class="text-emerald-500" />
                 Clinical Diagnoses (ICD-10)
-                <span hlmBadge variant="secondary" class="text-[10px]">{{ diagnoses.length }} Added</span>
+                <span hlmBadge variant="secondary" class="text-[10px]"
+                  >{{ diagnoses.length }} Added</span
+                >
               </h3>
               <button
                 hlmBtn
@@ -289,8 +408,10 @@ interface LabOrderItem {
                 *ngFor="let diag of diagnoses; let i = index"
                 class="flex items-center gap-2 p-2.5 rounded-lg border border-border bg-muted/20"
               >
-                <span class="font-mono text-muted-foreground text-[10px] w-5 text-center shrink-0">#{{ i + 1 }}</span>
-                
+                <span class="font-mono text-muted-foreground text-[10px] w-5 text-center shrink-0"
+                  >#{{ i + 1 }}</span
+                >
+
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 grow">
                   <div>
                     <input
@@ -325,10 +446,14 @@ interface LabOrderItem {
           <!-- 3. Dynamic eRx Prescriptions Manager -->
           <div class="p-4 rounded-xl border border-border bg-card space-y-3">
             <div class="flex items-center justify-between border-b border-border pb-2">
-              <h3 class="text-xs font-bold text-foreground flex items-center gap-2 uppercase tracking-wide">
+              <h3
+                class="text-xs font-bold text-foreground flex items-center gap-2 uppercase tracking-wide"
+              >
                 <ng-icon name="lucidePill" size="15" class="text-blue-500" />
                 eRx Medications & Prescriptions
-                <span hlmBadge variant="secondary" class="text-[10px]">{{ prescriptions.length }} Added</span>
+                <span hlmBadge variant="secondary" class="text-[10px]"
+                  >{{ prescriptions.length }} Added</span
+                >
               </h3>
               <button
                 hlmBtn
@@ -347,7 +472,9 @@ interface LabOrderItem {
                 *ngFor="let rx of prescriptions; let i = index"
                 class="flex items-center gap-2 p-2.5 rounded-lg border border-border bg-muted/20"
               >
-                <span class="font-mono text-muted-foreground text-[10px] w-5 text-center shrink-0">#{{ i + 1 }}</span>
+                <span class="font-mono text-muted-foreground text-[10px] w-5 text-center shrink-0"
+                  >#{{ i + 1 }}</span
+                >
 
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 grow">
                   <div>
@@ -391,10 +518,14 @@ interface LabOrderItem {
           <!-- 4. Dynamic Lab Test Orders Manager -->
           <div class="p-4 rounded-xl border border-border bg-card space-y-3">
             <div class="flex items-center justify-between border-b border-border pb-2">
-              <h3 class="text-xs font-bold text-foreground flex items-center gap-2 uppercase tracking-wide">
+              <h3
+                class="text-xs font-bold text-foreground flex items-center gap-2 uppercase tracking-wide"
+              >
                 <ng-icon name="lucideFlaskConical" size="15" class="text-amber-500" />
                 Laboratory Test Orders
-                <span hlmBadge variant="secondary" class="text-[10px]">{{ labOrders.length }} Added</span>
+                <span hlmBadge variant="secondary" class="text-[10px]"
+                  >{{ labOrders.length }} Added</span
+                >
               </h3>
               <button
                 hlmBtn
@@ -413,7 +544,9 @@ interface LabOrderItem {
                 *ngFor="let lab of labOrders; let i = index"
                 class="flex items-center gap-2 p-2.5 rounded-lg border border-border bg-muted/20"
               >
-                <span class="font-mono text-muted-foreground text-[10px] w-5 text-center shrink-0">#{{ i + 1 }}</span>
+                <span class="font-mono text-muted-foreground text-[10px] w-5 text-center shrink-0"
+                  >#{{ i + 1 }}</span
+                >
 
                 <div class="grow">
                   <input
@@ -435,13 +568,15 @@ interface LabOrderItem {
               </div>
             </div>
           </div>
-
         </div>
 
         <!-- Modal Footer -->
-        <div class="px-6 py-4 border-t border-border bg-muted/30 flex items-center justify-between shrink-0">
+        <div
+          class="px-6 py-4 border-t border-border bg-muted/30 flex items-center justify-between shrink-0"
+        >
           <div class="text-[11px] text-muted-foreground">
-            Submitting will finalize consultation notes, generate eRx, and update status to <strong class="text-emerald-600 dark:text-emerald-400">COMPLETED</strong>.
+            Submitting will finalize consultation notes, generate eRx, and update status to
+            <strong class="text-emerald-600 dark:text-emerald-400">COMPLETED</strong>.
           </div>
           <div class="flex items-center gap-3">
             <button hlmBtn variant="outline" size="sm" (click)="closeModal()">Cancel</button>
@@ -458,7 +593,6 @@ interface LabOrderItem {
             </button>
           </div>
         </div>
-
       </div>
     </div>
   `,
@@ -468,15 +602,20 @@ export class PhysicianAppointmentsComponent implements OnInit {
   activeApt = signal<Appointment | null>(null);
   nursingTriageNotes = signal<string>('');
 
-  doctorNotes: string = 'Patient evaluated. Vital signs reviewed. Heart sounds S1 S2 normal, lungs clear to auscultation bilaterally. Good dietary control reported.';
-  
+  doctorNotes: string =
+    'Patient evaluated. Vital signs reviewed. Heart sounds S1 S2 normal, lungs clear to auscultation bilaterally. Good dietary control reported.';
+
   diagnoses: DiagnosisItem[] = [
     { conditionName: 'Essential Hypertension', icdCode: 'I10' },
     { conditionName: 'Type 2 Diabetes Mellitus without complications', icdCode: 'E11.9' },
   ];
 
   prescriptions: PrescriptionItem[] = [
-    { medicationName: 'Lisinopril', dosage: '10mg', frequency: '1 tablet once daily in the morning' },
+    {
+      medicationName: 'Lisinopril',
+      dosage: '10mg',
+      frequency: '1 tablet once daily in the morning',
+    },
     { medicationName: 'Metformin', dosage: '500mg', frequency: '1 tablet twice daily with meals' },
   ];
 
@@ -502,14 +641,22 @@ export class PhysicianAppointmentsComponent implements OnInit {
 
   getStageBadgeLabel(stage?: string): string {
     switch (stage) {
-      case 'SCHEDULED': return 'Scheduled';
-      case 'ARRIVED': return 'Arrived';
-      case 'CHECKED_IN': return 'Desk Checked In';
-      case 'TRIAGED': return 'Triaged (Ready)';
-      case 'IN_CONSULTATION': return 'In Consultation';
-      case 'COMPLETED': return 'Completed';
-      case 'CANCELLED': return 'Cancelled';
-      default: return stage || 'Scheduled';
+      case 'SCHEDULED':
+        return 'Scheduled';
+      case 'ARRIVED':
+        return 'Arrived';
+      case 'CHECKED_IN':
+        return 'Desk Checked In';
+      case 'TRIAGED':
+        return 'Triaged (Ready)';
+      case 'IN_CONSULTATION':
+        return 'In Consultation';
+      case 'COMPLETED':
+        return 'Completed';
+      case 'CANCELLED':
+        return 'Cancelled';
+      default:
+        return stage || 'Scheduled';
     }
   }
 
@@ -533,16 +680,22 @@ export class PhysicianAppointmentsComponent implements OnInit {
     if (apt.id) {
       this.apiService.getAppointmentNotes(apt.id).subscribe({
         next: (notes) => {
-          const nurseNote = notes.find(n => n.noteType === 'NURSE_OBSERVATION' || n.authorRole === 'Nurse');
+          const nurseNote = notes.find(
+            (n) => n.noteType === 'NURSE_OBSERVATION' || n.authorRole === 'Nurse',
+          );
           if (nurseNote && nurseNote.content) {
             this.nursingTriageNotes.set(nurseNote.content);
           } else {
-            this.nursingTriageNotes.set('Patient is alert and oriented. Triage intake completed by nursing station.');
+            this.nursingTriageNotes.set(
+              'Patient is alert and oriented. Triage intake completed by nursing station.',
+            );
           }
         },
         error: () => {
-          this.nursingTriageNotes.set('Patient is alert and oriented. Triage intake completed by nursing station.');
-        }
+          this.nursingTriageNotes.set(
+            'Patient is alert and oriented. Triage intake completed by nursing station.',
+          );
+        },
       });
     }
   }
@@ -588,72 +741,83 @@ export class PhysicianAppointmentsComponent implements OnInit {
 
     this.submitting.set(true);
 
-    const validDiagnoses = this.diagnoses.filter(d => d.conditionName.trim().length > 0);
-    const validPrescriptions = this.prescriptions.filter(p => p.medicationName.trim().length > 0);
-    const validLabOrders = this.labOrders.filter(l => l.testName.trim().length > 0);
+    const validDiagnoses = this.diagnoses.filter((d) => d.conditionName.trim().length > 0);
+    const validPrescriptions = this.prescriptions.filter((p) => p.medicationName.trim().length > 0);
+    const validLabOrders = this.labOrders.filter((l) => l.testName.trim().length > 0);
     const patientId = apt.patientId || apt.patient?.id;
 
     const payload = {
       doctorNotes: this.doctorNotes,
-      diagnoses: validDiagnoses.length > 0 ? validDiagnoses : [{ conditionName: 'General Consultation', icdCode: 'Z00.00' }],
+      diagnoses:
+        validDiagnoses.length > 0
+          ? validDiagnoses
+          : [{ conditionName: 'General Consultation', icdCode: 'Z00.00' }],
       prescriptions: validPrescriptions,
       labOrders: validLabOrders,
     };
 
     // Auto-persist prescriptions and lab orders to patient chart
     if (patientId) {
-      validPrescriptions.forEach(rx => {
-        this.apiService.createPrescription({
-          patientId,
-          medicationName: rx.medicationName,
-          dosage: rx.dosage,
-          frequency: rx.frequency,
-          status: 'ACTIVE',
-        }).subscribe({ error: () => {} });
+      validPrescriptions.forEach((rx) => {
+        this.apiService
+          .createPrescription({
+            patientId,
+            medicationName: rx.medicationName,
+            dosage: rx.dosage,
+            frequency: rx.frequency,
+            status: 'ACTIVE',
+          })
+          .subscribe({ error: () => {} });
       });
 
-      validLabOrders.forEach(lab => {
-        this.apiService.createLabOrder({
-          patientId,
-          testName: lab.testName,
-        }).subscribe({ error: () => {} });
+      validLabOrders.forEach((lab) => {
+        this.apiService
+          .createLabOrder({
+            patientId,
+            testName: lab.testName,
+          })
+          .subscribe({ error: () => {} });
       });
 
-      validDiagnoses.forEach(d => {
-        this.apiService.createDiagnosis({
-          patientId,
-          conditionName: d.conditionName,
-          icdCode: d.icdCode,
-          status: 'ACTIVE',
-        }).subscribe({ error: () => {} });
+      validDiagnoses.forEach((d) => {
+        this.apiService
+          .createDiagnosis({
+            patientId,
+            conditionName: d.conditionName,
+            icdCode: d.icdCode,
+            status: 'ACTIVE',
+          })
+          .subscribe({ error: () => {} });
       });
     }
 
     this.apiService.recordDoctorConsultation(apt.id, payload).subscribe({
       next: () => {
-        this.apiService.generateBilling(apt.id!, { consultationFee: 100, triageFee: 25 }).subscribe({
-          next: () => {
-            this.submitting.set(false);
-            toast.success('Consultation Finalized', {
-              description: `Recorded ${validDiagnoses.length} diagnosis, ${validPrescriptions.length} eRx prescription(s), and ${validLabOrders.length} lab order(s) for ${apt.patientName || apt.patient?.fullName || 'Patient'}. Appointment completed.`
-            });
-            this.closeModal();
-            this.loadAppointments();
-          },
-          error: () => {
-            this.submitting.set(false);
-            toast.success('Consultation Finalized', {
-              description: `Consultation clinical notes saved for appointment #${apt.id}.`
-            });
-            this.closeModal();
-            this.loadAppointments();
-          },
-        });
+        this.apiService
+          .generateBilling(apt.id!, { consultationFee: 100, triageFee: 25 })
+          .subscribe({
+            next: () => {
+              this.submitting.set(false);
+              toast.success('Consultation Finalized', {
+                description: `Recorded ${validDiagnoses.length} diagnosis, ${validPrescriptions.length} eRx prescription(s), and ${validLabOrders.length} lab order(s) for ${apt.patientName || apt.patient?.fullName || 'Patient'}. Appointment completed.`,
+              });
+              this.closeModal();
+              this.loadAppointments();
+            },
+            error: () => {
+              this.submitting.set(false);
+              toast.success('Consultation Finalized', {
+                description: `Consultation clinical notes saved for appointment #${apt.id}.`,
+              });
+              this.closeModal();
+              this.loadAppointments();
+            },
+          });
       },
       error: (err) => {
         this.submitting.set(false);
         toast.error('Failed to Finalize Consultation', {
-          description: err?.error?.message || 'Server error occurred while recording consultation.'
+          description: err?.error?.message || 'Server error occurred while recording consultation.',
         });
       },
     });

@@ -7,7 +7,7 @@ Java 17 / Spring Boot RESTful API service powering the Sentinel Electronic Healt
 ## 🏗️ Core Components
 
 - **Authentication & JWT**: Stateless JSON Web Token authentication (`JwtTokenProvider`) and security filter (`JwtAuthenticationFilter`).
-- **Method Security**: Spring Security `@EnableMethodSecurity` with fine-grained `@PreAuthorize` rules (`ROLE_ADMIN`, `ROLE_DOCTOR`, `ROLE_NURSE`, `ROLE_AUDITOR`, `ROLE_PATIENT`).
+- **Method Security**: Spring Security `@EnableMethodSecurity` with fine-grained `@PreAuthorize` rules (`ROLE_ADMIN`, `ROLE_DOCTOR`, `ROLE_NURSE`, `ROLE_PATIENT`).
 - **Immutable WORM Audit Ledger**: `AuditLogRepository` storing append-only logs for HIPAA § 164.312(b) audit compliance.
 - **Smart Allergy Safety Engine**: `SmartSafetyService` cross-referencing eRx orders against coded patient allergies (RxNorm / SNOMED CT) with clinician override logging.
 - **HL7 FHIR R4 Interoperability**: `FhirController` delivering HL7 FHIR R4 standard JSON resources.
@@ -76,7 +76,7 @@ Java 17 / Spring Boot RESTful API service powering the Sentinel Electronic Healt
 - `GET /api/users/doctors`: List registered physicians.
 
 ### 👤 Master Patient Index (MPI)
-- `GET /api/patients`: Master Patient Index (`ADMIN`, `DOCTOR`, `NURSE`, `AUDITOR`).
+- `GET /api/patients`: Master Patient Index (`ADMIN`, `DOCTOR`, `NURSE`).
 - `GET /api/patients/search?query={q}`: Search by name, ABHA ID, National ID, MRN, phone.
 - `GET /api/patients/{id}`: Fetch patient by ID.
 - `GET /api/patients/user/{userId}`: Retrieve patient linked to user account (`PATIENT`).
@@ -98,7 +98,7 @@ Java 17 / Spring Boot RESTful API service powering the Sentinel Electronic Healt
 - `POST /api/appointments`: Schedule appointment.
 
 ### 🛡️ Audit Ledger & Compliance Logging
-- `GET /api/admin/audit-logs?search={q}`: Immutable audit trail log search (`ADMIN`, `AUDITOR`).
+- `GET /api/admin/audit-logs?search={q}`: Immutable audit trail log search (`ADMIN`).
 
 ### 🌐 HL7 FHIR R4 API (`/fhir/v1`)
 - `GET /fhir/v1/Patient`: Export FHIR Patient bundle.

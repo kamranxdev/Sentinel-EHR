@@ -42,7 +42,9 @@ export class FhirExplorerComponent implements OnInit {
         { system: 'phone', value: '+91 98765 43210', use: 'mobile' },
         { system: 'email', value: 'sunita.sharma@example.com', use: 'home' },
       ],
-      address: [{ use: 'home', text: '402 Sunrise Apartments, MG Road, Bengaluru, Karnataka 560001' }],
+      address: [
+        { use: 'home', text: '402 Sunrise Apartments, MG Road, Bengaluru, Karnataka 560001' },
+      ],
     },
     null,
     2,
@@ -91,7 +93,8 @@ export class FhirExplorerComponent implements OnInit {
     this.rawResult = null;
     this.totalEntries = 0;
 
-    const patientId = this.patientIdFilter && this.patientIdFilter.trim() ? this.patientIdFilter.trim() : undefined;
+    const patientId =
+      this.patientIdFilter && this.patientIdFilter.trim() ? this.patientIdFilter.trim() : undefined;
 
     if (this.isEverythingQuery && patientId) {
       this.apiService.getFhirPatientEverything(patientId).subscribe({

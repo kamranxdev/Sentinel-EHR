@@ -52,9 +52,13 @@ export interface DashboardInvoiceViewModel {
   template: `
     <div class="space-y-6">
       <!-- Billing Staff Header -->
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-border">
+      <div
+        class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-border"
+      >
         <div class="flex items-center gap-4">
-          <div class="size-12 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0">
+          <div
+            class="size-12 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0"
+          >
             <ng-icon name="lucideReceipt" size="24" />
           </div>
           <div>
@@ -62,7 +66,9 @@ export interface DashboardInvoiceViewModel {
               Revenue Cycle & Billing Operations
               <span hlmBadge variant="secondary" class="text-[11px]">Billing Staff</span>
             </h1>
-            <p class="text-xs text-muted-foreground mt-0.5">Patient invoicing, insurance claims submission, and financial reconciliation.</p>
+            <p class="text-xs text-muted-foreground mt-0.5">
+              Patient invoicing, insurance claims submission, and financial reconciliation.
+            </p>
           </div>
         </div>
       </div>
@@ -74,27 +80,34 @@ export interface DashboardInvoiceViewModel {
           value="₹3,42,850"
           subtitle="Processed Patient Billing (INR)"
           icon="lucideIndianRupee"
-          iconBgClass="bg-emerald-500/10 text-emerald-600" />
+          iconBgClass="bg-emerald-500/10 text-emerald-600"
+        />
         <app-stat-card
           title="Pending Claims"
           value="14 Claims"
           subtitle="Awaiting Insurance Settlement"
           icon="lucideCreditCard"
-          iconBgClass="bg-amber-500/10 text-amber-600" />
+          iconBgClass="bg-amber-500/10 text-amber-600"
+        />
         <app-stat-card
           title="Clean Claim Rate"
           value="98.4%"
           subtitle="First-Pass Compliance Rate"
           icon="lucideTrendingUp"
-          iconBgClass="bg-sky-500/10 text-sky-600" />
+          iconBgClass="bg-sky-500/10 text-sky-600"
+        />
       </div>
 
       <!-- Financial Invoices Table -->
       <div hlmCard class="p-6 space-y-4">
         <div class="flex items-center justify-between">
           <div>
-            <h2 class="text-base font-semibold text-foreground">Patient Invoices & Insurance Ledger</h2>
-            <p class="text-xs text-muted-foreground">Manage generated appointment billings, co-pays, and insurance claims.</p>
+            <h2 class="text-base font-semibold text-foreground">
+              Patient Invoices & Insurance Ledger
+            </h2>
+            <p class="text-xs text-muted-foreground">
+              Manage generated appointment billings, co-pays, and insurance claims.
+            </p>
           </div>
         </div>
 
@@ -122,7 +135,9 @@ export interface DashboardInvoiceViewModel {
               <tr *ngIf="!loading() && error()" hlmTableRow>
                 <td colspan="6" class="py-6 text-center text-xs text-destructive">
                   <p>{{ error() }}</p>
-                  <button (click)="loadInvoices()" class="mt-2 text-xs text-emerald-600 underline">Retry</button>
+                  <button (click)="loadInvoices()" class="mt-2 text-xs text-emerald-600 underline">
+                    Retry
+                  </button>
                 </td>
               </tr>
               <tr *ngIf="!loading() && !error() && invoices().length === 0" hlmTableRow>
@@ -132,11 +147,19 @@ export interface DashboardInvoiceViewModel {
               </tr>
               <tr *ngFor="let invoice of invoices()" hlmTableRow>
                 <td hlmTableCell class="font-mono text-xs text-foreground">{{ invoice.id }}</td>
-                <td hlmTableCell class="font-medium text-foreground text-xs">{{ invoice.patientName }}</td>
+                <td hlmTableCell class="font-medium text-foreground text-xs">
+                  {{ invoice.patientName }}
+                </td>
                 <td hlmTableCell class="text-xs text-muted-foreground">{{ invoice.carrier }}</td>
-                <td hlmTableCell class="text-xs font-semibold text-emerald-600">₹{{ invoice.amount | number:'1.2-2' }}</td>
+                <td hlmTableCell class="text-xs font-semibold text-emerald-600">
+                  ₹{{ invoice.amount | number: '1.2-2' }}
+                </td>
                 <td hlmTableCell>
-                  <span hlmBadge [variant]="invoice.status === 'PAID' ? 'default' : 'outline'" class="text-[10px]">
+                  <span
+                    hlmBadge
+                    [variant]="invoice.status === 'PAID' ? 'default' : 'outline'"
+                    class="text-[10px]"
+                  >
                     {{ invoice.status }}
                   </span>
                 </td>
@@ -147,7 +170,8 @@ export interface DashboardInvoiceViewModel {
                     variant="ghost"
                     class="text-xs text-emerald-600 hover:text-emerald-700"
                     [disabled]="invoice.status === 'PAID'"
-                    (click)="processClaim(invoice)">
+                    (click)="processClaim(invoice)"
+                  >
                     {{ invoice.status === 'PAID' ? 'Claim Settled' : 'Submit Claim' }}
                   </button>
                 </td>
@@ -166,7 +190,7 @@ export class BillingStaffDashboardComponent implements OnInit {
 
   constructor(
     public authService: AuthService,
-    private apiService: ApiService
+    private apiService: ApiService,
   ) {}
 
   ngOnInit(): void {
@@ -178,14 +202,16 @@ export class BillingStaffDashboardComponent implements OnInit {
     this.error.set(null);
     this.apiService.getAppointments().subscribe({
       next: (apts) => {
-        const list: DashboardInvoiceViewModel[] = (Array.isArray(apts) ? apts : []).map((apt, idx) => ({
-          id: `INV-${apt.id ? String(apt.id).substring(0, 6).toUpperCase() : (1000 + idx)}`,
-          appointmentId: apt.id,
-          patientName: apt.patientName || apt.patient?.fullName || 'Patient',
-          carrier: (apt as any).insuranceDetails || 'PM-JAY / State Health Assurance',
-          amount: 1500.0,
-          status: apt.status === 'COMPLETED' ? 'PAID' : 'PENDING',
-        }));
+        const list: DashboardInvoiceViewModel[] = (Array.isArray(apts) ? apts : []).map(
+          (apt, idx) => ({
+            id: `INV-${apt.id ? String(apt.id).substring(0, 6).toUpperCase() : 1000 + idx}`,
+            appointmentId: apt.id,
+            patientName: apt.patientName || apt.patient?.fullName || 'Patient',
+            carrier: (apt as any).insuranceDetails || 'PM-JAY / State Health Assurance',
+            amount: 1500.0,
+            status: apt.status === 'COMPLETED' ? 'PAID' : 'PENDING',
+          }),
+        );
         this.invoices.set(list);
         this.loading.set(false);
       },

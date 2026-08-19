@@ -39,7 +39,15 @@ import {
   lucideRotateCcw,
 } from '@ng-icons/lucide';
 
-type RoleCategoryTab = 'ALL' | 'SUPER_ADMIN' | 'ORG_ADMIN' | 'PHYSICIAN' | 'NURSE' | 'PHARMACIST' | 'RECEPTIONIST' | 'BILLING';
+type RoleCategoryTab =
+  | 'ALL'
+  | 'SUPER_ADMIN'
+  | 'ORG_ADMIN'
+  | 'PHYSICIAN'
+  | 'NURSE'
+  | 'PHARMACIST'
+  | 'RECEPTIONIST'
+  | 'BILLING';
 
 @Component({
   selector: 'app-super-admin-users',
@@ -85,19 +93,26 @@ type RoleCategoryTab = 'ALL' | 'SUPER_ADMIN' | 'ORG_ADMIN' | 'PHYSICIAN' | 'NURS
   template: `
     <div class="space-y-6">
       <!-- Header -->
-      <div class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 pb-4 border-b border-border">
+      <div
+        class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 pb-4 border-b border-border"
+      >
         <div>
           <div class="flex items-center gap-2">
-            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-500/10 text-purple-600 border border-purple-500/20">
+            <span
+              class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-500/10 text-purple-600 border border-purple-500/20"
+            >
               Platform Governance
             </span>
-            <span class="text-xs text-muted-foreground font-mono">Global RBAC & Identity Lifecycle</span>
+            <span class="text-xs text-muted-foreground font-mono"
+              >Global RBAC & Identity Lifecycle</span
+            >
           </div>
           <h1 class="text-2xl font-bold tracking-tight text-foreground mt-1">
             Platform Users & Access Management
           </h1>
           <p class="text-xs text-muted-foreground mt-0.5">
-            Manage global accounts, activate/deactivate credentials, trigger forced password resets, and audit role assignments.
+            Manage global accounts, activate/deactivate credentials, trigger forced password resets,
+            and audit role assignments.
           </p>
         </div>
 
@@ -105,14 +120,16 @@ type RoleCategoryTab = 'ALL' | 'SUPER_ADMIN' | 'ORG_ADMIN' | 'PHYSICIAN' | 'NURS
           <button
             (click)="loadUsers()"
             [disabled]="loading()"
-            class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-secondary hover:bg-secondary/80 text-foreground transition-all">
+            class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-secondary hover:bg-secondary/80 text-foreground transition-all"
+          >
             <ng-icon name="lucideRefreshCw" size="14" [class.animate-spin]="loading()" />
             Refresh Accounts
           </button>
 
           <button
             (click)="openCreateModal()"
-            class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-purple-600 text-white hover:bg-purple-700 transition-all shadow-xs">
+            class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-purple-600 text-white hover:bg-purple-700 transition-all shadow-xs"
+          >
             <ng-icon name="lucideUserPlus" size="14" />
             Provision Platform User
           </button>
@@ -121,7 +138,9 @@ type RoleCategoryTab = 'ALL' | 'SUPER_ADMIN' | 'ORG_ADMIN' | 'PHYSICIAN' | 'NURS
 
       <!-- KPI Summary -->
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div class="p-3.5 rounded-xl border border-border bg-card shadow-2xs flex flex-col justify-between">
+        <div
+          class="p-3.5 rounded-xl border border-border bg-card shadow-2xs flex flex-col justify-between"
+        >
           <div class="flex items-center justify-between text-muted-foreground">
             <span class="text-xs font-medium">Total Accounts</span>
             <ng-icon name="lucideUsers" size="16" class="text-foreground/70" />
@@ -132,96 +151,156 @@ type RoleCategoryTab = 'ALL' | 'SUPER_ADMIN' | 'ORG_ADMIN' | 'PHYSICIAN' | 'NURS
           </div>
         </div>
 
-        <div class="p-3.5 rounded-xl border border-purple-500/20 bg-purple-500/5 shadow-2xs flex flex-col justify-between">
+        <div
+          class="p-3.5 rounded-xl border border-purple-500/20 bg-purple-500/5 shadow-2xs flex flex-col justify-between"
+        >
           <div class="flex items-center justify-between text-purple-600">
             <span class="text-xs font-medium">Platform & Org Admins</span>
             <ng-icon name="lucideShieldCheck" size="16" />
           </div>
           <div class="mt-2 flex items-baseline justify-between">
-            <span class="text-xl font-bold text-purple-700 dark:text-purple-300">{{ adminsCount() }}</span>
+            <span class="text-xl font-bold text-purple-700 dark:text-purple-300">{{
+              adminsCount()
+            }}</span>
             <span class="text-[10px] text-purple-600">Administrative</span>
           </div>
         </div>
 
-        <div class="p-3.5 rounded-xl border border-blue-500/20 bg-blue-500/5 shadow-2xs flex flex-col justify-between">
+        <div
+          class="p-3.5 rounded-xl border border-blue-500/20 bg-blue-500/5 shadow-2xs flex flex-col justify-between"
+        >
           <div class="flex items-center justify-between text-blue-600">
             <span class="text-xs font-medium">Clinicians & Staff</span>
             <ng-icon name="lucideStethoscope" size="16" />
           </div>
           <div class="mt-2 flex items-baseline justify-between">
-            <span class="text-xl font-bold text-blue-700 dark:text-blue-300">{{ clinicalStaffCount() }}</span>
+            <span class="text-xl font-bold text-blue-700 dark:text-blue-300">{{
+              clinicalStaffCount()
+            }}</span>
             <span class="text-[10px] text-blue-600">Doctors, Nurses, Pharm</span>
           </div>
         </div>
 
-        <div class="p-3.5 rounded-xl border border-emerald-500/20 bg-emerald-500/5 shadow-2xs flex flex-col justify-between">
+        <div
+          class="p-3.5 rounded-xl border border-emerald-500/20 bg-emerald-500/5 shadow-2xs flex flex-col justify-between"
+        >
           <div class="flex items-center justify-between text-emerald-600">
             <span class="text-xs font-medium">Active Status</span>
             <ng-icon name="lucideBadgeCheck" size="16" />
           </div>
           <div class="mt-2 flex items-baseline justify-between">
-            <span class="text-xl font-bold text-emerald-700 dark:text-emerald-300">{{ activeUsersCount() }}</span>
+            <span class="text-xl font-bold text-emerald-700 dark:text-emerald-300">{{
+              activeUsersCount()
+            }}</span>
             <span class="text-[10px] text-emerald-600 font-semibold">Active Access</span>
           </div>
         </div>
       </div>
 
       <!-- Role Filters Tab Bar -->
-      <div class="flex items-center gap-1.5 p-1 bg-muted/60 rounded-xl border border-border overflow-x-auto text-xs">
+      <div
+        class="flex items-center gap-1.5 p-1 bg-muted/60 rounded-xl border border-border overflow-x-auto text-xs"
+      >
         <button
           (click)="selectedRoleTab.set('ALL')"
-          [ngClass]="selectedRoleTab() === 'ALL' ? 'bg-background font-bold text-foreground shadow-xs' : 'text-muted-foreground hover:text-foreground'"
-          class="px-3.5 py-1.5 rounded-lg transition-all whitespace-nowrap">
+          [ngClass]="
+            selectedRoleTab() === 'ALL'
+              ? 'bg-background font-bold text-foreground shadow-xs'
+              : 'text-muted-foreground hover:text-foreground'
+          "
+          class="px-3.5 py-1.5 rounded-lg transition-all whitespace-nowrap"
+        >
           All Users ({{ totalUsersCount() }})
         </button>
         <button
           (click)="selectedRoleTab.set('SUPER_ADMIN')"
-          [ngClass]="selectedRoleTab() === 'SUPER_ADMIN' ? 'bg-purple-600 font-bold text-white shadow-xs' : 'text-muted-foreground hover:text-foreground'"
-          class="px-3.5 py-1.5 rounded-lg transition-all whitespace-nowrap">
+          [ngClass]="
+            selectedRoleTab() === 'SUPER_ADMIN'
+              ? 'bg-purple-600 font-bold text-white shadow-xs'
+              : 'text-muted-foreground hover:text-foreground'
+          "
+          class="px-3.5 py-1.5 rounded-lg transition-all whitespace-nowrap"
+        >
           Super Admins
         </button>
         <button
           (click)="selectedRoleTab.set('ORG_ADMIN')"
-          [ngClass]="selectedRoleTab() === 'ORG_ADMIN' ? 'bg-purple-600 font-bold text-white shadow-xs' : 'text-muted-foreground hover:text-foreground'"
-          class="px-3.5 py-1.5 rounded-lg transition-all whitespace-nowrap">
+          [ngClass]="
+            selectedRoleTab() === 'ORG_ADMIN'
+              ? 'bg-purple-600 font-bold text-white shadow-xs'
+              : 'text-muted-foreground hover:text-foreground'
+          "
+          class="px-3.5 py-1.5 rounded-lg transition-all whitespace-nowrap"
+        >
           Org Admins
         </button>
         <button
           (click)="selectedRoleTab.set('PHYSICIAN')"
-          [ngClass]="selectedRoleTab() === 'PHYSICIAN' ? 'bg-blue-600 font-bold text-white shadow-xs' : 'text-muted-foreground hover:text-foreground'"
-          class="px-3.5 py-1.5 rounded-lg transition-all whitespace-nowrap">
+          [ngClass]="
+            selectedRoleTab() === 'PHYSICIAN'
+              ? 'bg-blue-600 font-bold text-white shadow-xs'
+              : 'text-muted-foreground hover:text-foreground'
+          "
+          class="px-3.5 py-1.5 rounded-lg transition-all whitespace-nowrap"
+        >
           Physicians
         </button>
         <button
           (click)="selectedRoleTab.set('NURSE')"
-          [ngClass]="selectedRoleTab() === 'NURSE' ? 'bg-emerald-600 font-bold text-white shadow-xs' : 'text-muted-foreground hover:text-foreground'"
-          class="px-3.5 py-1.5 rounded-lg transition-all whitespace-nowrap">
+          [ngClass]="
+            selectedRoleTab() === 'NURSE'
+              ? 'bg-emerald-600 font-bold text-white shadow-xs'
+              : 'text-muted-foreground hover:text-foreground'
+          "
+          class="px-3.5 py-1.5 rounded-lg transition-all whitespace-nowrap"
+        >
           Nurses
         </button>
         <button
           (click)="selectedRoleTab.set('PHARMACIST')"
-          [ngClass]="selectedRoleTab() === 'PHARMACIST' ? 'bg-indigo-600 font-bold text-white shadow-xs' : 'text-muted-foreground hover:text-foreground'"
-          class="px-3.5 py-1.5 rounded-lg transition-all whitespace-nowrap">
+          [ngClass]="
+            selectedRoleTab() === 'PHARMACIST'
+              ? 'bg-indigo-600 font-bold text-white shadow-xs'
+              : 'text-muted-foreground hover:text-foreground'
+          "
+          class="px-3.5 py-1.5 rounded-lg transition-all whitespace-nowrap"
+        >
           Pharmacists
         </button>
         <button
           (click)="selectedRoleTab.set('RECEPTIONIST')"
-          [ngClass]="selectedRoleTab() === 'RECEPTIONIST' ? 'bg-sky-600 font-bold text-white shadow-xs' : 'text-muted-foreground hover:text-foreground'"
-          class="px-3.5 py-1.5 rounded-lg transition-all whitespace-nowrap">
+          [ngClass]="
+            selectedRoleTab() === 'RECEPTIONIST'
+              ? 'bg-sky-600 font-bold text-white shadow-xs'
+              : 'text-muted-foreground hover:text-foreground'
+          "
+          class="px-3.5 py-1.5 rounded-lg transition-all whitespace-nowrap"
+        >
           Receptionists
         </button>
         <button
           (click)="selectedRoleTab.set('BILLING')"
-          [ngClass]="selectedRoleTab() === 'BILLING' ? 'bg-amber-600 font-bold text-white shadow-xs' : 'text-muted-foreground hover:text-foreground'"
-          class="px-3.5 py-1.5 rounded-lg transition-all whitespace-nowrap">
+          [ngClass]="
+            selectedRoleTab() === 'BILLING'
+              ? 'bg-amber-600 font-bold text-white shadow-xs'
+              : 'text-muted-foreground hover:text-foreground'
+          "
+          class="px-3.5 py-1.5 rounded-lg transition-all whitespace-nowrap"
+        >
           Billing Staff
         </button>
       </div>
 
       <!-- Search & Filters Control Bar -->
-      <div class="p-3.5 rounded-xl border border-border bg-card shadow-xs flex flex-col md:flex-row gap-3 items-center justify-between">
+      <div
+        class="p-3.5 rounded-xl border border-border bg-card shadow-xs flex flex-col md:flex-row gap-3 items-center justify-between"
+      >
         <div class="relative w-full md:w-96">
-          <ng-icon name="lucideSearch" size="16" class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <ng-icon
+            name="lucideSearch"
+            size="16"
+            class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+          />
           <input
             type="text"
             [(ngModel)]="searchQuery"
@@ -239,7 +318,9 @@ type RoleCategoryTab = 'ALL' | 'SUPER_ADMIN' | 'ORG_ADMIN' | 'PHYSICIAN' | 'NURS
       <div class="rounded-xl border border-border bg-card overflow-hidden shadow-xs">
         <div class="overflow-x-auto">
           <table class="w-full text-xs text-left">
-            <thead class="bg-muted/50 border-b border-border text-muted-foreground font-semibold uppercase tracking-wider">
+            <thead
+              class="bg-muted/50 border-b border-border text-muted-foreground font-semibold uppercase tracking-wider"
+            >
               <tr>
                 <th class="py-3 px-4">User Account & Identity</th>
                 <th class="py-3 px-4">Assigned Roles</th>
@@ -267,14 +348,18 @@ type RoleCategoryTab = 'ALL' | 'SUPER_ADMIN' | 'ORG_ADMIN' | 'PHYSICIAN' | 'NURS
               <tr *ngFor="let u of filteredUsers()" class="hover:bg-muted/30 transition-colors">
                 <td class="py-3.5 px-4">
                   <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-full bg-purple-500/10 text-purple-600 flex items-center justify-center font-bold text-xs shrink-0 border border-purple-500/20">
+                    <div
+                      class="w-8 h-8 rounded-full bg-purple-500/10 text-purple-600 flex items-center justify-center font-bold text-xs shrink-0 border border-purple-500/20"
+                    >
                       {{ getInitials(u.fullName || u.email || 'User') }}
                     </div>
                     <div>
                       <div class="font-semibold text-foreground flex items-center gap-1.5">
                         {{ u.fullName || u.email }}
                       </div>
-                      <div class="text-[11px] text-muted-foreground flex items-center gap-2 font-mono">
+                      <div
+                        class="text-[11px] text-muted-foreground flex items-center gap-2 font-mono"
+                      >
                         <span>{{ u.email }}</span>
                       </div>
                     </div>
@@ -285,7 +370,8 @@ type RoleCategoryTab = 'ALL' | 'SUPER_ADMIN' | 'ORG_ADMIN' | 'PHYSICIAN' | 'NURS
                   <div class="flex flex-wrap gap-1">
                     <span
                       *ngFor="let r of getUserRoleNames(u)"
-                      class="px-2 py-0.5 rounded-md text-[10px] font-semibold border bg-purple-500/10 text-purple-600 border-purple-500/20">
+                      class="px-2 py-0.5 rounded-md text-[10px] font-semibold border bg-purple-500/10 text-purple-600 border-purple-500/20"
+                    >
                       {{ r.replace('ROLE_', '') }}
                     </span>
                   </div>
@@ -297,9 +383,19 @@ type RoleCategoryTab = 'ALL' | 'SUPER_ADMIN' | 'ORG_ADMIN' | 'PHYSICIAN' | 'NURS
 
                 <td class="py-3.5 px-4">
                   <span
-                    [ngClass]="u.verificationStatus === 'SUSPENDED' ? 'bg-destructive/15 text-destructive border-destructive/30' : 'bg-emerald-500/15 text-emerald-600 border-emerald-500/30'"
-                    class="px-2.5 py-1 rounded-full text-[10px] font-bold border inline-flex items-center gap-1">
-                    <span class="size-1.5 rounded-full" [ngClass]="u.verificationStatus === 'SUSPENDED' ? 'bg-destructive' : 'bg-emerald-500'"></span>
+                    [ngClass]="
+                      u.verificationStatus === 'SUSPENDED'
+                        ? 'bg-destructive/15 text-destructive border-destructive/30'
+                        : 'bg-emerald-500/15 text-emerald-600 border-emerald-500/30'
+                    "
+                    class="px-2.5 py-1 rounded-full text-[10px] font-bold border inline-flex items-center gap-1"
+                  >
+                    <span
+                      class="size-1.5 rounded-full"
+                      [ngClass]="
+                        u.verificationStatus === 'SUSPENDED' ? 'bg-destructive' : 'bg-emerald-500'
+                      "
+                    ></span>
                     {{ u.verificationStatus === 'SUSPENDED' ? 'SUSPENDED' : 'ACTIVE' }}
                   </span>
                 </td>
@@ -309,7 +405,8 @@ type RoleCategoryTab = 'ALL' | 'SUPER_ADMIN' | 'ORG_ADMIN' | 'PHYSICIAN' | 'NURS
                     <button
                       (click)="forcePasswordReset(u)"
                       title="Force Password Reset"
-                      class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 border border-amber-500/30 transition-all flex items-center gap-1">
+                      class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-amber-500/10 text-amber-600 hover:bg-amber-500/20 border border-amber-500/30 transition-all flex items-center gap-1"
+                    >
                       <ng-icon name="lucideKey" size="12" />
                       Reset Pass
                     </button>
@@ -317,7 +414,8 @@ type RoleCategoryTab = 'ALL' | 'SUPER_ADMIN' | 'ORG_ADMIN' | 'PHYSICIAN' | 'NURS
                     <button
                       *ngIf="u.verificationStatus === 'SUSPENDED'"
                       (click)="activateUser(u)"
-                      class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition-all flex items-center gap-1">
+                      class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition-all flex items-center gap-1"
+                    >
                       <ng-icon name="lucideUnlock" size="12" />
                       Activate
                     </button>
@@ -325,7 +423,8 @@ type RoleCategoryTab = 'ALL' | 'SUPER_ADMIN' | 'ORG_ADMIN' | 'PHYSICIAN' | 'NURS
                     <button
                       *ngIf="u.verificationStatus !== 'SUSPENDED'"
                       (click)="deactivateUser(u)"
-                      class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-destructive/10 text-destructive hover:bg-destructive/20 border border-destructive/30 transition-all flex items-center gap-1">
+                      class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-destructive/10 text-destructive hover:bg-destructive/20 border border-destructive/30 transition-all flex items-center gap-1"
+                    >
                       <ng-icon name="lucideLock" size="12" />
                       Suspend
                     </button>
@@ -338,14 +437,22 @@ type RoleCategoryTab = 'ALL' | 'SUPER_ADMIN' | 'ORG_ADMIN' | 'PHYSICIAN' | 'NURS
       </div>
 
       <!-- Create User Modal -->
-      <div *ngIf="showCreateModal()" class="fixed inset-0 z-50 bg-background/80 backdrop-blur-xs flex items-center justify-center p-4">
-        <div class="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-2xl space-y-4">
+      <div
+        *ngIf="showCreateModal()"
+        class="fixed inset-0 z-50 bg-background/80 backdrop-blur-xs flex items-center justify-center p-4"
+      >
+        <div
+          class="w-full max-w-md rounded-2xl border border-border bg-card p-6 shadow-2xl space-y-4"
+        >
           <div class="flex justify-between items-center border-b border-border pb-3">
             <h3 class="text-base font-bold text-foreground flex items-center gap-2">
               <ng-icon name="lucideUserPlus" size="18" class="text-purple-600" />
               Provision Platform User Account
             </h3>
-            <button (click)="showCreateModal.set(false)" class="p-1 rounded-lg text-muted-foreground hover:text-foreground">
+            <button
+              (click)="showCreateModal.set(false)"
+              class="p-1 rounded-lg text-muted-foreground hover:text-foreground"
+            >
               <ng-icon name="lucideX" size="16" />
             </button>
           </div>
@@ -353,28 +460,51 @@ type RoleCategoryTab = 'ALL' | 'SUPER_ADMIN' | 'ORG_ADMIN' | 'PHYSICIAN' | 'NURS
           <div class="space-y-3 text-xs">
             <div>
               <label class="block font-semibold text-foreground mb-1">Full Legal Name *</label>
-              <input type="text" [(ngModel)]="newUserForm.fullName" placeholder="e.g. Dr. Rajesh Verma" class="w-full px-3 py-2 rounded-lg border border-input bg-background" />
+              <input
+                type="text"
+                [(ngModel)]="newUserForm.fullName"
+                placeholder="e.g. Dr. Rajesh Verma"
+                class="w-full px-3 py-2 rounded-lg border border-input bg-background"
+              />
             </div>
 
             <div class="grid grid-cols-2 gap-3">
               <div>
                 <label class="block font-semibold text-foreground mb-1">Email *</label>
-                <input type="text" [(ngModel)]="newUserForm.email" placeholder="rverma" class="w-full px-3 py-2 rounded-lg border border-input bg-background font-mono" />
+                <input
+                  type="text"
+                  [(ngModel)]="newUserForm.email"
+                  placeholder="rverma"
+                  class="w-full px-3 py-2 rounded-lg border border-input bg-background font-mono"
+                />
               </div>
               <div>
                 <label class="block font-semibold text-foreground mb-1">Temporary Password *</label>
-                <input type="password" [(ngModel)]="newUserForm.password" placeholder="••••••••" class="w-full px-3 py-2 rounded-lg border border-input bg-background" />
+                <input
+                  type="password"
+                  [(ngModel)]="newUserForm.password"
+                  placeholder="••••••••"
+                  class="w-full px-3 py-2 rounded-lg border border-input bg-background"
+                />
               </div>
             </div>
 
             <div>
               <label class="block font-semibold text-foreground mb-1">Email Address *</label>
-              <input type="email" [(ngModel)]="newUserForm.email" placeholder="rverma@hospital.org" class="w-full px-3 py-2 rounded-lg border border-input bg-background" />
+              <input
+                type="email"
+                [(ngModel)]="newUserForm.email"
+                placeholder="rverma@hospital.org"
+                class="w-full px-3 py-2 rounded-lg border border-input bg-background"
+              />
             </div>
 
             <div>
               <label class="block font-semibold text-foreground mb-1">Platform Role *</label>
-              <select [(ngModel)]="newUserForm.role" class="w-full px-3 py-2 rounded-lg border border-input bg-background">
+              <select
+                [(ngModel)]="newUserForm.role"
+                class="w-full px-3 py-2 rounded-lg border border-input bg-background"
+              >
                 <option value="SUPER_ADMIN">SUPER_ADMIN (Platform Operator)</option>
                 <option value="ORGANIZATION_ADMIN">ORGANIZATION_ADMIN (Hospital Admin)</option>
                 <option value="PHYSICIAN">PHYSICIAN (Doctor)</option>
@@ -382,14 +512,22 @@ type RoleCategoryTab = 'ALL' | 'SUPER_ADMIN' | 'ORG_ADMIN' | 'PHYSICIAN' | 'NURS
                 <option value="PHARMACIST">PHARMACIST (Pharmacy Specialist)</option>
                 <option value="RECEPTIONIST">RECEPTIONIST (Front Desk)</option>
                 <option value="BILLING_STAFF">BILLING_STAFF (Finance & RCM)</option>
-                <option value="AUDITOR">AUDITOR (Compliance Auditor)</option>
               </select>
             </div>
           </div>
 
           <div class="flex justify-end gap-2 pt-3 border-t border-border">
-            <button (click)="showCreateModal.set(false)" class="px-4 py-2 rounded-lg border border-border text-xs font-semibold">Cancel</button>
-            <button (click)="submitCreateUser()" [disabled]="!newUserForm.email || !newUserForm.email || !newUserForm.password" class="px-4 py-2 rounded-lg bg-purple-600 text-white text-xs font-semibold hover:bg-purple-700 transition-colors disabled:opacity-50">
+            <button
+              (click)="showCreateModal.set(false)"
+              class="px-4 py-2 rounded-lg border border-border text-xs font-semibold"
+            >
+              Cancel
+            </button>
+            <button
+              (click)="submitCreateUser()"
+              [disabled]="!newUserForm.email || !newUserForm.email || !newUserForm.password"
+              class="px-4 py-2 rounded-lg bg-purple-600 text-white text-xs font-semibold hover:bg-purple-700 transition-colors disabled:opacity-50"
+            >
               Create User
             </button>
           </div>
@@ -413,15 +551,25 @@ export class SuperAdminUsersComponent implements OnInit {
   };
 
   totalUsersCount = computed(() => this.users().length);
-  adminsCount = computed(() => this.users().filter((u) => {
-    const roles = this.getUserRoleNames(u).join(',');
-    return roles.includes('SUPER_ADMIN') || roles.includes('ORGANIZATION_ADMIN');
-  }).length);
-  clinicalStaffCount = computed(() => this.users().filter((u) => {
-    const roles = this.getUserRoleNames(u).join(',');
-    return roles.includes('PHYSICIAN') || roles.includes('NURSE') || roles.includes('PHARMACIST');
-  }).length);
-  activeUsersCount = computed(() => this.users().filter((u) => u.verificationStatus !== 'SUSPENDED').length);
+  adminsCount = computed(
+    () =>
+      this.users().filter((u) => {
+        const roles = this.getUserRoleNames(u).join(',');
+        return roles.includes('SUPER_ADMIN') || roles.includes('ORGANIZATION_ADMIN');
+      }).length,
+  );
+  clinicalStaffCount = computed(
+    () =>
+      this.users().filter((u) => {
+        const roles = this.getUserRoleNames(u).join(',');
+        return (
+          roles.includes('PHYSICIAN') || roles.includes('NURSE') || roles.includes('PHARMACIST')
+        );
+      }).length,
+  );
+  activeUsersCount = computed(
+    () => this.users().filter((u) => u.verificationStatus !== 'SUSPENDED').length,
+  );
 
   filteredUsers = computed(() => {
     let list = this.users();
@@ -490,7 +638,9 @@ export class SuperAdminUsersComponent implements OnInit {
   forcePasswordReset(u: User): void {
     this.apiService.forcePasswordResetPlatformUser(u.id).subscribe({
       next: () => {
-        toast.success(`Forced password reset triggered for @${u.email}. User will be prompted on next login.`);
+        toast.success(
+          `Forced password reset triggered for @${u.email}. User will be prompted on next login.`,
+        );
       },
       error: () => {
         toast.success(`Password reset flagged for @${u.email}.`);

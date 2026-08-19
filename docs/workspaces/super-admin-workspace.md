@@ -48,6 +48,6 @@ Super Admin Governance Scope:
 ### D. Consultation Schedule Analytics (`/super-admin/schedule-analytics`)
 - High-level capacity analytics: Consultation load across medical specialties, peak clinic hours, and doctor utilization rates.
 
-### E. ABDM & DPDP Compliance Ledger (`/auditor/ledger`)
+### E. ABDM & DPDP Compliance Ledger (`/super-admin/audit`)
 - Surveillance of ABDM Health Information Exchange (HIE) consent directives.
 - Cryptographically sequenced WORM audit logs of cross-enterprise data transfers.

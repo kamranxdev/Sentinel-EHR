@@ -56,7 +56,6 @@ Open **http://localhost:4200** and sign in with any demo credential below.
 | **Doctor** | `doctor_mahtab` | `doctor123` |
 | **Nurse** | `nurse_priya` | `nurse123` |
 | **Admin** | `admin` | `admin123` |
-| **Auditor** | `auditor` | `auditor123` |
 
 > For the full credentials matrix with user profiles and scopes, see [Getting Started Guide](docs/developer-setup-guide.md).
 

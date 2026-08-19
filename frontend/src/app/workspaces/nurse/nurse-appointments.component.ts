@@ -89,23 +89,38 @@ export interface FastTriageForm {
   template: `
     <div class="w-full space-y-6">
       <!-- 1. Header with Station Context -->
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-border">
+      <div
+        class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-border"
+      >
         <div class="space-y-1">
           <div class="flex items-center flex-wrap gap-2">
-            <h1 class="text-2xl font-extrabold tracking-tight text-foreground flex items-center gap-2">
+            <h1
+              class="text-2xl font-extrabold tracking-tight text-foreground flex items-center gap-2"
+            >
               <span>Outpatient Appointments & Triage</span>
             </h1>
-            <span hlmBadge variant="secondary" class="text-[11px] bg-amber-500/10 text-amber-600 border border-amber-500/20 font-semibold">
+            <span
+              hlmBadge
+              variant="secondary"
+              class="text-[11px] bg-amber-500/10 text-amber-600 border border-amber-500/20 font-semibold"
+            >
               Nursing Triage Station
             </span>
           </div>
           <p class="text-xs text-muted-foreground">
-            Perform pre-consultation vitals intake, allergy screening, pain assessment, and route patients to attending physicians.
+            Perform pre-consultation vitals intake, allergy screening, pain assessment, and route
+            patients to attending physicians.
           </p>
         </div>
 
         <div class="flex items-center gap-2">
-          <button hlmBtn variant="outline" size="sm" (click)="loadAppointments()" class="gap-1.5 text-xs">
+          <button
+            hlmBtn
+            variant="outline"
+            size="sm"
+            (click)="loadAppointments()"
+            class="gap-1.5 text-xs"
+          >
             <ng-icon name="lucideRefreshCw" [class.animate-spin]="loading()" size="14" />
             <span>Refresh Queue</span>
           </button>
@@ -122,8 +137,12 @@ export interface FastTriageForm {
           [class.ring-primary]="viewMode() === 'ALL'"
         >
           <div class="flex items-center justify-between">
-            <span class="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Total Today</span>
-            <div class="size-7 rounded-lg bg-muted flex items-center justify-center text-muted-foreground">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-muted-foreground"
+              >Total Today</span
+            >
+            <div
+              class="size-7 rounded-lg bg-muted flex items-center justify-center text-muted-foreground"
+            >
               <ng-icon name="lucideUsers" size="14" />
             </div>
           </div>
@@ -141,8 +160,12 @@ export interface FastTriageForm {
           [class.ring-foreground]="viewMode() === 'SCHEDULED'"
         >
           <div class="flex items-center justify-between">
-            <span class="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Awaiting Check-in</span>
-            <div class="size-7 rounded-lg bg-blue-500/10 text-blue-600 flex items-center justify-center">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-muted-foreground"
+              >Awaiting Check-in</span
+            >
+            <div
+              class="size-7 rounded-lg bg-blue-500/10 text-blue-600 flex items-center justify-center"
+            >
               <ng-icon name="lucideClock" size="14" />
             </div>
           </div>
@@ -160,13 +183,22 @@ export interface FastTriageForm {
           [class.ring-amber-500]="viewMode() === 'CHECKED_IN'"
         >
           <div class="flex items-center justify-between">
-            <span class="text-[11px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-300">Ready for Triage</span>
-            <div class="size-7 rounded-lg bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+            <span
+              class="text-[11px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-300"
+              >Ready for Triage</span
+            >
+            <div
+              class="size-7 rounded-lg bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center"
+            >
               <ng-icon name="lucideActivity" size="14" />
             </div>
           </div>
-          <div class="text-2xl font-extrabold text-amber-600 dark:text-amber-400">{{ checkedInCount() }}</div>
-          <div class="text-[11px] text-amber-700 dark:text-amber-300 pt-1 border-t border-amber-500/30 font-semibold">
+          <div class="text-2xl font-extrabold text-amber-600 dark:text-amber-400">
+            {{ checkedInCount() }}
+          </div>
+          <div
+            class="text-[11px] text-amber-700 dark:text-amber-300 pt-1 border-t border-amber-500/30 font-semibold"
+          >
             <span>Action Required: Vitals Intake</span>
           </div>
         </div>
@@ -179,33 +211,51 @@ export interface FastTriageForm {
           [class.ring-emerald-500]="viewMode() === 'TRIAGED'"
         >
           <div class="flex items-center justify-between">
-            <span class="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Triaged for Doctor</span>
-            <div class="size-7 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-muted-foreground"
+              >Triaged for Doctor</span
+            >
+            <div
+              class="size-7 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center"
+            >
               <ng-icon name="lucideCheckCircle2" size="14" />
             </div>
           </div>
           <div class="text-2xl font-extrabold text-foreground">{{ triagedCount() }}</div>
-          <div class="text-[11px] text-muted-foreground pt-1 border-t border-border/60 text-emerald-600 font-medium">
+          <div
+            class="text-[11px] text-muted-foreground pt-1 border-t border-border/60 text-emerald-600 font-medium"
+          >
             <span>Intake Completed</span>
           </div>
         </div>
       </div>
 
       <!-- 3. Filter Bar & Search -->
-      <div class="p-3.5 rounded-2xl border border-border bg-card shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div
+        class="p-3.5 rounded-2xl border border-border bg-card shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-3"
+      >
         <!-- View Mode Segmented Buttons -->
-        <div class="flex items-center gap-1.5 p-1 bg-muted/40 rounded-xl w-full sm:w-auto overflow-x-auto text-xs">
+        <div
+          class="flex items-center gap-1.5 p-1 bg-muted/40 rounded-xl w-full sm:w-auto overflow-x-auto text-xs"
+        >
           <button
             (click)="setViewMode('ALL')"
             class="px-3 py-1.5 rounded-lg font-semibold transition-all cursor-pointer whitespace-nowrap"
-            [ngClass]="viewMode() === 'ALL' ? 'bg-background shadow-xs text-foreground font-bold' : 'text-muted-foreground hover:text-foreground'"
+            [ngClass]="
+              viewMode() === 'ALL'
+                ? 'bg-background shadow-xs text-foreground font-bold'
+                : 'text-muted-foreground hover:text-foreground'
+            "
           >
             All Today ({{ totalCount() }})
           </button>
           <button
             (click)="setViewMode('CHECKED_IN')"
             class="px-3 py-1.5 rounded-lg font-semibold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1"
-            [ngClass]="viewMode() === 'CHECKED_IN' ? 'bg-amber-500/20 text-amber-700 dark:text-amber-300 font-bold border border-amber-500/30' : 'text-muted-foreground hover:text-amber-600'"
+            [ngClass]="
+              viewMode() === 'CHECKED_IN'
+                ? 'bg-amber-500/20 text-amber-700 dark:text-amber-300 font-bold border border-amber-500/30'
+                : 'text-muted-foreground hover:text-amber-600'
+            "
           >
             <span>Needs Triage ({{ checkedInCount() }})</span>
             <span *ngIf="checkedInCount() > 0" class="size-2 rounded-full bg-amber-500"></span>
@@ -213,7 +263,11 @@ export interface FastTriageForm {
           <button
             (click)="setViewMode('TRIAGED')"
             class="px-3 py-1.5 rounded-lg font-semibold transition-all cursor-pointer whitespace-nowrap"
-            [ngClass]="viewMode() === 'TRIAGED' ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-bold border border-emerald-500/30' : 'text-muted-foreground hover:text-emerald-600'"
+            [ngClass]="
+              viewMode() === 'TRIAGED'
+                ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-bold border border-emerald-500/30'
+                : 'text-muted-foreground hover:text-emerald-600'
+            "
           >
             Triaged ({{ triagedCount() }})
           </button>
@@ -221,7 +275,11 @@ export interface FastTriageForm {
 
         <!-- Search Input -->
         <div class="relative w-full sm:w-72">
-          <ng-icon name="lucideSearch" size="14" class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <ng-icon
+            name="lucideSearch"
+            size="14"
+            class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+          />
           <input
             hlmInput
             type="text"
@@ -240,7 +298,9 @@ export interface FastTriageForm {
               <tr hlmTableRow class="bg-muted/50 border-b border-border">
                 <th hlmTableHead class="py-3 px-4 text-left font-semibold">Appointment Time</th>
                 <th hlmTableHead class="py-3 px-4 text-left font-semibold">Patient Information</th>
-                <th hlmTableHead class="py-3 px-4 text-left font-semibold">Chief Complaint / Reason</th>
+                <th hlmTableHead class="py-3 px-4 text-left font-semibold">
+                  Chief Complaint / Reason
+                </th>
                 <th hlmTableHead class="py-3 px-4 text-left font-semibold">Attending Doctor</th>
                 <th hlmTableHead class="py-3 px-4 text-left font-semibold">Triage Stage</th>
                 <th hlmTableHead class="py-3 px-4 text-right font-semibold">Nursing Action</th>
@@ -257,28 +317,39 @@ export interface FastTriageForm {
                 <td hlmTableCell class="py-3.5 px-4 font-mono font-semibold text-foreground">
                   <div class="flex items-center gap-1.5">
                     <ng-icon name="lucideClock" size="13" class="text-muted-foreground" />
-                    <span>{{ apt.appointmentDate | date:'shortTime' }}</span>
+                    <span>{{ apt.appointmentDate | date: 'shortTime' }}</span>
                   </div>
-                  <span class="text-[10px] text-muted-foreground block mt-0.5">{{ apt.appointmentDate | date:'mediumDate' }}</span>
+                  <span class="text-[10px] text-muted-foreground block mt-0.5">{{
+                    apt.appointmentDate | date: 'mediumDate'
+                  }}</span>
                 </td>
 
                 <!-- Patient Demographics -->
                 <td hlmTableCell class="py-3.5 px-4">
-                  <div class="font-bold text-foreground text-xs">{{ apt.patient?.fullName || apt.patientName || 'Patient' }}</div>
+                  <div class="font-bold text-foreground text-xs">
+                    {{ apt.patient?.fullName || apt.patientName || 'Patient' }}
+                  </div>
                   <div class="text-[10px] text-muted-foreground font-mono mt-0.5">
-                    {{ apt.patient?.patientCode || 'MRN-RECORD' }} • {{ apt.patient?.gender || 'U' }} ({{ apt.patient?.dateOfBirth || 'N/A' }})
+                    {{ apt.patient?.patientCode || 'MRN-RECORD' }} •
+                    {{ apt.patient?.gender || 'U' }} ({{ apt.patient?.dateOfBirth || 'N/A' }})
                   </div>
                 </td>
 
                 <!-- Chief Complaint -->
                 <td hlmTableCell class="py-3.5 px-4 max-w-xs">
-                  <span class="font-medium text-foreground block truncate">{{ apt.reason || 'General Consultation' }}</span>
-                  <span class="text-[10px] text-muted-foreground">{{ apt.departmentName || apt.departmentId || 'Outpatient Clinic' }}</span>
+                  <span class="font-medium text-foreground block truncate">{{
+                    apt.reason || 'General Consultation'
+                  }}</span>
+                  <span class="text-[10px] text-muted-foreground">{{
+                    apt.departmentName || apt.departmentId || 'Outpatient Clinic'
+                  }}</span>
                 </td>
 
                 <!-- Attending Doctor -->
                 <td hlmTableCell class="py-3.5 px-4">
-                  <div class="font-semibold text-foreground text-xs">{{ apt.doctorName || 'Attending Physician' }}</div>
+                  <div class="font-semibold text-foreground text-xs">
+                    {{ apt.doctorName || 'Attending Physician' }}
+                  </div>
                   <span class="text-[10px] text-muted-foreground">Room: Consultation-1</span>
                 </td>
 
@@ -361,17 +432,23 @@ export interface FastTriageForm {
         *ngIf="isTriageModalOpen && selectedAppointment"
         class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto"
       >
-        <div class="relative w-full max-w-2xl bg-card border border-border rounded-2xl shadow-xl overflow-hidden my-8 space-y-0">
+        <div
+          class="relative w-full max-w-2xl bg-card border border-border rounded-2xl shadow-xl overflow-hidden my-8 space-y-0"
+        >
           <!-- Modal Header -->
           <div class="p-4 border-b border-border bg-muted/20 flex items-center justify-between">
             <div class="flex items-center gap-2.5">
-              <div class="size-9 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center">
+              <div
+                class="size-9 rounded-xl bg-amber-500/10 text-amber-600 flex items-center justify-center"
+              >
                 <ng-icon name="lucideActivity" size="18" />
               </div>
               <div>
                 <h3 class="text-sm font-bold text-foreground">Pre-Consultation Nursing Triage</h3>
                 <p class="text-xs text-muted-foreground">
-                  {{ selectedAppointment.patient?.fullName || selectedAppointment.patientName }} ({{ selectedAppointment.patient?.patientCode || 'MRN-VERIFIED' }})
+                  {{ selectedAppointment.patient?.fullName || selectedAppointment.patientName }} ({{
+                    selectedAppointment.patient?.patientCode || 'MRN-VERIFIED'
+                  }})
                 </p>
               </div>
             </div>
@@ -389,27 +466,43 @@ export interface FastTriageForm {
 
           <!-- Modal Body -->
           <div class="p-5 space-y-5 max-h-[75vh] overflow-y-auto">
-            
             <!-- Live Calculated Acuity Indicator Banner -->
-            <div class="p-3.5 rounded-xl border flex items-center justify-between gap-3 text-xs"
-              [ngClass]="computedNews2() >= 5 ? 'bg-rose-500/10 border-rose-500/30 text-rose-800 dark:text-rose-300' : computedNews2() >= 3 ? 'bg-amber-500/10 border-amber-500/30 text-amber-800 dark:text-amber-300' : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-800 dark:text-emerald-300'"
+            <div
+              class="p-3.5 rounded-xl border flex items-center justify-between gap-3 text-xs"
+              [ngClass]="
+                computedNews2() >= 5
+                  ? 'bg-rose-500/10 border-rose-500/30 text-rose-800 dark:text-rose-300'
+                  : computedNews2() >= 3
+                    ? 'bg-amber-500/10 border-amber-500/30 text-amber-800 dark:text-amber-300'
+                    : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-800 dark:text-emerald-300'
+              "
             >
               <div class="flex items-center gap-2 font-bold">
                 <ng-icon name="lucideShieldAlert" size="16" />
                 <span>Calculated NEWS2 Acuity Score: {{ computedNews2() }}</span>
               </div>
               <span hlmBadge variant="outline" class="text-[10px] font-bold">
-                {{ computedNews2() >= 5 ? 'MEDIUM-HIGH RISK' : computedNews2() >= 3 ? 'OBSERVED RISK' : 'STABLE' }}
+                {{
+                  computedNews2() >= 5
+                    ? 'MEDIUM-HIGH RISK'
+                    : computedNews2() >= 3
+                      ? 'OBSERVED RISK'
+                      : 'STABLE'
+                }}
               </span>
             </div>
 
             <!-- Vitals Grid (6 Core Parameters) -->
             <div>
-              <h4 class="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">1. Physiological Vital Signs</h4>
+              <h4 class="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">
+                1. Physiological Vital Signs
+              </h4>
               <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 <!-- Systolic BP -->
                 <div class="space-y-1">
-                  <label class="text-[11px] font-semibold text-foreground">Systolic BP (mmHg)</label>
+                  <label class="text-[11px] font-semibold text-foreground"
+                    >Systolic BP (mmHg)</label
+                  >
                   <input
                     hlmInput
                     type="number"
@@ -421,7 +514,9 @@ export interface FastTriageForm {
 
                 <!-- Diastolic BP -->
                 <div class="space-y-1">
-                  <label class="text-[11px] font-semibold text-foreground">Diastolic BP (mmHg)</label>
+                  <label class="text-[11px] font-semibold text-foreground"
+                    >Diastolic BP (mmHg)</label
+                  >
                   <input
                     hlmInput
                     type="number"
@@ -470,7 +565,9 @@ export interface FastTriageForm {
 
                 <!-- Blood Glucose -->
                 <div class="space-y-1">
-                  <label class="text-[11px] font-semibold text-foreground">Blood Glucose (mg/dL)</label>
+                  <label class="text-[11px] font-semibold text-foreground"
+                    >Blood Glucose (mg/dL)</label
+                  >
                   <input
                     hlmInput
                     type="number"
@@ -484,7 +581,9 @@ export interface FastTriageForm {
 
             <!-- Anthropometry & BMI -->
             <div>
-              <h4 class="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">2. Height, Weight & BMI</h4>
+              <h4 class="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3">
+                2. Height, Weight & BMI
+              </h4>
               <div class="grid grid-cols-3 gap-3">
                 <div class="space-y-1">
                   <label class="text-[11px] font-semibold text-foreground">Height (cm)</label>
@@ -508,8 +607,12 @@ export interface FastTriageForm {
                   />
                 </div>
                 <div class="space-y-1">
-                  <label class="text-[11px] font-semibold text-muted-foreground">Calculated BMI</label>
-                  <div class="h-8 rounded-md border border-border bg-muted/40 px-3 flex items-center text-xs font-bold font-mono text-foreground">
+                  <label class="text-[11px] font-semibold text-muted-foreground"
+                    >Calculated BMI</label
+                  >
+                  <div
+                    class="h-8 rounded-md border border-border bg-muted/40 px-3 flex items-center text-xs font-bold font-mono text-foreground"
+                  >
                     {{ computedBmi() || '—' }}
                   </div>
                 </div>
@@ -519,19 +622,32 @@ export interface FastTriageForm {
             <!-- Visual Pain Scale 0 to 10 -->
             <div class="space-y-2">
               <div class="flex items-center justify-between">
-                <label class="text-xs font-bold uppercase tracking-wider text-muted-foreground">3. Pain Severity Scale (0 - 10)</label>
+                <label class="text-xs font-bold uppercase tracking-wider text-muted-foreground"
+                  >3. Pain Severity Scale (0 - 10)</label
+                >
                 <span class="text-xs font-bold font-mono text-foreground">
-                  Score: {{ triageForm.painScore }}/10
-                  ({{ triageForm.painScore === 0 ? 'No Pain' : triageForm.painScore <= 3 ? 'Mild' : triageForm.painScore <= 6 ? 'Moderate' : 'Severe' }})
+                  Score: {{ triageForm.painScore }}/10 ({{
+                    triageForm.painScore === 0
+                      ? 'No Pain'
+                      : triageForm.painScore <= 3
+                        ? 'Mild'
+                        : triageForm.painScore <= 6
+                          ? 'Moderate'
+                          : 'Severe'
+                  }})
                 </span>
               </div>
               <div class="grid grid-cols-11 gap-1">
                 <button
-                  *ngFor="let score of [0,1,2,3,4,5,6,7,8,9,10]"
+                  *ngFor="let score of [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]"
                   type="button"
                   (click)="triageForm.painScore = score"
                   class="h-8 rounded-lg text-xs font-bold transition-all cursor-pointer"
-                  [ngClass]="triageForm.painScore === score ? 'bg-primary text-primary-foreground shadow-xs scale-105' : 'bg-muted/40 hover:bg-muted text-foreground'"
+                  [ngClass]="
+                    triageForm.painScore === score
+                      ? 'bg-primary text-primary-foreground shadow-xs scale-105'
+                      : 'bg-muted/40 hover:bg-muted text-foreground'
+                  "
                 >
                   {{ score }}
                 </button>
@@ -540,16 +656,22 @@ export interface FastTriageForm {
 
             <!-- Allergy Verification & Quick Checkboxes -->
             <div class="space-y-2.5 pt-2 border-t border-border">
-              <label class="flex items-center gap-2 text-xs font-semibold text-foreground cursor-pointer">
+              <label
+                class="flex items-center gap-2 text-xs font-semibold text-foreground cursor-pointer"
+              >
                 <input
                   type="checkbox"
                   [(ngModel)]="triageForm.allergiesVerified"
                   class="rounded border-border text-primary focus:ring-primary size-4"
                 />
-                <span>Patient allergies reviewed & verified (No unreported anaphylactic risks)</span>
+                <span
+                  >Patient allergies reviewed & verified (No unreported anaphylactic risks)</span
+                >
               </label>
 
-              <label class="flex items-center gap-2 text-xs font-semibold text-rose-600 dark:text-rose-400 cursor-pointer">
+              <label
+                class="flex items-center gap-2 text-xs font-semibold text-rose-600 dark:text-rose-400 cursor-pointer"
+              >
                 <input
                   type="checkbox"
                   [(ngModel)]="triageForm.requiresImmediateAttention"
@@ -561,7 +683,9 @@ export interface FastTriageForm {
 
             <!-- Nursing Assessment Notes -->
             <div class="space-y-1.5">
-              <label class="text-[11px] font-semibold text-foreground">Nursing Intake Notes & Observations</label>
+              <label class="text-[11px] font-semibold text-foreground"
+                >Nursing Intake Notes & Observations</label
+              >
               <textarea
                 hlmInput
                 rows="3"
@@ -628,7 +752,7 @@ export class NurseAppointmentsComponent implements OnInit {
   constructor(
     private apiService: ApiService,
     private patientContext: PatientContextService,
-    private router: Router
+    private router: Router,
   ) {}
 
   ngOnInit(): void {
@@ -648,9 +772,15 @@ export class NurseAppointmentsComponent implements OnInit {
   }
 
   totalCount = computed(() => this.appointments().length);
-  awaitingCheckInCount = computed(() => this.appointments().filter((a) => a.status === 'SCHEDULED').length);
-  checkedInCount = computed(() => this.appointments().filter((a) => a.status === 'CHECKED_IN').length);
-  triagedCount = computed(() => this.appointments().filter((a) => a.status === 'TRIAGED' || a.stage === 'TRIAGED').length);
+  awaitingCheckInCount = computed(
+    () => this.appointments().filter((a) => a.status === 'SCHEDULED').length,
+  );
+  checkedInCount = computed(
+    () => this.appointments().filter((a) => a.status === 'CHECKED_IN').length,
+  );
+  triagedCount = computed(
+    () => this.appointments().filter((a) => a.status === 'TRIAGED' || a.stage === 'TRIAGED').length,
+  );
 
   filteredAppointments = computed(() => {
     const q = this.searchQuery().toLowerCase().trim();
@@ -672,7 +802,7 @@ export class NurseAppointmentsComponent implements OnInit {
         a.patient?.patientCode?.toLowerCase().includes(q) ||
         a.patientName?.toLowerCase().includes(q) ||
         a.doctorName?.toLowerCase().includes(q) ||
-        a.reason?.toLowerCase().includes(q)
+        a.reason?.toLowerCase().includes(q),
     );
   });
 
@@ -731,7 +861,8 @@ export class NurseAppointmentsComponent implements OnInit {
       painScore: 0,
       heightCm: 172,
       weightKg: 68,
-      nursingNotes: 'Patient present for outpatient evaluation. Vitals recorded within normal limits.',
+      nursingNotes:
+        'Patient present for outpatient evaluation. Vitals recorded within normal limits.',
       allergiesVerified: true,
       requiresImmediateAttention: false,
     };
@@ -744,28 +875,34 @@ export class NurseAppointmentsComponent implements OnInit {
     // Record vitals & mark appointment as triaged
     const aptId = this.selectedAppointment.id;
     if (aptId) {
-      this.apiService.recordTriageVitals(aptId, {
-        systolicBp: this.triageForm.systolicBp || 120,
-        diastolicBp: this.triageForm.diastolicBp || 80,
-        heartRate: this.triageForm.heartRate || 72,
-        temperature: this.triageForm.temperature || 36.8,
-        oxygenSaturation: this.triageForm.oxygenSaturation || 98,
-        bloodGlucose: this.triageForm.bloodGlucose || undefined,
-        notes: this.triageForm.nursingNotes,
-        triageLevel: this.computedNews2() >= 5 ? 'CRITICAL' : 'ROUTINE',
-      }).subscribe({
-        next: () => {
-          toast.success(`Triage completed for ${this.selectedAppointment?.patient?.fullName || 'Patient'}`);
-          this.isTriageModalOpen = false;
-          this.loadAppointments();
-        },
-        error: () => {
-          // Update local status optimistically
-          this.selectedAppointment!.status = 'TRIAGED';
-          toast.success(`Triage saved locally for ${this.selectedAppointment?.patient?.fullName || 'Patient'}`);
-          this.isTriageModalOpen = false;
-        },
-      });
+      this.apiService
+        .recordTriageVitals(aptId, {
+          systolicBp: this.triageForm.systolicBp || 120,
+          diastolicBp: this.triageForm.diastolicBp || 80,
+          heartRate: this.triageForm.heartRate || 72,
+          temperature: this.triageForm.temperature || 36.8,
+          oxygenSaturation: this.triageForm.oxygenSaturation || 98,
+          bloodGlucose: this.triageForm.bloodGlucose || undefined,
+          notes: this.triageForm.nursingNotes,
+          triageLevel: this.computedNews2() >= 5 ? 'CRITICAL' : 'ROUTINE',
+        })
+        .subscribe({
+          next: () => {
+            toast.success(
+              `Triage completed for ${this.selectedAppointment?.patient?.fullName || 'Patient'}`,
+            );
+            this.isTriageModalOpen = false;
+            this.loadAppointments();
+          },
+          error: () => {
+            // Update local status optimistically
+            this.selectedAppointment!.status = 'TRIAGED';
+            toast.success(
+              `Triage saved locally for ${this.selectedAppointment?.patient?.fullName || 'Patient'}`,
+            );
+            this.isTriageModalOpen = false;
+          },
+        });
     }
   }
 }

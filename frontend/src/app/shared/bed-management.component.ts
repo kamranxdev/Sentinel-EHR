@@ -10,7 +10,15 @@ import { HlmBadgeImports } from '@spartan-ng/helm/badge';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmTableImports } from '@spartan-ng/helm/table';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { lucideBed, lucideArrowRightLeft, lucideRefreshCw, lucideCheckCircle2, lucideAlertTriangle, lucideSparkles, lucideUser } from '@ng-icons/lucide';
+import {
+  lucideBed,
+  lucideArrowRightLeft,
+  lucideRefreshCw,
+  lucideCheckCircle2,
+  lucideAlertTriangle,
+  lucideSparkles,
+  lucideUser,
+} from '@ng-icons/lucide';
 
 @Component({
   selector: 'app-bed-management',
@@ -38,13 +46,18 @@ import { lucideBed, lucideArrowRightLeft, lucideRefreshCw, lucideCheckCircle2, l
   template: `
     <div class="space-y-6">
       <!-- Header Banner -->
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-border">
+      <div
+        class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-border"
+      >
         <div>
           <h1 class="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
             Inpatient Bed & Ward Management
             <span hlmBadge variant="secondary" class="text-[10px]">Spatial Census</span>
           </h1>
-          <p class="text-xs text-muted-foreground mt-0.5">Real-time hospital bed tracking, room assignments, and 9-step controlled transfer workflow.</p>
+          <p class="text-xs text-muted-foreground mt-0.5">
+            Real-time hospital bed tracking, room assignments, and 9-step controlled transfer
+            workflow.
+          </p>
         </div>
         <div class="flex items-center gap-2">
           <button hlmBtn variant="outline" size="sm" (click)="loadBeds()" class="gap-2 text-xs">
@@ -58,7 +71,11 @@ import { lucideBed, lucideArrowRightLeft, lucideRefreshCw, lucideCheckCircle2, l
         <button
           *ngFor="let dept of departments"
           (click)="selectedDept.set(dept)"
-          [class]="selectedDept() === dept ? 'bg-primary text-primary-foreground font-semibold' : 'bg-muted/60 text-muted-foreground hover:bg-muted'"
+          [class]="
+            selectedDept() === dept
+              ? 'bg-primary text-primary-foreground font-semibold'
+              : 'bg-muted/60 text-muted-foreground hover:bg-muted'
+          "
           class="px-3 py-1.5 rounded-lg text-xs transition-all whitespace-nowrap"
         >
           {{ dept }}
@@ -66,18 +83,27 @@ import { lucideBed, lucideArrowRightLeft, lucideRefreshCw, lucideCheckCircle2, l
       </div>
 
       <!-- Spatial Bed Census Grid -->
-      <div *ngIf="loading()" class="py-16 text-center text-xs text-muted-foreground border border-border rounded-xl bg-card">
+      <div
+        *ngIf="loading()"
+        class="py-16 text-center text-xs text-muted-foreground border border-border rounded-xl bg-card"
+      >
         <div class="flex items-center justify-center gap-2">
           <ng-icon name="lucideRefreshCw" class="animate-spin text-primary" size="16" />
           <span>Loading inpatient bed census from hospital management server...</span>
         </div>
       </div>
 
-      <div *ngIf="!loading() && filteredBeds().length === 0" class="py-16 text-center text-xs text-muted-foreground border border-border rounded-xl bg-card">
+      <div
+        *ngIf="!loading() && filteredBeds().length === 0"
+        class="py-16 text-center text-xs text-muted-foreground border border-border rounded-xl bg-card"
+      >
         No inpatient beds found for the selected ward / department filter.
       </div>
 
-      <div *ngIf="!loading() && filteredBeds().length > 0" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div
+        *ngIf="!loading() && filteredBeds().length > 0"
+        class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+      >
         <div
           *ngFor="let bed of filteredBeds()"
           class="border border-border rounded-xl p-4 bg-card shadow-xs hover:shadow-md transition-all flex flex-col justify-between"
@@ -99,19 +125,26 @@ import { lucideBed, lucideArrowRightLeft, lucideRefreshCw, lucideCheckCircle2, l
 
             <div class="text-xs text-muted-foreground space-y-1">
               <div><strong class="text-foreground">Ward:</strong> {{ bed.wardName }}</div>
-              <div><strong class="text-foreground">Room:</strong> {{ bed.roomNumber }} | <strong class="text-foreground">Bed:</strong> {{ bed.bedNumber }}</div>
+              <div>
+                <strong class="text-foreground">Room:</strong> {{ bed.roomNumber }} |
+                <strong class="text-foreground">Bed:</strong> {{ bed.bedNumber }}
+              </div>
               <div *ngIf="bed.features" class="text-[11px] text-muted-foreground/80 italic mt-1">
                 {{ bed.features }}
               </div>
             </div>
 
-            <div *ngIf="bed.currentEncounter" class="mt-3 p-2.5 bg-muted/40 rounded-lg border border-border/60 text-xs space-y-1">
+            <div
+              *ngIf="bed.currentEncounter"
+              class="mt-3 p-2.5 bg-muted/40 rounded-lg border border-border/60 text-xs space-y-1"
+            >
               <div class="font-semibold text-foreground flex items-center gap-1">
                 <ng-icon name="lucideUser" class="text-xs text-primary"></ng-icon>
                 {{ bed.currentEncounter.patient?.fullName || 'Patient' }}
               </div>
               <div class="text-[11px] text-muted-foreground">
-                Encounter #ENC-{{ bed.currentEncounter.id }} | {{ bed.currentEncounter.acuityScore || 'Level 3' }}
+                Encounter #ENC-{{ bed.currentEncounter.id }} |
+                {{ bed.currentEncounter.acuityScore || 'Level 3' }}
               </div>
             </div>
           </div>
@@ -126,7 +159,8 @@ import { lucideBed, lucideArrowRightLeft, lucideRefreshCw, lucideCheckCircle2, l
               (click)="openTransferModal(bed)"
               class="w-full text-xs gap-1.5"
             >
-              <ng-icon name="lucideArrowRightLeft" class="text-xs"></ng-icon> Initiate 9-Step Transfer
+              <ng-icon name="lucideArrowRightLeft" class="text-xs"></ng-icon> Initiate 9-Step
+              Transfer
             </button>
 
             <button
@@ -144,10 +178,19 @@ import { lucideBed, lucideArrowRightLeft, lucideRefreshCw, lucideCheckCircle2, l
       </div>
 
       <!-- Transfer Modal -->
-      <div *ngIf="isTransferOpen()" class="fixed inset-0 z-50 bg-background/80 backdrop-blur-xs flex items-center justify-center p-4">
-        <div class="bg-card border border-border rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-xl">
+      <div
+        *ngIf="isTransferOpen()"
+        class="fixed inset-0 z-50 bg-background/80 backdrop-blur-xs flex items-center justify-center p-4"
+      >
+        <div
+          class="bg-card border border-border rounded-2xl max-w-lg w-full p-6 space-y-4 shadow-xl"
+        >
           <h3 class="text-lg font-bold text-foreground">9-Step Bed Transfer Workflow</h3>
-          <p class="text-xs text-muted-foreground">Select destination bed for patient <strong>{{ selectedBedForTransfer?.currentEncounter?.patient?.fullName }}</strong>.</p>
+          <p class="text-xs text-muted-foreground">
+            Select destination bed for patient
+            <strong>{{ selectedBedForTransfer?.currentEncounter?.patient?.fullName }}</strong
+            >.
+          </p>
 
           <div>
             <label class="block font-semibold text-xs mb-1">Destination Bed *</label>
@@ -163,7 +206,9 @@ import { lucideBed, lucideArrowRightLeft, lucideRefreshCw, lucideCheckCircle2, l
           </div>
 
           <div>
-            <label class="block font-semibold text-xs mb-1">Transfer Reason / Clinical Justification *</label>
+            <label class="block font-semibold text-xs mb-1"
+              >Transfer Reason / Clinical Justification *</label
+            >
             <input
               type="text"
               [(ngModel)]="transferReason"
@@ -173,8 +218,15 @@ import { lucideBed, lucideArrowRightLeft, lucideRefreshCw, lucideCheckCircle2, l
           </div>
 
           <div class="flex justify-end gap-2 pt-2">
-            <button hlmBtn variant="outline" size="sm" (click)="isTransferOpen.set(false)">Cancel</button>
-            <button hlmBtn size="sm" [disabled]="!destinationBedId || !transferReason" (click)="executeTransfer()">
+            <button hlmBtn variant="outline" size="sm" (click)="isTransferOpen.set(false)">
+              Cancel
+            </button>
+            <button
+              hlmBtn
+              size="sm"
+              [disabled]="!destinationBedId || !transferReason"
+              (click)="executeTransfer()"
+            >
               Confirm Transfer
             </button>
           </div>
@@ -217,19 +269,27 @@ export class BedManagementComponent implements OnInit {
   filteredBeds() {
     const dept = this.selectedDept();
     if (dept === 'ALL') return this.beds();
-    return this.beds().filter(b => b.wardName?.toLowerCase().includes(dept.toLowerCase()) || b.departmentName?.toLowerCase().includes(dept.toLowerCase()));
+    return this.beds().filter(
+      (b) =>
+        b.wardName?.toLowerCase().includes(dept.toLowerCase()) ||
+        b.departmentName?.toLowerCase().includes(dept.toLowerCase()),
+    );
   }
 
   availableBeds() {
-    return this.beds().filter(b => b.status === 'AVAILABLE');
+    return this.beds().filter((b) => b.status === 'AVAILABLE');
   }
 
   getBadgeVariant(status: string) {
     switch (status) {
-      case 'AVAILABLE': return 'secondary';
-      case 'OCCUPIED': return 'destructive';
-      case 'CLEANING_REQUIRED': return 'outline';
-      default: return 'outline';
+      case 'AVAILABLE':
+        return 'secondary';
+      case 'OCCUPIED':
+        return 'destructive';
+      case 'CLEANING_REQUIRED':
+        return 'outline';
+      default:
+        return 'outline';
     }
   }
 
@@ -241,7 +301,11 @@ export class BedManagementComponent implements OnInit {
   }
 
   executeTransfer() {
-    if (!this.selectedBedForTransfer?.currentEncounter?.id || !this.destinationBedId || !this.transferReason) {
+    if (
+      !this.selectedBedForTransfer?.currentEncounter?.id ||
+      !this.destinationBedId ||
+      !this.transferReason
+    ) {
       return;
     }
 
@@ -253,7 +317,9 @@ export class BedManagementComponent implements OnInit {
 
     this.apiService.transferBed(body).subscribe({
       next: () => {
-        toast.success('9-Step Bed Transfer completed successfully. Previous bed released to CLEANING_REQUIRED.');
+        toast.success(
+          '9-Step Bed Transfer completed successfully. Previous bed released to CLEANING_REQUIRED.',
+        );
         this.isTransferOpen.set(false);
         this.loadBeds();
       },
@@ -272,4 +338,3 @@ export class BedManagementComponent implements OnInit {
     });
   }
 }
-

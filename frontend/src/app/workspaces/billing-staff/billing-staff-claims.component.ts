@@ -41,13 +41,17 @@ import { lucideCreditCard, lucideSend, lucideShieldCheck } from '@ng-icons/lucid
   ],
   template: `
     <div class="space-y-6">
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-border">
+      <div
+        class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-border"
+      >
         <div>
           <h1 class="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
             Insurance Claims Submission & Clearinghouse
             <span hlmBadge variant="secondary" class="text-[11px]">Billing Staff</span>
           </h1>
-          <p class="text-xs text-muted-foreground mt-0.5">Submit 837P electronic claims, review denials, and track payer reimbursements.</p>
+          <p class="text-xs text-muted-foreground mt-0.5">
+            Submit 837P electronic claims, review denials, and track payer reimbursements.
+          </p>
         </div>
       </div>
 
@@ -68,7 +72,11 @@ import { lucideCreditCard, lucideSend, lucideShieldCheck } from '@ng-icons/lucid
               <tr *ngIf="loading()" hlmTableRow>
                 <td colspan="6" class="py-8 text-center text-xs text-muted-foreground">
                   <div class="flex items-center justify-center gap-2">
-                    <ng-icon name="lucideCreditCard" class="animate-spin text-emerald-600" size="16" />
+                    <ng-icon
+                      name="lucideCreditCard"
+                      class="animate-spin text-emerald-600"
+                      size="16"
+                    />
                     <span>Loading insurance claims from payer clearinghouse...</span>
                   </div>
                 </td>
@@ -76,18 +84,30 @@ import { lucideCreditCard, lucideSend, lucideShieldCheck } from '@ng-icons/lucid
               <tr *ngIf="!loading() && error()" hlmTableRow>
                 <td colspan="6" class="py-6 text-center text-xs text-destructive">
                   <p>{{ error() }}</p>
-                  <button (click)="loadClaims()" class="mt-2 text-xs text-emerald-600 underline">Retry</button>
+                  <button (click)="loadClaims()" class="mt-2 text-xs text-emerald-600 underline">
+                    Retry
+                  </button>
                 </td>
               </tr>
+            </tbody>
+
             <tbody class="divide-y divide-border">
               @for (claim of claims(); track claim.id) {
                 <tr class="hover:bg-muted/30 transition-colors">
                   <td class="px-6 py-4 font-mono font-medium text-foreground">{{ claim.id }}</td>
                   <td class="px-6 py-4 font-medium text-foreground">{{ claim.patientName }}</td>
                   <td class="px-6 py-4 text-muted-foreground">{{ claim.carrier }}</td>
-                  <td class="px-6 py-4 font-semibold text-foreground">&#8377;{{ claim.amount | number:'1.2-2' }}</td>
+                  <td class="px-6 py-4 font-semibold text-foreground">
+                    &#8377;{{ claim.amount | number: '1.2-2' }}
+                  </td>
                   <td class="px-6 py-4">
-                    <span [class]="claim.status === 'CLEARED' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 px-2.5 py-0.5 rounded-full text-xs font-semibold' : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 px-2.5 py-0.5 rounded-full text-xs font-semibold'">
+                    <span
+                      [class]="
+                        claim.status === 'CLEARED'
+                          ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 px-2.5 py-0.5 rounded-full text-xs font-semibold'
+                          : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 px-2.5 py-0.5 rounded-full text-xs font-semibold'
+                      "
+                    >
                       {{ claim.status }}
                     </span>
                   </td>
@@ -123,7 +143,7 @@ export class BillingStaffClaimsComponent implements OnInit {
 
   constructor(
     public authService: AuthService,
-    private apiService: ApiService
+    private apiService: ApiService,
   ) {}
 
   ngOnInit(): void {
@@ -135,13 +155,15 @@ export class BillingStaffClaimsComponent implements OnInit {
     this.error.set(null);
     this.apiService.getAppointments().subscribe({
       next: (apts: Appointment[]) => {
-        const list: ClaimSummaryViewModel[] = (Array.isArray(apts) ? apts : []).map((apt: Appointment, idx: number) => ({
-          id: `CLM-${apt.id ? String(apt.id).substring(0, 6).toUpperCase() : (900 + idx)}`,
-          patientName: apt.patientName || (apt as any).patient?.fullName || 'Patient',
-          carrier: (apt as any).insuranceDetails || 'PM-JAY Ayushman Bharat / Star Health',
-          amount: 2500.0,
-          status: apt.status === 'COMPLETED' ? 'CLEARED' : 'PENDING',
-        }));
+        const list: ClaimSummaryViewModel[] = (Array.isArray(apts) ? apts : []).map(
+          (apt: Appointment, idx: number) => ({
+            id: `CLM-${apt.id ? String(apt.id).substring(0, 6).toUpperCase() : 900 + idx}`,
+            patientName: apt.patientName || (apt as any).patient?.fullName || 'Patient',
+            carrier: (apt as any).insuranceDetails || 'PM-JAY Ayushman Bharat / Star Health',
+            amount: 2500.0,
+            status: apt.status === 'COMPLETED' ? 'CLEARED' : 'PENDING',
+          }),
+        );
         this.claims.set(list);
         this.loading.set(false);
       },

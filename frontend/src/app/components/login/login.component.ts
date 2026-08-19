@@ -92,9 +92,12 @@ export class LoginComponent implements OnInit {
       },
       error: (err) => {
         this.loading.set(false);
-        const msg = err.status === 0
-          ? 'Cannot connect to backend server. Please verify Spring Boot server is running on http://localhost:8080.'
-          : (typeof err.error === 'string' ? err.error : (err.error?.message || 'Invalid email or password.'));
+        const msg =
+          err.status === 0
+            ? 'Cannot connect to backend server. Please verify Spring Boot server is running on http://localhost:8080.'
+            : typeof err.error === 'string'
+              ? err.error
+              : err.error?.message || 'Invalid email or password.';
         this.errorMessage.set(msg);
         toast.error('Authentication Failed', { description: msg });
       },

@@ -38,7 +38,6 @@ Welcome to the comprehensive technical and operational documentation for **Senti
   - eRx clinical review, unit-dose dispensing, drug-drug interaction alerts, and formulary inventory.
 - [**Billing & Revenue Cycle Workspace**](./workspaces/billing-workspace.md)
   - Itemized invoicing, insurance claims adjudication, fee schedules, and payment processing.
-- [**Auditor & Compliance Workspace**](./workspaces/auditor-workspace.md)
   - Cryptographically sequenced WORM audit logs and emergency break-glass override surveillance.
 - [**Patient Self-Service Portal**](./workspaces/patient-workspace.md)
   - Patient self-registration, timeline history, lab result access, active prescriptions, and consent management.

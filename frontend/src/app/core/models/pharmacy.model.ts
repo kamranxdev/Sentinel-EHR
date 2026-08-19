@@ -20,7 +20,14 @@ export interface MedicationOrder {
   refills: number;
   instructions?: string;
   indication?: string;
-  status: 'PENDING_VERIFICATION' | 'PHARMACY_VERIFIED' | 'DISPENSED' | 'REJECTED' | 'CLARIFICATION_REQUESTED' | 'DISCONTINUED' | string;
+  status:
+    | 'PENDING_VERIFICATION'
+    | 'PHARMACY_VERIFIED'
+    | 'DISPENSED'
+    | 'REJECTED'
+    | 'CLARIFICATION_REQUESTED'
+    | 'DISCONTINUED'
+    | string;
   priority?: 'ROUTINE' | 'STAT' | 'URGENT' | string;
   orderedAt: string;
   verifiedAt?: string;

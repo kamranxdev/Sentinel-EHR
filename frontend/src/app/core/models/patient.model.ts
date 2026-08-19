@@ -1,5 +1,12 @@
 import { User } from './auth-user.model';
-import { Allergy, Diagnosis, Encounter, MedicalRecord, Prescription, Vitals } from './clinical.model';
+import {
+  Allergy,
+  Diagnosis,
+  Encounter,
+  MedicalRecord,
+  Prescription,
+  Vitals,
+} from './clinical.model';
 
 export interface EmergencyContact {
   id?: string;
@@ -256,5 +263,3 @@ export interface InpatientTransferRecord {
   transferredAt: string;
   notes?: string;
 }
-
-

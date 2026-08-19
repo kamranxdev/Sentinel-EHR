@@ -11,7 +11,6 @@ export type UserRole =
   | 'LAB_TECHNICIAN'
   | 'PHARMACIST'
   | 'BILLING_STAFF'
-  | 'AUDITOR'
   | 'PATIENT';
 
 export enum Capability {
@@ -89,7 +88,6 @@ export enum Capability {
   AUDIT_LOG_READ = 'AUDIT_LOG_READ',
   FHIR_QUERY = 'FHIR_QUERY',
 }
-
 
 const doctorCapabilities: Capability[] = [
   Capability.PATIENT_READ,
@@ -222,41 +220,18 @@ const patientCapabilities: Capability[] = [
   Capability.FHIR_QUERY,
 ];
 
-const auditorCapabilities: Capability[] = [
-  Capability.PATIENT_READ,
-  Capability.MPI_SEARCH,
-  Capability.ALLERGY_READ,
-  Capability.DIAGNOSIS_READ,
-  Capability.PRESCRIPTION_READ,
-  Capability.VITALS_READ,
-  Capability.ENCOUNTER_READ,
-  Capability.CLINICAL_NOTE_READ,
-  Capability.LAB_RESULT_READ,
-  Capability.INVOICE_READ,
-  Capability.BILLING_READ,
-  Capability.APPOINTMENT_READ,
-  Capability.PRACTITIONER_READ,
-  Capability.AUDIT_LOG_READ,
-  Capability.FHIR_QUERY,
-];
-
-
-
-
 /**
  * Maps each canonical role to its allowed capabilities.
  * Must match exactly the 10 role names in security.roles table.
  */
 export const ROLE_CAPABILITY_MAP: Record<UserRole, Capability[]> = {
-  SUPER_ADMIN:       Object.values(Capability),
+  SUPER_ADMIN: Object.values(Capability),
   ORGANIZATION_ADMIN: Object.values(Capability),
-  PHYSICIAN:         doctorCapabilities,
-  NURSE:             nurseCapabilities,
-  RECEPTIONIST:      receptionistCapabilities,
-  LAB_TECHNICIAN:    labTechCapabilities,
-  PHARMACIST:        pharmacistCapabilities,
-  BILLING_STAFF:     billingCapabilities,
-  AUDITOR:           auditorCapabilities,
-  PATIENT:           patientCapabilities,
+  PHYSICIAN: doctorCapabilities,
+  NURSE: nurseCapabilities,
+  RECEPTIONIST: receptionistCapabilities,
+  LAB_TECHNICIAN: labTechCapabilities,
+  PHARMACIST: pharmacistCapabilities,
+  BILLING_STAFF: billingCapabilities,
+  PATIENT: patientCapabilities,
 };
-

@@ -9,7 +9,7 @@ Modern standalone Angular enterprise application featuring role-tailored clinica
 - **Public Landing Page (`/`)**: Hero section, system features showcase, clinical workspace cards, and top navigation bar.
 - **Split-Screen Sign-In (`/login`)**:
   - **Left**: Medical architecture backdrop image.
-  - **Right**: 1-click persona demo switcher (Patient, Doctor, Nurse, Admin, Auditor) and manual login form.
+  - **Right**: 1-click persona demo switcher (Patient, Doctor, Nurse, Admin) and manual login form.
 - **Global Patient Context (`PatientContextService`)**:
   - Auto-locks patient data for logged-in patients (`ROLE_PATIENT`).
   - Active Patient Context Banner for clinicians (`ROLE_DOCTOR`, `ROLE_NURSE`, `ROLE_ADMIN`).

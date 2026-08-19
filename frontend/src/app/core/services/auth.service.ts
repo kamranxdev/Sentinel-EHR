@@ -1,7 +1,12 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map, tap } from 'rxjs';
-import { JwtAuthResponse, OrganizationContextDTO, SelectedContext, User } from '../models/auth-user.model';
+import {
+  JwtAuthResponse,
+  OrganizationContextDTO,
+  SelectedContext,
+  User,
+} from '../models/auth-user.model';
 import { StaffOnboardingRequestDTO } from '../models/organization.model';
 import { Capability, ROLE_CAPABILITY_MAP, UserRole } from '../models/permissions.model';
 
@@ -27,12 +32,12 @@ export class AuthService {
         atob(base64)
           .split('')
           .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-          .join('')
+          .join(''),
       );
       const payload = JSON.parse(jsonPayload);
       if (payload && payload.exp) {
         const now = Math.floor(Date.now() / 1000);
-        return payload.exp < (now + offsetSeconds);
+        return payload.exp < now + offsetSeconds;
       }
       return false;
     } catch (e) {
@@ -74,9 +79,9 @@ export class AuthService {
     password: string;
     fullName: string;
   }): Observable<JwtAuthResponse | { message: string }> {
-    return this.http.post<JwtAuthResponse | { message: string }>(`${this.apiUrl}/register`, userData).pipe(
-      map((res: any) => (res && res.data ? res.data : res)),
-    );
+    return this.http
+      .post<JwtAuthResponse | { message: string }>(`${this.apiUrl}/register`, userData)
+      .pipe(map((res: any) => (res && res.data ? res.data : res)));
   }
 
   setContext(context: SelectedContext): void {
@@ -195,7 +200,7 @@ export class AuthService {
    */
   hasActiveRelationship(patientId: string): boolean {
     if (!this.isLoggedIn()) return false;
-    if (this.hasAnyRole(['SUPER_ADMIN', 'ORGANIZATION_ADMIN', 'AUDITOR'])) {
+    if (this.hasAnyRole(['SUPER_ADMIN', 'ORGANIZATION_ADMIN'])) {
       return true;
     }
     const user = this.currentUser();
@@ -251,21 +256,25 @@ export class AuthService {
     return this.hasRole('BILLING_STAFF');
   }
 
-  isAuditor(): boolean {
-    return this.hasRole('AUDITOR');
-  }
-
   isPatient(): boolean {
     return this.hasRole('PATIENT');
   }
 
-  getPrimaryRole(): 'Patient' | 'Physician' | 'Nurse' | 'Receptionist' | 'SuperAdmin' | 'OrganizationAdmin' | 'Auditor' | 'LabTechnician' | 'Pharmacist' | 'BillingStaff' {
+  getPrimaryRole():
+    | 'Patient'
+    | 'Physician'
+    | 'Nurse'
+    | 'Receptionist'
+    | 'SuperAdmin'
+    | 'OrganizationAdmin'
+    | 'LabTechnician'
+    | 'Pharmacist'
+    | 'BillingStaff' {
     if (this.isSuperAdmin()) return 'SuperAdmin';
     if (this.isOrganizationAdmin()) return 'OrganizationAdmin';
     if (this.isPhysician()) return 'Physician';
     if (this.isNurse()) return 'Nurse';
     if (this.isReceptionist()) return 'Receptionist';
-    if (this.isAuditor()) return 'Auditor';
     if (this.isLabTechnician()) return 'LabTechnician';
     if (this.isPharmacist()) return 'Pharmacist';
     if (this.isBillingStaff()) return 'BillingStaff';
@@ -273,10 +282,8 @@ export class AuthService {
   }
 
   createStaffUser(payload: StaffOnboardingRequestDTO): Observable<User> {
-    return this.http.post<User>(`${this.apiUrl}/admin/create-user`, payload).pipe(
-      map((res: any) => (res && res.data ? res.data : res)),
-    );
+    return this.http
+      .post<User>(`${this.apiUrl}/admin/create-user`, payload)
+      .pipe(map((res: any) => (res && res.data ? res.data : res)));
   }
 }
-
-

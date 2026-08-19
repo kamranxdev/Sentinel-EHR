@@ -69,7 +69,8 @@ export interface Payment {
   invoiceId?: string;
   patientId: string;
   amount: number;
-  paymentMethod: 'CASH' | 'CREDIT_CARD' | 'DEBIT_CARD' | 'INSURANCE_CHECK' | 'ONLINE_TRANSFER' | string;
+  paymentMethod:
+    'CASH' | 'CREDIT_CARD' | 'DEBIT_CARD' | 'INSURANCE_CHECK' | 'ONLINE_TRANSFER' | string;
   referenceNumber?: string;
   status: 'PROCESSED' | 'REFUNDED' | 'PARTIALLY_REFUNDED' | string;
   processedAt: string;

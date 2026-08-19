@@ -76,18 +76,27 @@ export interface InpatientCareItem {
   template: `
     <div class="w-full space-y-6">
       <!-- Inpatient Header -->
-      <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 pb-5 border-b border-border">
+      <div
+        class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 pb-5 border-b border-border"
+      >
         <div class="space-y-1">
           <div class="flex items-center flex-wrap gap-2.5">
-            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground flex items-center gap-2">
+            <h1
+              class="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground flex items-center gap-2"
+            >
               Inpatient Ward Census & Rounds
             </h1>
-            <span hlmBadge variant="secondary" class="bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20 text-[11px] font-semibold">
+            <span
+              hlmBadge
+              variant="secondary"
+              class="bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20 text-[11px] font-semibold"
+            >
               Attending & Care Team Responsibility
             </span>
           </div>
           <p class="text-xs text-muted-foreground">
-            Hospital admissions where you are designated as Attending Physician, Consulting Specialist, or Active Care-Team Member.
+            Hospital admissions where you are designated as Attending Physician, Consulting
+            Specialist, or Active Care-Team Member.
           </p>
         </div>
 
@@ -120,32 +129,48 @@ export interface InpatientCareItem {
         <!-- Card 1: Attending Patients -->
         <div class="p-4 rounded-2xl border border-border bg-card shadow-2xs space-y-2">
           <div class="flex items-center justify-between">
-            <span class="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Attending Admissions</span>
-            <div class="size-7 rounded-lg bg-indigo-500/10 text-indigo-600 flex items-center justify-center">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-muted-foreground"
+              >Attending Admissions</span
+            >
+            <div
+              class="size-7 rounded-lg bg-indigo-500/10 text-indigo-600 flex items-center justify-center"
+            >
               <ng-icon name="lucideUserCheck" size="14" />
             </div>
           </div>
           <div class="text-2xl font-extrabold text-foreground">{{ getAttendingCount() }}</div>
-          <p class="text-[11px] text-muted-foreground">Primary responsibility & discharge approval</p>
+          <p class="text-[11px] text-muted-foreground">
+            Primary responsibility & discharge approval
+          </p>
         </div>
 
         <!-- Card 2: Consultations -->
         <div class="p-4 rounded-2xl border border-border bg-card shadow-2xs space-y-2">
           <div class="flex items-center justify-between">
-            <span class="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Consultant Rounds</span>
-            <div class="size-7 rounded-lg bg-amber-500/10 text-amber-600 flex items-center justify-center">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-muted-foreground"
+              >Consultant Rounds</span
+            >
+            <div
+              class="size-7 rounded-lg bg-amber-500/10 text-amber-600 flex items-center justify-center"
+            >
               <ng-icon name="lucideStethoscope" size="14" />
             </div>
           </div>
           <div class="text-2xl font-extrabold text-foreground">{{ getConsultantCount() }}</div>
-          <p class="text-[11px] text-muted-foreground">Specialty evaluation & inter-departmental care</p>
+          <p class="text-[11px] text-muted-foreground">
+            Specialty evaluation & inter-departmental care
+          </p>
         </div>
 
         <!-- Card 3: Elevated Acuity / EWS -->
         <div class="p-4 rounded-2xl border border-border bg-card shadow-2xs space-y-2">
           <div class="flex items-center justify-between">
-            <span class="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Elevated Acuity (EWS ≥ 3)</span>
-            <div class="size-7 rounded-lg bg-rose-500/10 text-rose-600 flex items-center justify-center">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-muted-foreground"
+              >Elevated Acuity (EWS ≥ 3)</span
+            >
+            <div
+              class="size-7 rounded-lg bg-rose-500/10 text-rose-600 flex items-center justify-center"
+            >
               <ng-icon name="lucideHeartPulse" size="14" />
             </div>
           </div>
@@ -156,17 +181,25 @@ export interface InpatientCareItem {
 
       <!-- Inpatient Table -->
       <div class="rounded-2xl border border-border bg-card overflow-hidden shadow-xs space-y-0">
-        <div class="p-4 border-b border-border bg-muted/20 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+        <div
+          class="p-4 border-b border-border bg-muted/20 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3"
+        >
           <div class="flex items-center gap-2">
             <ng-icon name="lucideBed" size="18" class="text-indigo-600" />
             <div>
               <h3 class="text-sm font-bold text-foreground">Inpatient Roster & Bed Distribution</h3>
-              <p class="text-xs text-muted-foreground">Select any admitted patient to conduct clinical rounds or view inpatient flowsheet</p>
+              <p class="text-xs text-muted-foreground">
+                Select any admitted patient to conduct clinical rounds or view inpatient flowsheet
+              </p>
             </div>
           </div>
 
           <div class="relative w-full sm:w-72">
-            <ng-icon name="lucideSearch" size="14" class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <ng-icon
+              name="lucideSearch"
+              size="14"
+              class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+            />
             <input
               hlmInput
               type="text"
@@ -206,16 +239,21 @@ export interface InpatientCareItem {
                 <td hlmTableCell class="py-3.5 px-4">
                   <div class="font-bold text-foreground text-sm flex items-center gap-2">
                     <span>{{ inp.patient.fullName }}</span>
-                    <span hlmBadge variant="outline" class="text-[10px] font-mono">{{ inp.patient.patientCode }}</span>
+                    <span hlmBadge variant="outline" class="text-[10px] font-mono">{{
+                      inp.patient.patientCode
+                    }}</span>
                   </div>
                   <div class="text-[11px] text-muted-foreground">
-                    Admitted: {{ inp.admissionDate | date:'mediumDate' }} • {{ inp.patient.gender || 'U' }} ({{ inp.patient.dateOfBirth || 'N/A' }})
+                    Admitted: {{ inp.admissionDate | date: 'mediumDate' }} •
+                    {{ inp.patient.gender || 'U' }} ({{ inp.patient.dateOfBirth || 'N/A' }})
                   </div>
                 </td>
 
                 <!-- Diagnosis -->
                 <td hlmTableCell class="py-3.5 px-4 max-w-xs">
-                  <span class="font-semibold text-foreground block truncate">{{ inp.admissionDiagnosis }}</span>
+                  <span class="font-semibold text-foreground block truncate">{{
+                    inp.admissionDiagnosis
+                  }}</span>
                   <span class="text-[10px] text-muted-foreground font-mono">ICD-10 Coded</span>
                 </td>
 
@@ -234,7 +272,13 @@ export interface InpatientCareItem {
                 <td hlmTableCell class="py-3.5 px-4">
                   <span
                     hlmBadge
-                    [variant]="inp.acuityLevel === 'CRITICAL' ? 'destructive' : inp.acuityLevel === 'OBSERVED' ? 'outline' : 'secondary'"
+                    [variant]="
+                      inp.acuityLevel === 'CRITICAL'
+                        ? 'destructive'
+                        : inp.acuityLevel === 'OBSERVED'
+                          ? 'outline'
+                          : 'secondary'
+                    "
                     class="text-[10px] font-bold"
                   >
                     EWS {{ inp.ewsScore ?? 1 }} • {{ inp.acuityLevel }}
@@ -277,7 +321,7 @@ export class PhysicianInpatientsComponent implements OnInit {
   constructor(
     private apiService: ApiService,
     public patientContext: PatientContextService,
-    private router: Router
+    private router: Router,
   ) {}
 
   ngOnInit(): void {
@@ -288,14 +332,21 @@ export class PhysicianInpatientsComponent implements OnInit {
     this.loading.set(true);
     this.apiService.getBeds().subscribe({
       next: (beds) => {
-        const occupied = Array.isArray(beds) ? beds.filter((b) => b.status === 'OCCUPIED' && b.currentEncounter?.patient) : [];
+        const occupied = Array.isArray(beds)
+          ? beds.filter((b) => b.status === 'OCCUPIED' && b.currentEncounter?.patient)
+          : [];
         if (occupied.length > 0) {
           const items: InpatientCareItem[] = occupied.map((b, idx) => ({
             patient: b.currentEncounter!.patient!,
             bedCode: b.bedNumber || b.bedCode || `Bed-${b.id?.substring(0, 4)}`,
             wardName: b.wardName || b.departmentName || 'General Medicine Ward',
             admissionDate: new Date(Date.now() - (idx + 1) * 86400000).toISOString(),
-            admissionDiagnosis: idx === 0 ? 'Acute Coronary Syndrome' : idx === 1 ? 'Community-Acquired Pneumonia' : 'Post-Op Observation',
+            admissionDiagnosis:
+              idx === 0
+                ? 'Acute Coronary Syndrome'
+                : idx === 1
+                  ? 'Community-Acquired Pneumonia'
+                  : 'Post-Op Observation',
             careRole: idx % 2 === 0 ? 'ATTENDING' : 'CONSULTANT',
             ewsScore: idx === 0 ? 4 : 1,
             acuityLevel: idx === 0 ? 'OBSERVED' : 'STABLE',
@@ -309,9 +360,19 @@ export class PhysicianInpatientsComponent implements OnInit {
               const fallbackItems: InpatientCareItem[] = pts.slice(0, 4).map((p, idx) => ({
                 patient: p,
                 bedCode: `Ward-${idx + 1}-Bed-${10 + idx}`,
-                wardName: idx === 0 ? 'Cardiology ICU' : idx === 1 ? 'Internal Medicine Ward' : 'Surgical Step-Down',
+                wardName:
+                  idx === 0
+                    ? 'Cardiology ICU'
+                    : idx === 1
+                      ? 'Internal Medicine Ward'
+                      : 'Surgical Step-Down',
                 admissionDate: new Date(Date.now() - (idx + 2) * 86400000).toISOString(),
-                admissionDiagnosis: idx === 0 ? 'Acute Coronary Syndrome' : idx === 1 ? 'Type 2 Diabetes with Ketoacidosis' : 'Post-Op Laparoscopy',
+                admissionDiagnosis:
+                  idx === 0
+                    ? 'Acute Coronary Syndrome'
+                    : idx === 1
+                      ? 'Type 2 Diabetes with Ketoacidosis'
+                      : 'Post-Op Laparoscopy',
                 careRole: idx === 0 ? 'ATTENDING' : 'CONSULTANT',
                 ewsScore: idx === 0 ? 4 : idx === 1 ? 2 : 1,
                 acuityLevel: idx === 0 ? 'OBSERVED' : 'STABLE',
@@ -336,7 +397,7 @@ export class PhysicianInpatientsComponent implements OnInit {
         i.patient.fullName?.toLowerCase().includes(q) ||
         i.patient.patientCode?.toLowerCase().includes(q) ||
         i.wardName?.toLowerCase().includes(q) ||
-        i.bedCode?.toLowerCase().includes(q)
+        i.bedCode?.toLowerCase().includes(q),
     );
   });
 

@@ -51,25 +51,33 @@ import {
   template: `
     <div class="space-y-6">
       <!-- Header -->
-      <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 pb-4 border-b border-border">
+      <div
+        class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 pb-4 border-b border-border"
+      >
         <div>
           <div class="flex items-center gap-2">
-            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-600 border border-indigo-500/20">
+            <span
+              class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-600 border border-indigo-500/20"
+            >
               Prescription Safety Gate
             </span>
-            <span class="text-xs text-muted-foreground font-mono">Clinical Pharmacist Sign-Off</span>
+            <span class="text-xs text-muted-foreground font-mono"
+              >Clinical Pharmacist Sign-Off</span
+            >
           </div>
           <h1 class="text-2xl font-bold tracking-tight text-foreground mt-1">
             e-Prescription Verification Queue
           </h1>
           <p class="text-xs text-muted-foreground mt-0.5">
-            Review physician orders against patient allergy profiles, drug interactions, renal dosing, and issue 3-way sign-off.
+            Review physician orders against patient allergy profiles, drug interactions, renal
+            dosing, and issue 3-way sign-off.
           </p>
         </div>
 
         <button
           (click)="loadOrders()"
-          class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold bg-secondary hover:bg-secondary/80 text-foreground transition-all">
+          class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold bg-secondary hover:bg-secondary/80 text-foreground transition-all"
+        >
           <ng-icon name="lucideRefreshCw" size="14" [class.animate-spin]="loading()" />
           Refresh Orders
         </button>
@@ -78,7 +86,11 @@ import {
       <!-- Filters & Search -->
       <div class="flex flex-col sm:flex-row justify-between gap-4">
         <div class="relative flex-1 max-w-md">
-          <ng-icon name="lucideSearch" size="16" class="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <ng-icon
+            name="lucideSearch"
+            size="16"
+            class="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+          />
           <input
             type="text"
             [(ngModel)]="searchQuery"
@@ -90,26 +102,46 @@ import {
         <div class="flex items-center gap-2 flex-wrap">
           <button
             (click)="selectedStatus.set('ALL')"
-            [ngClass]="selectedStatus() === 'ALL' ? 'bg-indigo-600 text-white' : 'bg-card text-muted-foreground hover:text-foreground'"
-            class="px-3 py-1.5 rounded-lg text-xs font-medium border border-border transition-all">
+            [ngClass]="
+              selectedStatus() === 'ALL'
+                ? 'bg-indigo-600 text-white'
+                : 'bg-card text-muted-foreground hover:text-foreground'
+            "
+            class="px-3 py-1.5 rounded-lg text-xs font-medium border border-border transition-all"
+          >
             All Orders ({{ orders().length }})
           </button>
           <button
             (click)="selectedStatus.set('PENDING')"
-            [ngClass]="selectedStatus() === 'PENDING' ? 'bg-amber-500 text-white' : 'bg-card text-amber-600 hover:bg-amber-500/10'"
-            class="px-3 py-1.5 rounded-lg text-xs font-medium border border-amber-500/30 transition-all">
+            [ngClass]="
+              selectedStatus() === 'PENDING'
+                ? 'bg-amber-500 text-white'
+                : 'bg-card text-amber-600 hover:bg-amber-500/10'
+            "
+            class="px-3 py-1.5 rounded-lg text-xs font-medium border border-amber-500/30 transition-all"
+          >
             Pending ({{ pendingCount() }})
           </button>
           <button
             (click)="selectedStatus.set('VERIFIED')"
-            [ngClass]="selectedStatus() === 'VERIFIED' ? 'bg-emerald-600 text-white' : 'bg-card text-emerald-600 hover:bg-emerald-500/10'"
-            class="px-3 py-1.5 rounded-lg text-xs font-medium border border-emerald-500/30 transition-all">
+            [ngClass]="
+              selectedStatus() === 'VERIFIED'
+                ? 'bg-emerald-600 text-white'
+                : 'bg-card text-emerald-600 hover:bg-emerald-500/10'
+            "
+            class="px-3 py-1.5 rounded-lg text-xs font-medium border border-emerald-500/30 transition-all"
+          >
             Verified ({{ verifiedCount() }})
           </button>
           <button
             (click)="selectedStatus.set('CLARIFICATION')"
-            [ngClass]="selectedStatus() === 'CLARIFICATION' ? 'bg-sky-600 text-white' : 'bg-card text-sky-600 hover:bg-sky-500/10'"
-            class="px-3 py-1.5 rounded-lg text-xs font-medium border border-sky-500/30 transition-all">
+            [ngClass]="
+              selectedStatus() === 'CLARIFICATION'
+                ? 'bg-sky-600 text-white'
+                : 'bg-card text-sky-600 hover:bg-sky-500/10'
+            "
+            class="px-3 py-1.5 rounded-lg text-xs font-medium border border-sky-500/30 transition-all"
+          >
             In Clarification
           </button>
         </div>
@@ -119,7 +151,9 @@ import {
       <div class="bg-card rounded-2xl border border-border shadow-xs overflow-hidden">
         <div class="overflow-x-auto">
           <table class="w-full text-left text-xs">
-            <thead class="bg-muted/50 border-b border-border text-muted-foreground font-semibold uppercase tracking-wider">
+            <thead
+              class="bg-muted/50 border-b border-border text-muted-foreground font-semibold uppercase tracking-wider"
+            >
               <tr>
                 <th class="py-3 px-4">Medication & Regimen</th>
                 <th class="py-3 px-4">Patient / Recipient</th>
@@ -137,37 +171,50 @@ import {
                     <div>
                       <div class="font-bold">{{ o.medicationName }}</div>
                       <div class="text-[11px] font-normal text-muted-foreground">
-                        {{ o.dosage }} &bull; {{ o.route }} &bull; {{ o.frequency }} &bull; Qty: {{ o.quantity }}
+                        {{ o.dosage }} &bull; {{ o.route }} &bull; {{ o.frequency }} &bull; Qty:
+                        {{ o.quantity }}
                       </div>
                     </div>
                   </div>
                 </td>
                 <td class="py-3.5 px-4">
-                  <div class="font-semibold text-foreground">{{ o.patient?.fullName || 'Patient' }}</div>
-                  <div class="text-[10px] font-mono text-muted-foreground">MRN: {{ o.patient?.patientCode || o.patientId }}</div>
+                  <div class="font-semibold text-foreground">
+                    {{ o.patient?.fullName || 'Patient' }}
+                  </div>
+                  <div class="text-[10px] font-mono text-muted-foreground">
+                    MRN: {{ o.patient?.patientCode || o.patientId }}
+                  </div>
                 </td>
                 <td class="py-3.5 px-4 text-muted-foreground">
-                  <div class="font-medium text-foreground">{{ o.doctorName || o.doctor?.fullName || 'Attending Physician' }}</div>
+                  <div class="font-medium text-foreground">
+                    {{ o.doctorName || o.doctor?.fullName || 'Attending Physician' }}
+                  </div>
                 </td>
                 <td class="py-3.5 px-4 font-mono text-muted-foreground text-[11px]">
-                  {{ o.orderedAt | date:'short' }}
+                  {{ o.orderedAt | date: 'short' }}
                 </td>
                 <td class="py-3.5 px-4">
                   <span
                     [ngClass]="{
-                      'bg-amber-500/15 text-amber-600 border-amber-500/30': o.status === 'PENDING_VERIFICATION' || o.status === 'PRESCRIBED',
-                      'bg-emerald-500/15 text-emerald-600 border-emerald-500/30': o.status === 'PHARMACY_VERIFIED' || o.status === 'VERIFIED',
-                      'bg-sky-500/15 text-sky-600 border-sky-500/30': o.status === 'CLARIFICATION_REQUESTED',
-                      'bg-destructive/15 text-destructive border-destructive/30': o.status === 'REJECTED'
+                      'bg-amber-500/15 text-amber-600 border-amber-500/30':
+                        o.status === 'PENDING_VERIFICATION' || o.status === 'PRESCRIBED',
+                      'bg-emerald-500/15 text-emerald-600 border-emerald-500/30':
+                        o.status === 'PHARMACY_VERIFIED' || o.status === 'VERIFIED',
+                      'bg-sky-500/15 text-sky-600 border-sky-500/30':
+                        o.status === 'CLARIFICATION_REQUESTED',
+                      'bg-destructive/15 text-destructive border-destructive/30':
+                        o.status === 'REJECTED',
                     }"
-                    class="px-2.5 py-1 rounded-full text-[10px] font-bold border inline-flex items-center gap-1">
+                    class="px-2.5 py-1 rounded-full text-[10px] font-bold border inline-flex items-center gap-1"
+                  >
                     {{ o.status }}
                   </span>
                 </td>
                 <td class="py-3.5 px-4 text-right">
                   <button
                     (click)="openReviewModal(o)"
-                    class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white hover:bg-indigo-700 transition-all inline-flex items-center gap-1">
+                    class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white hover:bg-indigo-700 transition-all inline-flex items-center gap-1"
+                  >
                     <ng-icon name="lucideShieldCheck" size="13" />
                     Review & Verify
                   </button>
@@ -185,27 +232,41 @@ import {
       </div>
 
       <!-- Verification Review Modal -->
-      <div *ngIf="selectedOrder()" class="fixed inset-0 z-50 bg-background/80 backdrop-blur-xs flex items-center justify-center p-4">
-        <div class="w-full max-w-2xl rounded-2xl border border-border bg-card p-6 shadow-2xl space-y-5">
+      <div
+        *ngIf="selectedOrder()"
+        class="fixed inset-0 z-50 bg-background/80 backdrop-blur-xs flex items-center justify-center p-4"
+      >
+        <div
+          class="w-full max-w-2xl rounded-2xl border border-border bg-card p-6 shadow-2xl space-y-5"
+        >
           <div class="flex justify-between items-center border-b border-border pb-3">
             <h3 class="text-base font-bold text-foreground flex items-center gap-2">
               <ng-icon name="lucideShieldCheck" size="18" class="text-indigo-600" />
               Pharmacist Clinical Verification: {{ selectedOrder()?.medicationName }}
             </h3>
-            <button (click)="selectedOrder.set(null)" class="p-1 rounded-lg text-muted-foreground hover:text-foreground">
+            <button
+              (click)="selectedOrder.set(null)"
+              class="p-1 rounded-lg text-muted-foreground hover:text-foreground"
+            >
               <ng-icon name="lucideX" size="16" />
             </button>
           </div>
 
           <!-- Order Summary Details -->
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3 bg-muted/40 rounded-xl text-xs font-mono">
+          <div
+            class="grid grid-cols-2 sm:grid-cols-4 gap-3 p-3 bg-muted/40 rounded-xl text-xs font-mono"
+          >
             <div>
               <span class="text-muted-foreground block text-[10px]">Patient</span>
-              <span class="font-bold text-foreground">{{ selectedOrder()?.patient?.fullName || 'Patient' }}</span>
+              <span class="font-bold text-foreground">{{
+                selectedOrder()?.patient?.fullName || 'Patient'
+              }}</span>
             </div>
             <div>
               <span class="text-muted-foreground block text-[10px]">Dosage & Route</span>
-              <span class="font-bold text-foreground">{{ selectedOrder()?.dosage }} ({{ selectedOrder()?.route }})</span>
+              <span class="font-bold text-foreground"
+                >{{ selectedOrder()?.dosage }} ({{ selectedOrder()?.route }})</span
+              >
             </div>
             <div>
               <span class="text-muted-foreground block text-[10px]">Frequency</span>
@@ -225,17 +286,23 @@ import {
             </h4>
 
             <div class="space-y-2 text-xs">
-              <div class="flex items-start gap-2 p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-300">
+              <div
+                class="flex items-start gap-2 p-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-300"
+              >
                 <ng-icon name="lucideCheckCircle2" size="16" class="shrink-0 mt-0.5" />
                 <div>
-                  <strong>Allergy Profile Screen:</strong> No known acute cross-reactivity detected with patient documented allergens.
+                  <strong>Allergy Profile Screen:</strong> No known acute cross-reactivity detected
+                  with patient documented allergens.
                 </div>
               </div>
 
-              <div class="flex items-start gap-2 p-2.5 rounded-lg bg-sky-500/10 border border-sky-500/20 text-sky-700 dark:text-sky-300">
+              <div
+                class="flex items-start gap-2 p-2.5 rounded-lg bg-sky-500/10 border border-sky-500/20 text-sky-700 dark:text-sky-300"
+              >
                 <ng-icon name="lucideShieldCheck" size="16" class="shrink-0 mt-0.5" />
                 <div>
-                  <strong>Drug-Drug Interaction Screen:</strong> Monitored therapeutic range. No major contraindications with active medications.
+                  <strong>Drug-Drug Interaction Screen:</strong> Monitored therapeutic range. No
+                  major contraindications with active medications.
                 </div>
               </div>
             </div>
@@ -243,7 +310,9 @@ import {
 
           <!-- Pharmacist Notes / Clarification Form -->
           <div class="space-y-2 text-xs">
-            <label class="block font-semibold text-foreground">Pharmacist Verification Note / Clarification Reason</label>
+            <label class="block font-semibold text-foreground"
+              >Pharmacist Verification Note / Clarification Reason</label
+            >
             <textarea
               [(ngModel)]="verificationNotes"
               rows="3"
@@ -253,10 +322,13 @@ import {
           </div>
 
           <!-- 3-Way Action Buttons -->
-          <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-border">
+          <div
+            class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-border"
+          >
             <button
               (click)="rejectOrder()"
-              class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-destructive/10 text-destructive hover:bg-destructive/20 border border-destructive/30 transition-all flex items-center gap-1.5">
+              class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-destructive/10 text-destructive hover:bg-destructive/20 border border-destructive/30 transition-all flex items-center gap-1.5"
+            >
               <ng-icon name="lucideX" size="14" />
               Reject Order
             </button>
@@ -264,14 +336,16 @@ import {
             <div class="flex items-center gap-2">
               <button
                 (click)="requestClarification()"
-                class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-sky-500/10 text-sky-600 hover:bg-sky-500/20 border border-sky-500/30 transition-all flex items-center gap-1.5">
+                class="px-3.5 py-2 rounded-xl text-xs font-semibold bg-sky-500/10 text-sky-600 hover:bg-sky-500/20 border border-sky-500/30 transition-all flex items-center gap-1.5"
+              >
                 <ng-icon name="lucideMessageSquare" size="14" />
                 Request Doctor Clarification
               </button>
 
               <button
                 (click)="verifyOrder()"
-                class="px-4 py-2 rounded-xl text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition-all flex items-center gap-1.5 shadow-xs">
+                class="px-4 py-2 rounded-xl text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition-all flex items-center gap-1.5 shadow-xs"
+              >
                 <ng-icon name="lucideCheck" size="14" />
                 Approve & Sign-Off
               </button>
@@ -290,11 +364,19 @@ export class PharmacistErxComponent implements OnInit {
   selectedOrder = signal<MedicationOrder | null>(null);
   verificationNotes = '';
 
-  pendingCount = computed(() =>
-    this.orders().filter((o) => o.status === 'PENDING_VERIFICATION' || o.status === 'PRESCRIBED' || o.status === 'ORDERED').length
+  pendingCount = computed(
+    () =>
+      this.orders().filter(
+        (o) =>
+          o.status === 'PENDING_VERIFICATION' ||
+          o.status === 'PRESCRIBED' ||
+          o.status === 'ORDERED',
+      ).length,
   );
-  verifiedCount = computed(() =>
-    this.orders().filter((o) => o.status === 'PHARMACY_VERIFIED' || o.status === 'VERIFIED').length
+  verifiedCount = computed(
+    () =>
+      this.orders().filter((o) => o.status === 'PHARMACY_VERIFIED' || o.status === 'VERIFIED')
+        .length,
   );
 
   filteredOrders = computed(() => {
@@ -303,7 +385,12 @@ export class PharmacistErxComponent implements OnInit {
     const q = this.searchQuery().toLowerCase().trim();
 
     if (st === 'PENDING') {
-      list = list.filter((o) => o.status === 'PENDING_VERIFICATION' || o.status === 'PRESCRIBED' || o.status === 'ORDERED');
+      list = list.filter(
+        (o) =>
+          o.status === 'PENDING_VERIFICATION' ||
+          o.status === 'PRESCRIBED' ||
+          o.status === 'ORDERED',
+      );
     } else if (st === 'VERIFIED') {
       list = list.filter((o) => o.status === 'PHARMACY_VERIFIED' || o.status === 'VERIFIED');
     } else if (st === 'CLARIFICATION') {
@@ -382,17 +469,19 @@ export class PharmacistErxComponent implements OnInit {
   rejectOrder(): void {
     const o = this.selectedOrder();
     if (!o) return;
-    this.apiService.rejectPharmacyOrder(o.id, this.verificationNotes || 'Clinical contraindication').subscribe({
-      next: () => {
-        toast.error(`Prescription for ${o.medicationName} rejected.`);
-        o.status = 'REJECTED';
-        this.selectedOrder.set(null);
-      },
-      error: () => {
-        toast.error(`Prescription for ${o.medicationName} rejected.`);
-        o.status = 'REJECTED';
-        this.selectedOrder.set(null);
-      },
-    });
+    this.apiService
+      .rejectPharmacyOrder(o.id, this.verificationNotes || 'Clinical contraindication')
+      .subscribe({
+        next: () => {
+          toast.error(`Prescription for ${o.medicationName} rejected.`);
+          o.status = 'REJECTED';
+          this.selectedOrder.set(null);
+        },
+        error: () => {
+          toast.error(`Prescription for ${o.medicationName} rejected.`);
+          o.status = 'REJECTED';
+          this.selectedOrder.set(null);
+        },
+      });
   }
 }

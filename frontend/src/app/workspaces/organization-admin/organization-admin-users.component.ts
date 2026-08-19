@@ -40,7 +40,8 @@ import {
   lucideSparkles,
 } from '@ng-icons/lucide';
 
-type RoleCategoryTab = 'ALL' | 'DOCTOR' | 'NURSE' | 'PHARMACIST' | 'RECEPTIONIST' | 'BILLING' | 'ADMIN';
+type RoleCategoryTab =
+  'ALL' | 'DOCTOR' | 'NURSE' | 'PHARMACIST' | 'RECEPTIONIST' | 'BILLING' | 'ADMIN';
 
 @Component({
   selector: 'app-organization-admin-users',
@@ -90,29 +91,40 @@ type RoleCategoryTab = 'ALL' | 'DOCTOR' | 'NURSE' | 'PHARMACIST' | 'RECEPTIONIST
       <div
         *ngIf="toastMessage()"
         [ngClass]="{
-          'bg-emerald-500/15 border-emerald-500/40 text-emerald-700 dark:text-emerald-300': toastMessage()?.type === 'success',
-          'bg-destructive/15 border-destructive/40 text-destructive': toastMessage()?.type === 'error'
+          'bg-emerald-500/15 border-emerald-500/40 text-emerald-700 dark:text-emerald-300':
+            toastMessage()?.type === 'success',
+          'bg-destructive/15 border-destructive/40 text-destructive':
+            toastMessage()?.type === 'error',
         }"
         class="flex items-center justify-between p-3.5 rounded-lg border text-xs font-medium transition-all shadow-xs"
       >
         <div class="flex items-center gap-2">
-          <ng-icon [name]="toastMessage()?.type === 'success' ? 'lucideCheck' : 'lucideAlertCircle'" size="16" />
+          <ng-icon
+            [name]="toastMessage()?.type === 'success' ? 'lucideCheck' : 'lucideAlertCircle'"
+            size="16"
+          />
           <span>{{ toastMessage()?.text }}</span>
         </div>
-        <button (click)="toastMessage.set(null)" class="text-muted-foreground hover:text-foreground">
+        <button
+          (click)="toastMessage.set(null)"
+          class="text-muted-foreground hover:text-foreground"
+        >
           <ng-icon name="lucideX" size="14" />
         </button>
       </div>
 
       <!-- Header & Action Toolbar -->
-      <div class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 pb-4 border-b border-border">
+      <div
+        class="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 pb-4 border-b border-border"
+      >
         <div>
           <h1 class="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
             Facility Staff Roster & User Management
             <span hlmBadge variant="secondary" class="text-[10px]">ORGANIZATION_ADMIN</span>
           </h1>
           <p class="text-xs text-muted-foreground mt-0.5">
-            Manage clinic staff accounts, doctor/nurse credentials, medical licenses, and patient accounts.
+            Manage clinic staff accounts, doctor/nurse credentials, medical licenses, and patient
+            accounts.
           </p>
         </div>
 
@@ -175,7 +187,9 @@ type RoleCategoryTab = 'ALL' | 'DOCTOR' | 'NURSE' | 'PHARMACIST' | 'RECEPTIONIST
 
       <!-- Metrics KPI Summary Grid -->
       <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
-        <div class="p-3.5 rounded-xl border border-border bg-card shadow-2xs flex flex-col justify-between">
+        <div
+          class="p-3.5 rounded-xl border border-border bg-card shadow-2xs flex flex-col justify-between"
+        >
           <div class="flex items-center justify-between text-muted-foreground">
             <span class="text-xs font-medium">Total Accounts</span>
             <ng-icon name="lucideUsers" size="16" class="text-foreground/70" />
@@ -186,58 +200,87 @@ type RoleCategoryTab = 'ALL' | 'DOCTOR' | 'NURSE' | 'PHARMACIST' | 'RECEPTIONIST
           </div>
         </div>
 
-        <div class="p-3.5 rounded-xl border border-blue-500/20 bg-blue-500/5 dark:bg-blue-950/20 shadow-2xs flex flex-col justify-between">
+        <div
+          class="p-3.5 rounded-xl border border-blue-500/20 bg-blue-500/5 dark:bg-blue-950/20 shadow-2xs flex flex-col justify-between"
+        >
           <div class="flex items-center justify-between text-blue-600 dark:text-blue-400">
             <span class="text-xs font-medium">Doctors</span>
             <ng-icon name="lucideStethoscope" size="16" />
           </div>
           <div class="mt-2 flex items-baseline justify-between">
-            <span class="text-xl font-bold text-blue-700 dark:text-blue-300">{{ doctorsCount() }}</span>
-            <span hlmBadge variant="outline" class="text-[9px] border-blue-500/30 text-blue-600">MD / Specialists</span>
+            <span class="text-xl font-bold text-blue-700 dark:text-blue-300">{{
+              doctorsCount()
+            }}</span>
+            <span hlmBadge variant="outline" class="text-[9px] border-blue-500/30 text-blue-600"
+              >MD / Specialists</span
+            >
           </div>
         </div>
 
-        <div class="p-3.5 rounded-xl border border-emerald-500/20 bg-emerald-500/5 dark:bg-emerald-950/20 shadow-2xs flex flex-col justify-between">
+        <div
+          class="p-3.5 rounded-xl border border-emerald-500/20 bg-emerald-500/5 dark:bg-emerald-950/20 shadow-2xs flex flex-col justify-between"
+        >
           <div class="flex items-center justify-between text-emerald-600 dark:text-emerald-400">
             <span class="text-xs font-medium">Nurses</span>
             <ng-icon name="lucideUserPlus" size="16" />
           </div>
           <div class="mt-2 flex items-baseline justify-between">
-            <span class="text-xl font-bold text-emerald-700 dark:text-emerald-300">{{ nursesCount() }}</span>
-            <span hlmBadge variant="outline" class="text-[9px] border-emerald-500/30 text-emerald-600">Nursing Staff</span>
+            <span class="text-xl font-bold text-emerald-700 dark:text-emerald-300">{{
+              nursesCount()
+            }}</span>
+            <span
+              hlmBadge
+              variant="outline"
+              class="text-[9px] border-emerald-500/30 text-emerald-600"
+              >Nursing Staff</span
+            >
           </div>
         </div>
 
-        <div class="p-3.5 rounded-xl border border-purple-500/20 bg-purple-500/5 dark:bg-purple-950/20 shadow-2xs flex flex-col justify-between">
+        <div
+          class="p-3.5 rounded-xl border border-purple-500/20 bg-purple-500/5 dark:bg-purple-950/20 shadow-2xs flex flex-col justify-between"
+        >
           <div class="flex items-center justify-between text-purple-600 dark:text-purple-400">
             <span class="text-xs font-medium">Staff & Admins</span>
             <ng-icon name="lucideShieldCheck" size="16" />
           </div>
           <div class="mt-2 flex items-baseline justify-between">
-            <span class="text-xl font-bold text-purple-700 dark:text-purple-300">{{ staffCount() }}</span>
-            <span hlmBadge variant="outline" class="text-[9px] border-purple-500/30 text-purple-600">Admin / Support</span>
+            <span class="text-xl font-bold text-purple-700 dark:text-purple-300">{{
+              staffCount()
+            }}</span>
+            <span hlmBadge variant="outline" class="text-[9px] border-purple-500/30 text-purple-600"
+              >Admin / Support</span
+            >
           </div>
         </div>
 
-        <div class="p-3.5 rounded-xl border border-indigo-500/20 bg-indigo-500/5 dark:bg-indigo-950/20 shadow-2xs flex flex-col justify-between">
+        <div
+          class="p-3.5 rounded-xl border border-indigo-500/20 bg-indigo-500/5 dark:bg-indigo-950/20 shadow-2xs flex flex-col justify-between"
+        >
           <div class="flex items-center justify-between text-indigo-600 dark:text-indigo-400">
             <span class="text-xs font-medium">Pharmacy & Reception</span>
             <ng-icon name="lucideUserCheck" size="16" />
           </div>
           <div class="mt-2 flex items-baseline justify-between">
-            <span class="text-xl font-bold text-indigo-700 dark:text-indigo-300">{{ pharmacistsCount() + receptionistsCount() }}</span>
-            <span hlmBadge variant="outline" class="text-[9px] border-indigo-500/30 text-indigo-600">Allied Roles</span>
+            <span class="text-xl font-bold text-indigo-700 dark:text-indigo-300">{{
+              pharmacistsCount() + receptionistsCount()
+            }}</span>
+            <span hlmBadge variant="outline" class="text-[9px] border-indigo-500/30 text-indigo-600"
+              >Allied Roles</span
+            >
           </div>
         </div>
       </div>
 
       <!-- Role Views Category Navigation Tabs -->
-      <div class="flex items-center gap-1.5 p-1 bg-muted/60 rounded-xl border border-border overflow-x-auto text-xs">
+      <div
+        class="flex items-center gap-1.5 p-1 bg-muted/60 rounded-xl border border-border overflow-x-auto text-xs"
+      >
         <button
           (click)="selectedRoleTab.set('ALL')"
           [ngClass]="{
             'bg-background font-bold text-foreground shadow-xs': selectedRoleTab() === 'ALL',
-            'text-muted-foreground hover:text-foreground': selectedRoleTab() !== 'ALL'
+            'text-muted-foreground hover:text-foreground': selectedRoleTab() !== 'ALL',
           }"
           class="px-3.5 py-1.5 rounded-lg transition-all flex items-center gap-1.5 whitespace-nowrap"
         >
@@ -248,8 +291,9 @@ type RoleCategoryTab = 'ALL' | 'DOCTOR' | 'NURSE' | 'PHARMACIST' | 'RECEPTIONIST
         <button
           (click)="selectedRoleTab.set('DOCTOR')"
           [ngClass]="{
-            'bg-background font-bold text-blue-600 dark:text-blue-400 shadow-xs': selectedRoleTab() === 'DOCTOR',
-            'text-muted-foreground hover:text-foreground': selectedRoleTab() !== 'DOCTOR'
+            'bg-background font-bold text-blue-600 dark:text-blue-400 shadow-xs':
+              selectedRoleTab() === 'DOCTOR',
+            'text-muted-foreground hover:text-foreground': selectedRoleTab() !== 'DOCTOR',
           }"
           class="px-3.5 py-1.5 rounded-lg transition-all flex items-center gap-1.5 whitespace-nowrap"
         >
@@ -260,8 +304,9 @@ type RoleCategoryTab = 'ALL' | 'DOCTOR' | 'NURSE' | 'PHARMACIST' | 'RECEPTIONIST
         <button
           (click)="selectedRoleTab.set('NURSE')"
           [ngClass]="{
-            'bg-background font-bold text-emerald-600 dark:text-emerald-400 shadow-xs': selectedRoleTab() === 'NURSE',
-            'text-muted-foreground hover:text-foreground': selectedRoleTab() !== 'NURSE'
+            'bg-background font-bold text-emerald-600 dark:text-emerald-400 shadow-xs':
+              selectedRoleTab() === 'NURSE',
+            'text-muted-foreground hover:text-foreground': selectedRoleTab() !== 'NURSE',
           }"
           class="px-3.5 py-1.5 rounded-lg transition-all flex items-center gap-1.5 whitespace-nowrap"
         >
@@ -272,8 +317,9 @@ type RoleCategoryTab = 'ALL' | 'DOCTOR' | 'NURSE' | 'PHARMACIST' | 'RECEPTIONIST
         <button
           (click)="selectedRoleTab.set('PHARMACIST')"
           [ngClass]="{
-            'bg-background font-bold text-indigo-600 dark:text-indigo-400 shadow-xs': selectedRoleTab() === 'PHARMACIST',
-            'text-muted-foreground hover:text-foreground': selectedRoleTab() !== 'PHARMACIST'
+            'bg-background font-bold text-indigo-600 dark:text-indigo-400 shadow-xs':
+              selectedRoleTab() === 'PHARMACIST',
+            'text-muted-foreground hover:text-foreground': selectedRoleTab() !== 'PHARMACIST',
           }"
           class="px-3.5 py-1.5 rounded-lg transition-all flex items-center gap-1.5 whitespace-nowrap"
         >
@@ -284,8 +330,9 @@ type RoleCategoryTab = 'ALL' | 'DOCTOR' | 'NURSE' | 'PHARMACIST' | 'RECEPTIONIST
         <button
           (click)="selectedRoleTab.set('RECEPTIONIST')"
           [ngClass]="{
-            'bg-background font-bold text-sky-600 dark:text-sky-400 shadow-xs': selectedRoleTab() === 'RECEPTIONIST',
-            'text-muted-foreground hover:text-foreground': selectedRoleTab() !== 'RECEPTIONIST'
+            'bg-background font-bold text-sky-600 dark:text-sky-400 shadow-xs':
+              selectedRoleTab() === 'RECEPTIONIST',
+            'text-muted-foreground hover:text-foreground': selectedRoleTab() !== 'RECEPTIONIST',
           }"
           class="px-3.5 py-1.5 rounded-lg transition-all flex items-center gap-1.5 whitespace-nowrap"
         >
@@ -296,8 +343,9 @@ type RoleCategoryTab = 'ALL' | 'DOCTOR' | 'NURSE' | 'PHARMACIST' | 'RECEPTIONIST
         <button
           (click)="selectedRoleTab.set('BILLING')"
           [ngClass]="{
-            'bg-background font-bold text-amber-600 dark:text-amber-400 shadow-xs': selectedRoleTab() === 'BILLING',
-            'text-muted-foreground hover:text-foreground': selectedRoleTab() !== 'BILLING'
+            'bg-background font-bold text-amber-600 dark:text-amber-400 shadow-xs':
+              selectedRoleTab() === 'BILLING',
+            'text-muted-foreground hover:text-foreground': selectedRoleTab() !== 'BILLING',
           }"
           class="px-3.5 py-1.5 rounded-lg transition-all flex items-center gap-1.5 whitespace-nowrap"
         >
@@ -308,8 +356,9 @@ type RoleCategoryTab = 'ALL' | 'DOCTOR' | 'NURSE' | 'PHARMACIST' | 'RECEPTIONIST
         <button
           (click)="selectedRoleTab.set('ADMIN')"
           [ngClass]="{
-            'bg-background font-bold text-purple-600 dark:text-purple-400 shadow-xs': selectedRoleTab() === 'ADMIN',
-            'text-muted-foreground hover:text-foreground': selectedRoleTab() !== 'ADMIN'
+            'bg-background font-bold text-purple-600 dark:text-purple-400 shadow-xs':
+              selectedRoleTab() === 'ADMIN',
+            'text-muted-foreground hover:text-foreground': selectedRoleTab() !== 'ADMIN',
           }"
           class="px-3.5 py-1.5 rounded-lg transition-all flex items-center gap-1.5 whitespace-nowrap"
         >
@@ -319,9 +368,15 @@ type RoleCategoryTab = 'ALL' | 'DOCTOR' | 'NURSE' | 'PHARMACIST' | 'RECEPTIONIST
       </div>
 
       <!-- Search & Filters Control Bar -->
-      <div class="p-3.5 rounded-xl border border-border bg-card shadow-xs flex flex-col md:flex-row gap-3 items-center justify-between">
+      <div
+        class="p-3.5 rounded-xl border border-border bg-card shadow-xs flex flex-col md:flex-row gap-3 items-center justify-between"
+      >
         <div class="relative w-full md:w-96">
-          <ng-icon name="lucideSearch" size="16" class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <ng-icon
+            name="lucideSearch"
+            size="16"
+            class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+          />
           <input
             hlmInput
             type="text"
@@ -333,7 +388,9 @@ type RoleCategoryTab = 'ALL' | 'DOCTOR' | 'NURSE' | 'PHARMACIST' | 'RECEPTIONIST
 
         <div class="flex items-center gap-3 w-full md:w-auto justify-between md:justify-end">
           <div class="flex items-center gap-2">
-            <span class="text-xs text-muted-foreground whitespace-nowrap">Verification Status:</span>
+            <span class="text-xs text-muted-foreground whitespace-nowrap"
+              >Verification Status:</span
+            >
             <select
               [(ngModel)]="selectedStatusFilter"
               class="h-9 px-3 text-xs rounded-md border border-input bg-background text-foreground focus:outline-hidden focus:ring-1 focus:ring-ring"
@@ -359,7 +416,9 @@ type RoleCategoryTab = 'ALL' | 'DOCTOR' | 'NURSE' | 'PHARMACIST' | 'RECEPTIONIST
               <tr hlmTableRow class="bg-muted/50 border-b border-border">
                 <th hlmTableHead class="py-3 px-4 text-left">User / Account Info</th>
                 <th hlmTableHead class="py-3 px-4 text-left">Assigned Roles</th>
-                <th hlmTableHead class="py-3 px-4 text-left">Department / Specialization / License</th>
+                <th hlmTableHead class="py-3 px-4 text-left">
+                  Department / Specialization / License
+                </th>
                 <th hlmTableHead class="py-3 px-4 text-left">Security Status</th>
                 <th hlmTableHead class="py-3 px-4 text-center w-36">Actions</th>
               </tr>
@@ -376,12 +435,20 @@ type RoleCategoryTab = 'ALL' | 'DOCTOR' | 'NURSE' | 'PHARMACIST' | 'RECEPTIONIST
 
               <tr *ngIf="!loading() && filteredUsers().length === 0" hlmTableRow>
                 <td colspan="5" class="py-8 text-center text-muted-foreground">
-                  <p class="font-semibold text-foreground">No database accounts match the criteria.</p>
-                  <p class="text-[11px] text-muted-foreground mt-0.5">Try adjusting your role view tab or search terms.</p>
+                  <p class="font-semibold text-foreground">
+                    No database accounts match the criteria.
+                  </p>
+                  <p class="text-[11px] text-muted-foreground mt-0.5">
+                    Try adjusting your role view tab or search terms.
+                  </p>
                 </td>
               </tr>
 
-              <tr *ngFor="let u of filteredUsers()" hlmTableRow class="hover:bg-muted/40 transition-colors">
+              <tr
+                *ngFor="let u of filteredUsers()"
+                hlmTableRow
+                class="hover:bg-muted/40 transition-colors"
+              >
                 <!-- User Info -->
                 <td hlmTableCell class="py-3 px-4">
                   <div class="flex items-center gap-3">
@@ -394,7 +461,12 @@ type RoleCategoryTab = 'ALL' | 'DOCTOR' | 'NURSE' | 'PHARMACIST' | 'RECEPTIONIST
                     <div>
                       <div class="font-semibold text-foreground flex items-center gap-1.5">
                         {{ u.fullName || u.email }}
-                        <ng-icon *ngIf="isUserVerified(u)" name="lucideBadgeCheck" class="text-emerald-500" size="14" />
+                        <ng-icon
+                          *ngIf="isUserVerified(u)"
+                          name="lucideBadgeCheck"
+                          class="text-emerald-500"
+                          size="14"
+                        />
                       </div>
                       <div class="text-[11px] text-muted-foreground flex items-center gap-2">
                         <span>{{ u.email }}</span>
@@ -422,18 +494,29 @@ type RoleCategoryTab = 'ALL' | 'DOCTOR' | 'NURSE' | 'PHARMACIST' | 'RECEPTIONIST
                     <div class="font-medium text-foreground">
                       {{ u.specialization || u.department || 'General Practice / Patient Account' }}
                     </div>
-                    <div *ngIf="u.licenseNumber" class="text-[10px] flex items-center gap-1 text-blue-600 dark:text-blue-400 font-mono">
+                    <div
+                      *ngIf="u.licenseNumber"
+                      class="text-[10px] flex items-center gap-1 text-blue-600 dark:text-blue-400 font-mono"
+                    >
                       <ng-icon name="lucideBadgeCheck" size="12" />
                       License/NPI: {{ u.licenseNumber }}
-                      <span *ngIf="u.qualifications" class="text-muted-foreground font-sans">({{ u.qualifications }})</span>
+                      <span *ngIf="u.qualifications" class="text-muted-foreground font-sans"
+                        >({{ u.qualifications }})</span
+                      >
                     </div>
                   </div>
                 </td>
 
                 <!-- Status -->
                 <td hlmTableCell class="py-3 px-4">
-                  <span [ngClass]="getStatusBadgeClass(u.verificationStatus)" class="px-2.5 py-1 rounded-full text-[10px] font-semibold border flex items-center gap-1.5 w-fit">
-                    <ng-icon [name]="u.verificationStatus === 'SUSPENDED' ? 'lucideLock' : 'lucideCheck'" size="12" />
+                  <span
+                    [ngClass]="getStatusBadgeClass(u.verificationStatus)"
+                    class="px-2.5 py-1 rounded-full text-[10px] font-semibold border flex items-center gap-1.5 w-fit"
+                  >
+                    <ng-icon
+                      [name]="u.verificationStatus === 'SUSPENDED' ? 'lucideLock' : 'lucideCheck'"
+                      size="12"
+                    />
                     {{ u.verificationStatus || 'VERIFIED' }}
                   </span>
                 </td>
@@ -479,10 +562,19 @@ type RoleCategoryTab = 'ALL' | 'DOCTOR' | 'NURSE' | 'PHARMACIST' | 'RECEPTIONIST
                       variant="ghost"
                       size="icon"
                       (click)="toggleUserStatus(u)"
-                      [title]="u.verificationStatus === 'SUSPENDED' ? 'Unlock / Verify' : 'Lock / Suspend Account'"
+                      [title]="
+                        u.verificationStatus === 'SUSPENDED'
+                          ? 'Unlock / Verify'
+                          : 'Lock / Suspend Account'
+                      "
                       class="h-7 w-7 text-muted-foreground hover:text-purple-600"
                     >
-                      <ng-icon [name]="u.verificationStatus === 'SUSPENDED' ? 'lucideUnlock' : 'lucideLock'" size="14" />
+                      <ng-icon
+                        [name]="
+                          u.verificationStatus === 'SUSPENDED' ? 'lucideUnlock' : 'lucideLock'
+                        "
+                        size="14"
+                      />
                     </button>
 
                     <button
@@ -581,17 +673,29 @@ export class OrganizationAdminUsersComponent implements OnInit {
     { value: 'PHARMACIST', label: 'Pharmacist' },
     { value: 'LAB_TECHNICIAN', label: 'Lab Tech' },
     { value: 'BILLING_STAFF', label: 'Billing Officer' },
-    { value: 'AUDITOR', label: 'Auditor' },
     { value: 'PATIENT', label: 'Patient' },
   ];
 
   totalUsersCount = computed(() => this.users().length);
-  doctorsCount = computed(() => this.users().filter((u) => this.getUserRoleNames(u).includes('PHYSICIAN')).length);
-  nursesCount = computed(() => this.users().filter((u) => this.getUserRoleNames(u).includes('NURSE')).length);
-  pharmacistsCount = computed(() => this.users().filter((u) => this.getUserRoleNames(u).includes('PHARMACIST')).length);
-  receptionistsCount = computed(() => this.users().filter((u) => this.getUserRoleNames(u).includes('RECEPTIONIST')).length);
-  billingCount = computed(() => this.users().filter((u) => this.getUserRoleNames(u).includes('BILLING_STAFF')).length);
-  staffCount = computed(() => this.users().filter((u) => this.getUserRoleNames(u).includes('ORGANIZATION_ADMIN')).length);
+  doctorsCount = computed(
+    () => this.users().filter((u) => this.getUserRoleNames(u).includes('PHYSICIAN')).length,
+  );
+  nursesCount = computed(
+    () => this.users().filter((u) => this.getUserRoleNames(u).includes('NURSE')).length,
+  );
+  pharmacistsCount = computed(
+    () => this.users().filter((u) => this.getUserRoleNames(u).includes('PHARMACIST')).length,
+  );
+  receptionistsCount = computed(
+    () => this.users().filter((u) => this.getUserRoleNames(u).includes('RECEPTIONIST')).length,
+  );
+  billingCount = computed(
+    () => this.users().filter((u) => this.getUserRoleNames(u).includes('BILLING_STAFF')).length,
+  );
+  staffCount = computed(
+    () =>
+      this.users().filter((u) => this.getUserRoleNames(u).includes('ORGANIZATION_ADMIN')).length,
+  );
 
   filteredUsers = computed(() => {
     let list = this.users();
@@ -601,30 +705,38 @@ export class OrganizationAdminUsersComponent implements OnInit {
 
     if (tab === 'DOCTOR') list = list.filter((u) => this.getUserRoleNames(u).includes('PHYSICIAN'));
     else if (tab === 'NURSE') list = list.filter((u) => this.getUserRoleNames(u).includes('NURSE'));
-    else if (tab === 'PHARMACIST') list = list.filter((u) => this.getUserRoleNames(u).includes('PHARMACIST'));
-    else if (tab === 'RECEPTIONIST') list = list.filter((u) => this.getUserRoleNames(u).includes('RECEPTIONIST'));
-    else if (tab === 'BILLING') list = list.filter((u) => this.getUserRoleNames(u).includes('BILLING_STAFF'));
-    else if (tab === 'ADMIN') list = list.filter((u) => this.getUserRoleNames(u).includes('ORGANIZATION_ADMIN'));
+    else if (tab === 'PHARMACIST')
+      list = list.filter((u) => this.getUserRoleNames(u).includes('PHARMACIST'));
+    else if (tab === 'RECEPTIONIST')
+      list = list.filter((u) => this.getUserRoleNames(u).includes('RECEPTIONIST'));
+    else if (tab === 'BILLING')
+      list = list.filter((u) => this.getUserRoleNames(u).includes('BILLING_STAFF'));
+    else if (tab === 'ADMIN')
+      list = list.filter((u) => this.getUserRoleNames(u).includes('ORGANIZATION_ADMIN'));
 
     if (status !== 'ALL') {
       list = list.filter((u) => (u.verificationStatus || 'VERIFIED') === status);
     }
 
     if (q) {
-      list = list.filter((u) =>
-        (u.fullName || '').toLowerCase().includes(q) ||
-        (u.email || '').toLowerCase().includes(q) ||
-        (u.email || '').toLowerCase().includes(q) ||
-        (u.department || '').toLowerCase().includes(q) ||
-        (u.specialization || '').toLowerCase().includes(q) ||
-        (u.licenseNumber || '').toLowerCase().includes(q)
+      list = list.filter(
+        (u) =>
+          (u.fullName || '').toLowerCase().includes(q) ||
+          (u.email || '').toLowerCase().includes(q) ||
+          (u.email || '').toLowerCase().includes(q) ||
+          (u.department || '').toLowerCase().includes(q) ||
+          (u.specialization || '').toLowerCase().includes(q) ||
+          (u.licenseNumber || '').toLowerCase().includes(q),
       );
     }
 
     return list;
   });
 
-  constructor(private apiService: ApiService, private authService: AuthService) {}
+  constructor(
+    private apiService: ApiService,
+    private authService: AuthService,
+  ) {}
 
   ngOnInit(): void {
     this.loadUsers();
@@ -651,7 +763,8 @@ export class OrganizationAdminUsersComponent implements OnInit {
   }
 
   getRoleBadgeClass(role: string): string {
-    if (role.includes('ORGANIZATION_ADMIN') || role.includes('ADMIN')) return 'bg-purple-500/10 text-purple-600 border-purple-500/30';
+    if (role.includes('ORGANIZATION_ADMIN') || role.includes('ADMIN'))
+      return 'bg-purple-500/10 text-purple-600 border-purple-500/30';
     if (role.includes('PHYSICIAN')) return 'bg-blue-500/10 text-blue-600 border-blue-500/30';
     if (role.includes('NURSE')) return 'bg-emerald-500/10 text-emerald-600 border-emerald-500/30';
     if (role.includes('PATIENT')) return 'bg-cyan-500/10 text-cyan-600 border-cyan-500/30';
@@ -660,7 +773,8 @@ export class OrganizationAdminUsersComponent implements OnInit {
 
   getStatusBadgeClass(status?: string): string {
     if (status === 'SUSPENDED') return 'bg-destructive/10 text-destructive border-destructive/30';
-    if (status === 'PENDING_VERIFICATION') return 'bg-amber-500/10 text-amber-600 border-amber-500/30';
+    if (status === 'PENDING_VERIFICATION')
+      return 'bg-amber-500/10 text-amber-600 border-amber-500/30';
     return 'bg-emerald-500/10 text-emerald-600 border-emerald-500/30';
   }
 
@@ -721,12 +835,18 @@ export class OrganizationAdminUsersComponent implements OnInit {
       next: () => {
         this.saving.set(false);
         this.showCreateModal.set(false);
-        this.toastMessage.set({ text: `Account for ${this.newUserForm.fullName || this.newUserForm.email} created successfully.`, type: 'success' });
+        this.toastMessage.set({
+          text: `Account for ${this.newUserForm.fullName || this.newUserForm.email} created successfully.`,
+          type: 'success',
+        });
         this.loadUsers();
       },
       error: (err: any) => {
         this.saving.set(false);
-        this.toastMessage.set({ text: err.error?.message || 'Failed to create user account.', type: 'error' });
+        this.toastMessage.set({
+          text: err.error?.message || 'Failed to create user account.',
+          type: 'error',
+        });
       },
     });
   }
@@ -767,7 +887,10 @@ export class OrganizationAdminUsersComponent implements OnInit {
       next: () => {
         this.saving.set(false);
         this.showEditModal.set(false);
-        this.toastMessage.set({ text: 'User details & permissions updated successfully.', type: 'success' });
+        this.toastMessage.set({
+          text: 'User details & permissions updated successfully.',
+          type: 'success',
+        });
         this.loadUsers();
       },
       error: () => {
@@ -794,7 +917,10 @@ export class OrganizationAdminUsersComponent implements OnInit {
       next: () => {
         this.saving.set(false);
         this.generatedTempPassword = pass;
-        this.toastMessage.set({ text: `Password reset successfully for @${u.email}.`, type: 'success' });
+        this.toastMessage.set({
+          text: `Password reset successfully for @${u.email}.`,
+          type: 'success',
+        });
       },
       error: () => {
         this.saving.set(false);
@@ -807,7 +933,10 @@ export class OrganizationAdminUsersComponent implements OnInit {
     const newStatus = u.verificationStatus === 'SUSPENDED' ? 'VERIFIED' : 'SUSPENDED';
     this.apiService.updateUserStatus(u.id, newStatus).subscribe({
       next: () => {
-        this.toastMessage.set({ text: `Account @${u.email} status updated to ${newStatus}.`, type: 'success' });
+        this.toastMessage.set({
+          text: `Account @${u.email} status updated to ${newStatus}.`,
+          type: 'success',
+        });
         this.loadUsers();
       },
     });

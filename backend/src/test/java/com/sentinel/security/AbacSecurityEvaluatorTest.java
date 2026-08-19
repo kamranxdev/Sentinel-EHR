@@ -47,16 +47,6 @@ public class AbacSecurityEvaluatorTest {
         assertTrue(allowed, "SUPER_ADMIN must bypass relationship check");
     }
 
-    @Test
-    public void testAuditorBypassesRelationshipCheck() {
-        Authentication auth = mock(Authentication.class);
-        when(auth.isAuthenticated()).thenReturn(true);
-        when(auth.getName()).thenReturn("compliance_auditor");
-        doReturn(List.of(new SimpleGrantedAuthority("AUDITOR"))).when(auth).getAuthorities();
-
-        boolean allowed = evaluator.hasTreatmentRelationship(auth, patientId);
-        assertTrue(allowed, "AUDITOR must bypass relationship check");
-    }
 
     @Test
     public void testPhysicianBypassesPatientCheckInAccessData() {

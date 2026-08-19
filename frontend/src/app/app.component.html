@@ -1,17 +1,28 @@
-<div class="h-screen w-full bg-background text-foreground flex overflow-hidden relative"
-  *ngIf="showDashboardLayout(); else standaloneLayout">
+<div
+  class="h-screen w-full bg-background text-foreground flex overflow-hidden relative"
+  *ngIf="showDashboardLayout(); else standaloneLayout"
+>
   <!-- Mobile sidebar backdrop -->
-  <div *ngIf="isMobile() && sidebarOpen()" (click)="closeMobileSidebar()"
-    class="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm transition-opacity"></div>
+  <div
+    *ngIf="isMobile() && sidebarOpen()"
+    (click)="closeMobileSidebar()"
+    class="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm transition-opacity"
+  ></div>
 
   <!-- Sidebar -->
-  <aside [class.translate-x-0]="sidebarOpen()" [class.-translate-x-full]="isMobile() && !sidebarOpen()"
-    [class.w-64]="sidebarOpen()" [class.w-[72px]]="!sidebarOpen() && !isMobile()"
-    class="fixed lg:static top-0 left-0 z-50 h-screen shrink-0 bg-card border-r border-border flex flex-col justify-between transition-all duration-200">
+  <aside
+    [class.translate-x-0]="sidebarOpen()"
+    [class.-translate-x-full]="isMobile() && !sidebarOpen()"
+    [class.w-64]="sidebarOpen()"
+    [class.w-[72px]]="!sidebarOpen() && !isMobile()"
+    class="fixed lg:static top-0 left-0 z-50 h-screen shrink-0 bg-card border-r border-border flex flex-col justify-between transition-all duration-200"
+  >
     <!-- Brand -->
     <div class="p-4 border-b border-border flex items-center justify-between shrink-0">
       <div class="flex items-center gap-3 overflow-hidden">
-        <div class="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+        <div
+          class="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground"
+        >
           <ng-icon name="lucideHeartPulse" size="18" />
         </div>
         <div *ngIf="sidebarOpen()" class="flex flex-col overflow-hidden">
@@ -20,27 +31,46 @@
         </div>
       </div>
 
-      <button hlmBtn variant="ghost" size="icon" class="hidden lg:inline-flex size-8" (click)="toggleSidebar()">
-        <ng-icon [name]="sidebarOpen() ? 'lucidePanelLeftClose' : 'lucidePanelLeftOpen'" size="16" />
+      <button
+        hlmBtn
+        variant="ghost"
+        size="icon"
+        class="hidden lg:inline-flex size-8"
+        (click)="toggleSidebar()"
+      >
+        <ng-icon
+          [name]="sidebarOpen() ? 'lucidePanelLeftClose' : 'lucidePanelLeftOpen'"
+          size="16"
+        />
       </button>
     </div>
 
     <!-- Nav -->
     <nav class="p-3 overflow-y-auto flex-1 space-y-5">
       <div *ngFor="let group of navGroups()" class="space-y-1">
-        <span *ngIf="sidebarOpen()"
-          class="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground px-2 py-1 block">
+        <span
+          *ngIf="sidebarOpen()"
+          class="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground px-2 py-1 block"
+        >
           {{ group.label }}
         </span>
 
-        <a *ngFor="let item of group.items" [routerLink]="item.routerLink"
-          routerLinkActive="bg-accent text-accent-foreground font-medium" (click)="closeMobileSidebar()"
+        <a
+          *ngFor="let item of group.items"
+          [routerLink]="item.routerLink"
+          routerLinkActive="bg-accent text-accent-foreground font-medium"
+          (click)="closeMobileSidebar()"
           [title]="item.label"
-          class="flex items-center gap-3 px-2.5 py-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors text-sm">
+          class="flex items-center gap-3 px-2.5 py-2 rounded-md text-muted-foreground hover:text-foreground hover:bg-accent/50 transition-colors text-sm"
+        >
           <ng-icon [name]="item.icon" size="17" class="shrink-0" />
           <span *ngIf="sidebarOpen()" class="truncate">{{ item.label }}</span>
-          <span *ngIf="item.badge && sidebarOpen()" hlmBadge variant="secondary"
-            class="ml-auto text-[10px] px-1.5 py-0">
+          <span
+            *ngIf="item.badge && sidebarOpen()"
+            hlmBadge
+            variant="secondary"
+            class="ml-auto text-[10px] px-1.5 py-0"
+          >
             {{ item.badge }}
           </span>
         </a>
@@ -58,12 +88,20 @@
             <span class="text-xs font-medium text-foreground truncate block">
               {{ authService.currentUser()?.fullName }}
             </span>
-            <span class="text-[11px] text-muted-foreground truncate block">{{ primaryRole() }}</span>
+            <span class="text-[11px] text-muted-foreground truncate block">{{
+              primaryRole()
+            }}</span>
           </div>
         </div>
 
-        <button hlmBtn variant="ghost" size="icon" class="size-8 shrink-0 text-muted-foreground hover:text-destructive"
-          hlmTooltip="Log out" (click)="logout()">
+        <button
+          hlmBtn
+          variant="ghost"
+          size="icon"
+          class="size-8 shrink-0 text-muted-foreground hover:text-destructive"
+          hlmTooltip="Log out"
+          (click)="logout()"
+        >
           <ng-icon name="lucideLogOut" size="16" />
         </button>
       </div>
@@ -73,35 +111,61 @@
   <!-- Main layout pane with fixed header & scrollable main content -->
   <div class="flex-1 flex flex-col min-w-0 h-screen overflow-hidden bg-background">
     <header
-      class="shrink-0 z-30 bg-background/95 backdrop-blur border-b border-border flex items-center justify-between px-4 lg:px-6 py-3 gap-3 flex-wrap">
+      class="shrink-0 z-30 bg-background/95 backdrop-blur border-b border-border flex items-center justify-between px-4 lg:px-6 py-3 gap-3 flex-wrap"
+    >
       <div class="flex items-center gap-3 min-w-0">
-        <button hlmBtn variant="outline" size="icon" class="lg:hidden size-9" (click)="toggleSidebar()">
+        <button
+          hlmBtn
+          variant="outline"
+          size="icon"
+          class="lg:hidden size-9"
+          (click)="toggleSidebar()"
+        >
           <ng-icon name="lucideMenu" size="18" />
         </button>
 
         <span class="font-semibold text-sm hidden sm:inline-block">Sentinel EHR</span>
 
         <!-- Sticky Top Bar Breadcrumb -->
-        <nav aria-label="Breadcrumb" class="flex items-center gap-1.5 text-xs text-muted-foreground min-w-0 flex-wrap">
+        <nav
+          aria-label="Breadcrumb"
+          class="flex items-center gap-1.5 text-xs text-muted-foreground min-w-0 flex-wrap"
+        >
           <ng-container *ngFor="let item of breadcrumbs(); let last = last">
             <ng-container *ngIf="item.url && !last; else activeBreadcrumb">
-              <a [routerLink]="item.url" class="flex items-center gap-1 font-medium hover:text-foreground transition-colors shrink-0">
+              <a
+                [routerLink]="item.url"
+                class="flex items-center gap-1 font-medium hover:text-foreground transition-colors shrink-0"
+              >
                 <ng-icon *ngIf="item.icon" [name]="item.icon" size="13" class="text-primary" />
                 <span class="truncate max-w-[130px] sm:max-w-none">{{ item.label }}</span>
               </a>
             </ng-container>
             <ng-template #activeBreadcrumb>
               <span class="font-semibold text-foreground truncate flex items-center gap-1 shrink-0">
-                <ng-icon *ngIf="item.icon" [name]="item.icon" size="13" class="text-primary shrink-0" />
+                <ng-icon
+                  *ngIf="item.icon"
+                  [name]="item.icon"
+                  size="13"
+                  class="text-primary shrink-0"
+                />
                 <span class="truncate max-w-[160px] sm:max-w-none">{{ item.label }}</span>
               </span>
             </ng-template>
-            <ng-icon *ngIf="!last" name="lucideChevronRight" size="12" class="text-muted-foreground/60 shrink-0" />
+            <ng-icon
+              *ngIf="!last"
+              name="lucideChevronRight"
+              size="12"
+              class="text-muted-foreground/60 shrink-0"
+            />
           </ng-container>
         </nav>
 
         <!-- Patient self-service banner -->
-        <div *ngIf="isPatient() && patientContext.activePatient()" class="flex items-center gap-2 text-xs ml-2">
+        <div
+          *ngIf="isPatient() && patientContext.activePatient()"
+          class="flex items-center gap-2 text-xs ml-2"
+        >
           <span class="text-muted-foreground font-medium hidden lg:inline">My record:</span>
           <span class="font-semibold text-xs">{{ patientContext.activePatient()?.fullName }}</span>
           <span hlmBadge variant="outline" class="text-[10px]">
@@ -115,7 +179,14 @@
           {{ primaryRole() }}
         </span>
 
-        <button hlmBtn variant="ghost" size="icon" class="size-8" hlmTooltip="Toggle theme" (click)="toggleTheme()">
+        <button
+          hlmBtn
+          variant="ghost"
+          size="icon"
+          class="size-8"
+          hlmTooltip="Toggle theme"
+          (click)="toggleTheme()"
+        >
           <ng-icon [name]="theme.mode() === 'dark' ? 'lucideSun' : 'lucideMoon'" size="16" />
         </button>
       </div>

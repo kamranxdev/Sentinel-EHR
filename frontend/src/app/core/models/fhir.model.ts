@@ -25,7 +25,16 @@ export interface FhirBundleEntry<T = FhirResource> {
 export interface FhirBundle<T = FhirResource> {
   resourceType: 'Bundle';
   id?: string;
-  type: 'document' | 'message' | 'transaction' | 'transaction-response' | 'batch' | 'batch-response' | 'history' | 'searchset' | 'collection';
+  type:
+    | 'document'
+    | 'message'
+    | 'transaction'
+    | 'transaction-response'
+    | 'batch'
+    | 'batch-response'
+    | 'history'
+    | 'searchset'
+    | 'collection';
   total?: number;
   entry?: FhirBundleEntry<T>[];
 }

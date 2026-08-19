@@ -60,10 +60,14 @@ import {
   template: `
     <div class="w-full space-y-6">
       <!-- Header -->
-      <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 pb-5 border-b border-border">
+      <div
+        class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 pb-5 border-b border-border"
+      >
         <div class="space-y-1">
           <div class="flex items-center flex-wrap gap-2.5">
-            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground flex items-center gap-2">
+            <h1
+              class="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground flex items-center gap-2"
+            >
               Emergency Break-Glass Protocol
             </h1>
             <span hlmBadge variant="destructive" class="text-[11px] font-semibold py-0.5 px-2.5">
@@ -71,7 +75,8 @@ import {
             </span>
           </div>
           <p class="text-xs text-muted-foreground">
-            Execute temporary emergency clinical record leases for unassigned emergency patients, trauma resuscitations, and rapid responses.
+            Execute temporary emergency clinical record leases for unassigned emergency patients,
+            trauma resuscitations, and rapid responses.
           </p>
         </div>
 
@@ -92,7 +97,9 @@ import {
       <!-- Security Guidance Banner -->
       <div class="p-5 rounded-2xl border border-rose-500/30 bg-rose-500/5 space-y-3">
         <div class="flex items-start gap-3.5">
-          <div class="size-10 rounded-xl bg-rose-500/20 text-rose-600 flex items-center justify-center shrink-0">
+          <div
+            class="size-10 rounded-xl bg-rose-500/20 text-rose-600 flex items-center justify-center shrink-0"
+          >
             <ng-icon name="lucideShieldAlert" size="22" />
           </div>
           <div class="space-y-1 text-xs">
@@ -101,8 +108,11 @@ import {
               <span hlmBadge variant="destructive" class="text-[10px]">Immutable Ledger</span>
             </h3>
             <p class="text-muted-foreground leading-relaxed">
-              In accordance with DPDP and ABDM data governance regulations, physicians may only access patient records within an active clinical relationship (Appointment, Inpatient Care Team, or Outpatient Encounter).
-              Executing Break-Glass overrides ABAC policies for a temporary 4-hour lease. Every read, write, and order executed is stamped to the immutable compliance ledger.
+              In accordance with DPDP and ABDM data governance regulations, physicians may only
+              access patient records within an active clinical relationship (Appointment, Inpatient
+              Care Team, or Outpatient Encounter). Executing Break-Glass overrides ABAC policies for
+              a temporary 4-hour lease. Every read, write, and order executed is stamped to the
+              immutable compliance ledger.
             </p>
           </div>
         </div>
@@ -113,10 +123,16 @@ import {
         <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
           <div>
             <h3 class="text-sm font-bold text-foreground">Emergency Patient Lookup</h3>
-            <p class="text-xs text-muted-foreground">Search by Patient Full Name, MRN Code, or National ID</p>
+            <p class="text-xs text-muted-foreground">
+              Search by Patient Full Name, MRN Code, or National ID
+            </p>
           </div>
           <div class="relative w-full sm:w-80">
-            <ng-icon name="lucideSearch" size="14" class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <ng-icon
+              name="lucideSearch"
+              size="14"
+              class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+            />
             <input
               hlmInput
               type="text"
@@ -129,7 +145,10 @@ import {
         </div>
 
         <!-- Search Results List -->
-        <div *ngIf="searchResults().length > 0" class="divide-y divide-border border rounded-xl overflow-hidden">
+        <div
+          *ngIf="searchResults().length > 0"
+          class="divide-y divide-border border rounded-xl overflow-hidden"
+        >
           <div
             *ngFor="let p of searchResults()"
             class="p-4 hover:bg-muted/30 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
@@ -137,10 +156,13 @@ import {
             <div class="space-y-1">
               <div class="flex items-center gap-2 font-bold text-foreground text-sm">
                 <span>{{ p.fullName }}</span>
-                <span hlmBadge variant="outline" class="text-[10px] font-mono">{{ p.patientCode }}</span>
+                <span hlmBadge variant="outline" class="text-[10px] font-mono">{{
+                  p.patientCode
+                }}</span>
               </div>
               <div class="text-muted-foreground text-[11px]">
-                DOB: {{ p.dateOfBirth || 'N/A' }} • Gender: {{ p.gender || 'N/A' }} • Blood: {{ p.bloodType || 'A+' }}
+                DOB: {{ p.dateOfBirth || 'N/A' }} • Gender: {{ p.gender || 'N/A' }} • Blood:
+                {{ p.bloodType || 'A+' }}
               </div>
             </div>
 
@@ -157,7 +179,10 @@ import {
           </div>
         </div>
 
-        <div *ngIf="searchQuery && searchResults().length === 0" class="py-8 text-center text-xs text-muted-foreground">
+        <div
+          *ngIf="searchQuery && searchResults().length === 0"
+          class="py-8 text-center text-xs text-muted-foreground"
+        >
           No patient found matching "{{ searchQuery }}". Verify MRN or national ID.
         </div>
       </div>
@@ -167,7 +192,9 @@ import {
         <div class="p-4 border-b border-border bg-muted/20 flex items-center justify-between">
           <div class="flex items-center gap-2">
             <ng-icon name="lucideHistory" size="16" class="text-rose-600" />
-            <h3 class="text-sm font-bold text-foreground">Recent Emergency Access Overrides & Active Leases</h3>
+            <h3 class="text-sm font-bold text-foreground">
+              Recent Emergency Access Overrides & Active Leases
+            </h3>
           </div>
           <span hlmBadge variant="outline" class="text-[10px] font-mono">
             {{ auditRecords().length }} Recorded Overrides
@@ -181,19 +208,37 @@ import {
                 <th hlmTableHead class="py-3 px-4 text-left font-semibold">Timestamp</th>
                 <th hlmTableHead class="py-3 px-4 text-left font-semibold">Patient ID / Context</th>
                 <th hlmTableHead class="py-3 px-4 text-left font-semibold">Category</th>
-                <th hlmTableHead class="py-3 px-4 text-left font-semibold">Clinical Justification</th>
+                <th hlmTableHead class="py-3 px-4 text-left font-semibold">
+                  Clinical Justification
+                </th>
                 <th hlmTableHead class="py-3 px-4 text-left font-semibold">Lease Status</th>
                 <th hlmTableHead class="py-3 px-4 text-right font-semibold">Action</th>
               </tr>
             </thead>
             <tbody hlmTableBody class="divide-y divide-border">
-              <tr *ngFor="let rec of auditRecords()" hlmTableRow class="hover:bg-muted/30 transition-colors">
-                <td hlmTableCell class="py-3 px-4 font-mono text-muted-foreground">{{ (rec.requestedAt || rec.id) | date:'medium' }}</td>
-                <td hlmTableCell class="py-3 px-4 font-mono font-semibold text-foreground">{{ rec.patientId || rec.patient?.patientCode || 'N/A' }}</td>
-                <td hlmTableCell class="py-3 px-4 font-semibold text-rose-600 dark:text-rose-400">{{ rec.category }}</td>
-                <td hlmTableCell class="py-3 px-4 max-w-xs truncate text-muted-foreground">{{ rec.justification }}</td>
+              <tr
+                *ngFor="let rec of auditRecords()"
+                hlmTableRow
+                class="hover:bg-muted/30 transition-colors"
+              >
+                <td hlmTableCell class="py-3 px-4 font-mono text-muted-foreground">
+                  {{ rec.requestedAt || rec.id | date: 'medium' }}
+                </td>
+                <td hlmTableCell class="py-3 px-4 font-mono font-semibold text-foreground">
+                  {{ rec.patientId || rec.patient?.patientCode || 'N/A' }}
+                </td>
+                <td hlmTableCell class="py-3 px-4 font-semibold text-rose-600 dark:text-rose-400">
+                  {{ rec.category }}
+                </td>
+                <td hlmTableCell class="py-3 px-4 max-w-xs truncate text-muted-foreground">
+                  {{ rec.justification }}
+                </td>
                 <td hlmTableCell class="py-3 px-4">
-                  <span hlmBadge variant="secondary" class="text-[10px] font-mono bg-emerald-500/10 text-emerald-600">
+                  <span
+                    hlmBadge
+                    variant="secondary"
+                    class="text-[10px] font-mono bg-emerald-500/10 text-emerald-600"
+                  >
                     {{ rec.status || 'LEASE_ACTIVE (4h)' }}
                   </span>
                 </td>
@@ -246,7 +291,7 @@ export class PhysicianBreakGlassComponent implements OnInit {
     private apiService: ApiService,
     private authService: AuthService,
     private patientContext: PatientContextService,
-    private router: Router
+    private router: Router,
   ) {}
 
   ngOnInit(): void {

@@ -114,25 +114,45 @@ export interface NursingShiftTask {
   template: `
     <div class="w-full space-y-6">
       <!-- 1. Nurse Header: Shift, Station & Unit Identity -->
-      <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 pb-5 border-b border-border">
+      <div
+        class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 pb-5 border-b border-border"
+      >
         <div class="space-y-1">
           <div class="flex items-center flex-wrap gap-2.5">
-            <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground flex items-center gap-2">
+            <h1
+              class="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground flex items-center gap-2"
+            >
               <span>Nurse Station Command Desk</span>
             </h1>
-            <span hlmBadge variant="secondary" class="bg-primary/10 text-primary border-primary/20 text-[11px] font-semibold py-0.5 px-2.5">
+            <span
+              hlmBadge
+              variant="secondary"
+              class="bg-primary/10 text-primary border-primary/20 text-[11px] font-semibold py-0.5 px-2.5"
+            >
               Staff Nurse: {{ currentUser?.fullName || 'Nurse Fatima' }}
             </span>
-            <span hlmBadge variant="outline" class="text-[11px] border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/5 flex items-center gap-1">
+            <span
+              hlmBadge
+              variant="outline"
+              class="text-[11px] border-emerald-500/30 text-emerald-600 dark:text-emerald-400 bg-emerald-500/5 flex items-center gap-1"
+            >
               <span class="size-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
               <span>Morning Shift (07:00 – 15:00)</span>
             </span>
           </div>
 
           <div class="flex items-center flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
-            <span>Assigned Unit: <strong class="text-foreground">Ward 3A - Acute Internal Medicine</strong></span>
+            <span
+              >Assigned Unit:
+              <strong class="text-foreground">Ward 3A - Acute Internal Medicine</strong></span
+            >
             <span class="text-border">•</span>
-            <span>Hospital / Clinic: <strong class="text-foreground">{{ authService.activeContext()?.organizationName || 'Main Hospital' }}</strong></span>
+            <span
+              >Hospital / Clinic:
+              <strong class="text-foreground">{{
+                authService.activeContext()?.organizationName || 'Main Hospital'
+              }}</strong></span
+            >
             <span class="text-border">•</span>
             <span>Station: <strong class="font-mono text-foreground">STATION-3A-N01</strong></span>
           </div>
@@ -174,17 +194,24 @@ export interface NursingShiftTask {
       </div>
 
       <!-- High-Acuity Patient Alerts (if any NEWS2 >= 4) -->
-      <div *ngIf="criticalPatientsCount() > 0" class="p-4 rounded-2xl border border-amber-500/30 bg-amber-500/10 text-amber-900 dark:text-amber-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
+      <div
+        *ngIf="criticalPatientsCount() > 0"
+        class="p-4 rounded-2xl border border-amber-500/30 bg-amber-500/10 text-amber-900 dark:text-amber-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs"
+      >
         <div class="flex items-center gap-3">
-          <div class="size-9 rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
+          <div
+            class="size-9 rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0"
+          >
             <ng-icon name="lucideAlertTriangle" size="20" />
           </div>
           <div>
             <div class="font-bold text-xs sm:text-sm">
-              Clinical Alert: {{ criticalPatientsCount() }} patient(s) in Ward 3A require close nursing observation
+              Clinical Alert: {{ criticalPatientsCount() }} patient(s) in Ward 3A require close
+              nursing observation
             </div>
             <p class="text-xs text-amber-800/80 dark:text-amber-300/80 mt-0.5">
-              Elevated NEWS2 score &ge; 4 or critical vitals detected. Check bedside flowsheet and notify attending physician.
+              Elevated NEWS2 score &ge; 4 or critical vitals detected. Check bedside flowsheet and
+              notify attending physician.
             </p>
           </div>
         </div>
@@ -209,20 +236,36 @@ export interface NursingShiftTask {
           [class.ring-primary]="filterMode() === 'ALL'"
         >
           <div class="flex items-center justify-between">
-            <span class="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">My Inpatient Census</span>
-            <div class="size-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-muted-foreground"
+              >My Inpatient Census</span
+            >
+            <div
+              class="size-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center"
+            >
               <ng-icon name="lucideBed" size="14" />
             </div>
           </div>
           <div class="flex items-baseline justify-between">
-            <span class="text-2xl font-extrabold text-foreground">{{ assignedInpatients().length }}</span>
-            <span hlmBadge variant="secondary" class="text-[10px] bg-primary/10 text-primary border-primary/20 font-semibold">
+            <span class="text-2xl font-extrabold text-foreground">{{
+              assignedInpatients().length
+            }}</span>
+            <span
+              hlmBadge
+              variant="secondary"
+              class="text-[10px] bg-primary/10 text-primary border-primary/20 font-semibold"
+            >
               Ward 3A
             </span>
           </div>
-          <div class="text-[11px] text-muted-foreground flex items-center justify-between pt-1 border-t border-border/60 group-hover:text-primary">
+          <div
+            class="text-[11px] text-muted-foreground flex items-center justify-between pt-1 border-t border-border/60 group-hover:text-primary"
+          >
             <span>Assigned Bedside Patients</span>
-            <ng-icon name="lucideChevronRight" size="12" class="group-hover:translate-x-0.5 transition-transform" />
+            <ng-icon
+              name="lucideChevronRight"
+              size="12"
+              class="group-hover:translate-x-0.5 transition-transform"
+            />
           </div>
         </div>
 
@@ -232,20 +275,34 @@ export interface NursingShiftTask {
           class="p-4 rounded-2xl border border-border bg-card shadow-2xs hover:border-amber-500/40 hover:shadow-xs transition-all space-y-2.5 group"
         >
           <div class="flex items-center justify-between">
-            <span class="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Triage Queue</span>
-            <div class="size-7 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-muted-foreground"
+              >Triage Queue</span
+            >
+            <div
+              class="size-7 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center"
+            >
               <ng-icon name="lucideClipboardList" size="14" />
             </div>
           </div>
           <div class="flex items-baseline justify-between">
             <span class="text-2xl font-extrabold text-foreground">{{ triageQueue().length }}</span>
-            <span hlmBadge variant="outline" class="text-[10px] font-semibold text-amber-600 border-amber-500/30">
+            <span
+              hlmBadge
+              variant="outline"
+              class="text-[10px] font-semibold text-amber-600 border-amber-500/30"
+            >
               {{ getPendingTriageCount() }} Awaiting Intake
             </span>
           </div>
-          <div class="text-[11px] text-muted-foreground flex items-center justify-between pt-1 border-t border-border/60 group-hover:text-amber-600">
+          <div
+            class="text-[11px] text-muted-foreground flex items-center justify-between pt-1 border-t border-border/60 group-hover:text-amber-600"
+          >
             <span>Pre-Consult Intake</span>
-            <ng-icon name="lucideChevronRight" size="12" class="group-hover:translate-x-0.5 transition-transform" />
+            <ng-icon
+              name="lucideChevronRight"
+              size="12"
+              class="group-hover:translate-x-0.5 transition-transform"
+            />
           </div>
         </a>
 
@@ -257,18 +314,28 @@ export interface NursingShiftTask {
           [class.ring-emerald-500]="filterMode() === 'MEDS_DUE'"
         >
           <div class="flex items-center justify-between">
-            <span class="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">eMAR Meds Due</span>
-            <div class="size-7 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-muted-foreground"
+              >eMAR Meds Due</span
+            >
+            <div
+              class="size-7 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center"
+            >
               <ng-icon name="lucidePill" size="14" />
             </div>
           </div>
           <div class="flex items-baseline justify-between">
             <span class="text-2xl font-extrabold text-foreground">{{ totalMedsDue() }}</span>
-            <span hlmBadge variant="secondary" class="text-[10px] bg-emerald-500/10 text-emerald-600 font-semibold">
+            <span
+              hlmBadge
+              variant="secondary"
+              class="text-[10px] bg-emerald-500/10 text-emerald-600 font-semibold"
+            >
               This Shift
             </span>
           </div>
-          <div class="text-[11px] text-muted-foreground flex items-center justify-between pt-1 border-t border-border/60 group-hover:text-emerald-600">
+          <div
+            class="text-[11px] text-muted-foreground flex items-center justify-between pt-1 border-t border-border/60 group-hover:text-emerald-600"
+          >
             <span>5-Rights Verification</span>
             <span class="text-[10px] text-emerald-600 font-bold">On Schedule</span>
           </div>
@@ -277,8 +344,12 @@ export interface NursingShiftTask {
         <!-- Tile 4: Shift Orders & Tasks -->
         <div class="p-4 rounded-2xl border border-border bg-card shadow-2xs space-y-2.5">
           <div class="flex items-center justify-between">
-            <span class="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Shift Tasks</span>
-            <div class="size-7 rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-muted-foreground"
+              >Shift Tasks</span
+            >
+            <div
+              class="size-7 rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400 flex items-center justify-center"
+            >
               <ng-icon name="lucideActivity" size="14" />
             </div>
           </div>
@@ -288,7 +359,9 @@ export interface NursingShiftTask {
               Action Required
             </span>
           </div>
-          <div class="text-[11px] text-muted-foreground flex items-center justify-between pt-1 border-t border-border/60">
+          <div
+            class="text-[11px] text-muted-foreground flex items-center justify-between pt-1 border-t border-border/60"
+          >
             <span>I/O, Vitals, Dressings</span>
             <span class="text-[10px] font-bold text-rose-600">Pending</span>
           </div>
@@ -297,13 +370,13 @@ export interface NursingShiftTask {
 
       <!-- 3. Main Workstation Grid (8 Cols: Inpatient Census Table + Triage Queue, 4 Cols: Shift Tasks Inbox & Quick Actions) -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        
         <!-- Left Column (8 Cols): Ward Census Roster & Outpatient Triage -->
         <div class="lg:col-span-8 space-y-6">
-
           <!-- Section A: Assigned Inpatients in Ward 3A with Filter Tabs -->
           <div class="rounded-2xl border border-border bg-card overflow-hidden shadow-xs">
-            <div class="p-4 border-b border-border bg-muted/20 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <div
+              class="p-4 border-b border-border bg-muted/20 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3"
+            >
               <div>
                 <h3 class="text-sm font-bold text-foreground flex items-center gap-2">
                   <ng-icon name="lucideBed" size="16" class="text-primary" />
@@ -316,7 +389,11 @@ export interface NursingShiftTask {
 
               <!-- Search Box -->
               <div class="relative w-full sm:w-60">
-                <ng-icon name="lucideSearch" size="14" class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <ng-icon
+                  name="lucideSearch"
+                  size="14"
+                  class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                />
                 <input
                   hlmInput
                   type="text"
@@ -328,11 +405,17 @@ export interface NursingShiftTask {
             </div>
 
             <!-- Filter Badges / View Filters -->
-            <div class="px-4 py-2 bg-muted/40 border-b border-border flex items-center gap-2 overflow-x-auto text-xs">
+            <div
+              class="px-4 py-2 bg-muted/40 border-b border-border flex items-center gap-2 overflow-x-auto text-xs"
+            >
               <button
                 (click)="filterMode.set('ALL')"
                 class="px-2.5 py-1 rounded-lg font-semibold transition-all cursor-pointer text-xs"
-                [ngClass]="filterMode() === 'ALL' ? 'bg-background shadow-xs text-foreground font-bold border border-border' : 'text-muted-foreground hover:text-foreground'"
+                [ngClass]="
+                  filterMode() === 'ALL'
+                    ? 'bg-background shadow-xs text-foreground font-bold border border-border'
+                    : 'text-muted-foreground hover:text-foreground'
+                "
               >
                 All Inpatients ({{ assignedInpatients().length }})
               </button>
@@ -340,16 +423,27 @@ export interface NursingShiftTask {
               <button
                 (click)="filterMode.set('CRITICAL')"
                 class="px-2.5 py-1 rounded-lg font-semibold transition-all cursor-pointer text-xs flex items-center gap-1"
-                [ngClass]="filterMode() === 'CRITICAL' ? 'bg-amber-500/20 text-amber-700 dark:text-amber-300 font-bold border border-amber-500/30' : 'text-muted-foreground hover:text-amber-600'"
+                [ngClass]="
+                  filterMode() === 'CRITICAL'
+                    ? 'bg-amber-500/20 text-amber-700 dark:text-amber-300 font-bold border border-amber-500/30'
+                    : 'text-muted-foreground hover:text-amber-600'
+                "
               >
                 <span>Elevated NEWS2</span>
-                <span *ngIf="criticalPatientsCount() > 0" class="size-2 rounded-full bg-amber-500"></span>
+                <span
+                  *ngIf="criticalPatientsCount() > 0"
+                  class="size-2 rounded-full bg-amber-500"
+                ></span>
               </button>
 
               <button
                 (click)="filterMode.set('FALL_RISK')"
                 class="px-2.5 py-1 rounded-lg font-semibold transition-all cursor-pointer text-xs"
-                [ngClass]="filterMode() === 'FALL_RISK' ? 'bg-rose-500/20 text-rose-700 dark:text-rose-300 font-bold border border-rose-500/30' : 'text-muted-foreground hover:text-rose-600'"
+                [ngClass]="
+                  filterMode() === 'FALL_RISK'
+                    ? 'bg-rose-500/20 text-rose-700 dark:text-rose-300 font-bold border border-rose-500/30'
+                    : 'text-muted-foreground hover:text-rose-600'
+                "
               >
                 High Fall Risk
               </button>
@@ -357,7 +451,11 @@ export interface NursingShiftTask {
               <button
                 (click)="filterMode.set('MEDS_DUE')"
                 class="px-2.5 py-1 rounded-lg font-semibold transition-all cursor-pointer text-xs"
-                [ngClass]="filterMode() === 'MEDS_DUE' ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-bold border border-emerald-500/30' : 'text-muted-foreground hover:text-emerald-600'"
+                [ngClass]="
+                  filterMode() === 'MEDS_DUE'
+                    ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-bold border border-emerald-500/30'
+                    : 'text-muted-foreground hover:text-emerald-600'
+                "
               >
                 Meds Due Now
               </button>
@@ -369,8 +467,12 @@ export interface NursingShiftTask {
                 <thead hlmTableHeader>
                   <tr hlmTableRow class="bg-muted/50 border-b border-border">
                     <th hlmTableHead class="py-3 px-4 text-left font-semibold">Bed / Room</th>
-                    <th hlmTableHead class="py-3 px-4 text-left font-semibold">Patient Demographics</th>
-                    <th hlmTableHead class="py-3 px-4 text-left font-semibold">Admission Diagnosis</th>
+                    <th hlmTableHead class="py-3 px-4 text-left font-semibold">
+                      Patient Demographics
+                    </th>
+                    <th hlmTableHead class="py-3 px-4 text-left font-semibold">
+                      Admission Diagnosis
+                    </th>
                     <th hlmTableHead class="py-3 px-4 text-left font-semibold">NEWS2 Acuity</th>
                     <th hlmTableHead class="py-3 px-4 text-left font-semibold">Care & Safety</th>
                     <th hlmTableHead class="py-3 px-4 text-right font-semibold">Action</th>
@@ -389,21 +491,31 @@ export interface NursingShiftTask {
                         <ng-icon name="lucideBed" size="13" class="text-primary" />
                         <span>{{ inp.bedCode }}</span>
                       </div>
-                      <span class="text-[10px] text-muted-foreground block mt-0.5">Rm {{ inp.roomNumber }}</span>
+                      <span class="text-[10px] text-muted-foreground block mt-0.5"
+                        >Rm {{ inp.roomNumber }}</span
+                      >
                     </td>
 
                     <!-- Patient Demographics -->
                     <td hlmTableCell class="py-3.5 px-4">
-                      <div class="font-bold text-foreground text-xs">{{ inp.patient.fullName }}</div>
+                      <div class="font-bold text-foreground text-xs">
+                        {{ inp.patient.fullName }}
+                      </div>
                       <div class="text-[10px] text-muted-foreground font-mono mt-0.5">
-                        {{ inp.patient.patientCode }} • {{ inp.patient.gender || 'U' }} ({{ inp.patient.dateOfBirth || 'N/A' }})
+                        {{ inp.patient.patientCode }} • {{ inp.patient.gender || 'U' }} ({{
+                          inp.patient.dateOfBirth || 'N/A'
+                        }})
                       </div>
                     </td>
 
                     <!-- Diagnosis & Doctor -->
                     <td hlmTableCell class="py-3.5 px-4 max-w-xs">
-                      <span class="font-medium text-foreground block truncate">{{ inp.admissionDiagnosis }}</span>
-                      <span class="text-[10px] text-muted-foreground">MD: {{ inp.attendingPhysician }}</span>
+                      <span class="font-medium text-foreground block truncate">{{
+                        inp.admissionDiagnosis
+                      }}</span>
+                      <span class="text-[10px] text-muted-foreground"
+                        >MD: {{ inp.attendingPhysician }}</span
+                      >
                     </td>
 
                     <!-- NEWS2 Acuity -->
@@ -411,13 +523,25 @@ export interface NursingShiftTask {
                       <div class="flex items-center gap-1.5">
                         <span
                           hlmBadge
-                          [variant]="inp.acuityLevel === 'CRITICAL' ? 'destructive' : inp.acuityLevel === 'OBSERVED' ? 'outline' : 'secondary'"
+                          [variant]="
+                            inp.acuityLevel === 'CRITICAL'
+                              ? 'destructive'
+                              : inp.acuityLevel === 'OBSERVED'
+                                ? 'outline'
+                                : 'secondary'
+                          "
                           class="text-[10px] font-bold"
-                          [ngClass]="inp.ewsScore >= 4 ? 'border-amber-500 text-amber-600 bg-amber-500/10' : ''"
+                          [ngClass]="
+                            inp.ewsScore >= 4
+                              ? 'border-amber-500 text-amber-600 bg-amber-500/10'
+                              : ''
+                          "
                         >
                           EWS: {{ inp.ewsScore }}
                         </span>
-                        <span class="text-[10px] font-semibold text-muted-foreground">{{ inp.acuityLevel }}</span>
+                        <span class="text-[10px] font-semibold text-muted-foreground">{{
+                          inp.acuityLevel
+                        }}</span>
                       </div>
                     </td>
 
@@ -478,17 +602,23 @@ export interface NursingShiftTask {
 
           <!-- Section B: Outpatient Appointments & Triage Queue Snapshot -->
           <div class="rounded-2xl border border-border bg-card overflow-hidden shadow-xs">
-            <div class="p-4 border-b border-border bg-muted/20 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+            <div
+              class="p-4 border-b border-border bg-muted/20 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2"
+            >
               <div>
                 <h3 class="text-sm font-bold text-foreground flex items-center gap-2">
                   <ng-icon name="lucideClipboardList" size="16" class="text-amber-600" />
                   <span>Outpatient Appointments & Triage</span>
                 </h3>
                 <p class="text-xs text-muted-foreground mt-0.5">
-                  Arrived clinic patients awaiting pre-consultation vitals, allergy verification, and triage before doctor consultation.
+                  Arrived clinic patients awaiting pre-consultation vitals, allergy verification,
+                  and triage before doctor consultation.
                 </p>
               </div>
-              <a routerLink="/nurse/appointments" class="text-xs text-amber-600 hover:underline font-semibold flex items-center gap-1">
+              <a
+                routerLink="/nurse/appointments"
+                class="text-xs text-amber-600 hover:underline font-semibold flex items-center gap-1"
+              >
                 <span>View Full Queue</span>
                 <ng-icon name="lucideChevronRight" size="13" />
               </a>
@@ -500,16 +630,21 @@ export interface NursingShiftTask {
                 class="p-3.5 hover:bg-muted/30 transition-colors flex items-center justify-between gap-3 text-xs"
               >
                 <div class="flex items-center gap-3">
-                  <div class="size-8 rounded-lg bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0">
+                  <div
+                    class="size-8 rounded-lg bg-amber-500/10 text-amber-600 flex items-center justify-center shrink-0"
+                  >
                     <ng-icon name="lucideClock" size="16" />
                   </div>
                   <div>
                     <div class="font-bold text-foreground flex items-center gap-2">
                       <span>{{ apt.patient?.fullName || apt.patientName || 'Patient' }}</span>
-                      <span hlmBadge variant="outline" class="text-[10px] font-mono">{{ apt.patient?.patientCode || 'MRN-VERIFIED' }}</span>
+                      <span hlmBadge variant="outline" class="text-[10px] font-mono">{{
+                        apt.patient?.patientCode || 'MRN-VERIFIED'
+                      }}</span>
                     </div>
                     <p class="text-[11px] text-muted-foreground">
-                      Time: {{ apt.appointmentDate | date:'shortTime' }} • Complaint: {{ apt.reason || 'General Consultation' }}
+                      Time: {{ apt.appointmentDate | date: 'shortTime' }} • Complaint:
+                      {{ apt.reason || 'General Consultation' }}
                     </p>
                   </div>
                 </div>
@@ -535,21 +670,24 @@ export interface NursingShiftTask {
                 </div>
               </div>
 
-              <div *ngIf="triageQueue().length === 0" class="py-8 text-center text-xs text-muted-foreground">
+              <div
+                *ngIf="triageQueue().length === 0"
+                class="py-8 text-center text-xs text-muted-foreground"
+              >
                 No patients awaiting intake in the triage queue.
               </div>
             </div>
           </div>
-
         </div>
 
         <!-- Right Column (4 Cols): Shift Tasks Inbox & Quick Station Tools -->
         <div class="lg:col-span-4 space-y-6">
-
           <!-- Shift Tasks Inbox -->
           <div class="rounded-2xl border border-border bg-card p-4 space-y-3 shadow-xs">
             <div class="flex items-center justify-between border-b border-border pb-3">
-              <h3 class="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+              <h3
+                class="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5"
+              >
                 <ng-icon name="lucideActivity" size="14" class="text-rose-600" />
                 <span>Shift Nursing Tasks Inbox</span>
               </h3>
@@ -565,7 +703,9 @@ export interface NursingShiftTask {
               >
                 <div class="flex items-start justify-between gap-2">
                   <div>
-                    <span class="font-bold text-foreground text-xs leading-snug">{{ task.title }}</span>
+                    <span class="font-bold text-foreground text-xs leading-snug">{{
+                      task.title
+                    }}</span>
                     <div class="text-[10px] text-muted-foreground font-mono mt-0.5">
                       {{ task.patientName }} ({{ task.bedCode }}) • Due: {{ task.dueTime }}
                     </div>
@@ -589,7 +729,10 @@ export interface NursingShiftTask {
                 </div>
               </div>
 
-              <div *ngIf="shiftTasks().length === 0" class="py-6 text-center text-xs text-muted-foreground">
+              <div
+                *ngIf="shiftTasks().length === 0"
+                class="py-6 text-center text-xs text-muted-foreground"
+              >
                 All shift tasks completed on schedule.
               </div>
             </div>
@@ -597,8 +740,10 @@ export interface NursingShiftTask {
 
           <!-- Quick Station Shortcuts -->
           <div class="p-4 rounded-2xl border border-border bg-card space-y-2.5 shadow-xs">
-            <h4 class="text-xs font-bold uppercase tracking-wider text-muted-foreground">Nursing Station Links</h4>
-            
+            <h4 class="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+              Nursing Station Links
+            </h4>
+
             <a
               routerLink="/nurse/beds"
               class="p-2.5 rounded-xl border border-border hover:bg-accent/40 transition-all flex items-center justify-between text-xs font-semibold text-foreground group"
@@ -607,7 +752,11 @@ export interface NursingShiftTask {
                 <ng-icon name="lucideBed" size="15" class="text-primary" />
                 Spatial Bed & Ward Census
               </span>
-              <ng-icon name="lucideChevronRight" size="14" class="text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
+              <ng-icon
+                name="lucideChevronRight"
+                size="14"
+                class="text-muted-foreground group-hover:translate-x-0.5 transition-transform"
+              />
             </a>
 
             <a
@@ -618,7 +767,11 @@ export interface NursingShiftTask {
                 <ng-icon name="lucideClipboardList" size="15" class="text-amber-600" />
                 Outpatient Appointments & Triage
               </span>
-              <ng-icon name="lucideChevronRight" size="14" class="text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
+              <ng-icon
+                name="lucideChevronRight"
+                size="14"
+                class="text-muted-foreground group-hover:translate-x-0.5 transition-transform"
+              />
             </a>
 
             <a
@@ -629,10 +782,13 @@ export interface NursingShiftTask {
                 <ng-icon name="lucideActivity" size="15" class="text-emerald-600" />
                 Active Bedside EHR Chart
               </span>
-              <ng-icon name="lucideChevronRight" size="14" class="text-muted-foreground group-hover:translate-x-0.5 transition-transform" />
+              <ng-icon
+                name="lucideChevronRight"
+                size="14"
+                class="text-muted-foreground group-hover:translate-x-0.5 transition-transform"
+              />
             </a>
           </div>
-
         </div>
       </div>
     </div>
@@ -651,7 +807,7 @@ export class NurseDashboardComponent implements OnInit {
     public authService: AuthService,
     private apiService: ApiService,
     public patientContext: PatientContextService,
-    private router: Router
+    private router: Router,
   ) {}
 
   get currentUser() {
@@ -668,14 +824,21 @@ export class NurseDashboardComponent implements OnInit {
     // 1. Load Inpatients from occupied hospital beds in assigned ward
     this.apiService.getBeds().subscribe({
       next: (beds) => {
-        const occupied = Array.isArray(beds) ? beds.filter((b) => b.status === 'OCCUPIED' && b.currentEncounter?.patient) : [];
+        const occupied = Array.isArray(beds)
+          ? beds.filter((b) => b.status === 'OCCUPIED' && b.currentEncounter?.patient)
+          : [];
         if (occupied.length > 0) {
           const items: NurseAssignedInpatient[] = occupied.map((b, idx) => ({
             patient: b.currentEncounter!.patient!,
             bedCode: b.bedNumber || b.bedCode || `301${String.fromCharCode(65 + idx)}`,
             wardName: b.wardName || b.departmentName || 'Ward 3A',
             roomNumber: b.roomNumber || `30${idx + 1}`,
-            admissionDiagnosis: idx === 0 ? 'Acute Coronary Syndrome' : idx === 1 ? 'Community-Acquired Pneumonia' : 'Post-Op Observation',
+            admissionDiagnosis:
+              idx === 0
+                ? 'Acute Coronary Syndrome'
+                : idx === 1
+                  ? 'Community-Acquired Pneumonia'
+                  : 'Post-Op Observation',
             ewsScore: idx === 0 ? 4 : idx === 1 ? 2 : 1,
             acuityLevel: idx === 0 ? 'OBSERVED' : 'STABLE',
             fallRisk: idx === 0 ? 'HIGH' : 'LOW',
@@ -697,7 +860,12 @@ export class NurseDashboardComponent implements OnInit {
                 bedCode: `30${idx + 1}A`,
                 wardName: 'Ward 3A - Acute Care',
                 roomNumber: `30${idx + 1}`,
-                admissionDiagnosis: idx === 0 ? 'Acute Coronary Syndrome' : idx === 1 ? 'Exacerbation of COPD' : 'Post-Op Laparoscopy',
+                admissionDiagnosis:
+                  idx === 0
+                    ? 'Acute Coronary Syndrome'
+                    : idx === 1
+                      ? 'Exacerbation of COPD'
+                      : 'Post-Op Laparoscopy',
                 ewsScore: idx === 0 ? 4 : idx === 1 ? 2 : 1,
                 acuityLevel: idx === 0 ? 'OBSERVED' : 'STABLE',
                 fallRisk: idx === 0 ? 'HIGH' : 'LOW',
@@ -766,7 +934,9 @@ export class NurseDashboardComponent implements OnInit {
 
     const mode = this.filterMode();
     if (mode === 'CRITICAL') {
-      list = list.filter((i) => i.ewsScore >= 3 || i.acuityLevel === 'CRITICAL' || i.acuityLevel === 'OBSERVED');
+      list = list.filter(
+        (i) => i.ewsScore >= 3 || i.acuityLevel === 'CRITICAL' || i.acuityLevel === 'OBSERVED',
+      );
     } else if (mode === 'FALL_RISK') {
       list = list.filter((i) => i.fallRisk === 'HIGH' || i.fallRisk === 'MODERATE');
     } else if (mode === 'MEDS_DUE') {
@@ -780,12 +950,13 @@ export class NurseDashboardComponent implements OnInit {
         i.patient.patientCode?.toLowerCase().includes(q) ||
         i.bedCode?.toLowerCase().includes(q) ||
         i.admissionDiagnosis?.toLowerCase().includes(q) ||
-        i.roomNumber?.toLowerCase().includes(q)
+        i.roomNumber?.toLowerCase().includes(q),
     );
   });
 
   criticalPatientsCount = computed(() => {
-    return this.assignedInpatients().filter((i) => i.ewsScore >= 4 || i.acuityLevel === 'CRITICAL').length;
+    return this.assignedInpatients().filter((i) => i.ewsScore >= 4 || i.acuityLevel === 'CRITICAL')
+      .length;
   });
 
   totalMedsDue = computed(() => {
@@ -793,7 +964,8 @@ export class NurseDashboardComponent implements OnInit {
   });
 
   getPendingTriageCount(): number {
-    return this.triageQueue().filter((a) => a.status === 'CHECKED_IN' || a.stage === 'ARRIVED').length;
+    return this.triageQueue().filter((a) => a.status === 'CHECKED_IN' || a.stage === 'ARRIVED')
+      .length;
   }
 
   openBedsideChart(patient: Patient): void {

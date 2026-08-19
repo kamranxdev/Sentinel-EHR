@@ -24,7 +24,9 @@ export const routes: Routes = [
   {
     path: 'select-context',
     loadComponent: () =>
-      import('./components/select-context/select-context.component').then((m) => m.SelectContextComponent),
+      import('./components/select-context/select-context.component').then(
+        (m) => m.SelectContextComponent,
+      ),
     canActivate: [authGuard],
     data: { standalone: true },
   },
@@ -36,13 +38,17 @@ export const routes: Routes = [
   {
     path: 'onboarding',
     loadComponent: () =>
-      import('./workspaces/patient/patient-profile.component').then((m) => m.PatientProfileComponent),
+      import('./workspaces/patient/patient-profile.component').then(
+        (m) => m.PatientProfileComponent,
+      ),
     canActivate: [authGuard],
   },
   {
     path: 'patient/onboarding',
     loadComponent: () =>
-      import('./workspaces/patient/patient-profile.component').then((m) => m.PatientProfileComponent),
+      import('./workspaces/patient/patient-profile.component').then(
+        (m) => m.PatientProfileComponent,
+      ),
     canActivate: [authGuard, roleGuard],
     data: { roles: ['PATIENT'] },
   },
@@ -57,14 +63,18 @@ export const routes: Routes = [
   {
     path: 'physician/dashboard',
     loadComponent: () =>
-      import('./workspaces/physician/physician-dashboard.component').then((m) => m.PhysicianDashboardComponent),
+      import('./workspaces/physician/physician-dashboard.component').then(
+        (m) => m.PhysicianDashboardComponent,
+      ),
     canActivate: [authGuard, roleGuard],
     data: { roles: ['PHYSICIAN'] },
   },
   {
     path: 'physician/chart',
     loadComponent: () =>
-      import('./workspaces/physician/physician-chart.component').then((m) => m.PhysicianChartComponent),
+      import('./workspaces/physician/physician-chart.component').then(
+        (m) => m.PhysicianChartComponent,
+      ),
     canActivate: [authGuard, roleGuard, clinicalAccessGuard],
     data: { roles: ['PHYSICIAN'] },
   },
@@ -76,21 +86,27 @@ export const routes: Routes = [
   {
     path: 'physician/appointments',
     loadComponent: () =>
-      import('./workspaces/physician/physician-appointments.component').then((m) => m.PhysicianAppointmentsComponent),
+      import('./workspaces/physician/physician-appointments.component').then(
+        (m) => m.PhysicianAppointmentsComponent,
+      ),
     canActivate: [authGuard, roleGuard, clinicalAccessGuard],
     data: { roles: ['PHYSICIAN'], permission: 'APPOINTMENT_READ' },
   },
   {
     path: 'physician/inpatients',
     loadComponent: () =>
-      import('./workspaces/physician/physician-inpatients.component').then((m) => m.PhysicianInpatientsComponent),
+      import('./workspaces/physician/physician-inpatients.component').then(
+        (m) => m.PhysicianInpatientsComponent,
+      ),
     canActivate: [authGuard, roleGuard, clinicalAccessGuard],
     data: { roles: ['PHYSICIAN'] },
   },
   {
     path: 'physician/break-glass',
     loadComponent: () =>
-      import('./workspaces/physician/physician-break-glass.component').then((m) => m.PhysicianBreakGlassComponent),
+      import('./workspaces/physician/physician-break-glass.component').then(
+        (m) => m.PhysicianBreakGlassComponent,
+      ),
     canActivate: [authGuard, roleGuard],
     data: { roles: ['PHYSICIAN'] },
   },
@@ -163,7 +179,9 @@ export const routes: Routes = [
   {
     path: 'nurse/appointments',
     loadComponent: () =>
-      import('./workspaces/nurse/nurse-appointments.component').then((m) => m.NurseAppointmentsComponent),
+      import('./workspaces/nurse/nurse-appointments.component').then(
+        (m) => m.NurseAppointmentsComponent,
+      ),
     canActivate: [authGuard, roleGuard],
     data: { roles: ['NURSE'] },
   },
@@ -207,35 +225,45 @@ export const routes: Routes = [
   {
     path: 'super-admin/dashboard',
     loadComponent: () =>
-      import('./workspaces/super-admin/super-admin-dashboard.component').then((m) => m.SuperAdminDashboardComponent),
+      import('./workspaces/super-admin/super-admin-dashboard.component').then(
+        (m) => m.SuperAdminDashboardComponent,
+      ),
     canActivate: [authGuard, roleGuard],
     data: { roles: ['SUPER_ADMIN'] },
   },
   {
     path: 'super-admin/organizations',
     loadComponent: () =>
-      import('./workspaces/super-admin/super-admin-organizations.component').then((m) => m.SuperAdminOrganizationsComponent),
+      import('./workspaces/super-admin/super-admin-organizations.component').then(
+        (m) => m.SuperAdminOrganizationsComponent,
+      ),
     canActivate: [authGuard, roleGuard],
     data: { roles: ['SUPER_ADMIN'] },
   },
   {
     path: 'super-admin/users',
     loadComponent: () =>
-      import('./workspaces/super-admin/super-admin-users.component').then((m) => m.SuperAdminUsersComponent),
+      import('./workspaces/super-admin/super-admin-users.component').then(
+        (m) => m.SuperAdminUsersComponent,
+      ),
     canActivate: [authGuard, roleGuard],
     data: { roles: ['SUPER_ADMIN'] },
   },
   {
     path: 'super-admin/audit',
     loadComponent: () =>
-      import('./workspaces/super-admin/super-admin-audit.component').then((m) => m.SuperAdminAuditComponent),
+      import('./workspaces/super-admin/super-admin-audit.component').then(
+        (m) => m.SuperAdminAuditComponent,
+      ),
     canActivate: [authGuard, roleGuard],
     data: { roles: ['SUPER_ADMIN'] },
   },
   {
     path: 'super-admin/system-health',
     loadComponent: () =>
-      import('./workspaces/super-admin/super-admin-system-health.component').then((m) => m.SuperAdminSystemHealthComponent),
+      import('./workspaces/super-admin/super-admin-system-health.component').then(
+        (m) => m.SuperAdminSystemHealthComponent,
+      ),
     canActivate: [authGuard, roleGuard],
     data: { roles: ['SUPER_ADMIN'] },
   },
@@ -254,35 +282,45 @@ export const routes: Routes = [
   {
     path: 'organization-admin/dashboard',
     loadComponent: () =>
-      import('./workspaces/organization-admin/organization-admin-dashboard.component').then((m) => m.OrganizationAdminDashboardComponent),
+      import('./workspaces/organization-admin/organization-admin-dashboard.component').then(
+        (m) => m.OrganizationAdminDashboardComponent,
+      ),
     canActivate: [authGuard, roleGuard],
     data: { roles: ['ORGANIZATION_ADMIN'] },
   },
   {
     path: 'organization-admin/facility-settings',
     loadComponent: () =>
-      import('./workspaces/organization-admin/organization-admin-settings.component').then((m) => m.OrganizationAdminSettingsComponent),
+      import('./workspaces/organization-admin/organization-admin-settings.component').then(
+        (m) => m.OrganizationAdminSettingsComponent,
+      ),
     canActivate: [authGuard, roleGuard],
     data: { roles: ['ORGANIZATION_ADMIN'] },
   },
   {
     path: 'organization-admin/users',
     loadComponent: () =>
-      import('./workspaces/organization-admin/organization-admin-users.component').then((m) => m.OrganizationAdminUsersComponent),
+      import('./workspaces/organization-admin/organization-admin-users.component').then(
+        (m) => m.OrganizationAdminUsersComponent,
+      ),
     canActivate: [authGuard, roleGuard],
     data: { roles: ['ORGANIZATION_ADMIN'] },
   },
   {
     path: 'organization-admin/patients',
     loadComponent: () =>
-      import('./workspaces/organization-admin/organization-admin-patients.component').then((m) => m.OrganizationAdminPatientsComponent),
+      import('./workspaces/organization-admin/organization-admin-patients.component').then(
+        (m) => m.OrganizationAdminPatientsComponent,
+      ),
     canActivate: [authGuard, roleGuard],
     data: { roles: ['ORGANIZATION_ADMIN'] },
   },
   {
     path: 'organization-admin/schedule-analytics',
     loadComponent: () =>
-      import('./workspaces/organization-admin/organization-admin-schedule-analytics.component').then((m) => m.OrganizationAdminScheduleAnalyticsComponent),
+      import('./workspaces/organization-admin/organization-admin-schedule-analytics.component').then(
+        (m) => m.OrganizationAdminScheduleAnalyticsComponent,
+      ),
     canActivate: [authGuard, roleGuard],
     data: { roles: ['ORGANIZATION_ADMIN'] },
   },
@@ -291,7 +329,9 @@ export const routes: Routes = [
   {
     path: 'patient/dashboard',
     loadComponent: () =>
-      import('./workspaces/patient/patient-dashboard.component').then((m) => m.PatientDashboardComponent),
+      import('./workspaces/patient/patient-dashboard.component').then(
+        (m) => m.PatientDashboardComponent,
+      ),
     canActivate: [authGuard, roleGuard],
     data: { roles: ['PATIENT'] },
   },
@@ -360,14 +400,18 @@ export const routes: Routes = [
   {
     path: 'patient/profile',
     loadComponent: () =>
-      import('./workspaces/patient/patient-profile.component').then((m) => m.PatientProfileComponent),
+      import('./workspaces/patient/patient-profile.component').then(
+        (m) => m.PatientProfileComponent,
+      ),
     canActivate: [authGuard, roleGuard],
     data: { roles: ['PATIENT'] },
   },
   {
     path: 'patient/appointments',
     loadComponent: () =>
-      import('./workspaces/patient/patient-appointments.component').then((m) => m.PatientAppointmentsComponent),
+      import('./workspaces/patient/patient-appointments.component').then(
+        (m) => m.PatientAppointmentsComponent,
+      ),
     canActivate: [authGuard, roleGuard],
     data: { roles: ['PATIENT'] },
   },
@@ -383,21 +427,27 @@ export const routes: Routes = [
   {
     path: 'receptionist/dashboard',
     loadComponent: () =>
-      import('./workspaces/receptionist/receptionist-dashboard.component').then((m) => m.ReceptionistDashboardComponent),
+      import('./workspaces/receptionist/receptionist-dashboard.component').then(
+        (m) => m.ReceptionistDashboardComponent,
+      ),
     canActivate: [authGuard, roleGuard],
     data: { roles: ['RECEPTIONIST'] },
   },
   {
     path: 'receptionist/mpi',
     loadComponent: () =>
-      import('./workspaces/receptionist/receptionist-mpi.component').then((m) => m.ReceptionistMPIComponent),
+      import('./workspaces/receptionist/receptionist-mpi.component').then(
+        (m) => m.ReceptionistMPIComponent,
+      ),
     canActivate: [authGuard, roleGuard],
     data: { roles: ['RECEPTIONIST'] },
   },
   {
     path: 'receptionist/appointments',
     loadComponent: () =>
-      import('./workspaces/receptionist/receptionist-appointments.component').then((m) => m.ReceptionistAppointmentsComponent),
+      import('./workspaces/receptionist/receptionist-appointments.component').then(
+        (m) => m.ReceptionistAppointmentsComponent,
+      ),
     canActivate: [authGuard, roleGuard],
     data: { roles: ['RECEPTIONIST'] },
   },
@@ -406,21 +456,27 @@ export const routes: Routes = [
   {
     path: 'lab-technician/dashboard',
     loadComponent: () =>
-      import('./workspaces/lab-technician/lab-technician-dashboard.component').then((m) => m.LabTechnicianDashboardComponent),
+      import('./workspaces/lab-technician/lab-technician-dashboard.component').then(
+        (m) => m.LabTechnicianDashboardComponent,
+      ),
     canActivate: [authGuard, roleGuard],
     data: { roles: ['LAB_TECHNICIAN'] },
   },
   {
     path: 'lab-technician/worklist',
     loadComponent: () =>
-      import('./workspaces/lab-technician/lab-technician-worklist.component').then((m) => m.LabTechnicianWorklistComponent),
+      import('./workspaces/lab-technician/lab-technician-worklist.component').then(
+        (m) => m.LabTechnicianWorklistComponent,
+      ),
     canActivate: [authGuard, roleGuard],
     data: { roles: ['LAB_TECHNICIAN'] },
   },
   {
     path: 'lab-technician/results',
     loadComponent: () =>
-      import('./workspaces/lab-technician/lab-technician-results.component').then((m) => m.LabTechnicianResultsComponent),
+      import('./workspaces/lab-technician/lab-technician-results.component').then(
+        (m) => m.LabTechnicianResultsComponent,
+      ),
     canActivate: [authGuard, roleGuard],
     data: { roles: ['LAB_TECHNICIAN'] },
   },
@@ -429,28 +485,36 @@ export const routes: Routes = [
   {
     path: 'pharmacist/dashboard',
     loadComponent: () =>
-      import('./workspaces/pharmacist/pharmacist-dashboard.component').then((m) => m.PharmacistDashboardComponent),
+      import('./workspaces/pharmacist/pharmacist-dashboard.component').then(
+        (m) => m.PharmacistDashboardComponent,
+      ),
     canActivate: [authGuard, roleGuard],
     data: { roles: ['PHARMACIST'] },
   },
   {
     path: 'pharmacist/erx',
     loadComponent: () =>
-      import('./workspaces/pharmacist/pharmacist-erx.component').then((m) => m.PharmacistErxComponent),
+      import('./workspaces/pharmacist/pharmacist-erx.component').then(
+        (m) => m.PharmacistErxComponent,
+      ),
     canActivate: [authGuard, roleGuard],
     data: { roles: ['PHARMACIST'] },
   },
   {
     path: 'pharmacist/dispense',
     loadComponent: () =>
-      import('./workspaces/pharmacist/pharmacist-dispense.component').then((m) => m.PharmacistDispenseComponent),
+      import('./workspaces/pharmacist/pharmacist-dispense.component').then(
+        (m) => m.PharmacistDispenseComponent,
+      ),
     canActivate: [authGuard, roleGuard],
     data: { roles: ['PHARMACIST'] },
   },
   {
     path: 'pharmacist/inventory',
     loadComponent: () =>
-      import('./workspaces/pharmacist/pharmacist-inventory.component').then((m) => m.PharmacistInventoryComponent),
+      import('./workspaces/pharmacist/pharmacist-inventory.component').then(
+        (m) => m.PharmacistInventoryComponent,
+      ),
     canActivate: [authGuard, roleGuard],
     data: { roles: ['PHARMACIST'] },
   },
@@ -459,52 +523,66 @@ export const routes: Routes = [
   {
     path: 'billing-staff/dashboard',
     loadComponent: () =>
-      import('./workspaces/billing-staff/billing-staff-dashboard.component').then((m) => m.BillingStaffDashboardComponent),
+      import('./workspaces/billing-staff/billing-staff-dashboard.component').then(
+        (m) => m.BillingStaffDashboardComponent,
+      ),
     canActivate: [authGuard, roleGuard],
     data: { roles: ['BILLING_STAFF'] },
   },
   {
     path: 'billing-staff/invoices',
     loadComponent: () =>
-      import('./workspaces/billing-staff/billing-staff-invoices.component').then((m) => m.BillingStaffInvoicesComponent),
+      import('./workspaces/billing-staff/billing-staff-invoices.component').then(
+        (m) => m.BillingStaffInvoicesComponent,
+      ),
     canActivate: [authGuard, roleGuard],
     data: { roles: ['BILLING_STAFF'] },
   },
   {
     path: 'billing-staff/claims',
     loadComponent: () =>
-      import('./workspaces/billing-staff/billing-staff-claims.component').then((m) => m.BillingStaffClaimsComponent),
+      import('./workspaces/billing-staff/billing-staff-claims.component').then(
+        (m) => m.BillingStaffClaimsComponent,
+      ),
     canActivate: [authGuard, roleGuard],
     data: { roles: ['BILLING_STAFF'] },
   },
 
-  // --- AUDITOR WORKSPACE ROUTES ---
+  // --- AUDIT ROUTES ---
   {
-    path: 'auditor/dashboard',
+    path: 'super-admin/audit',
     loadComponent: () =>
-      import('./workspaces/auditor/auditor-dashboard.component').then((m) => m.AuditorDashboardComponent),
+      import('./workspaces/super-admin/super-admin-audit.component').then(
+        (m) => m.SuperAdminAuditComponent,
+      ),
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['AUDITOR'] },
+    data: { roles: ['SUPER_ADMIN'] },
   },
   {
-    path: 'auditor/ledger',
+    path: 'organization-admin/audit',
     loadComponent: () =>
-      import('./workspaces/auditor/auditor-ledger.component').then((m) => m.AuditorLedgerComponent),
+      import('./workspaces/organization-admin/organization-admin-audit.component').then(
+        (m) => m.OrganizationAdminAuditComponent,
+      ),
     canActivate: [authGuard, roleGuard],
-    data: { roles: ['AUDITOR', 'SUPER_ADMIN', 'ORGANIZATION_ADMIN'] },
+    data: { roles: ['ORGANIZATION_ADMIN'] },
   },
 
   // Public Static Routes
   {
     path: 'privacy-policy',
     loadComponent: () =>
-      import('./components/privacy-policy/privacy-policy.component').then((m) => m.PrivacyPolicyComponent),
+      import('./components/privacy-policy/privacy-policy.component').then(
+        (m) => m.PrivacyPolicyComponent,
+      ),
     data: { standalone: true },
   },
   {
     path: 'terms-of-service',
     loadComponent: () =>
-      import('./components/terms-of-service/terms-of-service.component').then((m) => m.TermsOfServiceComponent),
+      import('./components/terms-of-service/terms-of-service.component').then(
+        (m) => m.TermsOfServiceComponent,
+      ),
     data: { standalone: true },
   },
   { path: '**', redirectTo: 'dashboard' },

@@ -1,199 +1,332 @@
 import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
 import { ApiService } from '../../core/services/api.service';
-import { SecurityEventLog } from '../../core/models/security-policy.model';
 import { AuditLog } from '../../core/models/audit.model';
+import { SecurityEventLog } from '../../core/models/security-policy.model';
+import { BreakGlassRecord } from '../../core/models/patient.model';
+import { toast } from '@spartan-ng/brain/sonner';
+
+import { HlmCardImports } from '@spartan-ng/helm/card';
+import { HlmBadgeImports } from '@spartan-ng/helm/badge';
+import { HlmButtonImports } from '@spartan-ng/helm/button';
+import { HlmInputImports } from '@spartan-ng/helm/input';
+import { HlmTableImports } from '@spartan-ng/helm/table';
 import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   lucideShieldCheck,
   lucideSearch,
   lucideRefreshCw,
-  lucideLock,
-  lucideAlertTriangle,
-  lucideCheckCircle2,
-  lucideEye,
-  lucideFileText,
-  lucideBuilding2,
-  lucideUser,
+  lucideFilter,
   lucideX,
+  lucideInfo,
+  lucideShieldAlert,
+  lucideDownload,
+  lucideLock,
+  lucideFileText,
 } from '@ng-icons/lucide';
 
 @Component({
   selector: 'app-super-admin-audit',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, NgIcon],
+  imports: [
+    CommonModule,
+    FormsModule,
+    HlmCardImports,
+    HlmBadgeImports,
+    HlmButtonImports,
+    HlmInputImports,
+    HlmTableImports,
+    NgIcon,
+  ],
   providers: [
     provideIcons({
       lucideShieldCheck,
       lucideSearch,
       lucideRefreshCw,
-      lucideLock,
-      lucideAlertTriangle,
-      lucideCheckCircle2,
-      lucideEye,
-      lucideFileText,
-      lucideBuilding2,
-      lucideUser,
+      lucideFilter,
       lucideX,
+      lucideInfo,
+      lucideShieldAlert,
+      lucideDownload,
+      lucideLock,
+      lucideFileText,
     }),
   ],
   template: `
     <div class="space-y-6">
       <!-- Header -->
-      <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 pb-4 border-b border-border">
+      <div
+        class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-border"
+      >
         <div>
-          <div class="flex items-center gap-2">
-            <span class="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-500/10 text-indigo-600 border border-indigo-500/20">
-              Forensic & Security
-            </span>
-            <span class="text-xs text-muted-foreground font-mono">Platform-Wide WORM Audit Ledger</span>
-          </div>
-          <h1 class="text-2xl font-bold tracking-tight text-foreground mt-1">
-            Platform Audit & Security Event Vault
+          <h1 class="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
+            Compliance Audit & Security Forensics Vault
+            <span hlmBadge variant="secondary" class="text-[10px]">WORM Storage</span>
           </h1>
           <p class="text-xs text-muted-foreground mt-0.5">
-            Cryptographically signed Write-Once-Read-Many (WORM) audit records across all healthcare tenant organizations.
+            Immutable log trail for compliance reviews and access audits across the EHR system under
+            ABDM HDMP, HIPAA & DPDP Act.
           </p>
-        </div>
-
-        <div class="flex items-center gap-2.5">
-          <button
-            (click)="loadAuditLogs()"
-            class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold bg-secondary hover:bg-secondary/80 text-foreground transition-all">
-            <ng-icon name="lucideRefreshCw" size="14" [class.animate-spin]="loading()" />
-            Refresh Trail
-          </button>
-        </div>
-      </div>
-
-      <!-- Tab Selectors & Search -->
-      <div class="flex flex-col sm:flex-row justify-between gap-4">
-        <div class="relative flex-1 max-w-md">
-          <ng-icon name="lucideSearch" size="16" class="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
-          <input
-            type="text"
-            [(ngModel)]="searchQuery"
-            placeholder="Search by action, user, entity, IP address, tenant..."
-            class="w-full pl-10 pr-4 py-2 rounded-xl border border-input bg-card text-xs text-foreground focus:outline-none focus:ring-2 focus:ring-indigo-500/40"
-          />
         </div>
 
         <div class="flex items-center gap-2">
           <button
-            (click)="activeTab.set('ALL')"
-            [ngClass]="activeTab() === 'ALL' ? 'bg-indigo-600 text-white' : 'bg-card text-muted-foreground hover:text-foreground'"
-            class="px-3 py-1.5 rounded-lg text-xs font-medium border border-border transition-all">
-            All Events ({{ auditLogs().length }})
+            hlmBtn
+            variant="outline"
+            size="sm"
+            (click)="exportComplianceReport()"
+            class="gap-1.5 text-xs"
+          >
+            <ng-icon name="lucideDownload" size="14" />
+            Export Compliance Report
           </button>
           <button
-            (click)="activeTab.set('SECURITY')"
-            [ngClass]="activeTab() === 'SECURITY' ? 'bg-indigo-600 text-white' : 'bg-card text-muted-foreground hover:text-foreground'"
-            class="px-3 py-1.5 rounded-lg text-xs font-medium border border-border transition-all">
-            Security Violations ({{ securityCount() }})
+            hlmBtn
+            variant="outline"
+            size="sm"
+            (click)="loadAllData()"
+            [disabled]="loading()"
+            class="gap-1.5 text-xs"
+          >
+            <ng-icon name="lucideRefreshCw" size="14" [class.animate-spin]="loading()" />
+            Refresh Vault
           </button>
         </div>
       </div>
 
-      <!-- Audit Logs Table -->
-      <div class="bg-card rounded-2xl border border-border shadow-xs overflow-hidden">
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-xs">
-            <thead class="bg-muted/50 border-b border-border text-muted-foreground font-semibold uppercase tracking-wider">
-              <tr>
-                <th class="py-3 px-4">Timestamp & Trace ID</th>
-                <th class="py-3 px-4">Actor / User</th>
-                <th class="py-3 px-4">Action & Resource</th>
-                <th class="py-3 px-4">Outcome</th>
-                <th class="py-3 px-4">IP & Context</th>
-                <th class="py-3 px-4 text-right">Details</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-border">
-              <tr *ngFor="let log of filteredLogs()" class="hover:bg-muted/30 transition-colors">
-                <td class="py-3.5 px-4 font-mono text-[11px] text-muted-foreground">
-                  <div class="text-foreground font-medium">{{ log.timestamp || log.occurredAt | date:'medium' }}</div>
-                  <div class="text-[10px] text-muted-foreground/80">Trace: #{{ log.id ? String(log.id).substring(0, 8) : 'AUD-991' }}</div>
-                </td>
-                <td class="py-3.5 px-4">
-                  <div class="font-semibold text-foreground flex items-center gap-1.5">
-                    <ng-icon name="lucideUser" size="13" class="text-indigo-600" />
-                    {{ log.email || log.userId || 'SYSTEM' }}
-                  </div>
-                  <div class="text-[10px] font-mono text-muted-foreground">{{ log.userRole || 'SUPER_ADMIN' }}</div>
-                </td>
-                <td class="py-3.5 px-4">
-                  <div class="font-semibold text-foreground">{{ log.action }}</div>
-                  <div class="text-[11px] text-muted-foreground font-mono">{{ log.entityName || log.resourceType || 'SECURITY_POLICY' }}</div>
-                </td>
-                <td class="py-3.5 px-4">
-                  <span
-                    [ngClass]="log.result === 'DENIED' || log.result === 'FAILURE' ? 'bg-destructive/15 text-destructive border-destructive/30' : 'bg-emerald-500/15 text-emerald-600 border-emerald-500/30'"
-                    class="px-2 py-0.5 rounded-full text-[10px] font-bold border inline-flex items-center gap-1">
-                    <ng-icon [name]="log.result === 'DENIED' ? 'lucideAlertTriangle' : 'lucideCheckCircle2'" size="11" />
-                    {{ log.result || 'SUCCESS' }}
-                  </span>
-                </td>
-                <td class="py-3.5 px-4 font-mono text-muted-foreground text-[11px]">
-                  <div>IP: {{ log.ipAddress || '127.0.0.1' }}</div>
-                  <div class="text-[10px] text-muted-foreground/80">Org: {{ log.organizationId || 'PLATFORM' }}</div>
-                </td>
-                <td class="py-3.5 px-4 text-right">
-                  <button
-                    (click)="selectedLog.set(log)"
-                    class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-secondary hover:bg-secondary/80 text-foreground transition-all flex items-center gap-1 ml-auto">
-                    <ng-icon name="lucideEye" size="13" />
-                    Inspect
-                  </button>
-                </td>
-              </tr>
+      <!-- Admin Navigation Tabs -->
+      <div class="flex items-center gap-2 border-b border-border pb-1">
+        <button
+          hlmBtn
+          [variant]="activeTab() === 'audit' ? 'default' : 'ghost'"
+          size="sm"
+          (click)="activeTab.set('audit')"
+          class="text-xs gap-1.5"
+        >
+          <ng-icon name="lucideShieldCheck" size="14" /> Access & Mutation Audit Trail
+        </button>
 
-              <tr *ngIf="filteredLogs().length === 0">
-                <td colspan="6" class="py-8 text-center text-muted-foreground text-xs">
-                  No forensic audit logs match search criteria.
-                </td>
-              </tr>
-            </tbody>
-          </table>
+        <button
+          hlmBtn
+          [variant]="activeTab() === 'security' ? 'default' : 'ghost'"
+          size="sm"
+          (click)="activeTab.set('security')"
+          class="text-xs gap-1.5"
+        >
+          <ng-icon name="lucideLock" size="14" /> Security Events & Threat Log
+        </button>
+
+        <button
+          hlmBtn
+          [variant]="activeTab() === 'break-glass' ? 'default' : 'ghost'"
+          size="sm"
+          (click)="activeTab.set('break-glass')"
+          class="text-xs gap-1.5"
+        >
+          <ng-icon name="lucideShieldAlert" size="14" /> Emergency Break-Glass Audits
+        </button>
+      </div>
+
+      <!-- TAB 1: General Audit Trail -->
+      <div *ngIf="activeTab() === 'audit'" class="space-y-4">
+        <!-- Controls: Search & Quick Action Filters -->
+        <div class="p-4 rounded-xl border border-border bg-card shadow-xs space-y-3">
+          <div class="relative">
+            <ng-icon
+              name="lucideSearch"
+              size="16"
+              class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+            />
+            <input
+              hlmInput
+              type="text"
+              [(ngModel)]="searchQuery"
+              placeholder="Filter audit logs by actor email, role, action, resource, IP address, or details..."
+              class="pl-9 h-10 w-full text-xs bg-background"
+            />
+          </div>
+
+          <!-- Action Quick Filter Pills -->
+          <div class="flex flex-wrap items-center gap-2 pt-1 text-xs">
+            <span
+              class="text-muted-foreground text-[11px] font-medium flex items-center gap-1 mr-1"
+            >
+              <ng-icon name="lucideFilter" size="12" /> Filter Action:
+            </span>
+            <button
+              *ngFor="let filter of actionFilters"
+              (click)="selectedActionFilter = filter.value"
+              [class]="
+                'px-2.5 py-1 rounded-md text-[11px] font-medium border transition-colors ' +
+                (selectedActionFilter === filter.value
+                  ? 'bg-primary text-primary-foreground border-primary'
+                  : 'bg-background hover:bg-muted text-muted-foreground border-border')
+              "
+            >
+              {{ filter.label }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Audit Ledger Table -->
+        <div class="rounded-xl border border-border bg-card overflow-hidden shadow-xs">
+          <div class="overflow-x-auto">
+            <table hlmTable class="w-full text-xs">
+              <thead hlmTableHeader>
+                <tr hlmTableRow class="bg-muted/50 border-b border-border">
+                  <th hlmTableHead class="py-3 px-4 text-left">Timestamp</th>
+                  <th hlmTableHead class="py-3 px-4 text-left">User / Actor</th>
+                  <th hlmTableHead class="py-3 px-4 text-left">Role</th>
+                  <th hlmTableHead class="py-3 px-4 text-left">Action</th>
+                  <th hlmTableHead class="py-3 px-4 text-left">Target Resource</th>
+                  <th hlmTableHead class="py-3 px-4 text-left">Source IP</th>
+                  <th hlmTableHead class="py-3 px-4 text-left">Audit Details</th>
+                </tr>
+              </thead>
+              <tbody hlmTableBody class="divide-y divide-border">
+                <tr
+                  *ngFor="let log of filteredLogs()"
+                  (click)="selectedLog.set(log)"
+                  hlmTableRow
+                  class="hover:bg-muted/40 cursor-pointer transition-colors"
+                >
+                  <td
+                    hlmTableCell
+                    class="py-3 px-4 font-mono text-muted-foreground whitespace-nowrap"
+                  >
+                    {{ log.timestamp | date: 'medium' }}
+                  </td>
+                  <td hlmTableCell class="py-3 px-4 font-semibold text-foreground">
+                    {{ log.email }}
+                  </td>
+                  <td hlmTableCell class="py-3 px-4">
+                    <span hlmBadge variant="outline" class="text-[10px]">{{ log.userRole }}</span>
+                  </td>
+                  <td hlmTableCell class="py-3 px-4">
+                    <span hlmBadge variant="secondary" class="text-[10px] font-mono">{{
+                      log.action
+                    }}</span>
+                  </td>
+                  <td hlmTableCell class="py-3 px-4 font-medium text-foreground">
+                    {{ log.resourceType || log.entityName }}
+                  </td>
+                  <td hlmTableCell class="py-3 px-4 font-mono text-muted-foreground">
+                    {{ log.ipAddress }}
+                  </td>
+                  <td hlmTableCell class="py-3 px-4 text-muted-foreground max-w-xs truncate">
+                    {{ log.details }}
+                  </td>
+                </tr>
+                <tr *ngIf="filteredLogs().length === 0" hlmTableRow>
+                  <td colspan="7" hlmTableCell class="py-12 text-center text-muted-foreground">
+                    No audit entries matching filter.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
 
-      <!-- Detail Modal -->
-      <div *ngIf="selectedLog()" class="fixed inset-0 z-50 bg-background/80 backdrop-blur-xs flex items-center justify-center p-4">
-        <div class="w-full max-w-lg rounded-2xl border border-border bg-card p-6 shadow-2xl space-y-4">
-          <div class="flex justify-between items-center border-b border-border pb-3">
-            <h3 class="text-base font-bold text-foreground flex items-center gap-2">
-              <ng-icon name="lucideShieldCheck" size="18" class="text-indigo-600" />
-              Forensic Log Details
+      <!-- TAB 2: Security Events & Threat Log -->
+      <div *ngIf="activeTab() === 'security'" class="space-y-4">
+        <div class="rounded-xl border border-border bg-card overflow-hidden shadow-xs">
+          <div class="p-4 border-b border-border bg-muted/20">
+            <h3 class="text-xs font-semibold text-foreground">
+              Security Policy & Threat Detection Events
             </h3>
-            <button (click)="selectedLog.set(null)" class="p-1 rounded-lg text-muted-foreground hover:text-foreground">
-              <ng-icon name="lucideX" size="16" />
-            </button>
           </div>
-
-          <div class="space-y-2.5 text-xs">
-            <div class="p-3 bg-muted/40 rounded-xl space-y-1.5 font-mono text-[11px]">
-              <div><strong>Action:</strong> {{ selectedLog()?.action }}</div>
-              <div><strong>Actor:</strong> {{ selectedLog()?.email }} ({{ selectedLog()?.userRole }})</div>
-              <div><strong>Resource:</strong> {{ selectedLog()?.entityName || selectedLog()?.resourceType }} [ID: {{ selectedLog()?.resourceId || 'N/A' }}]</div>
-              <div><strong>Timestamp:</strong> {{ selectedLog()?.timestamp }}</div>
-              <div><strong>IP Address:</strong> {{ selectedLog()?.ipAddress }}</div>
-              <div><strong>Result:</strong> {{ selectedLog()?.result }}</div>
-            </div>
-
-            <div>
-              <label class="block font-semibold text-foreground mb-1">Log Narrative Details</label>
-              <div class="p-3 bg-card border border-border rounded-xl text-muted-foreground text-xs leading-relaxed">
-                {{ selectedLog()?.details || 'Standard statutory audit event recorded with cryptographic hash verification.' }}
-              </div>
-            </div>
+          <div class="overflow-x-auto">
+            <table hlmTable class="w-full text-xs">
+              <thead hlmTableHeader>
+                <tr hlmTableRow class="bg-muted/50 border-b border-border">
+                  <th hlmTableHead class="py-3 px-4 text-left">Occurred At</th>
+                  <th hlmTableHead class="py-3 px-4 text-left">Event Type</th>
+                  <th hlmTableHead class="py-3 px-4 text-left">Actor Email</th>
+                  <th hlmTableHead class="py-3 px-4 text-left">Action</th>
+                  <th hlmTableHead class="py-3 px-4 text-left">Status</th>
+                  <th hlmTableHead class="py-3 px-4 text-left">IP Address</th>
+                </tr>
+              </thead>
+              <tbody hlmTableBody class="divide-y divide-border">
+                <tr *ngFor="let ev of securityEvents()" hlmTableRow class="hover:bg-muted/40">
+                  <td hlmTableCell class="py-3 px-4 font-mono text-muted-foreground">
+                    {{ ev.occurredAt | date: 'short' }}
+                  </td>
+                  <td hlmTableCell class="py-3 px-4 font-bold text-foreground">
+                    {{ ev.eventType }}
+                  </td>
+                  <td hlmTableCell class="py-3 px-4 font-medium">{{ ev.email }}</td>
+                  <td hlmTableCell class="py-3 px-4 font-mono">{{ ev.action }}</td>
+                  <td hlmTableCell class="py-3 px-4">
+                    <span
+                      hlmBadge
+                      [variant]="ev.status === 'SUCCESS' ? 'secondary' : 'destructive'"
+                      class="text-[10px]"
+                    >
+                      {{ ev.status }}
+                    </span>
+                  </td>
+                  <td hlmTableCell class="py-3 px-4 font-mono text-muted-foreground">
+                    {{ ev.ipAddress || '127.0.0.1' }}
+                  </td>
+                </tr>
+                <tr *ngIf="securityEvents().length === 0" hlmTableRow>
+                  <td colspan="6" hlmTableCell class="py-12 text-center text-muted-foreground">
+                    No security warning events recorded.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
+        </div>
+      </div>
 
-          <div class="flex justify-end pt-2 border-t border-border">
-            <button (click)="selectedLog.set(null)" class="px-4 py-2 rounded-lg bg-secondary text-foreground text-xs font-semibold">
-              Close Inspector
-            </button>
+      <!-- TAB 3: Emergency Break-Glass Audits -->
+      <div *ngIf="activeTab() === 'break-glass'" class="space-y-4">
+        <div class="rounded-xl border border-border bg-card overflow-hidden shadow-xs">
+          <div class="p-4 border-b border-border bg-muted/20">
+            <h3 class="text-xs font-semibold text-foreground">
+              Emergency Access (Break-Glass) Override Log
+            </h3>
+          </div>
+          <div class="overflow-x-auto">
+            <table hlmTable class="w-full text-xs">
+              <thead hlmTableHeader>
+                <tr hlmTableRow class="bg-muted/50 border-b border-border">
+                  <th hlmTableHead class="py-3 px-4 text-left">Requested At</th>
+                  <th hlmTableHead class="py-3 px-4 text-left">Clinician</th>
+                  <th hlmTableHead class="py-3 px-4 text-left">Patient MRN / ID</th>
+                  <th hlmTableHead class="py-3 px-4 text-left">Emergency Justification</th>
+                  <th hlmTableHead class="py-3 px-4 text-left">Access Status</th>
+                </tr>
+              </thead>
+              <tbody hlmTableBody class="divide-y divide-border">
+                <tr *ngFor="let bg of breakGlassLogs()" hlmTableRow class="hover:bg-muted/40">
+                  <td hlmTableCell class="py-3 px-4 font-mono text-muted-foreground">
+                    {{ bg.accessedAt || (bg.createdAt | date: 'short') }}
+                  </td>
+                  <td hlmTableCell class="py-3 px-4 font-bold text-foreground">
+                    {{ bg.email || bg.requestedBy }}
+                  </td>
+                  <td hlmTableCell class="py-3 px-4 font-mono">{{ bg.patientId }}</td>
+                  <td hlmTableCell class="py-3 px-4 text-foreground">
+                    {{ bg.reason || bg.justification }}
+                  </td>
+                  <td hlmTableCell class="py-3 px-4">
+                    <span hlmBadge variant="destructive" class="text-[10px]"
+                      >EMERGENCY_OVERRIDE</span
+                    >
+                  </td>
+                </tr>
+                <tr *ngIf="breakGlassLogs().length === 0" hlmTableRow>
+                  <td colspan="5" hlmTableCell class="py-12 text-center text-muted-foreground">
+                    No emergency break-glass overrides recorded.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
@@ -201,68 +334,86 @@ import {
   `,
 })
 export class SuperAdminAuditComponent implements OnInit {
-  auditLogs = signal<AuditLog[]>([]);
-  securityEvents = signal<SecurityEventLog[]>([]);
+  activeTab = signal<'audit' | 'security' | 'break-glass'>('audit');
   loading = signal(false);
-  searchQuery = signal('');
-  activeTab = signal<'ALL' | 'SECURITY'>('ALL');
+  logs = signal<AuditLog[]>([]);
+  securityEvents = signal<SecurityEventLog[]>([]);
+  breakGlassLogs = signal<BreakGlassRecord[]>([]);
   selectedLog = signal<AuditLog | null>(null);
 
-  securityCount = computed(() => this.securityEvents().length);
+  searchQuery = '';
+  selectedActionFilter = 'ALL';
 
-  filteredLogs = computed<AuditLog[]>(() => {
-    let list: AuditLog[] = this.auditLogs();
-    const q = this.searchQuery().toLowerCase().trim();
+  actionFilters = [
+    { label: 'All Actions', value: 'ALL' },
+    { label: 'Create / Insert', value: 'CREATE' },
+    { label: 'Read / Access', value: 'READ' },
+    { label: 'Update / Patch', value: 'UPDATE' },
+    { label: 'Delete / Purge', value: 'DELETE' },
+    { label: 'Emergency Override', value: 'BREAK_GLASS' },
+  ];
 
-    if (this.activeTab() === 'SECURITY') {
-      list = this.securityEvents().map((s: SecurityEventLog) => ({
-        id: String(s.id),
-        timestamp: s.occurredAt || new Date().toISOString(),
-        email: s.email || 'SECURITY_SYSTEM',
-        userRole: 'SECURITY_MONITOR',
-        action: s.action || s.eventType || 'SECURITY_POLICY_EVALUATION',
-        entityName: s.resourceType || 'ABAC_RESOURCE',
-        result: s.status || 'DENIED',
-        ipAddress: s.ipAddress || '127.0.0.1',
-        details: s.details || 'Security policy evaluation check',
-      }));
+  filteredLogs = computed(() => {
+    let result = this.logs();
+    if (this.selectedActionFilter !== 'ALL') {
+      result = result.filter((l) => l.action?.toUpperCase().includes(this.selectedActionFilter));
     }
-
-    if (q) {
-      list = list.filter(
-        (l: AuditLog) =>
-          (l.email || '').toLowerCase().includes(q) ||
-          (l.action || '').toLowerCase().includes(q) ||
-          (l.entityName || '').toLowerCase().includes(q) ||
-          (l.details || '').toLowerCase().includes(q) ||
-          (l.ipAddress || '').includes(q),
+    if (this.searchQuery.trim()) {
+      const q = this.searchQuery.toLowerCase();
+      result = result.filter(
+        (l) =>
+          l.email?.toLowerCase().includes(q) ||
+          l.action?.toLowerCase().includes(q) ||
+          l.entityName?.toLowerCase().includes(q) ||
+          l.details?.toLowerCase().includes(q) ||
+          l.ipAddress?.includes(q),
       );
     }
-
-    return list;
+    return result;
   });
 
   constructor(private apiService: ApiService) {}
 
   ngOnInit(): void {
-    this.loadAuditLogs();
+    this.loadAllData();
   }
 
-  loadAuditLogs(): void {
+  loadAllData(): void {
     this.loading.set(true);
     this.apiService.getAuditLogs().subscribe({
       next: (logs) => {
-        this.auditLogs.set(logs);
+        this.logs.set(logs || []);
         this.loading.set(false);
       },
       error: () => this.loading.set(false),
     });
 
-    this.apiService.getPlatformSecurityEvents().subscribe({
-      next: (events) => this.securityEvents.set(events),
-      error: () => {},
+    this.apiService.getSecurityEvents().subscribe({
+      next: (events) => this.securityEvents.set(events || []),
+      error: () => this.securityEvents.set([]),
+    });
+
+    this.apiService.getBreakGlassByUser('all').subscribe({
+      next: (bgs) => this.breakGlassLogs.set(bgs || []),
+      error: () => this.breakGlassLogs.set([]),
     });
   }
 
-  String = String;
+  exportComplianceReport(): void {
+    const reportData = {
+      complianceStandard: 'ABDM HDMP & HIPAA Security Rule (45 CFR § 164.312(b))',
+      exportedAt: new Date().toISOString(),
+      totalAuditEntries: this.logs().length,
+      entries: this.logs(),
+    };
+    const dataStr =
+      'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(reportData, null, 2));
+    const downloadAnchor = document.createElement('a');
+    downloadAnchor.setAttribute('href', dataStr);
+    downloadAnchor.setAttribute('download', `Compliance_Audit_Vault_${Date.now()}.json`);
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+    toast.success('Compliance audit vault report exported');
+  }
 }

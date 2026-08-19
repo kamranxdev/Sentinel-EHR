@@ -40,7 +40,6 @@ public class SentinelAuthorizationInterceptor extends AuthorizationInterceptor {
         boolean isNurse = roles.contains("NURSE");
         boolean isPharmacist = roles.contains("PHARMACIST");
         boolean isReceptionist = roles.contains("RECEPTIONIST");
-        boolean isAuditor = roles.contains("AUDITOR");
         boolean isPatient = roles.contains("PATIENT");
 
         if (isAdmin) {
@@ -99,11 +98,6 @@ public class SentinelAuthorizationInterceptor extends AuthorizationInterceptor {
                     .allow().read().resourcesOfType(MedicationRequest.class).withAnyId().andThen()
                     .allow().read().resourcesOfType(Observation.class).withAnyId().andThen()
                     .allow().read().resourcesOfType(Appointment.class).withAnyId();
-            return builder.build();
-        }
-
-        if (isAuditor) {
-            builder.allow().read().allResources().withAnyId();
             return builder.build();
         }
 

@@ -3,7 +3,10 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
 import { OrganizationService } from '../../core/services/organization.service';
-import { OrganizationRegistrationRequest, Organization } from '../../core/models/organization.model';
+import {
+  OrganizationRegistrationRequest,
+  Organization,
+} from '../../core/models/organization.model';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmInputImports } from '@spartan-ng/helm/input';
 import { HlmBadgeImports } from '@spartan-ng/helm/badge';
@@ -81,25 +84,35 @@ interface StepItem {
     }),
   ],
   template: `
-    <div class="min-h-screen bg-background text-foreground flex flex-col lg:flex-row overflow-hidden font-sans">
-
+    <div
+      class="min-h-screen bg-background text-foreground flex flex-col lg:flex-row overflow-hidden font-sans"
+    >
       <!-- LEFT FULL COLUMN STEP TRACKER & GOVERNANCE SIDEBAR (PRIMARY BRANDED) -->
-      <div class="hidden lg:flex lg:w-5/12 xl:w-4/12 bg-primary text-primary-foreground border-r border-primary/20 p-7 xl:p-9 flex-col justify-between relative overflow-hidden h-screen select-none">
-        
+      <div
+        class="hidden lg:flex lg:w-5/12 xl:w-4/12 bg-primary text-primary-foreground border-r border-primary/20 p-7 xl:p-9 flex-col justify-between relative overflow-hidden h-screen select-none"
+      >
         <!-- Subtle Ambient Background Accents for Depth -->
-        <div class="absolute -top-24 -right-24 w-80 h-80 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
-        <div class="absolute -bottom-24 -left-24 w-72 h-72 bg-black/10 rounded-full blur-3xl pointer-events-none"></div>
+        <div
+          class="absolute -top-24 -right-24 w-80 h-80 bg-white/10 rounded-full blur-3xl pointer-events-none"
+        ></div>
+        <div
+          class="absolute -bottom-24 -left-24 w-72 h-72 bg-black/10 rounded-full blur-3xl pointer-events-none"
+        ></div>
 
         <!-- 1. Top Brand Header -->
         <div class="relative z-10">
           <div class="flex items-center gap-3">
-            <div class="size-10 rounded-xl bg-white text-primary flex items-center justify-center shadow-lg shadow-black/10 ring-1 ring-white/40">
+            <div
+              class="size-10 rounded-xl bg-white text-primary flex items-center justify-center shadow-lg shadow-black/10 ring-1 ring-white/40"
+            >
               <ng-icon name="lucideHeartPulse" size="20" />
             </div>
             <div>
               <div class="flex items-center gap-2">
                 <span class="font-bold text-lg tracking-tight text-white">Sentinel</span>
-                <span class="text-[10px] px-2 py-0.5 rounded-md font-semibold bg-white/15 text-white border border-white/25 backdrop-blur-xs">
+                <span
+                  class="text-[10px] px-2 py-0.5 rounded-md font-semibold bg-white/15 text-white border border-white/25 backdrop-blur-xs"
+                >
                   Enterprise Cloud
                 </span>
               </div>
@@ -121,7 +134,7 @@ interface StepItem {
               [ngClass]="{
                 'bg-emerald-400': currentStep() > step.number,
                 'bg-white/40': currentStep() === step.number,
-                'bg-white/15': currentStep() < step.number
+                'bg-white/15': currentStep() < step.number,
               }"
             ></div>
 
@@ -131,12 +144,19 @@ interface StepItem {
               [class.cursor-pointer]="canJumpToStep(step.number)"
               class="relative z-10 size-9 rounded-xl flex items-center justify-center font-bold text-xs shrink-0 transition-all duration-300 shadow-sm"
               [ngClass]="{
-                'bg-white text-primary ring-4 ring-white/30 shadow-lg shadow-black/15 scale-105': currentStep() === step.number,
+                'bg-white text-primary ring-4 ring-white/30 shadow-lg shadow-black/15 scale-105':
+                  currentStep() === step.number,
                 'bg-emerald-400 text-slate-950 shadow-emerald-500/30': currentStep() > step.number,
-                'bg-white/10 text-white/60 border border-white/20 group-hover:border-white/40 group-hover:text-white': currentStep() < step.number
+                'bg-white/10 text-white/60 border border-white/20 group-hover:border-white/40 group-hover:text-white':
+                  currentStep() < step.number,
               }"
             >
-              <ng-icon *ngIf="currentStep() > step.number" name="lucideCheck" size="16" class="stroke-2" />
+              <ng-icon
+                *ngIf="currentStep() > step.number"
+                name="lucideCheck"
+                size="16"
+                class="stroke-2"
+              />
               <span *ngIf="currentStep() <= step.number">{{ step.number }}</span>
             </div>
 
@@ -152,7 +172,7 @@ interface StepItem {
                   [ngClass]="{
                     'text-white font-bold': currentStep() === step.number,
                     'text-white/95': currentStep() > step.number,
-                    'text-white/60': currentStep() < step.number
+                    'text-white/60': currentStep() < step.number,
                   }"
                 >
                   {{ step.title }}
@@ -188,16 +208,22 @@ interface StepItem {
               <!-- Step Summary Preview Chips (When Completed) -->
               <div *ngIf="currentStep() > step.number" class="mt-1.5 flex flex-wrap gap-1.5">
                 <ng-container *ngIf="step.number === 1 && formData.orgName">
-                  <span class="text-[10px] font-mono bg-white/15 px-2 py-0.5 rounded text-white font-medium border border-white/20 truncate max-w-[170px]">
+                  <span
+                    class="text-[10px] font-mono bg-white/15 px-2 py-0.5 rounded text-white font-medium border border-white/20 truncate max-w-[170px]"
+                  >
                     {{ formData.orgName }}
                   </span>
-                  <span class="text-[10px] font-mono text-emerald-200 bg-emerald-400/20 px-1.5 py-0.5 rounded font-semibold border border-emerald-400/30">
+                  <span
+                    class="text-[10px] font-mono text-emerald-200 bg-emerald-400/20 px-1.5 py-0.5 rounded font-semibold border border-emerald-400/30"
+                  >
                     {{ formData.orgCode || formData.code }}
                   </span>
                 </ng-container>
 
                 <ng-container *ngIf="step.number === 2 && formData.licenseNumber">
-                  <span class="text-[10px] font-mono bg-white/15 px-2 py-0.5 rounded text-white font-medium border border-white/20 truncate max-w-[170px]">
+                  <span
+                    class="text-[10px] font-mono bg-white/15 px-2 py-0.5 rounded text-white font-medium border border-white/20 truncate max-w-[170px]"
+                  >
                     Lic: {{ formData.licenseNumber }}
                   </span>
                 </ng-container>
@@ -209,7 +235,9 @@ interface StepItem {
         <!-- 3. Bottom Contextual Assistance & Security Trust Assurance -->
         <div class="relative z-10 space-y-3">
           <!-- Dynamic Helper / Assurance Card -->
-          <div class="p-3.5 rounded-xl bg-white/10 border border-white/15 backdrop-blur-md space-y-1.5 text-white">
+          <div
+            class="p-3.5 rounded-xl bg-white/10 border border-white/15 backdrop-blur-md space-y-1.5 text-white"
+          >
             <div class="flex items-center gap-2 text-xs font-semibold">
               <ng-icon name="lucideShieldCheck" size="15" class="text-emerald-300 shrink-0" />
               <span *ngIf="currentStep() === 1">Multi-Tenant Isolation Guaranteed</span>
@@ -218,49 +246,62 @@ interface StepItem {
             </div>
             <p class="text-[11px] text-white/80 leading-relaxed">
               <span *ngIf="currentStep() === 1">
-                Provisioning creates dedicated schema instances, HL7/FHIR R4 resource stores, and encrypted database partitions.
+                Provisioning creates dedicated schema instances, HL7/FHIR R4 resource stores, and
+                encrypted database partitions.
               </span>
               <span *ngIf="currentStep() === 2">
-                All clinical registrations are validated in accordance with National Health Authority and ABDM standards.
+                All clinical registrations are validated in accordance with National Health
+                Authority and ABDM standards.
               </span>
               <span *ngIf="currentStep() === 3">
-                Your Org Admin account will have master authority over role-based access control (RBAC) and clinical workspaces.
+                Your Org Admin account will have master authority over role-based access control
+                (RBAC) and clinical workspaces.
               </span>
             </p>
           </div>
 
           <!-- Compliance Badges -->
           <div class="flex flex-wrap gap-1.5 text-[11px]">
-            <span class="inline-flex items-center gap-1.5 py-1 px-2.5 rounded-md bg-white/10 border border-white/20 text-white font-medium text-[11px] backdrop-blur-xs">
+            <span
+              class="inline-flex items-center gap-1.5 py-1 px-2.5 rounded-md bg-white/10 border border-white/20 text-white font-medium text-[11px] backdrop-blur-xs"
+            >
               <ng-icon name="lucideShieldCheck" size="13" class="text-emerald-300" />
               ABDM & DPDP
             </span>
-            <span class="inline-flex items-center gap-1.5 py-1 px-2.5 rounded-md bg-white/10 border border-white/20 text-white font-medium text-[11px] backdrop-blur-xs">
+            <span
+              class="inline-flex items-center gap-1.5 py-1 px-2.5 rounded-md bg-white/10 border border-white/20 text-white font-medium text-[11px] backdrop-blur-xs"
+            >
               <ng-icon name="lucideKeyRound" size="13" class="text-emerald-300" />
               Tenant Isolation
             </span>
-            <span class="inline-flex items-center gap-1.5 py-1 px-2.5 rounded-md bg-white/10 border border-white/20 text-white font-medium text-[11px] backdrop-blur-xs">
+            <span
+              class="inline-flex items-center gap-1.5 py-1 px-2.5 rounded-md bg-white/10 border border-white/20 text-white font-medium text-[11px] backdrop-blur-xs"
+            >
               <ng-icon name="lucideBadgeCheck" size="13" class="text-emerald-300" />
               FHIR R4
             </span>
           </div>
 
           <!-- Footer Metadata -->
-          <div class="text-[11px] text-white/65 flex items-center justify-between pt-1 border-t border-white/15">
+          <div
+            class="text-[11px] text-white/65 flex items-center justify-between pt-1 border-t border-white/15"
+          >
             <span>&copy; 2026 Sentinel EHR System</span>
             <span class="text-white/50">v2.4.0 &bull; Enterprise</span>
           </div>
         </div>
-
       </div>
 
       <!-- RIGHT REGISTRATION FORM WORKSPACE -->
-      <div class="w-full lg:w-7/12 xl:w-8/12 flex flex-col justify-between p-6 sm:p-10 lg:p-12 xl:p-16 overflow-y-auto max-h-screen">
-
+      <div
+        class="w-full lg:w-7/12 xl:w-8/12 flex flex-col justify-between p-6 sm:p-10 lg:p-12 xl:p-16 overflow-y-auto max-h-screen"
+      >
         <!-- Top Navigation Bar -->
         <div class="flex items-center justify-between mb-6">
           <div class="flex items-center gap-2.5 lg:hidden">
-            <div class="size-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center shadow-xs">
+            <div
+              class="size-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center shadow-xs"
+            >
               <ng-icon name="lucideHeartPulse" size="16" />
             </div>
             <span class="font-bold text-sm">Sentinel EHR</span>
@@ -280,7 +321,13 @@ interface StepItem {
               <span>Fill Demo Data</span>
             </button>
 
-            <a routerLink="/" hlmBtn variant="ghost" size="sm" class="gap-1.5 text-muted-foreground hover:text-foreground text-xs h-8">
+            <a
+              routerLink="/"
+              hlmBtn
+              variant="ghost"
+              size="sm"
+              class="gap-1.5 text-muted-foreground hover:text-foreground text-xs h-8"
+            >
               <ng-icon name="lucideHome" size="14" />
               <span class="hidden sm:inline">Home</span>
             </a>
@@ -288,7 +335,6 @@ interface StepItem {
         </div>
 
         <div class="max-w-xl w-full mx-auto space-y-6 my-auto">
-
           <!-- Page Header -->
           <div class="space-y-1.5">
             <div class="inline-flex items-center gap-1.5 text-xs text-primary font-semibold">
@@ -311,13 +357,19 @@ interface StepItem {
               [class.cursor-pointer]="canJumpToStep(step.number)"
               class="relative flex flex-col p-2.5 rounded-xl border text-center transition-all"
               [ngClass]="{
-                'bg-primary/10 border-primary text-primary shadow-xs font-semibold': currentStep() === step.number,
+                'bg-primary/10 border-primary text-primary shadow-xs font-semibold':
+                  currentStep() === step.number,
                 'bg-muted/50 border-border text-foreground': currentStep() > step.number,
-                'bg-muted/20 border-border/40 text-muted-foreground': currentStep() < step.number
+                'bg-muted/20 border-border/40 text-muted-foreground': currentStep() < step.number,
               }"
             >
               <div class="flex items-center justify-center gap-1 text-xs font-bold">
-                <ng-icon *ngIf="currentStep() > step.number" name="lucideCheckCircle2" size="13" class="text-emerald-500" />
+                <ng-icon
+                  *ngIf="currentStep() > step.number"
+                  name="lucideCheckCircle2"
+                  size="13"
+                  class="text-emerald-500"
+                />
                 <span>Step {{ step.number }}</span>
               </div>
               <span class="text-[11px] truncate opacity-90">{{ step.title }}</span>
@@ -342,7 +394,9 @@ interface StepItem {
             class="p-6 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 dark:text-emerald-200 text-xs space-y-4 animate-in fade-in duration-300"
           >
             <div class="flex items-start gap-3.5">
-              <div class="size-10 rounded-xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+              <div
+                class="size-10 rounded-xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0"
+              >
                 <ng-icon name="lucideCheckCircle2" size="22" />
               </div>
               <div class="space-y-1">
@@ -354,7 +408,9 @@ interface StepItem {
             </div>
 
             <!-- Summary Card -->
-            <div class="p-4 rounded-xl bg-card border border-border/70 text-foreground space-y-2.5 shadow-xs">
+            <div
+              class="p-4 rounded-xl bg-card border border-border/70 text-foreground space-y-2.5 shadow-xs"
+            >
               <div class="flex justify-between items-center pb-2 border-b border-border text-xs">
                 <span class="text-muted-foreground">Facility Name:</span>
                 <span class="font-bold text-foreground">{{ formData.orgName }}</span>
@@ -371,7 +427,9 @@ interface StepItem {
               </div>
               <div class="flex justify-between items-center text-xs">
                 <span class="text-muted-foreground">Tenant Status:</span>
-                <span class="inline-flex items-center gap-1 font-semibold text-amber-600 dark:text-amber-400">
+                <span
+                  class="inline-flex items-center gap-1 font-semibold text-amber-600 dark:text-amber-400"
+                >
                   <span class="size-1.5 rounded-full bg-amber-500 animate-pulse"></span>
                   PENDING_VERIFICATION
                 </span>
@@ -402,19 +460,27 @@ interface StepItem {
 
           <!-- Multi-Step Registration Form -->
           <form *ngIf="!successMessage()" (ngSubmit)="onSubmit()" class="space-y-6">
-
             <!-- STEP 1: FACILITY PROFILE -->
             <div *ngIf="currentStep() === 1" class="space-y-4 animate-in fade-in duration-200">
-              <div class="p-3.5 rounded-xl bg-primary/5 border border-primary/15 text-xs text-muted-foreground flex items-center gap-2.5">
+              <div
+                class="p-3.5 rounded-xl bg-primary/5 border border-primary/15 text-xs text-muted-foreground flex items-center gap-2.5"
+              >
                 <ng-icon name="lucideBuilding2" size="16" class="text-primary shrink-0" />
-                <span>Specify the hospital or clinic's identity, unique organization code, and healthcare provider type.</span>
+                <span
+                  >Specify the hospital or clinic's identity, unique organization code, and
+                  healthcare provider type.</span
+                >
               </div>
 
               <!-- Hospital Display Name -->
               <div class="space-y-1.5">
-                <label class="text-xs font-semibold text-foreground flex items-center justify-between">
+                <label
+                  class="text-xs font-semibold text-foreground flex items-center justify-between"
+                >
                   <span>Hospital / Clinic Name *</span>
-                  <span class="text-[11px] text-muted-foreground font-normal">Primary Display Title</span>
+                  <span class="text-[11px] text-muted-foreground font-normal"
+                    >Primary Display Title</span
+                  >
                 </label>
                 <div class="relative">
                   <input
@@ -427,14 +493,20 @@ interface StepItem {
                     placeholder="e.g. Apollo Multi-Specialty Hospital"
                     class="w-full h-10 text-xs pl-9"
                   />
-                  <ng-icon name="lucideBuilding2" size="15" class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <ng-icon
+                    name="lucideBuilding2"
+                    size="15"
+                    class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                  />
                 </div>
               </div>
 
               <!-- Org Code & Slug Generator Grid -->
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div class="space-y-1.5">
-                  <label class="text-xs font-semibold text-foreground flex items-center justify-between">
+                  <label
+                    class="text-xs font-semibold text-foreground flex items-center justify-between"
+                  >
                     <span>Organization Code *</span>
                     <button
                       type="button"
@@ -454,13 +526,21 @@ interface StepItem {
                       placeholder="e.g. APOLLO-MUM"
                       class="w-full h-10 text-xs pl-9 font-mono uppercase"
                     />
-                    <ng-icon name="lucideKeyRound" size="15" class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                    <ng-icon
+                      name="lucideKeyRound"
+                      size="15"
+                      class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                    />
                   </div>
-                  <p class="text-[10px] text-muted-foreground">Unique tenant slug (alphanumeric & hyphens, max 50 chars).</p>
+                  <p class="text-[10px] text-muted-foreground">
+                    Unique tenant slug (alphanumeric & hyphens, max 50 chars).
+                  </p>
                 </div>
 
                 <div class="space-y-1.5">
-                  <label class="text-xs font-semibold text-foreground block">Organization Type *</label>
+                  <label class="text-xs font-semibold text-foreground block"
+                    >Organization Type *</label
+                  >
                   <select
                     [(ngModel)]="formData.organizationType"
                     name="organizationType"
@@ -479,7 +559,9 @@ interface StepItem {
 
               <!-- Legal Entity Name -->
               <div class="space-y-1.5">
-                <label class="text-xs font-semibold text-foreground flex items-center justify-between">
+                <label
+                  class="text-xs font-semibold text-foreground flex items-center justify-between"
+                >
                   <span>Legal Business Entity Name</span>
                   <span class="text-[11px] text-muted-foreground font-normal">Optional</span>
                 </label>
@@ -492,7 +574,11 @@ interface StepItem {
                     placeholder="e.g. Apollo Hospitals Enterprise Limited"
                     class="w-full h-10 text-xs pl-9"
                   />
-                  <ng-icon name="lucideFileText" size="15" class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <ng-icon
+                    name="lucideFileText"
+                    size="15"
+                    class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                  />
                 </div>
               </div>
 
@@ -514,14 +600,21 @@ interface StepItem {
 
             <!-- STEP 2: LICENSING, LOCATION & CONTACT -->
             <div *ngIf="currentStep() === 2" class="space-y-4 animate-in fade-in duration-200">
-              <div class="p-3.5 rounded-xl bg-primary/5 border border-primary/15 text-xs text-muted-foreground flex items-center gap-2.5">
+              <div
+                class="p-3.5 rounded-xl bg-primary/5 border border-primary/15 text-xs text-muted-foreground flex items-center gap-2.5"
+              >
                 <ng-icon name="lucideFileText" size="16" class="text-primary shrink-0" />
-                <span>Provide clinical registration credentials and facility contact details for verification.</span>
+                <span
+                  >Provide clinical registration credentials and facility contact details for
+                  verification.</span
+                >
               </div>
 
               <!-- Medical License Number -->
               <div class="space-y-1.5">
-                <label class="text-xs font-semibold text-foreground block">Medical License / Accreditation # *</label>
+                <label class="text-xs font-semibold text-foreground block"
+                  >Medical License / Accreditation # *</label
+                >
                 <div class="relative">
                   <input
                     hlmInput
@@ -532,15 +625,23 @@ interface StepItem {
                     placeholder="e.g. NABH/2026/DEL/0482 or LIC-MH-98401"
                     class="w-full h-10 text-xs pl-9"
                   />
-                  <ng-icon name="lucideShieldCheck" size="15" class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <ng-icon
+                    name="lucideShieldCheck"
+                    size="15"
+                    class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                  />
                 </div>
-                <p class="text-[10px] text-muted-foreground">State Health Dept, NABH, or National Clinical Registry identifier.</p>
+                <p class="text-[10px] text-muted-foreground">
+                  State Health Dept, NABH, or National Clinical Registry identifier.
+                </p>
               </div>
 
               <!-- Email & Phone Grid -->
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div class="space-y-1.5">
-                  <label class="text-xs font-semibold text-foreground block">Facility Contact Email *</label>
+                  <label class="text-xs font-semibold text-foreground block"
+                    >Facility Contact Email *</label
+                  >
                   <div class="relative">
                     <input
                       hlmInput
@@ -551,12 +652,18 @@ interface StepItem {
                       placeholder="contact@facility.org"
                       class="w-full h-10 text-xs pl-9"
                     />
-                    <ng-icon name="lucideMail" size="15" class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                    <ng-icon
+                      name="lucideMail"
+                      size="15"
+                      class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                    />
                   </div>
                 </div>
 
                 <div class="space-y-1.5">
-                  <label class="text-xs font-semibold text-foreground block">Reception / Emergency Phone *</label>
+                  <label class="text-xs font-semibold text-foreground block"
+                    >Reception / Emergency Phone *</label
+                  >
                   <div class="relative">
                     <input
                       hlmInput
@@ -567,14 +674,20 @@ interface StepItem {
                       placeholder="+91 22 2490 1000"
                       class="w-full h-10 text-xs pl-9"
                     />
-                    <ng-icon name="lucidePhone" size="15" class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                    <ng-icon
+                      name="lucidePhone"
+                      size="15"
+                      class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                    />
                   </div>
                 </div>
               </div>
 
               <!-- Physical Address -->
               <div class="space-y-1.5">
-                <label class="text-xs font-semibold text-foreground block">Physical Facility Address</label>
+                <label class="text-xs font-semibold text-foreground block"
+                  >Physical Facility Address</label
+                >
                 <div class="relative">
                   <input
                     hlmInput
@@ -584,7 +697,11 @@ interface StepItem {
                     placeholder="Plot 13, Sector 4, Navi Mumbai, Maharashtra 400614"
                     class="w-full h-10 text-xs pl-9"
                   />
-                  <ng-icon name="lucideMapPin" size="15" class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <ng-icon
+                    name="lucideMapPin"
+                    size="15"
+                    class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                  />
                 </div>
               </div>
 
@@ -664,14 +781,21 @@ interface StepItem {
 
             <!-- STEP 3: PRIMARY ORG ADMIN ACCOUNT -->
             <div *ngIf="currentStep() === 3" class="space-y-4 animate-in fade-in duration-200">
-              <div class="p-3.5 rounded-xl bg-primary/5 border border-primary/15 text-xs text-muted-foreground flex items-center gap-2.5">
+              <div
+                class="p-3.5 rounded-xl bg-primary/5 border border-primary/15 text-xs text-muted-foreground flex items-center gap-2.5"
+              >
                 <ng-icon name="lucideUserCheck" size="16" class="text-primary shrink-0" />
-                <span>Set up the primary super-administrator account who will manage staff onboarding & permissions.</span>
+                <span
+                  >Set up the primary super-administrator account who will manage staff onboarding &
+                  permissions.</span
+                >
               </div>
 
               <!-- Admin Full Name -->
               <div class="space-y-1.5">
-                <label class="text-xs font-semibold text-foreground block">Admin Full Legal Name & Title *</label>
+                <label class="text-xs font-semibold text-foreground block"
+                  >Admin Full Legal Name & Title *</label
+                >
                 <div class="relative">
                   <input
                     hlmInput
@@ -682,13 +806,19 @@ interface StepItem {
                     placeholder="e.g. Dr. Vikram Singh"
                     class="w-full h-10 text-xs pl-9"
                   />
-                  <ng-icon name="lucideUser" size="15" class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <ng-icon
+                    name="lucideUser"
+                    size="15"
+                    class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                  />
                 </div>
               </div>
 
               <!-- Admin Official Work Email -->
               <div class="space-y-1.5">
-                <label class="text-xs font-semibold text-foreground block">Admin Official Work Email *</label>
+                <label class="text-xs font-semibold text-foreground block"
+                  >Admin Official Work Email *</label
+                >
                 <div class="relative">
                   <input
                     hlmInput
@@ -699,15 +829,24 @@ interface StepItem {
                     placeholder="vikram.singh@facility.org"
                     class="w-full h-10 text-xs pl-9"
                   />
-                  <ng-icon name="lucideMail" size="15" class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <ng-icon
+                    name="lucideMail"
+                    size="15"
+                    class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                  />
                 </div>
-                <p class="text-[10px] text-muted-foreground">This email address will be used to log into the Sentinel Organization Admin Console.</p>
+                <p class="text-[10px] text-muted-foreground">
+                  This email address will be used to log into the Sentinel Organization Admin
+                  Console.
+                </p>
               </div>
 
               <!-- Password & Confirm Password Grid -->
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 <div class="space-y-1.5">
-                  <label class="text-xs font-semibold text-foreground flex items-center justify-between">
+                  <label
+                    class="text-xs font-semibold text-foreground flex items-center justify-between"
+                  >
                     <span>Admin Master Password *</span>
                     <button
                       type="button"
@@ -727,12 +866,18 @@ interface StepItem {
                       placeholder="••••••••••••"
                       class="w-full h-10 text-xs pl-9"
                     />
-                    <ng-icon name="lucideLock" size="15" class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                    <ng-icon
+                      name="lucideLock"
+                      size="15"
+                      class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                    />
                   </div>
                 </div>
 
                 <div class="space-y-1.5">
-                  <label class="text-xs font-semibold text-foreground block">Confirm Master Password *</label>
+                  <label class="text-xs font-semibold text-foreground block"
+                    >Confirm Master Password *</label
+                  >
                   <div class="relative">
                     <input
                       hlmInput
@@ -743,13 +888,20 @@ interface StepItem {
                       placeholder="••••••••••••"
                       class="w-full h-10 text-xs pl-9"
                     />
-                    <ng-icon name="lucideLock" size="15" class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                    <ng-icon
+                      name="lucideLock"
+                      size="15"
+                      class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+                    />
                   </div>
                 </div>
               </div>
 
               <!-- Password Strength Meter -->
-              <div *ngIf="formData.adminPassword" class="space-y-1.5 p-3 rounded-xl bg-muted/40 border border-border text-xs">
+              <div
+                *ngIf="formData.adminPassword"
+                class="space-y-1.5 p-3 rounded-xl bg-muted/40 border border-border text-xs"
+              >
                 <div class="flex items-center justify-between text-[11px]">
                   <span class="text-muted-foreground">Password strength:</span>
                   <span class="font-bold" [ngClass]="getPasswordStrength().textColor">
@@ -763,10 +915,16 @@ interface StepItem {
                     [style.width.%]="getPasswordStrength().percentage"
                   ></div>
                 </div>
-                <p *ngIf="confirmPassword && formData.adminPassword !== confirmPassword" class="text-[11px] text-destructive font-medium pt-0.5">
+                <p
+                  *ngIf="confirmPassword && formData.adminPassword !== confirmPassword"
+                  class="text-[11px] text-destructive font-medium pt-0.5"
+                >
                   Passwords do not match.
                 </p>
-                <p *ngIf="confirmPassword && formData.adminPassword === confirmPassword" class="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium pt-0.5 flex items-center gap-1">
+                <p
+                  *ngIf="confirmPassword && formData.adminPassword === confirmPassword"
+                  class="text-[11px] text-emerald-600 dark:text-emerald-400 font-medium pt-0.5 flex items-center gap-1"
+                >
                   <ng-icon name="lucideCheckCircle2" size="12" />
                   Passwords match successfully.
                 </p>
@@ -774,7 +932,9 @@ interface StepItem {
 
               <!-- Terms & Data Governance Checkbox -->
               <div class="pt-2">
-                <label class="flex items-start gap-2.5 p-3 rounded-xl bg-muted/30 border border-border cursor-pointer select-none text-xs text-muted-foreground leading-relaxed hover:bg-muted/50 transition-colors">
+                <label
+                  class="flex items-start gap-2.5 p-3 rounded-xl bg-muted/30 border border-border cursor-pointer select-none text-xs text-muted-foreground leading-relaxed hover:bg-muted/50 transition-colors"
+                >
                   <input
                     type="checkbox"
                     [(ngModel)]="agreedToTerms"
@@ -783,9 +943,21 @@ interface StepItem {
                     class="mt-0.5 size-4 rounded text-primary focus:ring-primary/40 border-input bg-background"
                   />
                   <span>
-                    I confirm that I am authorized to register this facility under the ABDM Health Data Management Policy and DPDP Act 2023, and agree to Sentinel EHR's
-                    <a routerLink="/terms-of-service" target="_blank" class="text-foreground font-semibold underline">Terms of Service</a> &
-                    <a routerLink="/privacy-policy" target="_blank" class="text-foreground font-semibold underline">Privacy Policy</a>.
+                    I confirm that I am authorized to register this facility under the ABDM Health
+                    Data Management Policy and DPDP Act 2023, and agree to Sentinel EHR's
+                    <a
+                      routerLink="/terms-of-service"
+                      target="_blank"
+                      class="text-foreground font-semibold underline"
+                      >Terms of Service</a
+                    >
+                    &
+                    <a
+                      routerLink="/privacy-policy"
+                      target="_blank"
+                      class="text-foreground font-semibold underline"
+                      >Privacy Policy</a
+                    >.
                   </span>
                 </label>
               </div>
@@ -820,23 +992,29 @@ interface StepItem {
                 </button>
               </div>
             </div>
-
           </form>
         </div>
 
         <!-- Bottom Footer Links -->
-        <div class="mt-6 text-center text-xs text-muted-foreground flex items-center justify-center gap-3">
-          <span>Enterprise Support: <a href="mailto:support@sentinel-ehr.com" class="text-foreground underline">Helpdesk</a></span>
+        <div
+          class="mt-6 text-center text-xs text-muted-foreground flex items-center justify-center gap-3"
+        >
+          <span
+            >Enterprise Support:
+            <a href="mailto:support@sentinel-ehr.com" class="text-foreground underline"
+              >Helpdesk</a
+            ></span
+          >
           <span>&bull;</span>
           <a routerLink="/privacy-policy" class="text-foreground hover:underline">Privacy Policy</a>
           <span>&bull;</span>
-          <a routerLink="/terms-of-service" class="text-foreground hover:underline">Terms of Service</a>
+          <a routerLink="/terms-of-service" class="text-foreground hover:underline"
+            >Terms of Service</a
+          >
         </div>
-
       </div>
-
     </div>
-  `
+  `,
 })
 export class RegisterOrgComponent {
   currentStep = signal<1 | 2 | 3>(1);
@@ -852,19 +1030,22 @@ export class RegisterOrgComponent {
       number: 1,
       title: 'Facility Profile',
       subtitle: 'Facility Identity & Category',
-      description: 'Enter organizational identity, unique tenant slug code, and facility operational type.',
+      description:
+        'Enter organizational identity, unique tenant slug code, and facility operational type.',
     },
     {
       number: 2,
       title: 'Licensing & Contact',
       subtitle: 'Accreditation & Registry',
-      description: 'Provide official healthcare accreditation numbers, emergency contact, and location.',
+      description:
+        'Provide official healthcare accreditation numbers, emergency contact, and location.',
     },
     {
       number: 3,
       title: 'Org Admin Security',
       subtitle: 'Master Super-Admin Access',
-      description: 'Establish primary administrator credentials for tenant governance and staff management.',
+      description:
+        'Establish primary administrator credentials for tenant governance and staff management.',
     },
   ];
 
@@ -888,8 +1069,8 @@ export class RegisterOrgComponent {
 
   constructor(
     private orgService: OrganizationService,
-    private router: Router
-  ) { }
+    private router: Router,
+  ) {}
 
   getProgressPercentage(): number {
     if (this.currentStep() === 1) return 33;
@@ -968,7 +1149,8 @@ export class RegisterOrgComponent {
   }
 
   isStep2Valid(): boolean {
-    const emailValid = !!this.formData.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.formData.email);
+    const emailValid =
+      !!this.formData.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(this.formData.email);
     return !!this.formData.licenseNumber?.trim() && emailValid && !!this.formData.phone?.trim();
   }
 
@@ -997,13 +1179,33 @@ export class RegisterOrgComponent {
     if (/[^A-Za-z0-9]/.test(p)) score += 25;
 
     if (score <= 25) {
-      return { text: 'Weak', percentage: 25, barColor: 'bg-destructive', textColor: 'text-destructive' };
+      return {
+        text: 'Weak',
+        percentage: 25,
+        barColor: 'bg-destructive',
+        textColor: 'text-destructive',
+      };
     } else if (score <= 50) {
-      return { text: 'Fair', percentage: 50, barColor: 'bg-amber-500', textColor: 'text-amber-600 dark:text-amber-400' };
+      return {
+        text: 'Fair',
+        percentage: 50,
+        barColor: 'bg-amber-500',
+        textColor: 'text-amber-600 dark:text-amber-400',
+      };
     } else if (score <= 75) {
-      return { text: 'Good', percentage: 75, barColor: 'bg-blue-500', textColor: 'text-blue-600 dark:text-blue-400' };
+      return {
+        text: 'Good',
+        percentage: 75,
+        barColor: 'bg-blue-500',
+        textColor: 'text-blue-600 dark:text-blue-400',
+      };
     } else {
-      return { text: 'Strong', percentage: 100, barColor: 'bg-emerald-500', textColor: 'text-emerald-600 dark:text-emerald-400' };
+      return {
+        text: 'Strong',
+        percentage: 100,
+        barColor: 'bg-emerald-500',
+        textColor: 'text-emerald-600 dark:text-emerald-400',
+      };
     }
   }
 
@@ -1041,7 +1243,7 @@ export class RegisterOrgComponent {
         const facilityName = res.name || this.formData.orgName;
         const tenantCode = res.orgCode || res.code || code;
         this.successMessage.set(
-          `Your healthcare organization '${facilityName}' (Tenant Code: ${tenantCode}) has been registered in PENDING_VERIFICATION status. Primary Admin credentials for '${this.formData.adminEmail}' are configured.`
+          `Your healthcare organization '${facilityName}' (Tenant Code: ${tenantCode}) has been registered in PENDING_VERIFICATION status. Primary Admin credentials for '${this.formData.adminEmail}' are configured.`,
         );
       },
       error: (err) => {
@@ -1080,4 +1282,3 @@ export class RegisterOrgComponent {
     };
   }
 }
-

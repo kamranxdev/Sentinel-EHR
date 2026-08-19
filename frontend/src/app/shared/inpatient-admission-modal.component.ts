@@ -1,4 +1,13 @@
-import { Component, EventEmitter, Input, Output, OnInit, OnChanges, SimpleChanges, signal } from '@angular/core';
+import {
+  Component,
+  EventEmitter,
+  Input,
+  Output,
+  OnInit,
+  OnChanges,
+  SimpleChanges,
+  signal,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ApiService } from '../core/services/api.service';
@@ -9,19 +18,20 @@ import { HlmCardImports } from '@spartan-ng/helm/card';
 import { HlmButtonImports } from '@spartan-ng/helm/button';
 import { HlmBadgeImports } from '@spartan-ng/helm/badge';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { lucideHospital, lucideUserPlus, lucideX, lucideUser, lucideStethoscope, lucideActivity, lucideLock } from '@ng-icons/lucide';
+import {
+  lucideHospital,
+  lucideUserPlus,
+  lucideX,
+  lucideUser,
+  lucideStethoscope,
+  lucideActivity,
+  lucideLock,
+} from '@ng-icons/lucide';
 
 @Component({
   selector: 'app-inpatient-admission-modal',
   standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    HlmCardImports,
-    HlmButtonImports,
-    HlmBadgeImports,
-    NgIcon,
-  ],
+  imports: [CommonModule, FormsModule, HlmCardImports, HlmButtonImports, HlmBadgeImports, NgIcon],
   providers: [
     provideIcons({
       lucideHospital,
@@ -34,8 +44,13 @@ import { lucideHospital, lucideUserPlus, lucideX, lucideUser, lucideStethoscope,
     }),
   ],
   template: `
-    <div *ngIf="isOpen" class="fixed inset-0 z-50 bg-background/80 backdrop-blur-xs flex items-center justify-center p-4">
-      <div class="bg-card border border-border rounded-2xl max-w-xl w-full overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-200">
+    <div
+      *ngIf="isOpen"
+      class="fixed inset-0 z-50 bg-background/80 backdrop-blur-xs flex items-center justify-center p-4"
+    >
+      <div
+        class="bg-card border border-border rounded-2xl max-w-xl w-full overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-200"
+      >
         <!-- Header -->
         <div class="bg-primary/10 border-b border-primary/20 p-5 flex items-start justify-between">
           <div class="flex items-center gap-3">
@@ -47,10 +62,15 @@ import { lucideHospital, lucideUserPlus, lucideX, lucideUser, lucideStethoscope,
                 Inpatient Admission & Registration
                 <span hlmBadge variant="secondary" class="text-[10px]">Hospitalization</span>
               </h2>
-              <p class="text-xs text-muted-foreground mt-0.5">Register inpatient hospitalization encounter and enter bed assignment queue</p>
+              <p class="text-xs text-muted-foreground mt-0.5">
+                Register inpatient hospitalization encounter and enter bed assignment queue
+              </p>
             </div>
           </div>
-          <button (click)="closeModal()" class="text-muted-foreground hover:text-foreground p-1 rounded-lg">
+          <button
+            (click)="closeModal()"
+            class="text-muted-foreground hover:text-foreground p-1 rounded-lg"
+          >
             <ng-icon name="lucideX" class="text-lg"></ng-icon>
           </button>
         </div>
@@ -61,7 +81,12 @@ import { lucideHospital, lucideUserPlus, lucideX, lucideUser, lucideStethoscope,
           <div>
             <div class="flex items-center justify-between mb-1">
               <label class="font-semibold text-foreground">Target Patient *</label>
-              <span *ngIf="isPatientLocked()" hlmBadge variant="secondary" class="text-[10px] bg-primary/10 text-primary border border-primary/20 flex items-center gap-1 font-medium">
+              <span
+                *ngIf="isPatientLocked()"
+                hlmBadge
+                variant="secondary"
+                class="text-[10px] bg-primary/10 text-primary border border-primary/20 flex items-center gap-1 font-medium"
+              >
                 <ng-icon name="lucideLock" size="10" /> Auto-filled from Active Chart Context
               </span>
             </div>
@@ -81,7 +106,10 @@ import { lucideHospital, lucideUserPlus, lucideX, lucideUser, lucideStethoscope,
             <!-- Admission Type -->
             <div>
               <label class="block font-semibold text-foreground mb-1">Admission Type *</label>
-              <select [(ngModel)]="admissionType" class="w-full h-9 rounded-md border border-input bg-background px-3 py-1 text-xs">
+              <select
+                [(ngModel)]="admissionType"
+                class="w-full h-9 rounded-md border border-input bg-background px-3 py-1 text-xs"
+              >
                 <option value="EMERGENCY">Emergency Admission</option>
                 <option value="URGENT">Urgent Inpatient Stay</option>
                 <option value="ELECTIVE">Elective / Surgical Admission</option>
@@ -93,7 +121,10 @@ import { lucideHospital, lucideUserPlus, lucideX, lucideUser, lucideStethoscope,
             <!-- Admission Source -->
             <div>
               <label class="block font-semibold text-foreground mb-1">Admission Source *</label>
-              <select [(ngModel)]="admissionSource" class="w-full h-9 rounded-md border border-input bg-background px-3 py-1 text-xs">
+              <select
+                [(ngModel)]="admissionSource"
+                class="w-full h-9 rounded-md border border-input bg-background px-3 py-1 text-xs"
+              >
                 <option value="EMERGENCY_DEPARTMENT">Emergency Department (ED)</option>
                 <option value="OUTPATIENT_CLINIC">Outpatient Clinic (OPD Referral)</option>
                 <option value="ELECTIVE_SCHEDULED">Elective / Scheduled Booking</option>
@@ -107,7 +138,10 @@ import { lucideHospital, lucideUserPlus, lucideX, lucideUser, lucideStethoscope,
             <!-- Department / Ward -->
             <div>
               <label class="block font-semibold text-foreground mb-1">Target Ward / Unit *</label>
-              <select [(ngModel)]="targetDepartment" class="w-full h-9 rounded-md border border-input bg-background px-3 py-1 text-xs">
+              <select
+                [(ngModel)]="targetDepartment"
+                class="w-full h-9 rounded-md border border-input bg-background px-3 py-1 text-xs"
+              >
                 <option value="Cardiology Inpatient">Cardiovascular Medicine Ward</option>
                 <option value="ICU">Intensive Care Unit (ICU)</option>
                 <option value="Emergency Ward">Emergency & Acute Care Ward</option>
@@ -118,20 +152,35 @@ import { lucideHospital, lucideUserPlus, lucideX, lucideUser, lucideStethoscope,
 
             <!-- Acuity Level -->
             <div>
-              <label class="block font-semibold text-foreground mb-1">Initial Triage Acuity Level *</label>
-              <select [(ngModel)]="acuityScore" class="w-full h-9 rounded-md border border-input bg-background px-3 py-1 text-xs">
-                <option value="Level 1 - Resuscitation">Level 1 - Resuscitation (Immediate STAT)</option>
+              <label class="block font-semibold text-foreground mb-1"
+                >Initial Triage Acuity Level *</label
+              >
+              <select
+                [(ngModel)]="acuityScore"
+                class="w-full h-9 rounded-md border border-input bg-background px-3 py-1 text-xs"
+              >
+                <option value="Level 1 - Resuscitation">
+                  Level 1 - Resuscitation (Immediate STAT)
+                </option>
                 <option value="Level 2 - Emergent">Level 2 - Emergent (High Risk / Acute)</option>
-                <option value="Level 3 - Urgent">Level 3 - Urgent (Multiple Resources Required)</option>
-                <option value="Level 4 - Less Urgent">Level 4 - Less Urgent (Single Resource)</option>
-                <option value="Level 5 - Non-Urgent">Level 5 - Non-Urgent (Baseline Routine)</option>
+                <option value="Level 3 - Urgent">
+                  Level 3 - Urgent (Multiple Resources Required)
+                </option>
+                <option value="Level 4 - Less Urgent">
+                  Level 4 - Less Urgent (Single Resource)
+                </option>
+                <option value="Level 5 - Non-Urgent">
+                  Level 5 - Non-Urgent (Baseline Routine)
+                </option>
               </select>
             </div>
           </div>
 
           <!-- Chief Complaint -->
           <div>
-            <label class="block font-semibold text-foreground mb-1">Primary Admission Complaint & ICD-10 Diagnosis *</label>
+            <label class="block font-semibold text-foreground mb-1"
+              >Primary Admission Complaint & ICD-10 Diagnosis *</label
+            >
             <input
               type="text"
               [(ngModel)]="chiefComplaint"
@@ -142,7 +191,9 @@ import { lucideHospital, lucideUserPlus, lucideX, lucideUser, lucideStethoscope,
 
           <!-- Admitting Notes -->
           <div>
-            <label class="block font-semibold text-foreground mb-1">Admitting Clinical Directives & Directives</label>
+            <label class="block font-semibold text-foreground mb-1"
+              >Admitting Clinical Directives & Directives</label
+            >
             <textarea
               [(ngModel)]="clinicalNotes"
               rows="2"
@@ -190,7 +241,7 @@ export class InpatientAdmissionModalComponent implements OnInit, OnChanges {
 
   constructor(
     private apiService: ApiService,
-    private patientContext: PatientContextService
+    private patientContext: PatientContextService,
   ) {}
 
   ngOnInit() {
@@ -206,7 +257,11 @@ export class InpatientAdmissionModalComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['isOpen']?.currentValue || changes['targetPatientId']?.currentValue || changes['lockPatient']?.currentValue) {
+    if (
+      changes['isOpen']?.currentValue ||
+      changes['targetPatientId']?.currentValue ||
+      changes['lockPatient']?.currentValue
+    ) {
       this.syncPatientContext();
     }
   }
@@ -246,7 +301,9 @@ export class InpatientAdmissionModalComponent implements OnInit, OnChanges {
     this.apiService.createEncounter(payload).subscribe({
       next: (res: any) => {
         this.isSubmitting.set(false);
-        toast.success(`Inpatient Admission registered successfully. Encounter #ENC-${res.id || 'NEW'} status set to ADMITTED.`);
+        toast.success(
+          `Inpatient Admission registered successfully. Encounter #ENC-${res.id || 'NEW'} status set to ADMITTED.`,
+        );
         this.admitted.emit(res);
         this.closeModal();
       },
@@ -257,4 +314,3 @@ export class InpatientAdmissionModalComponent implements OnInit, OnChanges {
     });
   }
 }
-

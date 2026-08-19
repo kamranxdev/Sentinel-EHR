@@ -107,7 +107,7 @@ POST   /api/v1/beds/{id}/transfer        # Transfer patient between beds/wards
 ```http
 # Emergency Break-Glass
 POST   /api/v1/security/break-glass      # Request 4h emergency override lease
-GET    /api/v1/security/break-glass/audit# List historical break-glass leases (Admins/Auditors)
+GET    /api/v1/security/break-glass/audit# List historical break-glass leases (Admins)
 
 # WORM Audit Logs
 GET    /api/v1/audit/logs                # Query immutable audit events by time/user/resource

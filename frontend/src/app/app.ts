@@ -148,16 +148,39 @@ export class App implements OnInit, OnDestroy {
     }
 
     const roleMap: Record<string, { label: string; url: string; icon: string }> = {
-      physician: { label: 'Physician Workspace', url: '/physician/dashboard', icon: 'lucideHeartPulse' },
+      physician: {
+        label: 'Physician Workspace',
+        url: '/physician/dashboard',
+        icon: 'lucideHeartPulse',
+      },
       nurse: { label: 'Nurse Workspace', url: '/nurse/dashboard', icon: 'lucideActivity' },
-      'super-admin': { label: 'Super Admin Desk', url: '/super-admin/dashboard', icon: 'lucideSettings' },
-      'organization-admin': { label: 'Org Admin Center', url: '/organization-admin/dashboard', icon: 'lucideBuilding2' },
+      'super-admin': {
+        label: 'Super Admin Desk',
+        url: '/super-admin/dashboard',
+        icon: 'lucideSettings',
+      },
+      'organization-admin': {
+        label: 'Org Admin Center',
+        url: '/organization-admin/dashboard',
+        icon: 'lucideBuilding2',
+      },
       patient: { label: 'Patient Portal', url: '/patient/dashboard', icon: 'lucideUserRound' },
-      receptionist: { label: 'Front Desk', url: '/receptionist/dashboard', icon: 'lucideCalendarClock' },
-      'lab-technician': { label: 'Pathology Lab', url: '/lab-technician/dashboard', icon: 'lucideMicroscope' },
+      receptionist: {
+        label: 'Front Desk',
+        url: '/receptionist/dashboard',
+        icon: 'lucideCalendarClock',
+      },
+      'lab-technician': {
+        label: 'Pathology Lab',
+        url: '/lab-technician/dashboard',
+        icon: 'lucideMicroscope',
+      },
       pharmacist: { label: 'Pharmacy Hub', url: '/pharmacist/dashboard', icon: 'lucidePill' },
-      'billing-staff': { label: 'Billing & RCM', url: '/billing-staff/dashboard', icon: 'lucideReceipt' },
-      auditor: { label: 'Compliance & Audit', url: '/auditor/dashboard', icon: 'lucideShieldCheck' },
+      'billing-staff': {
+        label: 'Billing & RCM',
+        url: '/billing-staff/dashboard',
+        icon: 'lucideReceipt',
+      },
     };
 
     const pageMetaMap: Record<string, { label: string; icon: string }> = {
@@ -250,9 +273,7 @@ export class App implements OnInit, OnDestroy {
   });
 
   private formatSegmentName(seg: string): string {
-    return seg
-      .replace(/-/g, ' ')
-      .replace(/\b\w/g, (c) => c.toUpperCase());
+    return seg.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
   }
 
   private mql?: MediaQueryList;
@@ -365,9 +386,7 @@ export class App implements OnInit, OnDestroy {
   isBillingStaff(): boolean {
     return this.authService.isBillingStaff();
   }
-  isAuditor(): boolean {
-    return this.authService.isAuditor();
-  }
+
   isPatient(): boolean {
     return this.authService.isPatient();
   }
@@ -381,7 +400,6 @@ export class App implements OnInit, OnDestroy {
     if (this.isLabTechnician()) return 'Laboratory Specialist';
     if (this.isPharmacist()) return 'Clinical Pharmacist';
     if (this.isBillingStaff()) return 'Billing Staff';
-    if (this.isAuditor()) return 'Compliance Auditor';
     return 'Patient Portal';
   }
 
@@ -401,15 +419,31 @@ export class App implements OnInit, OnDestroy {
         {
           label: 'Clinical Practice & Rounds',
           items: [
-            { icon: 'lucideLayoutDashboard', label: 'Physician Command Desk', routerLink: '/physician/dashboard' },
-            { icon: 'lucideCalendarClock', label: 'Outpatient Appointments & Queue', routerLink: '/physician/appointments' },
-            { icon: 'lucideBed', label: 'Inpatient Ward Census & Rounds', routerLink: '/physician/inpatients' },
+            {
+              icon: 'lucideLayoutDashboard',
+              label: 'Physician Command Desk',
+              routerLink: '/physician/dashboard',
+            },
+            {
+              icon: 'lucideCalendarClock',
+              label: 'Outpatient Appointments & Queue',
+              routerLink: '/physician/appointments',
+            },
+            {
+              icon: 'lucideBed',
+              label: 'Inpatient Ward Census & Rounds',
+              routerLink: '/physician/inpatients',
+            },
           ],
         },
         {
           label: 'Safety & Overrides',
           items: [
-            { icon: 'lucideShieldAlert', label: 'Emergency Break-Glass Access', routerLink: '/physician/break-glass' },
+            {
+              icon: 'lucideShieldAlert',
+              label: 'Emergency Break-Glass Access',
+              routerLink: '/physician/break-glass',
+            },
           ],
         },
       ];
@@ -419,8 +453,16 @@ export class App implements OnInit, OnDestroy {
         {
           label: 'Station Command & Triage',
           items: [
-            { icon: 'lucideLayoutDashboard', label: 'Nursing Command Station', routerLink: '/nurse/dashboard' },
-            { icon: 'lucideCalendarClock', label: 'Outpatient Appointments & Triage', routerLink: '/nurse/appointments' },
+            {
+              icon: 'lucideLayoutDashboard',
+              label: 'Nursing Command Station',
+              routerLink: '/nurse/dashboard',
+            },
+            {
+              icon: 'lucideCalendarClock',
+              label: 'Outpatient Appointments & Triage',
+              routerLink: '/nurse/appointments',
+            },
           ],
         },
         {
@@ -436,8 +478,16 @@ export class App implements OnInit, OnDestroy {
         {
           label: 'Reception Desk Workspace',
           items: [
-            { icon: 'lucideLayoutDashboard', label: 'Front-Desk Command Center', routerLink: '/receptionist/dashboard' },
-            { icon: 'lucideCalendarClock', label: 'Appointments Roster', routerLink: '/receptionist/appointments' },
+            {
+              icon: 'lucideLayoutDashboard',
+              label: 'Front-Desk Command Center',
+              routerLink: '/receptionist/dashboard',
+            },
+            {
+              icon: 'lucideCalendarClock',
+              label: 'Appointments Roster',
+              routerLink: '/receptionist/appointments',
+            },
             { icon: 'lucideHeartPulse', label: 'MPI Search', routerLink: '/receptionist/mpi' },
           ],
         },
@@ -448,9 +498,21 @@ export class App implements OnInit, OnDestroy {
         {
           label: 'Pathology & Lab Workspace',
           items: [
-            { icon: 'lucideMicroscope', label: 'Lab Dashboard', routerLink: '/lab-technician/dashboard' },
-            { icon: 'lucideListChecks', label: 'Specimen Worklist Queue', routerLink: '/lab-technician/worklist' },
-            { icon: 'lucideFileText', label: 'LOINC Result Entry', routerLink: '/lab-technician/results' },
+            {
+              icon: 'lucideMicroscope',
+              label: 'Lab Dashboard',
+              routerLink: '/lab-technician/dashboard',
+            },
+            {
+              icon: 'lucideListChecks',
+              label: 'Specimen Worklist Queue',
+              routerLink: '/lab-technician/worklist',
+            },
+            {
+              icon: 'lucideFileText',
+              label: 'LOINC Result Entry',
+              routerLink: '/lab-technician/results',
+            },
           ],
         },
       ];
@@ -460,10 +522,26 @@ export class App implements OnInit, OnDestroy {
         {
           label: 'Clinical Pharmacy Workspace',
           items: [
-            { icon: 'lucideLayoutDashboard', label: 'Pharmacy Dashboard', routerLink: '/pharmacist/dashboard' },
-            { icon: 'lucideListChecks', label: 'Prescription Verification', routerLink: '/pharmacist/erx' },
-            { icon: 'lucidePill', label: 'Dispense Station & MAR', routerLink: '/pharmacist/dispense' },
-            { icon: 'lucideBoxes', label: 'Inventory & FEFO Batches', routerLink: '/pharmacist/inventory' },
+            {
+              icon: 'lucideLayoutDashboard',
+              label: 'Pharmacy Dashboard',
+              routerLink: '/pharmacist/dashboard',
+            },
+            {
+              icon: 'lucideListChecks',
+              label: 'Prescription Verification',
+              routerLink: '/pharmacist/erx',
+            },
+            {
+              icon: 'lucidePill',
+              label: 'Dispense Station & MAR',
+              routerLink: '/pharmacist/dispense',
+            },
+            {
+              icon: 'lucideBoxes',
+              label: 'Inventory & FEFO Batches',
+              routerLink: '/pharmacist/inventory',
+            },
           ],
         },
       ];
@@ -473,9 +551,21 @@ export class App implements OnInit, OnDestroy {
         {
           label: 'Revenue Cycle Workspace',
           items: [
-            { icon: 'lucideLayoutDashboard', label: 'Revenue Dashboard', routerLink: '/billing-staff/dashboard' },
-            { icon: 'lucideReceipt', label: 'Invoices & Charge Ledger', routerLink: '/billing-staff/invoices' },
-            { icon: 'lucideFileText', label: 'Insurance & PM-JAY Claims', routerLink: '/billing-staff/claims' },
+            {
+              icon: 'lucideLayoutDashboard',
+              label: 'Revenue Dashboard',
+              routerLink: '/billing-staff/dashboard',
+            },
+            {
+              icon: 'lucideReceipt',
+              label: 'Invoices & Charge Ledger',
+              routerLink: '/billing-staff/invoices',
+            },
+            {
+              icon: 'lucideFileText',
+              label: 'Insurance & PM-JAY Claims',
+              routerLink: '/billing-staff/claims',
+            },
           ],
         },
       ];
@@ -485,11 +575,31 @@ export class App implements OnInit, OnDestroy {
         {
           label: 'Platform & Infrastructure',
           items: [
-            { icon: 'lucideLayoutDashboard', label: 'Platform Command Desk', routerLink: '/super-admin/dashboard' },
-            { icon: 'lucideBuilding2', label: 'Organizations & Tenants', routerLink: '/super-admin/organizations' },
-            { icon: 'lucideUsers', label: 'Platform Users & RBAC', routerLink: '/super-admin/users' },
-            { icon: 'lucideShieldCheck', label: 'Platform Audit Vault', routerLink: '/super-admin/audit' },
-            { icon: 'lucideServer', label: 'System Health & Terminology', routerLink: '/super-admin/system-health' },
+            {
+              icon: 'lucideLayoutDashboard',
+              label: 'Platform Command Desk',
+              routerLink: '/super-admin/dashboard',
+            },
+            {
+              icon: 'lucideBuilding2',
+              label: 'Organizations & Tenants',
+              routerLink: '/super-admin/organizations',
+            },
+            {
+              icon: 'lucideUsers',
+              label: 'Platform Users & RBAC',
+              routerLink: '/super-admin/users',
+            },
+            {
+              icon: 'lucideShieldCheck',
+              label: 'Platform Audit Vault',
+              routerLink: '/super-admin/audit',
+            },
+            {
+              icon: 'lucideServer',
+              label: 'System Health & Terminology',
+              routerLink: '/super-admin/system-health',
+            },
           ],
         },
       ];
@@ -499,39 +609,66 @@ export class App implements OnInit, OnDestroy {
         {
           label: 'Hospital Administration',
           items: [
-            { icon: 'lucideLayoutDashboard', label: 'Org Admin Command Center', routerLink: '/organization-admin/dashboard' },
-            { icon: 'lucideBuilding2', label: 'Hospital Layout & Units', routerLink: '/organization-admin/facility-settings' },
-            { icon: 'lucideUsers', label: 'Staff Roster & Users', routerLink: '/organization-admin/users' },
-            { icon: 'lucideActivity', label: 'Patient Census Policies', routerLink: '/organization-admin/patients' },
-            { icon: 'lucideCalendarClock', label: 'Consultation Load Analytics', routerLink: '/organization-admin/schedule-analytics' },
+            {
+              icon: 'lucideLayoutDashboard',
+              label: 'Org Admin Command Center',
+              routerLink: '/organization-admin/dashboard',
+            },
+            {
+              icon: 'lucideBuilding2',
+              label: 'Hospital Layout & Units',
+              routerLink: '/organization-admin/facility-settings',
+            },
+            {
+              icon: 'lucideUsers',
+              label: 'Staff Roster & Users',
+              routerLink: '/organization-admin/users',
+            },
+            {
+              icon: 'lucideActivity',
+              label: 'Patient Census Policies',
+              routerLink: '/organization-admin/patients',
+            },
+            {
+              icon: 'lucideCalendarClock',
+              label: 'Consultation Load Analytics',
+              routerLink: '/organization-admin/schedule-analytics',
+            },
+            {
+              icon: 'lucideShieldCheck',
+              label: 'Organization Audit Log',
+              routerLink: '/organization-admin/audit',
+            },
           ],
         },
       ];
     }
-    if (this.isAuditor()) {
-      return [
-        {
-          label: 'Audit & Forensics Vault',
-          items: [
-            { icon: 'lucideLayoutDashboard', label: 'Compliance Overview', routerLink: '/auditor/dashboard' },
-            { icon: 'lucideShieldCheck', label: 'ABDM WORM Audit Vault', routerLink: '/auditor/ledger' },
-          ],
-        },
-      ];
-    }
+
     return [
       {
         label: 'My Clinical Records',
         items: [
-          { icon: 'lucideLayoutDashboard', label: 'My Health Summary', routerLink: '/patient/dashboard' },
-          { icon: 'lucideHeartPulse', label: 'My Health Chart & Reports', routerLink: '/patient/chart' },
+          {
+            icon: 'lucideLayoutDashboard',
+            label: 'My Health Summary',
+            routerLink: '/patient/dashboard',
+          },
+          {
+            icon: 'lucideHeartPulse',
+            label: 'My Health Chart & Reports',
+            routerLink: '/patient/chart',
+          },
           { icon: 'lucideActivity', label: 'Vitals & Flowsheet', routerLink: '/patient/vitals' },
         ],
       },
       {
         label: 'Care & Appointments',
         items: [
-          { icon: 'lucideCalendarClock', label: 'Appointments & Schedule', routerLink: '/patient/appointments' },
+          {
+            icon: 'lucideCalendarClock',
+            label: 'Appointments & Schedule',
+            routerLink: '/patient/appointments',
+          },
           { icon: 'lucideUserRound', label: 'My Health Profile', routerLink: '/patient/profile' },
         ],
       },

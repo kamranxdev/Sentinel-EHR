@@ -2,7 +2,13 @@ export interface ClinicalDocument {
   id: number | string;
   encounterId?: string;
   patientId: string;
-  documentType: 'PROGRESS_NOTE' | 'DISCHARGE_SUMMARY' | 'CONSULT_NOTE' | 'OPERATIVE_REPORT' | 'EMERGENCY_SUMMARY' | 'HISTORY_PHYSICAL';
+  documentType:
+    | 'PROGRESS_NOTE'
+    | 'DISCHARGE_SUMMARY'
+    | 'CONSULT_NOTE'
+    | 'OPERATIVE_REPORT'
+    | 'EMERGENCY_SUMMARY'
+    | 'HISTORY_PHYSICAL';
   title: string;
   content: string;
   status: 'DRAFT' | 'PRELIMINARY' | 'FINAL' | 'AMENDED';

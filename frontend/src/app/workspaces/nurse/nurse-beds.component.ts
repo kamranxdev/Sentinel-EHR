@@ -81,23 +81,38 @@ export interface WardBedCard {
   template: `
     <div class="w-full space-y-6">
       <!-- 1. Header with Ward Identity & Actions -->
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-border">
+      <div
+        class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-border"
+      >
         <div class="space-y-1">
           <div class="flex items-center flex-wrap gap-2">
-            <h1 class="text-2xl font-extrabold tracking-tight text-foreground flex items-center gap-2">
+            <h1
+              class="text-2xl font-extrabold tracking-tight text-foreground flex items-center gap-2"
+            >
               <span>Spatial Ward Bed Census</span>
             </h1>
-            <span hlmBadge variant="secondary" class="text-[11px] bg-primary/10 text-primary border-primary/20 font-semibold">
+            <span
+              hlmBadge
+              variant="secondary"
+              class="text-[11px] bg-primary/10 text-primary border-primary/20 font-semibold"
+            >
               Ward 3A - Acute Care
             </span>
           </div>
           <p class="text-xs text-muted-foreground">
-            Live spatial layout of inpatient beds, real-time patient occupancy, acuity surveillance, and room statuses.
+            Live spatial layout of inpatient beds, real-time patient occupancy, acuity surveillance,
+            and room statuses.
           </p>
         </div>
 
         <div class="flex items-center gap-2">
-          <button hlmBtn variant="outline" size="sm" (click)="loadWardBeds()" class="gap-1.5 text-xs">
+          <button
+            hlmBtn
+            variant="outline"
+            size="sm"
+            (click)="loadWardBeds()"
+            class="gap-1.5 text-xs"
+          >
             <ng-icon name="lucideRefreshCw" [class.animate-spin]="loading()" size="14" />
             <span>Refresh Ward</span>
           </button>
@@ -109,8 +124,12 @@ export interface WardBedCard {
         <!-- Card 1: Total Ward Beds -->
         <div class="p-4 rounded-2xl border border-border bg-card shadow-2xs space-y-2">
           <div class="flex items-center justify-between">
-            <span class="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Total Ward Beds</span>
-            <div class="size-7 rounded-lg bg-muted flex items-center justify-center text-muted-foreground">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-muted-foreground"
+              >Total Ward Beds</span
+            >
+            <div
+              class="size-7 rounded-lg bg-muted flex items-center justify-center text-muted-foreground"
+            >
               <ng-icon name="lucideHospital" size="14" />
             </div>
           </div>
@@ -128,18 +147,28 @@ export interface WardBedCard {
           [class.ring-primary]="statusFilter() === 'OCCUPIED'"
         >
           <div class="flex items-center justify-between">
-            <span class="text-[11px] font-bold uppercase tracking-wider text-primary">Occupied Beds</span>
-            <div class="size-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+            <span class="text-[11px] font-bold uppercase tracking-wider text-primary"
+              >Occupied Beds</span
+            >
+            <div
+              class="size-7 rounded-lg bg-primary/10 text-primary flex items-center justify-center"
+            >
               <ng-icon name="lucideUsers" size="14" />
             </div>
           </div>
           <div class="flex items-baseline justify-between">
             <span class="text-2xl font-extrabold text-foreground">{{ occupiedCount() }}</span>
-            <span hlmBadge variant="secondary" class="text-[10px] bg-primary/10 text-primary font-semibold">
+            <span
+              hlmBadge
+              variant="secondary"
+              class="text-[10px] bg-primary/10 text-primary font-semibold"
+            >
               {{ occupancyRate() }}% Occupancy
             </span>
           </div>
-          <div class="text-[11px] text-muted-foreground pt-1 border-t border-border/60 group-hover:text-primary">
+          <div
+            class="text-[11px] text-muted-foreground pt-1 border-t border-border/60 group-hover:text-primary"
+          >
             <span>Active Inpatient Admissions</span>
           </div>
         </div>
@@ -152,13 +181,22 @@ export interface WardBedCard {
           [class.ring-emerald-500]="statusFilter() === 'AVAILABLE'"
         >
           <div class="flex items-center justify-between">
-            <span class="text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400">Available Beds</span>
-            <div class="size-7 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center">
+            <span
+              class="text-[11px] font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-400"
+              >Available Beds</span
+            >
+            <div
+              class="size-7 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center"
+            >
               <ng-icon name="lucideCheckCircle2" size="14" />
             </div>
           </div>
-          <div class="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400">{{ availableCount() }}</div>
-          <div class="text-[11px] text-muted-foreground pt-1 border-t border-border/60 group-hover:text-emerald-600">
+          <div class="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400">
+            {{ availableCount() }}
+          </div>
+          <div
+            class="text-[11px] text-muted-foreground pt-1 border-t border-border/60 group-hover:text-emerald-600"
+          >
             <span>Ready for New Admission</span>
           </div>
         </div>
@@ -171,47 +209,76 @@ export interface WardBedCard {
           [class.ring-amber-500]="statusFilter() === 'CLEANING'"
         >
           <div class="flex items-center justify-between">
-            <span class="text-[11px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400">Turnover / Cleaning</span>
-            <div class="size-7 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center">
+            <span
+              class="text-[11px] font-bold uppercase tracking-wider text-amber-600 dark:text-amber-400"
+              >Turnover / Cleaning</span
+            >
+            <div
+              class="size-7 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center"
+            >
               <ng-icon name="lucideSparkles" size="14" />
             </div>
           </div>
-          <div class="text-2xl font-extrabold text-amber-600 dark:text-amber-400">{{ cleaningCount() }}</div>
-          <div class="text-[11px] text-muted-foreground pt-1 border-t border-border/60 group-hover:text-amber-600">
+          <div class="text-2xl font-extrabold text-amber-600 dark:text-amber-400">
+            {{ cleaningCount() }}
+          </div>
+          <div
+            class="text-[11px] text-muted-foreground pt-1 border-t border-border/60 group-hover:text-amber-600"
+          >
             <span>Sanitization in Progress</span>
           </div>
         </div>
       </div>
 
       <!-- 3. Filter Bar & Search -->
-      <div class="p-3.5 rounded-2xl border border-border bg-card shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div
+        class="p-3.5 rounded-2xl border border-border bg-card shadow-2xs flex flex-col sm:flex-row items-center justify-between gap-3"
+      >
         <!-- Status Filter Buttons -->
-        <div class="flex items-center gap-1.5 p-1 bg-muted/40 rounded-xl w-full sm:w-auto overflow-x-auto text-xs">
+        <div
+          class="flex items-center gap-1.5 p-1 bg-muted/40 rounded-xl w-full sm:w-auto overflow-x-auto text-xs"
+        >
           <button
             (click)="statusFilter.set('ALL')"
             class="px-3 py-1.5 rounded-lg font-semibold transition-all cursor-pointer whitespace-nowrap"
-            [ngClass]="statusFilter() === 'ALL' ? 'bg-background shadow-xs text-foreground font-bold' : 'text-muted-foreground hover:text-foreground'"
+            [ngClass]="
+              statusFilter() === 'ALL'
+                ? 'bg-background shadow-xs text-foreground font-bold'
+                : 'text-muted-foreground hover:text-foreground'
+            "
           >
             All Beds ({{ totalBedsCount() }})
           </button>
           <button
             (click)="statusFilter.set('OCCUPIED')"
             class="px-3 py-1.5 rounded-lg font-semibold transition-all cursor-pointer whitespace-nowrap"
-            [ngClass]="statusFilter() === 'OCCUPIED' ? 'bg-primary/20 text-primary font-bold border border-primary/30' : 'text-muted-foreground hover:text-primary'"
+            [ngClass]="
+              statusFilter() === 'OCCUPIED'
+                ? 'bg-primary/20 text-primary font-bold border border-primary/30'
+                : 'text-muted-foreground hover:text-primary'
+            "
           >
             Occupied ({{ occupiedCount() }})
           </button>
           <button
             (click)="statusFilter.set('AVAILABLE')"
             class="px-3 py-1.5 rounded-lg font-semibold transition-all cursor-pointer whitespace-nowrap"
-            [ngClass]="statusFilter() === 'AVAILABLE' ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-bold border border-emerald-500/30' : 'text-muted-foreground hover:text-emerald-600'"
+            [ngClass]="
+              statusFilter() === 'AVAILABLE'
+                ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-bold border border-emerald-500/30'
+                : 'text-muted-foreground hover:text-emerald-600'
+            "
           >
             Available ({{ availableCount() }})
           </button>
           <button
             (click)="statusFilter.set('CLEANING')"
             class="px-3 py-1.5 rounded-lg font-semibold transition-all cursor-pointer whitespace-nowrap"
-            [ngClass]="statusFilter() === 'CLEANING' ? 'bg-amber-500/20 text-amber-700 dark:text-amber-300 font-bold border border-amber-500/30' : 'text-muted-foreground hover:text-amber-600'"
+            [ngClass]="
+              statusFilter() === 'CLEANING'
+                ? 'bg-amber-500/20 text-amber-700 dark:text-amber-300 font-bold border border-amber-500/30'
+                : 'text-muted-foreground hover:text-amber-600'
+            "
           >
             Cleaning ({{ cleaningCount() }})
           </button>
@@ -219,7 +286,11 @@ export interface WardBedCard {
 
         <!-- Search Input -->
         <div class="relative w-full sm:w-72">
-          <ng-icon name="lucideSearch" size="14" class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <ng-icon
+            name="lucideSearch"
+            size="14"
+            class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+          />
           <input
             hlmInput
             type="text"
@@ -235,7 +306,15 @@ export interface WardBedCard {
         <div
           *ngFor="let bed of filteredBeds()"
           class="rounded-2xl border bg-card p-4 space-y-3.5 shadow-2xs hover:shadow-xs transition-all flex flex-col justify-between"
-          [ngClass]="bed.status === 'OCCUPIED' ? (bed.ewsScore && bed.ewsScore >= 4 ? 'border-amber-500/50 bg-amber-500/5' : 'border-border') : bed.status === 'AVAILABLE' ? 'border-emerald-500/30 bg-emerald-500/5' : 'border-amber-500/30 bg-muted/20'"
+          [ngClass]="
+            bed.status === 'OCCUPIED'
+              ? bed.ewsScore && bed.ewsScore >= 4
+                ? 'border-amber-500/50 bg-amber-500/5'
+                : 'border-border'
+              : bed.status === 'AVAILABLE'
+                ? 'border-emerald-500/30 bg-emerald-500/5'
+                : 'border-amber-500/30 bg-muted/20'
+          "
         >
           <!-- Bed Top Bar -->
           <div class="space-y-2">
@@ -243,33 +322,58 @@ export interface WardBedCard {
               <div class="flex items-center gap-2">
                 <div
                   class="size-8 rounded-xl flex items-center justify-center font-mono font-bold text-xs"
-                  [ngClass]="bed.status === 'OCCUPIED' ? 'bg-primary/10 text-primary' : bed.status === 'AVAILABLE' ? 'bg-emerald-500/10 text-emerald-600' : 'bg-amber-500/10 text-amber-600'"
+                  [ngClass]="
+                    bed.status === 'OCCUPIED'
+                      ? 'bg-primary/10 text-primary'
+                      : bed.status === 'AVAILABLE'
+                        ? 'bg-emerald-500/10 text-emerald-600'
+                        : 'bg-amber-500/10 text-amber-600'
+                  "
                 >
                   {{ bed.bedCode }}
                 </div>
                 <div>
                   <h3 class="font-bold text-foreground text-xs leading-none">{{ bed.bedCode }}</h3>
-                  <span class="text-[10px] text-muted-foreground">Rm {{ bed.roomNumber }} • {{ bed.wardName }}</span>
+                  <span class="text-[10px] text-muted-foreground"
+                    >Rm {{ bed.roomNumber }} • {{ bed.wardName }}</span
+                  >
                 </div>
               </div>
 
               <!-- Status Badge -->
               <span
                 hlmBadge
-                [variant]="bed.status === 'OCCUPIED' ? 'default' : bed.status === 'AVAILABLE' ? 'secondary' : 'outline'"
+                [variant]="
+                  bed.status === 'OCCUPIED'
+                    ? 'default'
+                    : bed.status === 'AVAILABLE'
+                      ? 'secondary'
+                      : 'outline'
+                "
                 class="text-[10px] font-bold"
-                [ngClass]="bed.status === 'AVAILABLE' ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20' : bed.status === 'CLEANING' ? 'bg-amber-500/10 text-amber-600 border border-amber-500/20' : 'bg-primary text-primary-foreground'"
+                [ngClass]="
+                  bed.status === 'AVAILABLE'
+                    ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/20'
+                    : bed.status === 'CLEANING'
+                      ? 'bg-amber-500/10 text-amber-600 border border-amber-500/20'
+                      : 'bg-primary text-primary-foreground'
+                "
               >
                 {{ bed.status }}
               </span>
             </div>
 
             <!-- OCCUPIED Bed Details -->
-            <div *ngIf="bed.status === 'OCCUPIED' && bed.patient" class="space-y-2 pt-2 border-t border-border/60">
+            <div
+              *ngIf="bed.status === 'OCCUPIED' && bed.patient"
+              class="space-y-2 pt-2 border-t border-border/60"
+            >
               <div>
                 <div class="font-bold text-foreground text-xs">{{ bed.patient.fullName }}</div>
                 <div class="text-[10px] text-muted-foreground font-mono">
-                  {{ bed.patient.patientCode }} • {{ bed.patient.gender || 'U' }} ({{ bed.patient.dateOfBirth || 'N/A' }})
+                  {{ bed.patient.patientCode }} • {{ bed.patient.gender || 'U' }} ({{
+                    bed.patient.dateOfBirth || 'N/A'
+                  }})
                 </div>
               </div>
 
@@ -309,14 +413,22 @@ export interface WardBedCard {
 
             <!-- AVAILABLE Bed Details -->
             <div *ngIf="bed.status === 'AVAILABLE'" class="py-4 text-center space-y-1">
-              <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 block">Bed Ready for Intake</span>
-              <p class="text-[10px] text-muted-foreground">Sanitized and available for new admission transfer.</p>
+              <span class="text-xs font-semibold text-emerald-600 dark:text-emerald-400 block"
+                >Bed Ready for Intake</span
+              >
+              <p class="text-[10px] text-muted-foreground">
+                Sanitized and available for new admission transfer.
+              </p>
             </div>
 
             <!-- CLEANING Bed Details -->
             <div *ngIf="bed.status === 'CLEANING'" class="py-4 text-center space-y-1">
-              <span class="text-xs font-semibold text-amber-600 dark:text-amber-400 block">Cleaning in Progress</span>
-              <p class="text-[10px] text-muted-foreground">Housekeeping assigned. Available shortly.</p>
+              <span class="text-xs font-semibold text-amber-600 dark:text-amber-400 block"
+                >Cleaning in Progress</span
+              >
+              <p class="text-[10px] text-muted-foreground">
+                Housekeeping assigned. Available shortly.
+              </p>
             </div>
           </div>
 
@@ -361,7 +473,10 @@ export interface WardBedCard {
         </div>
       </div>
 
-      <div *ngIf="filteredBeds().length === 0" class="p-12 text-center text-xs text-muted-foreground rounded-2xl border border-border bg-card">
+      <div
+        *ngIf="filteredBeds().length === 0"
+        class="p-12 text-center text-xs text-muted-foreground rounded-2xl border border-border bg-card"
+      >
         No beds match the current status filter or search query in Ward 3A.
       </div>
     </div>
@@ -376,7 +491,7 @@ export class NurseBedsComponent implements OnInit {
   constructor(
     private apiService: ApiService,
     private patientContext: PatientContextService,
-    private router: Router
+    private router: Router,
   ) {}
 
   ngOnInit(): void {
@@ -392,12 +507,22 @@ export class NurseBedsComponent implements OnInit {
         if (rawBeds.length > 0) {
           const cards: WardBedCard[] = rawBeds.map((b, idx) => ({
             id: b.id || `b-${idx}`,
-            bedCode: b.bedNumber || b.bedCode || `30${Math.floor(idx / 2) + 1}${idx % 2 === 0 ? 'A' : 'B'}`,
+            bedCode:
+              b.bedNumber ||
+              b.bedCode ||
+              `30${Math.floor(idx / 2) + 1}${idx % 2 === 0 ? 'A' : 'B'}`,
             roomNumber: b.roomNumber || `30${Math.floor(idx / 2) + 1}`,
             wardName: b.wardName || 'Ward 3A - Acute Care',
-            status: ((b.status as any) || (idx % 3 === 0 ? 'AVAILABLE' : idx % 4 === 0 ? 'CLEANING' : 'OCCUPIED')) as 'OCCUPIED' | 'AVAILABLE' | 'CLEANING' | 'MAINTENANCE',
+            status: ((b.status as any) ||
+              (idx % 3 === 0 ? 'AVAILABLE' : idx % 4 === 0 ? 'CLEANING' : 'OCCUPIED')) as
+              'OCCUPIED' | 'AVAILABLE' | 'CLEANING' | 'MAINTENANCE',
             patient: b.currentEncounter?.patient,
-            admissionDiagnosis: idx === 0 ? 'Acute Coronary Syndrome' : idx === 1 ? 'Community-Acquired Pneumonia' : 'Post-Op Laparoscopy',
+            admissionDiagnosis:
+              idx === 0
+                ? 'Acute Coronary Syndrome'
+                : idx === 1
+                  ? 'Community-Acquired Pneumonia'
+                  : 'Post-Op Laparoscopy',
             attendingPhysician: 'Dr. S. Sharma',
             ewsScore: idx === 0 ? 4 : idx === 1 ? 2 : 1,
             acuityLevel: idx === 0 ? 'OBSERVED' : 'STABLE',
@@ -519,7 +644,7 @@ export class NurseBedsComponent implements OnInit {
         b.roomNumber.toLowerCase().includes(q) ||
         b.patient?.fullName?.toLowerCase().includes(q) ||
         b.patient?.patientCode?.toLowerCase().includes(q) ||
-        b.admissionDiagnosis?.toLowerCase().includes(q)
+        b.admissionDiagnosis?.toLowerCase().includes(q),
     );
   });
 

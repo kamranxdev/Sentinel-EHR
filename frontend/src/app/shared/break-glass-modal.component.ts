@@ -11,7 +11,13 @@ import { HlmInputImports } from '@spartan-ng/helm/input';
 import { HlmTextareaImports } from '@spartan-ng/helm/textarea';
 import { HlmBadgeImports } from '@spartan-ng/helm/badge';
 import { NgIcon, provideIcons } from '@ng-icons/core';
-import { lucideShieldAlert, lucideZap, lucideX, lucideAlertTriangle, lucideLock } from '@ng-icons/lucide';
+import {
+  lucideShieldAlert,
+  lucideZap,
+  lucideX,
+  lucideAlertTriangle,
+  lucideLock,
+} from '@ng-icons/lucide';
 
 @Component({
   selector: 'app-break-glass-modal',
@@ -37,10 +43,17 @@ import { lucideShieldAlert, lucideZap, lucideX, lucideAlertTriangle, lucideLock 
     }),
   ],
   template: `
-    <div *ngIf="isOpen" class="fixed inset-0 z-50 bg-background/80 backdrop-blur-xs flex items-center justify-center p-4">
-      <div class="bg-card border border-destructive/40 shadow-2xl rounded-2xl max-w-lg w-full overflow-hidden animate-in fade-in zoom-in duration-200">
+    <div
+      *ngIf="isOpen"
+      class="fixed inset-0 z-50 bg-background/80 backdrop-blur-xs flex items-center justify-center p-4"
+    >
+      <div
+        class="bg-card border border-destructive/40 shadow-2xl rounded-2xl max-w-lg w-full overflow-hidden animate-in fade-in zoom-in duration-200"
+      >
         <!-- Header -->
-        <div class="bg-destructive/10 border-b border-destructive/20 p-5 flex items-start justify-between">
+        <div
+          class="bg-destructive/10 border-b border-destructive/20 p-5 flex items-start justify-between"
+        >
           <div class="flex items-center gap-3">
             <div class="p-2.5 rounded-xl bg-destructive/20 text-destructive font-bold">
               <ng-icon name="lucideShieldAlert" class="text-xl"></ng-icon>
@@ -50,27 +63,43 @@ import { lucideShieldAlert, lucideZap, lucideX, lucideAlertTriangle, lucideLock 
                 Emergency Break-Glass Access
                 <span hlmBadge variant="destructive" class="text-[10px]">Restricted Override</span>
               </h2>
-              <p class="text-xs text-muted-foreground mt-0.5">Override Attribute-Based Access Controls for emergency clinical treatment</p>
+              <p class="text-xs text-muted-foreground mt-0.5">
+                Override Attribute-Based Access Controls for emergency clinical treatment
+              </p>
             </div>
           </div>
-          <button (click)="closeModal()" class="text-muted-foreground hover:text-foreground p-1 rounded-lg">
+          <button
+            (click)="closeModal()"
+            class="text-muted-foreground hover:text-foreground p-1 rounded-lg"
+          >
             <ng-icon name="lucideX" class="text-lg"></ng-icon>
           </button>
         </div>
 
         <!-- Body -->
         <div class="p-6 space-y-4 text-xs">
-          <div class="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3.5 flex items-start gap-3 text-amber-600 dark:text-amber-400">
+          <div
+            class="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3.5 flex items-start gap-3 text-amber-600 dark:text-amber-400"
+          >
             <ng-icon name="lucideAlertTriangle" class="text-lg shrink-0 mt-0.5"></ng-icon>
             <div class="leading-relaxed">
-              <span class="font-semibold block text-amber-700 dark:text-amber-300">WORM Audit Warning (ABDM / DISHA Compliance)</span>
-              Executing Break-Glass overrides role/ward restrictions and grants a temporary 4-hour lease. All actions taken will be recorded in immutable security logs and flagged for mandatory compliance auditing.
+              <span class="font-semibold block text-amber-700 dark:text-amber-300"
+                >WORM Audit Warning (ABDM / DISHA Compliance)</span
+              >
+              Executing Break-Glass overrides role/ward restrictions and grants a temporary 4-hour
+              lease. All actions taken will be recorded in immutable security logs and flagged for
+              mandatory compliance auditing.
             </div>
           </div>
 
-          <div *ngIf="patientName" class="p-3 bg-muted/40 rounded-lg flex items-center justify-between border border-border">
+          <div
+            *ngIf="patientName"
+            class="p-3 bg-muted/40 rounded-lg flex items-center justify-between border border-border"
+          >
             <span class="text-muted-foreground">Target Patient:</span>
-            <span class="font-semibold text-foreground">{{ patientName }} (ID: {{ patientId }})</span>
+            <span class="font-semibold text-foreground"
+              >{{ patientName }} (ID: {{ patientId }})</span
+            >
           </div>
 
           <div>
@@ -88,7 +117,9 @@ import { lucideShieldAlert, lucideZap, lucideX, lucideAlertTriangle, lucideLock 
           </div>
 
           <div>
-            <label class="block font-semibold text-foreground mb-1">Detailed Clinical Justification * (Min 10 chars)</label>
+            <label class="block font-semibold text-foreground mb-1"
+              >Detailed Clinical Justification * (Min 10 chars)</label
+            >
             <textarea
               [(ngModel)]="justification"
               rows="3"
@@ -162,4 +193,3 @@ export class BreakGlassModalComponent {
     });
   }
 }
-

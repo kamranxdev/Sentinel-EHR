@@ -17,8 +17,14 @@ import { lucideLoader2 } from '@ng-icons/lucide';
       [size]="size"
       [disabled]="disabled || loading"
       (click)="onClick($event)"
-      [class]="customClass">
-      <ng-icon *ngIf="loading" name="lucideLoader2" size="14" class="animate-spin mr-1.5 inline-block" />
+      [class]="customClass"
+    >
+      <ng-icon
+        *ngIf="loading"
+        name="lucideLoader2"
+        size="14"
+        class="animate-spin mr-1.5 inline-block"
+      />
       <ng-content></ng-content>
     </button>
   `,
@@ -26,7 +32,8 @@ import { lucideLoader2 } from '@ng-icons/lucide';
 export class ActionButtonComponent {
   @Input() loading = false;
   @Input() disabled = false;
-  @Input() variant: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link' = 'default';
+  @Input() variant: 'default' | 'destructive' | 'outline' | 'secondary' | 'ghost' | 'link' =
+    'default';
   @Input() size: 'default' | 'sm' | 'lg' | 'icon' | 'xs' = 'default';
   @Input() type: 'button' | 'submit' | 'reset' = 'button';
   @Input() customClass = '';

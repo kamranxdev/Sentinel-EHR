@@ -6,10 +6,20 @@ import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
 import { PatientContextService } from '../../core/services/patient-context.service';
 import { Patient } from '../../core/models/patient.model';
-import { Encounter, Diagnosis, Prescription, Allergy, Vitals } from '../../core/models/clinical.model';
+import {
+  Encounter,
+  Diagnosis,
+  Prescription,
+  Allergy,
+  Vitals,
+} from '../../core/models/clinical.model';
 import { LabOrder, LabResult } from '../../core/models/lab.model';
 import { ImagingOrder, ImagingStudy, ImagingReport } from '../../core/models/imaging.model';
-import { ProcedureOrder, ProcedurePerformance, ProcedureNote } from '../../core/models/procedure.model';
+import {
+  ProcedureOrder,
+  ProcedurePerformance,
+  ProcedureNote,
+} from '../../core/models/procedure.model';
 import { ClinicalDocument, DocumentVersion } from '../../core/models/document.model';
 import { PatientConsent } from '../../core/models/consent.model';
 import { CareTeam, CareTeamMember } from '../../core/models/care-team.model';
@@ -128,9 +138,13 @@ export type PatientChartTab =
     <div class="space-y-6">
       <!-- 1. Patient Health Banner & Record Summary Card -->
       <div class="rounded-2xl border border-border bg-card p-5 sm:p-6 shadow-xs space-y-5">
-        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 pb-4 border-b border-border">
+        <div
+          class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 pb-4 border-b border-border"
+        >
           <div class="flex items-start sm:items-center gap-3.5">
-            <div class="size-13 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shrink-0 border border-primary/20">
+            <div
+              class="size-13 rounded-2xl bg-primary/10 text-primary flex items-center justify-center shrink-0 border border-primary/20"
+            >
               <ng-icon name="lucideHeartPulse" size="28" />
             </div>
             <div>
@@ -138,12 +152,17 @@ export type PatientChartTab =
                 <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-foreground">
                   My Health Records & Clinical Chart
                 </h1>
-                <span hlmBadge variant="secondary" class="text-[10px] bg-primary/10 text-primary border border-primary/20">
+                <span
+                  hlmBadge
+                  variant="secondary"
+                  class="text-[10px] bg-primary/10 text-primary border border-primary/20"
+                >
                   Verified Patient Chart
                 </span>
               </div>
               <p class="text-xs text-muted-foreground mt-0.5">
-                Access your complete clinical history: diagnostic lab findings, radiology imaging, doctor visit summaries, procedures, care teams, and clinical documents.
+                Access your complete clinical history: diagnostic lab findings, radiology imaging,
+                doctor visit summaries, procedures, care teams, and clinical documents.
               </p>
             </div>
           </div>
@@ -184,49 +203,87 @@ export type PatientChartTab =
         </div>
 
         <!-- Patient Demographics Ribbon -->
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 text-xs bg-muted/20 p-3.5 rounded-xl border border-border/60">
+        <div
+          class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 text-xs bg-muted/20 p-3.5 rounded-xl border border-border/60"
+        >
           <div>
-            <span class="text-[10px] text-muted-foreground uppercase tracking-wider block font-semibold">Patient Name</span>
-            <span class="font-bold text-foreground truncate block text-sm">{{ patient()?.fullName || currentUser?.fullName || 'Patient' }}</span>
+            <span
+              class="text-[10px] text-muted-foreground uppercase tracking-wider block font-semibold"
+              >Patient Name</span
+            >
+            <span class="font-bold text-foreground truncate block text-sm">{{
+              patient()?.fullName || currentUser?.fullName || 'Patient'
+            }}</span>
           </div>
           <div>
-            <span class="text-[10px] text-muted-foreground uppercase tracking-wider block font-semibold">Medical Record #</span>
-            <span class="font-mono font-bold text-foreground block">{{ patient()?.patientCode || 'MRN-VERIFIED' }}</span>
+            <span
+              class="text-[10px] text-muted-foreground uppercase tracking-wider block font-semibold"
+              >Medical Record #</span
+            >
+            <span class="font-mono font-bold text-foreground block">{{
+              patient()?.patientCode || 'MRN-VERIFIED'
+            }}</span>
           </div>
           <div>
-            <span class="text-[10px] text-muted-foreground uppercase tracking-wider block font-semibold">Date of Birth / Age</span>
+            <span
+              class="text-[10px] text-muted-foreground uppercase tracking-wider block font-semibold"
+              >Date of Birth / Age</span
+            >
             <span class="font-medium text-foreground block">
               {{ patient()?.dateOfBirth || 'N/A' }}
-              <span *ngIf="getAge(patient()?.dateOfBirth)" class="text-muted-foreground">({{ getAge(patient()?.dateOfBirth) }})</span>
+              <span *ngIf="getAge(patient()?.dateOfBirth)" class="text-muted-foreground"
+                >({{ getAge(patient()?.dateOfBirth) }})</span
+              >
             </span>
           </div>
           <div>
-            <span class="text-[10px] text-muted-foreground uppercase tracking-wider block font-semibold">Blood Group</span>
+            <span
+              class="text-[10px] text-muted-foreground uppercase tracking-wider block font-semibold"
+              >Blood Group</span
+            >
             <span class="font-bold text-foreground block">
-              <span hlmBadge variant="outline" class="font-mono text-[10px] text-rose-600 dark:text-rose-400">
+              <span
+                hlmBadge
+                variant="outline"
+                class="font-mono text-[10px] text-rose-600 dark:text-rose-400"
+              >
                 {{ patient()?.bloodType || 'A+' }}
               </span>
             </span>
           </div>
           <div>
-            <span class="text-[10px] text-muted-foreground uppercase tracking-wider block font-semibold">Gender</span>
-            <span class="font-medium text-foreground block">{{ patient()?.gender || 'Not specified' }}</span>
+            <span
+              class="text-[10px] text-muted-foreground uppercase tracking-wider block font-semibold"
+              >Gender</span
+            >
+            <span class="font-medium text-foreground block">{{
+              patient()?.gender || 'Not specified'
+            }}</span>
           </div>
           <div>
-            <span class="text-[10px] text-muted-foreground uppercase tracking-wider block font-semibold">Primary Coverage</span>
-            <span class="font-medium text-foreground block truncate">{{ patient()?.insuranceProvider || 'Self-Pay / ABDM' }}</span>
+            <span
+              class="text-[10px] text-muted-foreground uppercase tracking-wider block font-semibold"
+              >Primary Coverage</span
+            >
+            <span class="font-medium text-foreground block truncate">{{
+              patient()?.insuranceProvider || 'Self-Pay / ABDM'
+            }}</span>
           </div>
         </div>
       </div>
 
       <!-- 2. Interactive Navigation Tabs for Clinical Domains (Multi-Row Adaptable Grid) -->
       <div class="p-2.5 sm:p-3 rounded-2xl border border-border bg-card shadow-2xs space-y-2.5">
-        <div class="flex items-center justify-between px-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+        <div
+          class="flex items-center justify-between px-1 text-[11px] font-bold uppercase tracking-wider text-muted-foreground"
+        >
           <span class="flex items-center gap-1.5">
             <ng-icon name="lucideSparkles" size="13" class="text-primary" />
             <span>Clinical Records & Diagnostic Categories</span>
           </span>
-          <span class="text-[10px] font-medium normal-case text-muted-foreground">12 Comprehensive Health Sections</span>
+          <span class="text-[10px] font-medium normal-case text-muted-foreground"
+            >12 Comprehensive Health Sections</span
+          >
         </div>
 
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
@@ -271,14 +328,18 @@ export type PatientChartTab =
       </div>
 
       <!-- Loading State Indicator -->
-      <div *ngIf="loading()" class="p-12 rounded-2xl border border-border bg-card text-center space-y-3">
+      <div
+        *ngIf="loading()"
+        class="p-12 rounded-2xl border border-border bg-card text-center space-y-3"
+      >
         <ng-icon name="lucideHeartPulse" class="animate-spin text-primary mx-auto" size="28" />
-        <p class="text-xs text-muted-foreground font-medium">Retrieving verified clinical records from Sentinel EHR repository...</p>
+        <p class="text-xs text-muted-foreground font-medium">
+          Retrieving verified clinical records from Sentinel EHR repository...
+        </p>
       </div>
 
       <!-- 3. TAB CONTENTS -->
       <div *ngIf="!loading()" class="space-y-6">
-
         <!-- ========================================================================= -->
         <!-- TAB 1: OVERVIEW / CLINICAL SUMMARY MATRIX                                 -->
         <!-- ========================================================================= -->
@@ -290,7 +351,10 @@ export type PatientChartTab =
               class="p-4 rounded-xl border border-border bg-card hover:border-primary/50 hover:bg-muted/30 transition-all cursor-pointer space-y-1.5 group"
             >
               <div class="flex items-center justify-between">
-                <span class="text-xs font-semibold text-muted-foreground group-hover:text-primary transition-colors">Lab Results</span>
+                <span
+                  class="text-xs font-semibold text-muted-foreground group-hover:text-primary transition-colors"
+                  >Lab Results</span
+                >
                 <ng-icon name="lucideMicroscope" size="18" class="text-primary" />
               </div>
               <div class="text-2xl font-extrabold text-foreground">{{ labOrders().length }}</div>
@@ -305,10 +369,15 @@ export type PatientChartTab =
               class="p-4 rounded-xl border border-border bg-card hover:border-indigo-500/50 hover:bg-muted/30 transition-all cursor-pointer space-y-1.5 group"
             >
               <div class="flex items-center justify-between">
-                <span class="text-xs font-semibold text-muted-foreground group-hover:text-indigo-600 transition-colors">Imaging & X-Rays</span>
+                <span
+                  class="text-xs font-semibold text-muted-foreground group-hover:text-indigo-600 transition-colors"
+                  >Imaging & X-Rays</span
+                >
                 <ng-icon name="lucideEye" size="18" class="text-indigo-600" />
               </div>
-              <div class="text-2xl font-extrabold text-foreground">{{ imagingOrders().length }}</div>
+              <div class="text-2xl font-extrabold text-foreground">
+                {{ imagingOrders().length }}
+              </div>
               <div class="text-[11px] text-muted-foreground flex items-center gap-1">
                 <span>Radiology studies</span>
                 <ng-icon name="lucideChevronRight" size="12" />
@@ -320,7 +389,10 @@ export type PatientChartTab =
               class="p-4 rounded-xl border border-border bg-card hover:border-amber-500/50 hover:bg-muted/30 transition-all cursor-pointer space-y-1.5 group"
             >
               <div class="flex items-center justify-between">
-                <span class="text-xs font-semibold text-muted-foreground group-hover:text-amber-600 transition-colors">Active Conditions</span>
+                <span
+                  class="text-xs font-semibold text-muted-foreground group-hover:text-amber-600 transition-colors"
+                  >Active Conditions</span
+                >
                 <ng-icon name="lucideListChecks" size="18" class="text-amber-600" />
               </div>
               <div class="text-2xl font-extrabold text-foreground">{{ diagnoses().length }}</div>
@@ -335,10 +407,15 @@ export type PatientChartTab =
               class="p-4 rounded-xl border border-border bg-card hover:border-emerald-500/50 hover:bg-muted/30 transition-all cursor-pointer space-y-1.5 group"
             >
               <div class="flex items-center justify-between">
-                <span class="text-xs font-semibold text-muted-foreground group-hover:text-emerald-600 transition-colors">Medications (eRx)</span>
+                <span
+                  class="text-xs font-semibold text-muted-foreground group-hover:text-emerald-600 transition-colors"
+                  >Medications (eRx)</span
+                >
                 <ng-icon name="lucidePill" size="18" class="text-emerald-600" />
               </div>
-              <div class="text-2xl font-extrabold text-foreground">{{ prescriptions().length }}</div>
+              <div class="text-2xl font-extrabold text-foreground">
+                {{ prescriptions().length }}
+              </div>
               <div class="text-[11px] text-muted-foreground flex items-center gap-1">
                 <span>Active prescriptions</span>
                 <ng-icon name="lucideChevronRight" size="12" />
@@ -355,7 +432,10 @@ export type PatientChartTab =
                   <ng-icon name="lucideMicroscope" size="16" class="text-primary" />
                   <span>Recent Diagnostic Lab Reports</span>
                 </h3>
-                <button (click)="selectTab('labs')" class="text-xs text-primary hover:underline font-semibold flex items-center gap-1">
+                <button
+                  (click)="selectTab('labs')"
+                  class="text-xs text-primary hover:underline font-semibold flex items-center gap-1"
+                >
                   <span>View all</span>
                   <ng-icon name="lucideChevronRight" size="12" />
                 </button>
@@ -370,12 +450,19 @@ export type PatientChartTab =
                   <div class="space-y-0.5 min-w-0">
                     <div class="font-bold text-foreground truncate">{{ lab.testName }}</div>
                     <div class="text-[11px] font-mono text-muted-foreground">
-                      {{ lab.orderedAt | date:'mediumDate' }} • LOINC: {{ lab.loincCode || '4548-4' }}
+                      {{ lab.orderedAt | date: 'mediumDate' }} • LOINC:
+                      {{ lab.loincCode || '4548-4' }}
                     </div>
                   </div>
                   <span
                     hlmBadge
-                    [variant]="lab.status === 'COMPLETED' || lab.status === 'VERIFIED' || lab.status === 'RESULTED' ? 'secondary' : 'outline'"
+                    [variant]="
+                      lab.status === 'COMPLETED' ||
+                      lab.status === 'VERIFIED' ||
+                      lab.status === 'RESULTED'
+                        ? 'secondary'
+                        : 'outline'
+                    "
                     class="text-[10px] shrink-0 font-bold"
                   >
                     {{ lab.status }}
@@ -383,7 +470,9 @@ export type PatientChartTab =
                 </div>
               </div>
               <ng-template #noRecentLabs>
-                <div class="py-8 text-center text-xs text-muted-foreground">No laboratory reports on record.</div>
+                <div class="py-8 text-center text-xs text-muted-foreground">
+                  No laboratory reports on record.
+                </div>
               </ng-template>
             </div>
 
@@ -394,7 +483,10 @@ export type PatientChartTab =
                   <ng-icon name="lucideStethoscope" size="16" class="text-primary" />
                   <span>Recent Doctor Consultations & Visits</span>
                 </h3>
-                <button (click)="selectTab('encounters')" class="text-xs text-primary hover:underline font-semibold flex items-center gap-1">
+                <button
+                  (click)="selectTab('encounters')"
+                  class="text-xs text-primary hover:underline font-semibold flex items-center gap-1"
+                >
                   <span>View all</span>
                   <ng-icon name="lucideChevronRight" size="12" />
                 </button>
@@ -407,9 +499,16 @@ export type PatientChartTab =
                   class="p-3 rounded-xl border border-border bg-muted/20 hover:bg-muted/50 cursor-pointer transition-colors flex items-center justify-between gap-3 text-xs"
                 >
                   <div class="space-y-0.5 min-w-0">
-                    <div class="font-bold text-foreground truncate">{{ enc.chiefComplaint || enc.encounterType || 'Clinical Consultation' }}</div>
+                    <div class="font-bold text-foreground truncate">
+                      {{ enc.chiefComplaint || enc.encounterType || 'Clinical Consultation' }}
+                    </div>
                     <div class="text-[11px] text-muted-foreground">
-                      {{ enc.startedAt || enc.createdAt | date:'mediumDate' }} • Dr. {{ enc.attendingProvider?.fullName || enc.createdByEmail || 'Attending Physician' }}
+                      {{ enc.startedAt || enc.createdAt | date: 'mediumDate' }} • Dr.
+                      {{
+                        enc.attendingProvider?.fullName ||
+                          enc.createdByEmail ||
+                          'Attending Physician'
+                      }}
                     </div>
                   </div>
                   <span hlmBadge variant="outline" class="text-[10px] shrink-0 font-bold">
@@ -418,7 +517,9 @@ export type PatientChartTab =
                 </div>
               </div>
               <ng-template #noRecentEncounters>
-                <div class="py-8 text-center text-xs text-muted-foreground">No clinical consultations recorded.</div>
+                <div class="py-8 text-center text-xs text-muted-foreground">
+                  No clinical consultations recorded.
+                </div>
               </ng-template>
             </div>
           </div>
@@ -428,14 +529,19 @@ export type PatientChartTab =
         <!-- TAB 2: LAB & DIAGNOSTIC REPORTS                                           -->
         <!-- ========================================================================= -->
         <div *ngIf="activeTab() === 'labs'" class="space-y-5">
-          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-border">
+          <div
+            class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-border"
+          >
             <div>
-              <h2 class="text-base font-bold tracking-tight text-foreground flex items-center gap-2">
+              <h2
+                class="text-base font-bold tracking-tight text-foreground flex items-center gap-2"
+              >
                 <ng-icon name="lucideMicroscope" size="18" class="text-primary" />
                 <span>Laboratory & Diagnostic Test Reports</span>
               </h2>
               <p class="text-xs text-muted-foreground mt-0.5">
-                Review quantitative blood, biochemical, and pathology test findings, LOINC codes, reference ranges, and pathologist sign-offs.
+                Review quantitative blood, biochemical, and pathology test findings, LOINC codes,
+                reference ranges, and pathologist sign-offs.
               </p>
             </div>
           </div>
@@ -454,30 +560,51 @@ export type PatientChartTab =
                   </tr>
                 </thead>
                 <tbody hlmTableBody class="divide-y divide-border">
-                  <tr *ngFor="let lab of labOrders()" hlmTableRow class="hover:bg-muted/30 transition-colors">
+                  <tr
+                    *ngFor="let lab of labOrders()"
+                    hlmTableRow
+                    class="hover:bg-muted/30 transition-colors"
+                  >
                     <td hlmTableCell class="py-3.5 px-4">
                       <div class="font-bold text-foreground">{{ lab.testName }}</div>
-                      <div class="text-[10px] font-mono text-muted-foreground flex items-center gap-1.5">
-                        <span class="bg-muted px-1 rounded">LOINC: {{ lab.loincCode || '4548-4' }}</span>
-                        <span *ngIf="lab.priority === 'STAT'" class="text-rose-600 font-bold">STAT</span>
+                      <div
+                        class="text-[10px] font-mono text-muted-foreground flex items-center gap-1.5"
+                      >
+                        <span class="bg-muted px-1 rounded"
+                          >LOINC: {{ lab.loincCode || '4548-4' }}</span
+                        >
+                        <span *ngIf="lab.priority === 'STAT'" class="text-rose-600 font-bold"
+                          >STAT</span
+                        >
                       </div>
                     </td>
                     <td hlmTableCell class="py-3.5 px-4 text-muted-foreground">
                       {{ lab.category || 'Biochemistry' }}
                     </td>
                     <td hlmTableCell class="py-3.5 px-4 font-mono">
-                      <span *ngIf="lab.specimenBarcode" class="bg-muted px-1.5 py-0.5 rounded border border-border text-[11px]">
+                      <span
+                        *ngIf="lab.specimenBarcode"
+                        class="bg-muted px-1.5 py-0.5 rounded border border-border text-[11px]"
+                      >
                         {{ lab.specimenBarcode }}
                       </span>
-                      <span *ngIf="!lab.specimenBarcode" class="text-muted-foreground italic">Pending</span>
+                      <span *ngIf="!lab.specimenBarcode" class="text-muted-foreground italic"
+                        >Pending</span
+                      >
                     </td>
                     <td hlmTableCell class="py-3.5 px-4 text-muted-foreground">
-                      {{ lab.orderedAt | date:'mediumDate' }}
+                      {{ lab.orderedAt | date: 'mediumDate' }}
                     </td>
                     <td hlmTableCell class="py-3.5 px-4">
                       <span
                         hlmBadge
-                        [variant]="lab.status === 'COMPLETED' || lab.status === 'VERIFIED' || lab.status === 'RESULTED' ? 'secondary' : 'outline'"
+                        [variant]="
+                          lab.status === 'COMPLETED' ||
+                          lab.status === 'VERIFIED' ||
+                          lab.status === 'RESULTED'
+                            ? 'secondary'
+                            : 'outline'
+                        "
                         class="text-[10px] font-bold"
                       >
                         {{ lab.status }}
@@ -511,14 +638,19 @@ export type PatientChartTab =
         <!-- TAB 3: IMAGING & RADIOLOGY PACS STUDIES                                   -->
         <!-- ========================================================================= -->
         <div *ngIf="activeTab() === 'imaging'" class="space-y-5">
-          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-border">
+          <div
+            class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-border"
+          >
             <div>
-              <h2 class="text-base font-bold tracking-tight text-foreground flex items-center gap-2">
+              <h2
+                class="text-base font-bold tracking-tight text-foreground flex items-center gap-2"
+              >
                 <ng-icon name="lucideEye" size="18" class="text-indigo-600" />
                 <span>Radiology Imaging & Diagnostic Scans (PACS)</span>
               </h2>
               <p class="text-xs text-muted-foreground mt-0.5">
-                Review X-Ray, CT, MRI, and Ultrasound imaging orders, study accessions, and radiologist diagnostic impressions.
+                Review X-Ray, CT, MRI, and Ultrasound imaging orders, study accessions, and
+                radiologist diagnostic impressions.
               </p>
             </div>
           </div>
@@ -529,7 +661,9 @@ export type PatientChartTab =
                 <thead hlmTableHeader>
                   <tr hlmTableRow class="bg-muted/50 border-b border-border">
                     <th hlmTableHead class="py-3 px-4 font-semibold">Modality</th>
-                    <th hlmTableHead class="py-3 px-4 font-semibold">Procedure / Anatomical Site</th>
+                    <th hlmTableHead class="py-3 px-4 font-semibold">
+                      Procedure / Anatomical Site
+                    </th>
                     <th hlmTableHead class="py-3 px-4 font-semibold">Ordered Date</th>
                     <th hlmTableHead class="py-3 px-4 font-semibold">Status</th>
                     <th hlmTableHead class="py-3 px-4 font-semibold">Radiology Impression</th>
@@ -537,26 +671,43 @@ export type PatientChartTab =
                   </tr>
                 </thead>
                 <tbody hlmTableBody class="divide-y divide-border">
-                  <tr *ngFor="let img of imagingOrders()" hlmTableRow class="hover:bg-muted/30 transition-colors">
+                  <tr
+                    *ngFor="let img of imagingOrders()"
+                    hlmTableRow
+                    class="hover:bg-muted/30 transition-colors"
+                  >
                     <td hlmTableCell class="py-3.5 px-4">
-                      <span hlmBadge variant="outline" class="font-mono font-bold text-indigo-600 border-indigo-300 dark:border-indigo-800 bg-indigo-500/10">
+                      <span
+                        hlmBadge
+                        variant="outline"
+                        class="font-mono font-bold text-indigo-600 border-indigo-300 dark:border-indigo-800 bg-indigo-500/10"
+                      >
                         {{ img.modality }}
                       </span>
                     </td>
                     <td hlmTableCell class="py-3.5 px-4">
                       <div class="font-bold text-foreground">{{ img.procedureName }}</div>
-                      <div class="text-[10px] font-mono text-muted-foreground">CPT: {{ img.cptCode || '71045' }} • {{ img.bodySite || 'Chest / Torso' }}</div>
+                      <div class="text-[10px] font-mono text-muted-foreground">
+                        CPT: {{ img.cptCode || '71045' }} • {{ img.bodySite || 'Chest / Torso' }}
+                      </div>
                     </td>
                     <td hlmTableCell class="py-3.5 px-4 text-muted-foreground">
-                      {{ img.orderedAt | date:'mediumDate' }}
+                      {{ img.orderedAt | date: 'mediumDate' }}
                     </td>
                     <td hlmTableCell class="py-3.5 px-4">
-                      <span hlmBadge [variant]="img.status === 'COMPLETED' ? 'secondary' : 'outline'" class="text-[10px] font-bold">
+                      <span
+                        hlmBadge
+                        [variant]="img.status === 'COMPLETED' ? 'secondary' : 'outline'"
+                        class="text-[10px] font-bold"
+                      >
                         {{ img.status }}
                       </span>
                     </td>
                     <td hlmTableCell class="py-3.5 px-4 text-muted-foreground max-w-xs truncate">
-                      {{ img.radiologistReport || 'Preliminary acquisition complete; awaiting final sign-off.' }}
+                      {{
+                        img.radiologistReport ||
+                          'Preliminary acquisition complete; awaiting final sign-off.'
+                      }}
                     </td>
                     <td hlmTableCell class="py-3.5 px-4 text-right">
                       <button
@@ -586,28 +737,42 @@ export type PatientChartTab =
         <!-- TAB 4: MEDICAL CONDITIONS & PROBLEM LIST (ICD-10)                          -->
         <!-- ========================================================================= -->
         <div *ngIf="activeTab() === 'diagnoses'" class="space-y-5">
-          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-border">
+          <div
+            class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-border"
+          >
             <div>
-              <h2 class="text-base font-bold tracking-tight text-foreground flex items-center gap-2">
+              <h2
+                class="text-base font-bold tracking-tight text-foreground flex items-center gap-2"
+              >
                 <ng-icon name="lucideListChecks" size="18" class="text-amber-600" />
                 <span>Medical Conditions & Problem List (ICD-10)</span>
               </h2>
               <p class="text-xs text-muted-foreground mt-0.5">
-                Active medical conditions, chronic illnesses, and resolved health diagnoses diagnosed by your care team.
+                Active medical conditions, chronic illnesses, and resolved health diagnoses
+                diagnosed by your care team.
               </p>
             </div>
           </div>
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div *ngFor="let d of diagnoses()" class="rounded-xl border border-border bg-card p-4 shadow-xs space-y-2.5">
+            <div
+              *ngFor="let d of diagnoses()"
+              class="rounded-xl border border-border bg-card p-4 shadow-xs space-y-2.5"
+            >
               <div class="flex items-start justify-between gap-3">
                 <div class="space-y-1">
                   <h3 class="font-bold text-foreground text-sm">{{ d.conditionName }}</h3>
                   <div class="flex items-center gap-2 text-xs">
-                    <span hlmBadge variant="outline" class="font-mono text-[10px] bg-muted font-bold">
+                    <span
+                      hlmBadge
+                      variant="outline"
+                      class="font-mono text-[10px] bg-muted font-bold"
+                    >
                       ICD-10: {{ d.icdCode || 'E11.9' }}
                     </span>
-                    <span *ngIf="d.diagnosisType" class="text-muted-foreground text-[11px]">• {{ d.diagnosisType }}</span>
+                    <span *ngIf="d.diagnosisType" class="text-muted-foreground text-[11px]"
+                      >• {{ d.diagnosisType }}</span
+                    >
                   </div>
                 </div>
                 <span
@@ -620,13 +785,18 @@ export type PatientChartTab =
                 </span>
               </div>
 
-              <div class="pt-2 border-t border-border flex items-center justify-between text-[11px] text-muted-foreground">
-                <span>Diagnosed on: {{ d.onsetDate || d.recordedAt | date:'mediumDate' }}</span>
+              <div
+                class="pt-2 border-t border-border flex items-center justify-between text-[11px] text-muted-foreground"
+              >
+                <span>Diagnosed on: {{ d.onsetDate || d.recordedAt | date: 'mediumDate' }}</span>
                 <span *ngIf="d.doctor?.fullName">By: Dr. {{ d.doctor?.fullName }}</span>
               </div>
             </div>
 
-            <div *ngIf="diagnoses().length === 0" class="col-span-2 p-12 text-center text-xs text-muted-foreground rounded-xl border border-border bg-card">
+            <div
+              *ngIf="diagnoses().length === 0"
+              class="col-span-2 p-12 text-center text-xs text-muted-foreground rounded-xl border border-border bg-card"
+            >
               No documented medical conditions or problem lists on record.
             </div>
           </div>
@@ -636,14 +806,19 @@ export type PatientChartTab =
         <!-- TAB 5: DOCTOR VISITS & CONSULTATIONS (ENCOUNTERS)                         -->
         <!-- ========================================================================= -->
         <div *ngIf="activeTab() === 'encounters'" class="space-y-5">
-          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-border">
+          <div
+            class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-border"
+          >
             <div>
-              <h2 class="text-base font-bold tracking-tight text-foreground flex items-center gap-2">
+              <h2
+                class="text-base font-bold tracking-tight text-foreground flex items-center gap-2"
+              >
                 <ng-icon name="lucideStethoscope" size="18" class="text-primary" />
                 <span>Doctor Consultations & Hospital Visits</span>
               </h2>
               <p class="text-xs text-muted-foreground mt-0.5">
-                Complete clinical encounter summaries, chief complaints, physician assessments, and discharge plans.
+                Complete clinical encounter summaries, chief complaints, physician assessments, and
+                discharge plans.
               </p>
             </div>
           </div>
@@ -655,14 +830,20 @@ export type PatientChartTab =
                   <tr hlmTableRow class="bg-muted/50 border-b border-border">
                     <th hlmTableHead class="py-3 px-4 font-semibold">Encounter ID</th>
                     <th hlmTableHead class="py-3 px-4 font-semibold">Visit Type</th>
-                    <th hlmTableHead class="py-3 px-4 font-semibold">Reason for Visit / Chief Complaint</th>
+                    <th hlmTableHead class="py-3 px-4 font-semibold">
+                      Reason for Visit / Chief Complaint
+                    </th>
                     <th hlmTableHead class="py-3 px-4 font-semibold">Date & Physician</th>
                     <th hlmTableHead class="py-3 px-4 font-semibold">Status</th>
                     <th hlmTableHead class="py-3 px-4 text-right font-semibold">Action</th>
                   </tr>
                 </thead>
                 <tbody hlmTableBody class="divide-y divide-border">
-                  <tr *ngFor="let enc of encounters()" hlmTableRow class="hover:bg-muted/30 transition-colors">
+                  <tr
+                    *ngFor="let enc of encounters()"
+                    hlmTableRow
+                    class="hover:bg-muted/30 transition-colors"
+                  >
                     <td hlmTableCell class="py-3.5 px-4 font-mono font-bold text-foreground">
                       #ENC-{{ enc.id }}
                     </td>
@@ -675,10 +856,23 @@ export type PatientChartTab =
                       {{ enc.chiefComplaint || 'Routine Health Consultation' }}
                     </td>
                     <td hlmTableCell class="py-3.5 px-4 text-muted-foreground">
-                      {{ enc.startedAt || enc.createdAt | date:'mediumDate' }} • Dr. {{ enc.attendingProvider?.fullName || enc.createdByEmail || 'Attending Physician' }}
+                      {{ enc.startedAt || enc.createdAt | date: 'mediumDate' }} • Dr.
+                      {{
+                        enc.attendingProvider?.fullName ||
+                          enc.createdByEmail ||
+                          'Attending Physician'
+                      }}
                     </td>
                     <td hlmTableCell class="py-3.5 px-4">
-                      <span hlmBadge [variant]="enc.status === 'FINISHED' || enc.status === 'COMPLETED' ? 'secondary' : 'default'" class="text-[10px] font-bold">
+                      <span
+                        hlmBadge
+                        [variant]="
+                          enc.status === 'FINISHED' || enc.status === 'COMPLETED'
+                            ? 'secondary'
+                            : 'default'
+                        "
+                        class="text-[10px] font-bold"
+                      >
                         {{ enc.status }}
                       </span>
                     </td>
@@ -710,14 +904,19 @@ export type PatientChartTab =
         <!-- TAB 6: SURGICAL & CLINICAL PROCEDURES                                     -->
         <!-- ========================================================================= -->
         <div *ngIf="activeTab() === 'procedures'" class="space-y-5">
-          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-border">
+          <div
+            class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-border"
+          >
             <div>
-              <h2 class="text-base font-bold tracking-tight text-foreground flex items-center gap-2">
+              <h2
+                class="text-base font-bold tracking-tight text-foreground flex items-center gap-2"
+              >
                 <ng-icon name="lucideScissors" size="18" class="text-rose-600" />
                 <span>Surgical & Clinical Procedures</span>
               </h2>
               <p class="text-xs text-muted-foreground mt-0.5">
-                Past surgical interventions, minor bedside procedures, CPT codes, and post-procedure recovery instructions.
+                Past surgical interventions, minor bedside procedures, CPT codes, and post-procedure
+                recovery instructions.
               </p>
             </div>
           </div>
@@ -735,7 +934,11 @@ export type PatientChartTab =
                   </tr>
                 </thead>
                 <tbody hlmTableBody class="divide-y divide-border">
-                  <tr *ngFor="let p of procedureOrders()" hlmTableRow class="hover:bg-muted/30 transition-colors">
+                  <tr
+                    *ngFor="let p of procedureOrders()"
+                    hlmTableRow
+                    class="hover:bg-muted/30 transition-colors"
+                  >
                     <td hlmTableCell class="py-3.5 px-4 font-mono font-bold">
                       <span hlmBadge variant="outline">{{ p.procedureCode || 'CPT-99213' }}</span>
                     </td>
@@ -746,7 +949,11 @@ export type PatientChartTab =
                       {{ p.bodySite || 'General / Systemic' }}
                     </td>
                     <td hlmTableCell class="py-3.5 px-4">
-                      <span hlmBadge [variant]="p.priority === 'EMERGENCY' ? 'destructive' : 'secondary'" class="text-[10px]">
+                      <span
+                        hlmBadge
+                        [variant]="p.priority === 'EMERGENCY' ? 'destructive' : 'secondary'"
+                        class="text-[10px]"
+                      >
                         {{ p.priority || 'ROUTINE' }}
                       </span>
                     </td>
@@ -771,14 +978,19 @@ export type PatientChartTab =
         <!-- TAB 7: CLINICAL DOCUMENTS & DISCHARGE SUMMARIES                           -->
         <!-- ========================================================================= -->
         <div *ngIf="activeTab() === 'documents'" class="space-y-5">
-          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-border">
+          <div
+            class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-border"
+          >
             <div>
-              <h2 class="text-base font-bold tracking-tight text-foreground flex items-center gap-2">
+              <h2
+                class="text-base font-bold tracking-tight text-foreground flex items-center gap-2"
+              >
                 <ng-icon name="lucideFileText" size="18" class="text-emerald-600" />
                 <span>Clinical Documents & Hospital Discharge Summaries</span>
               </h2>
               <p class="text-xs text-muted-foreground mt-0.5">
-                Official medical summaries, referral letters, and signed clinical documentation authored by your physicians.
+                Official medical summaries, referral letters, and signed clinical documentation
+                authored by your physicians.
               </p>
             </div>
           </div>
@@ -797,7 +1009,11 @@ export type PatientChartTab =
                   </tr>
                 </thead>
                 <tbody hlmTableBody class="divide-y divide-border">
-                  <tr *ngFor="let doc of clinicalDocuments()" hlmTableRow class="hover:bg-muted/30 transition-colors">
+                  <tr
+                    *ngFor="let doc of clinicalDocuments()"
+                    hlmTableRow
+                    class="hover:bg-muted/30 transition-colors"
+                  >
                     <td hlmTableCell class="py-3.5 px-4">
                       <span hlmBadge variant="outline" class="text-[10px] font-bold">
                         {{ doc.documentType }}
@@ -810,10 +1026,14 @@ export type PatientChartTab =
                       Dr. {{ doc.authorEmail || 'Attending Staff' }}
                     </td>
                     <td hlmTableCell class="py-3.5 px-4 text-muted-foreground">
-                      {{ doc.createdAt | date:'mediumDate' }}
+                      {{ doc.createdAt | date: 'mediumDate' }}
                     </td>
                     <td hlmTableCell class="py-3.5 px-4">
-                      <span hlmBadge [variant]="doc.status === 'FINAL' ? 'secondary' : 'default'" class="text-[10px] font-bold">
+                      <span
+                        hlmBadge
+                        [variant]="doc.status === 'FINAL' ? 'secondary' : 'default'"
+                        class="text-[10px] font-bold"
+                      >
                         {{ doc.status }}
                       </span>
                     </td>
@@ -845,31 +1065,47 @@ export type PatientChartTab =
         <!-- TAB 8: MULTIDISCIPLINARY CARE TEAM & DOCTORS                              -->
         <!-- ========================================================================= -->
         <div *ngIf="activeTab() === 'care-team'" class="space-y-5">
-          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-border">
+          <div
+            class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-border"
+          >
             <div>
-              <h2 class="text-base font-bold tracking-tight text-foreground flex items-center gap-2">
+              <h2
+                class="text-base font-bold tracking-tight text-foreground flex items-center gap-2"
+              >
                 <ng-icon name="lucideUsers" size="18" class="text-cyan-600" />
                 <span>My Multidisciplinary Care Team & Physicians</span>
               </h2>
               <p class="text-xs text-muted-foreground mt-0.5">
-                Your designated primary care physicians, consulting medical specialists, and clinical nurse coordinators.
+                Your designated primary care physicians, consulting medical specialists, and
+                clinical nurse coordinators.
               </p>
             </div>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div *ngFor="let member of careTeamMembers()" class="rounded-2xl border border-border bg-card p-5 shadow-xs space-y-3.5">
+            <div
+              *ngFor="let member of careTeamMembers()"
+              class="rounded-2xl border border-border bg-card p-5 shadow-xs space-y-3.5"
+            >
               <div class="flex items-start justify-between gap-3">
                 <div class="flex items-center gap-3">
-                  <div class="size-11 rounded-2xl bg-cyan-500/10 text-cyan-600 font-bold text-base flex items-center justify-center border border-cyan-500/20">
+                  <div
+                    class="size-11 rounded-2xl bg-cyan-500/10 text-cyan-600 font-bold text-base flex items-center justify-center border border-cyan-500/20"
+                  >
                     {{ member.fullName ? member.fullName[0] : 'Dr' }}
                   </div>
                   <div>
-                    <h3 class="font-bold text-foreground text-xs sm:text-sm">Dr. {{ member.fullName || member.email }}</h3>
-                    <p class="text-[11px] text-muted-foreground">{{ member.specialty || 'General Medicine' }}</p>
+                    <h3 class="font-bold text-foreground text-xs sm:text-sm">
+                      Dr. {{ member.fullName || member.email }}
+                    </h3>
+                    <p class="text-[11px] text-muted-foreground">
+                      {{ member.specialty || 'General Medicine' }}
+                    </p>
                   </div>
                 </div>
-                <span hlmBadge variant="outline" class="text-[9px] font-bold">{{ member.role || 'ATTENDING' }}</span>
+                <span hlmBadge variant="outline" class="text-[9px] font-bold">{{
+                  member.role || 'ATTENDING'
+                }}</span>
               </div>
 
               <div class="pt-2.5 border-t border-border flex items-center justify-between text-xs">
@@ -881,11 +1117,15 @@ export type PatientChartTab =
             </div>
 
             <!-- Fallback Default Care Team Card if empty -->
-            <div *ngIf="careTeamMembers().length === 0" class="col-span-3 rounded-2xl border border-dashed border-border bg-muted/20 p-8 text-center space-y-2">
+            <div
+              *ngIf="careTeamMembers().length === 0"
+              class="col-span-3 rounded-2xl border border-dashed border-border bg-muted/20 p-8 text-center space-y-2"
+            >
               <ng-icon name="lucideUsers" size="28" class="text-muted-foreground/60 mx-auto" />
               <h3 class="text-sm font-bold text-foreground">Care Team Directory</h3>
               <p class="text-xs text-muted-foreground max-w-md mx-auto">
-                Your primary care physicians and attending clinical specialists are automatically synchronized upon hospital admission or encounter creation.
+                Your primary care physicians and attending clinical specialists are automatically
+                synchronized upon hospital admission or encounter creation.
               </p>
             </div>
           </div>
@@ -895,14 +1135,19 @@ export type PatientChartTab =
         <!-- TAB 9: INFORMED CONSENTS & DIRECTIVES                                     -->
         <!-- ========================================================================= -->
         <div *ngIf="activeTab() === 'consents'" class="space-y-5">
-          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-border">
+          <div
+            class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-border"
+          >
             <div>
-              <h2 class="text-base font-bold tracking-tight text-foreground flex items-center gap-2">
+              <h2
+                class="text-base font-bold tracking-tight text-foreground flex items-center gap-2"
+              >
                 <ng-icon name="lucideFileBadge" size="18" class="text-purple-600" />
                 <span>Informed Consents & Medical Directives</span>
               </h2>
               <p class="text-xs text-muted-foreground mt-0.5">
-                Treatment consent agreements, procedure authorizations, and health information sharing policies under ABDM.
+                Treatment consent agreements, procedure authorizations, and health information
+                sharing policies under ABDM.
               </p>
             </div>
           </div>
@@ -920,7 +1165,11 @@ export type PatientChartTab =
                   </tr>
                 </thead>
                 <tbody hlmTableBody class="divide-y divide-border">
-                  <tr *ngFor="let c of patientConsents()" hlmTableRow class="hover:bg-muted/30 transition-colors">
+                  <tr
+                    *ngFor="let c of patientConsents()"
+                    hlmTableRow
+                    class="hover:bg-muted/30 transition-colors"
+                  >
                     <td hlmTableCell class="py-3.5 px-4 font-mono font-bold text-foreground">
                       #CNS-{{ c.id }}
                     </td>
@@ -928,10 +1177,14 @@ export type PatientChartTab =
                       {{ c.consentTypeName || 'General Medical Treatment & ABDM Data Exchange' }}
                     </td>
                     <td hlmTableCell class="py-3.5 px-4 text-muted-foreground">
-                      {{ c.validFrom | date:'mediumDate' }}
+                      {{ c.validFrom | date: 'mediumDate' }}
                     </td>
                     <td hlmTableCell class="py-3.5 px-4">
-                      <span hlmBadge [variant]="c.status === 'ACTIVE' ? 'secondary' : 'destructive'" class="text-[10px] font-bold">
+                      <span
+                        hlmBadge
+                        [variant]="c.status === 'ACTIVE' ? 'secondary' : 'destructive'"
+                        class="text-[10px] font-bold"
+                      >
                         {{ c.status }}
                       </span>
                     </td>
@@ -946,7 +1199,11 @@ export type PatientChartTab =
                       >
                         Revoke Directive
                       </button>
-                      <span *ngIf="c.status !== 'ACTIVE'" class="text-muted-foreground italic text-[11px]">Revoked</span>
+                      <span
+                        *ngIf="c.status !== 'ACTIVE'"
+                        class="text-muted-foreground italic text-[11px]"
+                        >Revoked</span
+                      >
                     </td>
                   </tr>
                   <tr *ngIf="patientConsents().length === 0" hlmTableRow>
@@ -964,21 +1221,30 @@ export type PatientChartTab =
         <!-- TAB 10: MEDICATIONS & E-PRESCRIPTIONS                                     -->
         <!-- ========================================================================= -->
         <div *ngIf="activeTab() === 'prescriptions'" class="space-y-5">
-          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-border">
+          <div
+            class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-border"
+          >
             <div>
-              <h2 class="text-base font-bold tracking-tight text-foreground flex items-center gap-2">
+              <h2
+                class="text-base font-bold tracking-tight text-foreground flex items-center gap-2"
+              >
                 <ng-icon name="lucidePill" size="18" class="text-emerald-600" />
                 <span>My Active Medications & Prescriptions (eRx)</span>
               </h2>
               <p class="text-xs text-muted-foreground mt-0.5">
-                Active medications prescribed by your doctor, dosage instructions, schedule, and pharmacy refill status.
+                Active medications prescribed by your doctor, dosage instructions, schedule, and
+                pharmacy refill status.
               </p>
             </div>
 
             <!-- Medication Search & Filter -->
             <div class="flex items-center gap-2 w-full sm:w-auto">
               <div class="relative flex-1 sm:w-60">
-                <ng-icon name="lucideSearch" size="14" class="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <ng-icon
+                  name="lucideSearch"
+                  size="14"
+                  class="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+                />
                 <input
                   hlmInput
                   type="text"
@@ -1005,15 +1271,25 @@ export type PatientChartTab =
                   </tr>
                 </thead>
                 <tbody hlmTableBody class="divide-y divide-border">
-                  <tr *ngFor="let rx of filteredPrescriptions()" hlmTableRow class="hover:bg-muted/30 transition-colors">
+                  <tr
+                    *ngFor="let rx of filteredPrescriptions()"
+                    hlmTableRow
+                    class="hover:bg-muted/30 transition-colors"
+                  >
                     <td hlmTableCell class="py-3.5 px-4 font-bold text-foreground">
                       <div class="flex items-center gap-2">
-                        <div class="size-7 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0">
+                        <div
+                          class="size-7 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0"
+                        >
                           <ng-icon name="lucidePill" size="14" />
                         </div>
                         <div>
                           <span>{{ rx.medicationName }}</span>
-                          <span *ngIf="rx.doctor?.fullName || rx.doctorName" class="block text-[10px] text-muted-foreground font-normal">Dr. {{ rx.doctor?.fullName || rx.doctorName }}</span>
+                          <span
+                            *ngIf="rx.doctor?.fullName || rx.doctorName"
+                            class="block text-[10px] text-muted-foreground font-normal"
+                            >Dr. {{ rx.doctor?.fullName || rx.doctorName }}</span
+                          >
                         </div>
                       </div>
                     </td>
@@ -1032,7 +1308,11 @@ export type PatientChartTab =
                       </span>
                     </td>
                     <td hlmTableCell class="py-3.5 px-4">
-                      <span hlmBadge variant="secondary" class="text-[10px] font-bold text-emerald-600 bg-emerald-500/10">
+                      <span
+                        hlmBadge
+                        variant="secondary"
+                        class="text-[10px] font-bold text-emerald-600 bg-emerald-500/10"
+                      >
                         {{ rx.status || 'ACTIVE' }}
                       </span>
                     </td>
@@ -1064,14 +1344,19 @@ export type PatientChartTab =
         <!-- TAB 11: ALLERGIES & RISK REGISTER                                         -->
         <!-- ========================================================================= -->
         <div *ngIf="activeTab() === 'allergies'" class="space-y-5">
-          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-border">
+          <div
+            class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-border"
+          >
             <div>
-              <h2 class="text-base font-bold tracking-tight text-foreground flex items-center gap-2">
+              <h2
+                class="text-base font-bold tracking-tight text-foreground flex items-center gap-2"
+              >
                 <ng-icon name="lucideTriangleAlert" size="18" class="text-amber-600" />
                 <span>Allergies & Adverse Reaction Safety Register</span>
               </h2>
               <p class="text-xs text-muted-foreground mt-0.5">
-                Documented allergies to medications, foods, or environmental factors. Always notify your clinicians of these items.
+                Documented allergies to medications, foods, or environmental factors. Always notify
+                your clinicians of these items.
               </p>
             </div>
 
@@ -1094,8 +1379,13 @@ export type PatientChartTab =
           </div>
 
           <!-- Severe Allergy Alert Banner if applicable -->
-          <div *ngIf="hasSevereAllergy()" class="p-4 rounded-xl border border-destructive/30 bg-destructive/10 flex items-start gap-3 shadow-xs">
-            <div class="size-9 rounded-lg bg-destructive/20 text-destructive flex items-center justify-center shrink-0 mt-0.5">
+          <div
+            *ngIf="hasSevereAllergy()"
+            class="p-4 rounded-xl border border-destructive/30 bg-destructive/10 flex items-start gap-3 shadow-xs"
+          >
+            <div
+              class="size-9 rounded-lg bg-destructive/20 text-destructive flex items-center justify-center shrink-0 mt-0.5"
+            >
               <ng-icon name="lucideShieldAlert" size="18" />
             </div>
             <div class="space-y-1 text-xs">
@@ -1103,13 +1393,18 @@ export type PatientChartTab =
                 High-Risk Medical Allergy Warning
               </h4>
               <p class="text-foreground leading-relaxed">
-                You have high-severity or anaphylactic reactions documented in your chart. Clinical decision support active in Sentinel EHR will automatically block conflicting e-prescriptions.
+                You have high-severity or anaphylactic reactions documented in your chart. Clinical
+                decision support active in Sentinel EHR will automatically block conflicting
+                e-prescriptions.
               </p>
             </div>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            <div *ngFor="let a of filteredAllergies()" class="rounded-2xl border border-border bg-card p-5 shadow-xs space-y-3">
+            <div
+              *ngFor="let a of filteredAllergies()"
+              class="rounded-2xl border border-border bg-card p-5 shadow-xs space-y-3"
+            >
               <div class="flex items-start justify-between gap-3">
                 <div class="space-y-1">
                   <h3 class="font-bold text-foreground text-sm">{{ a.allergenName }}</h3>
@@ -1119,7 +1414,11 @@ export type PatientChartTab =
                 </div>
                 <span
                   hlmBadge
-                  [variant]="a.severity === 'SEVERE' || a.severity === 'LIFE_THREATENING' ? 'destructive' : 'secondary'"
+                  [variant]="
+                    a.severity === 'SEVERE' || a.severity === 'LIFE_THREATENING'
+                      ? 'destructive'
+                      : 'secondary'
+                  "
                   class="text-[10px] font-bold"
                 >
                   {{ a.severity }}
@@ -1127,12 +1426,20 @@ export type PatientChartTab =
               </div>
 
               <div class="text-xs text-muted-foreground bg-muted/30 p-2.5 rounded-lg space-y-1">
-                <div><strong>Reaction:</strong> {{ a.reactionDescription || a.reaction || 'Cutaneous rash / Anaphylaxis risk' }}</div>
-                <div *ngIf="a.onsetDate" class="text-[10px] text-muted-foreground">Onset: {{ a.onsetDate | date:'mediumDate' }}</div>
+                <div>
+                  <strong>Reaction:</strong>
+                  {{ a.reactionDescription || a.reaction || 'Cutaneous rash / Anaphylaxis risk' }}
+                </div>
+                <div *ngIf="a.onsetDate" class="text-[10px] text-muted-foreground">
+                  Onset: {{ a.onsetDate | date: 'mediumDate' }}
+                </div>
               </div>
             </div>
 
-            <div *ngIf="filteredAllergies().length === 0" class="col-span-3 p-12 text-center text-xs text-muted-foreground rounded-2xl border border-border bg-card">
+            <div
+              *ngIf="filteredAllergies().length === 0"
+              class="col-span-3 p-12 text-center text-xs text-muted-foreground rounded-2xl border border-border bg-card"
+            >
               No documented allergies or adverse reactions matching the selected category.
             </div>
           </div>
@@ -1142,14 +1449,19 @@ export type PatientChartTab =
         <!-- TAB 12: BEDSIDE VITALS & HEALTH TRENDS                                    -->
         <!-- ========================================================================= -->
         <div *ngIf="activeTab() === 'vitals'" class="space-y-5">
-          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-border">
+          <div
+            class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-border"
+          >
             <div>
-              <h2 class="text-base font-bold tracking-tight text-foreground flex items-center gap-2">
+              <h2
+                class="text-base font-bold tracking-tight text-foreground flex items-center gap-2"
+              >
                 <ng-icon name="lucideActivity" size="18" class="text-blue-600" />
                 <span>Physiological Vital Signs & Trends</span>
               </h2>
               <p class="text-xs text-muted-foreground mt-0.5">
-                Bedside physiological observations: Blood Pressure, Pulse, Respiratory Rate, Temperature, SpO2, and BMI.
+                Bedside physiological observations: Blood Pressure, Pulse, Respiratory Rate,
+                Temperature, SpO2, and BMI.
               </p>
             </div>
 
@@ -1180,12 +1492,20 @@ export type PatientChartTab =
                   </tr>
                 </thead>
                 <tbody hlmTableBody class="divide-y divide-border">
-                  <tr *ngFor="let v of vitals()" hlmTableRow class="hover:bg-muted/30 transition-colors">
+                  <tr
+                    *ngFor="let v of vitals()"
+                    hlmTableRow
+                    class="hover:bg-muted/30 transition-colors"
+                  >
                     <td hlmTableCell class="py-3.5 px-4 font-mono text-muted-foreground">
-                      {{ v.recordedAt | date:'medium' }}
+                      {{ v.recordedAt | date: 'medium' }}
                     </td>
                     <td hlmTableCell class="py-3.5 px-4 font-bold font-mono text-foreground">
-                      {{ v.systolicBp && v.diastolicBp ? v.systolicBp + '/' + v.diastolicBp + ' mmHg' : 'N/A' }}
+                      {{
+                        v.systolicBp && v.diastolicBp
+                          ? v.systolicBp + '/' + v.diastolicBp + ' mmHg'
+                          : 'N/A'
+                      }}
                     </td>
                     <td hlmTableCell class="py-3.5 px-4 font-mono">
                       {{ v.heartRate ? v.heartRate + ' bpm' : 'N/A' }}
@@ -1213,20 +1533,27 @@ export type PatientChartTab =
             </div>
           </div>
         </div>
-
       </div>
 
       <!-- ========================================================================= -->
       <!-- MODAL: LAB REPORT DETAILS                                                 -->
       <!-- ========================================================================= -->
-      <div *ngIf="selectedLabReport" class="fixed inset-0 z-50 bg-background/80 backdrop-blur-xs flex items-center justify-center p-4">
-        <div class="bg-card border border-border rounded-2xl max-w-xl w-full p-6 space-y-4 shadow-xl">
+      <div
+        *ngIf="selectedLabReport"
+        class="fixed inset-0 z-50 bg-background/80 backdrop-blur-xs flex items-center justify-center p-4"
+      >
+        <div
+          class="bg-card border border-border rounded-2xl max-w-xl w-full p-6 space-y-4 shadow-xl"
+        >
           <div class="flex items-center justify-between pb-3 border-b border-border">
             <div class="flex items-center gap-2 text-primary">
               <ng-icon name="lucideMicroscope" size="20" />
               <h3 class="text-base font-bold text-foreground">Diagnostic Laboratory Report</h3>
             </div>
-            <button (click)="selectedLabReport = null" class="text-muted-foreground hover:text-foreground">
+            <button
+              (click)="selectedLabReport = null"
+              class="text-muted-foreground hover:text-foreground"
+            >
               <ng-icon name="lucideX" size="18" />
             </button>
           </div>
@@ -1238,29 +1565,44 @@ export type PatientChartTab =
             </div>
             <div class="flex justify-between">
               <span class="text-muted-foreground">LOINC Standard Code:</span>
-              <span class="font-mono text-foreground">{{ selectedLabReport.loincCode || '4548-4' }}</span>
+              <span class="font-mono text-foreground">{{
+                selectedLabReport.loincCode || '4548-4'
+              }}</span>
             </div>
             <div class="flex justify-between">
               <span class="text-muted-foreground">Accession Barcode:</span>
-              <span class="font-mono text-foreground">{{ selectedLabReport.specimenBarcode || 'N/A' }}</span>
+              <span class="font-mono text-foreground">{{
+                selectedLabReport.specimenBarcode || 'N/A'
+              }}</span>
             </div>
             <div class="flex justify-between">
               <span class="text-muted-foreground">Ordered By:</span>
-              <span class="text-foreground">Dr. {{ selectedLabReport.orderingProviderEmail || 'Staff Physician' }}</span>
+              <span class="text-foreground"
+                >Dr. {{ selectedLabReport.orderingProviderEmail || 'Staff Physician' }}</span
+              >
             </div>
             <div class="flex justify-between">
               <span class="text-muted-foreground">Status:</span>
-              <span hlmBadge variant="secondary" class="text-[10px]">{{ selectedLabReport.status }}</span>
+              <span hlmBadge variant="secondary" class="text-[10px]">{{
+                selectedLabReport.status
+              }}</span>
             </div>
           </div>
 
           <div class="space-y-2 text-xs">
-            <h4 class="font-bold text-foreground">Clinical Diagnostic Findings & Interpretation:</h4>
+            <h4 class="font-bold text-foreground">
+              Clinical Diagnostic Findings & Interpretation:
+            </h4>
             <div class="p-3 rounded-xl border border-border bg-background space-y-2">
               <p class="text-muted-foreground leading-relaxed">
-                {{ selectedLabReport.clinicalNotes || 'Results validated by laboratory technologist and verified within biological reference limits.' }}
+                {{
+                  selectedLabReport.clinicalNotes ||
+                    'Results validated by laboratory technologist and verified within biological reference limits.'
+                }}
               </p>
-              <div class="text-[11px] text-primary font-semibold flex items-center gap-1 pt-1 border-t border-border">
+              <div
+                class="text-[11px] text-primary font-semibold flex items-center gap-1 pt-1 border-t border-border"
+              >
                 <ng-icon name="lucideCheckCircle2" size="14" />
                 <span>Digitally signed and released to patient EHR chart</span>
               </div>
@@ -1278,14 +1620,24 @@ export type PatientChartTab =
       <!-- ========================================================================= -->
       <!-- MODAL: IMAGING FINDINGS DETAILS                                           -->
       <!-- ========================================================================= -->
-      <div *ngIf="selectedImaging" class="fixed inset-0 z-50 bg-background/80 backdrop-blur-xs flex items-center justify-center p-4">
-        <div class="bg-card border border-border rounded-2xl max-w-xl w-full p-6 space-y-4 shadow-xl">
+      <div
+        *ngIf="selectedImaging"
+        class="fixed inset-0 z-50 bg-background/80 backdrop-blur-xs flex items-center justify-center p-4"
+      >
+        <div
+          class="bg-card border border-border rounded-2xl max-w-xl w-full p-6 space-y-4 shadow-xl"
+        >
           <div class="flex items-center justify-between pb-3 border-b border-border">
             <div class="flex items-center gap-2 text-indigo-600">
               <ng-icon name="lucideEye" size="20" />
-              <h3 class="text-base font-bold text-foreground">Radiology Imaging Findings & PACS Study</h3>
+              <h3 class="text-base font-bold text-foreground">
+                Radiology Imaging Findings & PACS Study
+              </h3>
             </div>
-            <button (click)="selectedImaging = null" class="text-muted-foreground hover:text-foreground">
+            <button
+              (click)="selectedImaging = null"
+              class="text-muted-foreground hover:text-foreground"
+            >
               <ng-icon name="lucideX" size="18" />
             </button>
           </div>
@@ -1297,7 +1649,10 @@ export type PatientChartTab =
             </div>
             <div class="flex justify-between">
               <span class="text-muted-foreground">Modality & CPT:</span>
-              <span class="font-mono text-foreground">{{ selectedImaging.modality }} (CPT: {{ selectedImaging.cptCode || '71045' }})</span>
+              <span class="font-mono text-foreground"
+                >{{ selectedImaging.modality }} (CPT:
+                {{ selectedImaging.cptCode || '71045' }})</span
+              >
             </div>
             <div class="flex justify-between">
               <span class="text-muted-foreground">Anatomical Region:</span>
@@ -1305,7 +1660,9 @@ export type PatientChartTab =
             </div>
             <div class="flex justify-between">
               <span class="text-muted-foreground">Status:</span>
-              <span hlmBadge variant="secondary" class="text-[10px]">{{ selectedImaging.status }}</span>
+              <span hlmBadge variant="secondary" class="text-[10px]">{{
+                selectedImaging.status
+              }}</span>
             </div>
           </div>
 
@@ -1313,9 +1670,14 @@ export type PatientChartTab =
             <h4 class="font-bold text-foreground">Radiologist Diagnostic Impression:</h4>
             <div class="p-3 rounded-xl border border-border bg-background space-y-2">
               <p class="text-muted-foreground leading-relaxed">
-                {{ selectedImaging.radiologistReport || 'No acute cardiopulmonary disease. Lungs are clear without focal consolidation, pneumothorax, or pleural effusion. Cardiomediastinal silhouette is normal.' }}
+                {{
+                  selectedImaging.radiologistReport ||
+                    'No acute cardiopulmonary disease. Lungs are clear without focal consolidation, pneumothorax, or pleural effusion. Cardiomediastinal silhouette is normal.'
+                }}
               </p>
-              <div class="text-[11px] text-indigo-600 dark:text-indigo-400 font-semibold flex items-center gap-1 pt-1 border-t border-border">
+              <div
+                class="text-[11px] text-indigo-600 dark:text-indigo-400 font-semibold flex items-center gap-1 pt-1 border-t border-border"
+              >
                 <ng-icon name="lucideCheckCircle2" size="14" />
                 <span>PACS DICOM images archived in clinical vault</span>
               </div>
@@ -1323,7 +1685,13 @@ export type PatientChartTab =
           </div>
 
           <div class="flex justify-end pt-3 border-t border-border">
-            <button hlmBtn variant="default" size="sm" (click)="selectedImaging = null" class="bg-indigo-600 hover:bg-indigo-700 text-white">
+            <button
+              hlmBtn
+              variant="default"
+              size="sm"
+              (click)="selectedImaging = null"
+              class="bg-indigo-600 hover:bg-indigo-700 text-white"
+            >
               Close Study
             </button>
           </div>
@@ -1333,14 +1701,24 @@ export type PatientChartTab =
       <!-- ========================================================================= -->
       <!-- MODAL: ENCOUNTER VISIT DETAILS                                            -->
       <!-- ========================================================================= -->
-      <div *ngIf="selectedEncounter" class="fixed inset-0 z-50 bg-background/80 backdrop-blur-xs flex items-center justify-center p-4">
-        <div class="bg-card border border-border rounded-2xl max-w-xl w-full p-6 space-y-4 shadow-xl">
+      <div
+        *ngIf="selectedEncounter"
+        class="fixed inset-0 z-50 bg-background/80 backdrop-blur-xs flex items-center justify-center p-4"
+      >
+        <div
+          class="bg-card border border-border rounded-2xl max-w-xl w-full p-6 space-y-4 shadow-xl"
+        >
           <div class="flex items-center justify-between pb-3 border-b border-border">
             <div class="flex items-center gap-2 text-primary">
               <ng-icon name="lucideStethoscope" size="20" />
-              <h3 class="text-base font-bold text-foreground">Clinical Visit & Consultation Summary</h3>
+              <h3 class="text-base font-bold text-foreground">
+                Clinical Visit & Consultation Summary
+              </h3>
             </div>
-            <button (click)="selectedEncounter = null" class="text-muted-foreground hover:text-foreground">
+            <button
+              (click)="selectedEncounter = null"
+              class="text-muted-foreground hover:text-foreground"
+            >
               <ng-icon name="lucideX" size="18" />
             </button>
           </div>
@@ -1348,19 +1726,32 @@ export type PatientChartTab =
           <div class="p-3 bg-muted/40 rounded-xl space-y-1.5 text-xs">
             <div class="flex justify-between">
               <span class="text-muted-foreground">Visit Type:</span>
-              <span class="font-bold text-foreground">{{ selectedEncounter.encounterType || 'Outpatient Consultation' }}</span>
+              <span class="font-bold text-foreground">{{
+                selectedEncounter.encounterType || 'Outpatient Consultation'
+              }}</span>
             </div>
             <div class="flex justify-between">
               <span class="text-muted-foreground">Reason for Visit:</span>
-              <span class="font-semibold text-foreground">{{ selectedEncounter.chiefComplaint || 'Routine Health Checkup' }}</span>
+              <span class="font-semibold text-foreground">{{
+                selectedEncounter.chiefComplaint || 'Routine Health Checkup'
+              }}</span>
             </div>
             <div class="flex justify-between">
               <span class="text-muted-foreground">Attending Doctor:</span>
-              <span class="text-foreground">Dr. {{ selectedEncounter.attendingProvider?.fullName || selectedEncounter.createdByEmail || 'Attending Physician' }}</span>
+              <span class="text-foreground"
+                >Dr.
+                {{
+                  selectedEncounter.attendingProvider?.fullName ||
+                    selectedEncounter.createdByEmail ||
+                    'Attending Physician'
+                }}</span
+              >
             </div>
             <div class="flex justify-between">
               <span class="text-muted-foreground">Visit Date:</span>
-              <span class="text-foreground">{{ selectedEncounter.startedAt || selectedEncounter.createdAt | date:'medium' }}</span>
+              <span class="text-foreground">{{
+                selectedEncounter.startedAt || selectedEncounter.createdAt | date: 'medium'
+              }}</span>
             </div>
           </div>
 
@@ -1368,7 +1759,8 @@ export type PatientChartTab =
             <h4 class="font-bold text-foreground">Physician Advice & Plan:</h4>
             <div class="p-3 rounded-xl border border-border bg-background space-y-2">
               <p class="text-muted-foreground leading-relaxed">
-                Continue current prescribed medication therapy. Maintain balanced hydration and routine monitoring. Follow up in clinic in 4 weeks or as clinically indicated.
+                Continue current prescribed medication therapy. Maintain balanced hydration and
+                routine monitoring. Follow up in clinic in 4 weeks or as clinically indicated.
               </p>
             </div>
           </div>
@@ -1384,14 +1776,22 @@ export type PatientChartTab =
       <!-- ========================================================================= -->
       <!-- MODAL: CLINICAL DOCUMENT DETAILS                                          -->
       <!-- ========================================================================= -->
-      <div *ngIf="selectedDocument" class="fixed inset-0 z-50 bg-background/80 backdrop-blur-xs flex items-center justify-center p-4">
-        <div class="bg-card border border-border rounded-2xl max-w-2xl w-full p-6 space-y-4 shadow-xl">
+      <div
+        *ngIf="selectedDocument"
+        class="fixed inset-0 z-50 bg-background/80 backdrop-blur-xs flex items-center justify-center p-4"
+      >
+        <div
+          class="bg-card border border-border rounded-2xl max-w-2xl w-full p-6 space-y-4 shadow-xl"
+        >
           <div class="flex items-center justify-between pb-3 border-b border-border">
             <div class="flex items-center gap-2 text-emerald-600">
               <ng-icon name="lucideFileText" size="20" />
               <h3 class="text-base font-bold text-foreground">{{ selectedDocument.title }}</h3>
             </div>
-            <button (click)="selectedDocument = null" class="text-muted-foreground hover:text-foreground">
+            <button
+              (click)="selectedDocument = null"
+              class="text-muted-foreground hover:text-foreground"
+            >
               <ng-icon name="lucideX" size="18" />
             </button>
           </div>
@@ -1403,31 +1803,44 @@ export type PatientChartTab =
             </div>
             <div class="flex justify-between">
               <span class="text-muted-foreground">Author:</span>
-              <span class="text-foreground">Dr. {{ selectedDocument.authorEmail || 'Attending Physician' }}</span>
+              <span class="text-foreground"
+                >Dr. {{ selectedDocument.authorEmail || 'Attending Physician' }}</span
+              >
             </div>
             <div class="flex justify-between">
               <span class="text-muted-foreground">Date Authored:</span>
-              <span class="text-foreground">{{ selectedDocument.createdAt | date:'medium' }}</span>
+              <span class="text-foreground">{{ selectedDocument.createdAt | date: 'medium' }}</span>
             </div>
           </div>
 
           <div class="space-y-2 text-xs">
             <h4 class="font-bold text-foreground">Document Content:</h4>
-            <div class="p-4 rounded-xl border border-border bg-background max-h-64 overflow-y-auto font-mono text-xs leading-relaxed text-foreground">
-              {{ selectedDocument.content || 'Official clinical document content verified and recorded in electronic health record repository.' }}
+            <div
+              class="p-4 rounded-xl border border-border bg-background max-h-64 overflow-y-auto font-mono text-xs leading-relaxed text-foreground"
+            >
+              {{
+                selectedDocument.content ||
+                  'Official clinical document content verified and recorded in electronic health record repository.'
+              }}
             </div>
           </div>
 
           <div class="flex justify-end gap-2 pt-3 border-t border-border">
-            <button hlmBtn variant="outline" size="sm" (click)="selectedDocument = null">Close</button>
-            <button hlmBtn size="sm" (click)="printChart()" class="bg-emerald-600 hover:bg-emerald-700 text-white gap-1">
+            <button hlmBtn variant="outline" size="sm" (click)="selectedDocument = null">
+              Close
+            </button>
+            <button
+              hlmBtn
+              size="sm"
+              (click)="printChart()"
+              class="bg-emerald-600 hover:bg-emerald-700 text-white gap-1"
+            >
               <ng-icon name="lucidePrinter" size="14" />
               <span>Print Document</span>
             </button>
           </div>
         </div>
       </div>
-
     </div>
   `,
 })
@@ -1474,7 +1887,7 @@ export class PatientChartComponent implements OnInit {
       (rx) =>
         (rx.medicationName && rx.medicationName.toLowerCase().includes(q)) ||
         (rx.instructions && rx.instructions.toLowerCase().includes(q)) ||
-        (rx.dosage && rx.dosage.toLowerCase().includes(q))
+        (rx.dosage && rx.dosage.toLowerCase().includes(q)),
     );
   });
 
@@ -1487,7 +1900,7 @@ export class PatientChartComponent implements OnInit {
 
   hasSevereAllergy = computed(() => {
     return this.allergies().some(
-      (a) => a.severity === 'SEVERE' || a.severity === 'LIFE_THREATENING'
+      (a) => a.severity === 'SEVERE' || a.severity === 'LIFE_THREATENING',
     );
   });
 
@@ -1505,7 +1918,11 @@ export class PatientChartComponent implements OnInit {
     { key: 'imaging' as PatientChartTab, label: 'Imaging & PACS', icon: 'lucideEye' },
     { key: 'diagnoses' as PatientChartTab, label: 'Conditions (ICD-10)', icon: 'lucideListChecks' },
     { key: 'encounters' as PatientChartTab, label: 'Doctor Visits', icon: 'lucideStethoscope' },
-    { key: 'procedures' as PatientChartTab, label: 'Procedures & Surgeries', icon: 'lucideScissors' },
+    {
+      key: 'procedures' as PatientChartTab,
+      label: 'Procedures & Surgeries',
+      icon: 'lucideScissors',
+    },
     { key: 'documents' as PatientChartTab, label: 'Clinical Documents', icon: 'lucideFileText' },
     { key: 'care-team' as PatientChartTab, label: 'Care Team', icon: 'lucideUsers' },
     { key: 'consents' as PatientChartTab, label: 'Informed Consents', icon: 'lucideFileBadge' },
@@ -1519,7 +1936,7 @@ export class PatientChartComponent implements OnInit {
     public authService: AuthService,
     public patientContext: PatientContextService,
     private route: ActivatedRoute,
-    private router: Router
+    private router: Router,
   ) {}
 
   ngOnInit(): void {
@@ -1647,18 +2064,30 @@ export class PatientChartComponent implements OnInit {
 
   getTabCount(tabKey: PatientChartTab): number | undefined {
     switch (tabKey) {
-      case 'labs': return this.labOrders().length;
-      case 'imaging': return this.imagingOrders().length;
-      case 'diagnoses': return this.diagnoses().length;
-      case 'encounters': return this.encounters().length;
-      case 'procedures': return this.procedureOrders().length;
-      case 'documents': return this.clinicalDocuments().length;
-      case 'care-team': return this.careTeamMembers().length;
-      case 'consents': return this.patientConsents().length;
-      case 'prescriptions': return this.prescriptions().length;
-      case 'allergies': return this.allergies().length;
-      case 'vitals': return this.vitals().length;
-      default: return undefined;
+      case 'labs':
+        return this.labOrders().length;
+      case 'imaging':
+        return this.imagingOrders().length;
+      case 'diagnoses':
+        return this.diagnoses().length;
+      case 'encounters':
+        return this.encounters().length;
+      case 'procedures':
+        return this.procedureOrders().length;
+      case 'documents':
+        return this.clinicalDocuments().length;
+      case 'care-team':
+        return this.careTeamMembers().length;
+      case 'consents':
+        return this.patientConsents().length;
+      case 'prescriptions':
+        return this.prescriptions().length;
+      case 'allergies':
+        return this.allergies().length;
+      case 'vitals':
+        return this.vitals().length;
+      default:
+        return undefined;
     }
   }
 
@@ -1689,14 +2118,16 @@ export class PatientChartComponent implements OnInit {
   }
 
   revokeConsent(consentId: number | string): void {
-    this.apiService.revokePatientConsent(consentId, 'Revoked by patient via personal health portal').subscribe({
-      next: () => {
-        toast.success('Consent directive revoked successfully.');
-        const patientId = this.patient()?.id;
-        if (patientId) this.fetchAllClinicalRecords(patientId);
-      },
-      error: () => toast.error('Failed to revoke consent directive.'),
-    });
+    this.apiService
+      .revokePatientConsent(consentId, 'Revoked by patient via personal health portal')
+      .subscribe({
+        next: () => {
+          toast.success('Consent directive revoked successfully.');
+          const patientId = this.patient()?.id;
+          if (patientId) this.fetchAllClinicalRecords(patientId);
+        },
+        error: () => toast.error('Failed to revoke consent directive.'),
+      });
   }
 
   downloadFhirHealthRecord(): void {
@@ -1708,7 +2139,9 @@ export class PatientChartComponent implements OnInit {
 
     this.apiService.getFhirPatientEverything(patientId).subscribe({
       next: (bundle) => {
-        const blob = new Blob([JSON.stringify(bundle || {}, null, 2)], { type: 'application/json' });
+        const blob = new Blob([JSON.stringify(bundle || {}, null, 2)], {
+          type: 'application/json',
+        });
         const url = window.URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;

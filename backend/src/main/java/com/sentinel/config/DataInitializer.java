@@ -1105,7 +1105,7 @@ public class DataInitializer implements ApplicationRunner {
     private Map<String, Role> initRoles(Map<String, Permission> permissions) {
         String[] canonicalRoles = {
             "SUPER_ADMIN", "ORGANIZATION_ADMIN", "PHYSICIAN", "NURSE", "RECEPTIONIST",
-            "LAB_TECHNICIAN", "PHARMACIST", "RADIOLOGIST", "BILLING_STAFF", "AUDITOR", "PATIENT"
+            "LAB_TECHNICIAN", "PHARMACIST", "RADIOLOGIST", "BILLING_STAFF", "PATIENT"
         };
 
         Map<String, Role> map = new HashMap<>();
@@ -1131,8 +1131,6 @@ public class DataInitializer implements ApplicationRunner {
                 assignPermsByPrefix(rolePerms, permissions, "PATIENT_", "MPI_", "APPOINTMENT_", "INVOICE_READ", "CONSENT_");
             } else if (roleName.equals("BILLING_STAFF")) {
                 assignPermsByPrefix(rolePerms, permissions, "PATIENT_READ", "INVOICE_", "BILLING_", "PAYMENT_", "REFUND_", "INSURANCE_");
-            } else if (roleName.equals("AUDITOR")) {
-                assignPermsByPrefix(rolePerms, permissions, "AUDIT_LOG_READ", "PATIENT_READ", "ENCOUNTER_READ", "INVOICE_READ");
             } else if (roleName.equals("PATIENT")) {
                 assignPermsByPrefix(rolePerms, permissions, "PATIENT_READ", "APPOINTMENT_READ", "APPOINTMENT_CREATE", "INVOICE_READ", "CONSENT_READ");
             }
@@ -1204,7 +1202,6 @@ public class DataInitializer implements ApplicationRunner {
         public User amit;
         public User anitaPharm;
         public User vikas;
-        public User sureshAuditor;
         public User orgAdminVikram;
 
         public User siddharthDoc;
@@ -1293,10 +1290,6 @@ public class DataInitializer implements ApplicationRunner {
         // 11. Financial Officer Vikas Mehta (AIIMS)
         ctx.vikas = createStaffUser("vikas.mehta@aiims.edu", defaultPass, "Vikas", "Mehta", "MALE", LocalDate.of(1984, 8, 27), roles.get("BILLING_STAFF"));
         linkStaffToTenancy(ctx.vikas, tenancy.aiims, tenancy.genmed, "EMP-AIIMS-FIN-01", "FULL_TIME");
-
-        // 12. Compliance Auditor Suresh Nair
-        ctx.sureshAuditor = createStaffUser("suresh.nair@aiims.edu", defaultPass, "Suresh", "Nair", "MALE", LocalDate.of(1979, 3, 11), roles.get("AUDITOR"));
-        linkStaffToTenancy(ctx.sureshAuditor, tenancy.aiims, tenancy.genmed, "EMP-AIIMS-AUD-01", "FULL_TIME");
 
         // 13. Apollo Hospitals Mumbai Staff Seeding
         ctx.orgAdminVikram = createStaffUser("vikram.singh@apollo.com", defaultPass, "Vikram", "Singh", "MALE", LocalDate.of(1975, 1, 20), roles.get("ORGANIZATION_ADMIN"));

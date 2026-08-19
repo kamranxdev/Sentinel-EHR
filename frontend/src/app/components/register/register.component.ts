@@ -141,9 +141,13 @@ export class RegisterComponent implements OnInit {
       },
       error: (err) => {
         this.loading.set(false);
-        const msg = err.status === 0
-          ? 'Cannot connect to backend server. Please verify Spring Boot server is running.'
-          : (err.error?.message || (typeof err.error === 'string' ? err.error : 'Registration failed. Please check your details and try again.'));
+        const msg =
+          err.status === 0
+            ? 'Cannot connect to backend server. Please verify Spring Boot server is running.'
+            : err.error?.message ||
+              (typeof err.error === 'string'
+                ? err.error
+                : 'Registration failed. Please check your details and try again.');
         this.errorMessage.set(msg);
         toast.error('Registration Failed', { description: msg });
       },

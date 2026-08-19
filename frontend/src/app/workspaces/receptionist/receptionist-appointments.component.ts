@@ -71,29 +71,64 @@ import { StatCardComponent } from '../../shared/ui/stat-card.component';
   template: `
     <div class="space-y-6">
       <!-- Header -->
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-border">
+      <div
+        class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-border"
+      >
         <div>
           <h1 class="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
             Appointments Roster & Front Desk Check-in
-            <span hlmBadge variant="secondary" class="text-[11px] bg-sky-500/10 text-sky-600 border border-sky-500/20 font-mono">Daily Schedule</span>
+            <span
+              hlmBadge
+              variant="secondary"
+              class="text-[11px] bg-sky-500/10 text-sky-600 border border-sky-500/20 font-mono"
+              >Daily Schedule</span
+            >
           </h1>
-          <p class="text-xs text-muted-foreground mt-0.5">Filter by date, physician, and stage status. Execute front desk arrival check-ins, cancellations, and SMS/Email reminders.</p>
+          <p class="text-xs text-muted-foreground mt-0.5">
+            Filter by date, physician, and stage status. Execute front desk arrival check-ins,
+            cancellations, and SMS/Email reminders.
+          </p>
         </div>
 
         <div class="flex items-center gap-2 flex-wrap">
-          <button (click)="openBookModal()" hlmBtn variant="default" size="sm" class="text-xs gap-1.5 bg-sky-600 hover:bg-sky-700 text-white">
+          <button
+            (click)="openBookModal()"
+            hlmBtn
+            variant="default"
+            size="sm"
+            class="text-xs gap-1.5 bg-sky-600 hover:bg-sky-700 text-white"
+          >
             <ng-icon name="lucideCalendar" size="14" />
             <span>Book Appointment</span>
           </button>
-          <button (click)="openIntakeModal()" hlmBtn variant="outline" size="sm" class="text-xs gap-1.5 text-emerald-600 border-emerald-500/30">
+          <button
+            (click)="openIntakeModal()"
+            hlmBtn
+            variant="outline"
+            size="sm"
+            class="text-xs gap-1.5 text-emerald-600 border-emerald-500/30"
+          >
             <ng-icon name="lucideUserPlus" size="14" />
             <span>New Patient Intake</span>
           </button>
-          <button (click)="openRteModal()" hlmBtn variant="outline" size="sm" class="text-xs gap-1.5 text-purple-600 border-purple-500/30">
+          <button
+            (click)="openRteModal()"
+            hlmBtn
+            variant="outline"
+            size="sm"
+            class="text-xs gap-1.5 text-purple-600 border-purple-500/30"
+          >
             <ng-icon name="lucideShieldCheck" size="14" />
             <span>RTE Inquiry</span>
           </button>
-          <button hlmBtn variant="outline" size="sm" (click)="triggerReminders()" [disabled]="reminding()" class="text-xs gap-1.5 text-sky-600 border-sky-500/30">
+          <button
+            hlmBtn
+            variant="outline"
+            size="sm"
+            (click)="triggerReminders()"
+            [disabled]="reminding()"
+            class="text-xs gap-1.5 text-sky-600 border-sky-500/30"
+          >
             <ng-icon name="lucideBellRing" size="14" />
             <span>{{ reminding() ? 'Sending...' : 'Dispatch Reminders' }}</span>
           </button>
@@ -101,17 +136,27 @@ import { StatCardComponent } from '../../shared/ui/stat-card.component';
       </div>
 
       <!-- Notification Banner -->
-      <div *ngIf="reminderBanner()" class="p-3 rounded-lg bg-sky-500/10 text-sky-700 dark:text-sky-300 border border-sky-500/20 text-xs flex items-center justify-between shadow-sm">
+      <div
+        *ngIf="reminderBanner()"
+        class="p-3 rounded-lg bg-sky-500/10 text-sky-700 dark:text-sky-300 border border-sky-500/20 text-xs flex items-center justify-between shadow-sm"
+      >
         <div class="flex items-center gap-2 font-medium">
           <ng-icon name="lucideCheckCircle2" size="16" class="text-sky-600" />
           <span>{{ reminderBanner() }}</span>
         </div>
-        <button class="text-sky-600 hover:text-sky-800 text-xs font-bold" (click)="reminderBanner.set(null)">&times;</button>
+        <button
+          class="text-sky-600 hover:text-sky-800 text-xs font-bold"
+          (click)="reminderBanner.set(null)"
+        >
+          &times;
+        </button>
       </div>
 
       <!-- Date View & Search Filter Toolbar -->
       <div hlmCard class="p-4 border border-border shadow-sm space-y-4">
-        <div class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 pb-3 border-b border-border">
+        <div
+          class="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 pb-3 border-b border-border"
+        >
           <!-- Date Filter Mode Buttons -->
           <div class="flex items-center gap-2 flex-wrap">
             <span class="text-xs font-semibold text-foreground flex items-center gap-1.5 mr-1">
@@ -121,29 +166,49 @@ import { StatCardComponent } from '../../shared/ui/stat-card.component';
               <button
                 type="button"
                 class="px-3 py-1 rounded-md text-xs font-medium transition-all"
-                [ngClass]="dateFilterMode() === 'TODAY' ? 'bg-background text-foreground shadow-sm font-semibold' : 'text-muted-foreground hover:text-foreground'"
-                (click)="setDateMode('TODAY')">
+                [ngClass]="
+                  dateFilterMode() === 'TODAY'
+                    ? 'bg-background text-foreground shadow-sm font-semibold'
+                    : 'text-muted-foreground hover:text-foreground'
+                "
+                (click)="setDateMode('TODAY')"
+              >
                 Today
               </button>
               <button
                 type="button"
                 class="px-3 py-1 rounded-md text-xs font-medium transition-all"
-                [ngClass]="dateFilterMode() === 'TOMORROW' ? 'bg-background text-foreground shadow-sm font-semibold' : 'text-muted-foreground hover:text-foreground'"
-                (click)="setDateMode('TOMORROW')">
+                [ngClass]="
+                  dateFilterMode() === 'TOMORROW'
+                    ? 'bg-background text-foreground shadow-sm font-semibold'
+                    : 'text-muted-foreground hover:text-foreground'
+                "
+                (click)="setDateMode('TOMORROW')"
+              >
                 Tomorrow
               </button>
               <button
                 type="button"
                 class="px-3 py-1 rounded-md text-xs font-medium transition-all"
-                [ngClass]="dateFilterMode() === 'CUSTOM' ? 'bg-background text-foreground shadow-sm font-semibold' : 'text-muted-foreground hover:text-foreground'"
-                (click)="setDateMode('CUSTOM')">
+                [ngClass]="
+                  dateFilterMode() === 'CUSTOM'
+                    ? 'bg-background text-foreground shadow-sm font-semibold'
+                    : 'text-muted-foreground hover:text-foreground'
+                "
+                (click)="setDateMode('CUSTOM')"
+              >
                 Pick Date
               </button>
               <button
                 type="button"
                 class="px-3 py-1 rounded-md text-xs font-medium transition-all"
-                [ngClass]="dateFilterMode() === 'ALL' ? 'bg-background text-foreground shadow-sm font-semibold' : 'text-muted-foreground hover:text-foreground'"
-                (click)="setDateMode('ALL')">
+                [ngClass]="
+                  dateFilterMode() === 'ALL'
+                    ? 'bg-background text-foreground shadow-sm font-semibold'
+                    : 'text-muted-foreground hover:text-foreground'
+                "
+                (click)="setDateMode('ALL')"
+              >
                 All Dates
               </button>
             </div>
@@ -153,11 +218,13 @@ import { StatCardComponent } from '../../shared/ui/stat-card.component';
               type="date"
               [ngModel]="selectedDate()"
               (ngModelChange)="selectedDate.set($event)"
-              class="px-2.5 py-1.5 rounded-lg border border-border bg-background text-xs font-medium text-foreground focus:outline-none focus:ring-1 focus:ring-primary" />
+              class="px-2.5 py-1.5 rounded-lg border border-border bg-background text-xs font-medium text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+            />
           </div>
 
           <div class="text-xs text-muted-foreground font-mono">
-            Showing appointments for: <span class="font-bold text-foreground">{{ getActiveDateLabel() }}</span>
+            Showing appointments for:
+            <span class="font-bold text-foreground">{{ getActiveDateLabel() }}</span>
           </div>
         </div>
 
@@ -167,7 +234,10 @@ import { StatCardComponent } from '../../shared/ui/stat-card.component';
             <label class="font-medium text-foreground flex items-center gap-1">
               <ng-icon name="lucideStethoscope" size="14" class="text-sky-500" /> Filter Physician
             </label>
-            <select [(ngModel)]="selectedDoctor" class="w-full p-2 rounded-lg border border-border bg-background text-xs text-foreground">
+            <select
+              [(ngModel)]="selectedDoctor"
+              class="w-full p-2 rounded-lg border border-border bg-background text-xs text-foreground"
+            >
               <option value="ALL">All Attending Physicians</option>
               <option *ngFor="let doc of uniqueDoctors()" [value]="doc">{{ doc }}</option>
             </select>
@@ -178,7 +248,10 @@ import { StatCardComponent } from '../../shared/ui/stat-card.component';
             <label class="font-medium text-foreground flex items-center gap-1">
               <ng-icon name="lucideFilter" size="14" class="text-purple-500" /> Filter Stage Status
             </label>
-            <select [(ngModel)]="selectedStage" class="w-full p-2 rounded-lg border border-border bg-background text-xs text-foreground">
+            <select
+              [(ngModel)]="selectedStage"
+              class="w-full p-2 rounded-lg border border-border bg-background text-xs text-foreground"
+            >
               <option value="ALL">All Stages</option>
               <option value="SCHEDULED">1. Booked (Pre-Arrival)</option>
               <option value="ARRIVED">2. Lobby Arrival (In Queue)</option>
@@ -192,9 +265,16 @@ import { StatCardComponent } from '../../shared/ui/stat-card.component';
           <!-- Search Query -->
           <div class="space-y-1">
             <label class="font-medium text-foreground flex items-center gap-1">
-              <ng-icon name="lucideUser" size="14" class="text-emerald-500" /> Search Patient / MRN / Reason
+              <ng-icon name="lucideUser" size="14" class="text-emerald-500" /> Search Patient / MRN
+              / Reason
             </label>
-            <input hlmInput type="text" [(ngModel)]="searchTerm" placeholder="Filter patient name, MRN, or reason..." class="w-full text-xs" />
+            <input
+              hlmInput
+              type="text"
+              [(ngModel)]="searchTerm"
+              placeholder="Filter patient name, MRN, or reason..."
+              class="w-full text-xs"
+            />
           </div>
         </div>
       </div>
@@ -206,25 +286,29 @@ import { StatCardComponent } from '../../shared/ui/stat-card.component';
           [value]="dateScopedAppointments().length"
           subtitle="In Active Date Scope"
           icon="lucideCalendarClock"
-          iconBgClass="bg-sky-500/10 text-sky-600" />
+          iconBgClass="bg-sky-500/10 text-sky-600"
+        />
         <app-stat-card
           title="Scheduled Arrivals"
           [value]="scheduledCount()"
           subtitle="Awaiting Check-in"
           icon="lucideClock"
-          iconBgClass="bg-blue-500/10 text-blue-600" />
+          iconBgClass="bg-blue-500/10 text-blue-600"
+        />
         <app-stat-card
           title="Arrived & Checked In"
           [value]="arrivedCount()"
           subtitle="In Clinic Queue"
           icon="lucideUserCheck"
-          iconBgClass="bg-amber-500/10 text-amber-600" />
+          iconBgClass="bg-amber-500/10 text-amber-600"
+        />
         <app-stat-card
           title="Cancelled / No-Show"
           [value]="cancelledCount()"
           subtitle="Cancelled Records"
           icon="lucideXCircle"
-          iconBgClass="bg-red-500/10 text-red-600" />
+          iconBgClass="bg-red-500/10 text-red-600"
+        />
       </div>
 
       <!-- Appointments Grid Table -->
@@ -254,33 +338,59 @@ import { StatCardComponent } from '../../shared/ui/stat-card.component';
               </tr>
             </thead>
             <tbody hlmTableBody>
-              <tr *ngFor="let apt of filteredAppointments()" hlmTableRow class="hover:bg-muted/30 transition-colors">
+              <tr
+                *ngFor="let apt of filteredAppointments()"
+                hlmTableRow
+                class="hover:bg-muted/30 transition-colors"
+              >
                 <td hlmTableCell class="font-mono text-xs font-bold text-foreground">
-                  <div>{{ apt.appointmentDate | date:'shortTime' }}</div>
+                  <div>{{ apt.appointmentDate | date: 'shortTime' }}</div>
                   <div class="text-[10px] text-muted-foreground font-normal">
-                    {{ apt.appointmentDate | date:'mediumDate' }}
+                    {{ apt.appointmentDate | date: 'mediumDate' }}
                   </div>
                 </td>
                 <td hlmTableCell>
-                  <div class="font-bold text-foreground text-xs">{{ apt.patientName || apt.patient?.fullName || 'Patient Profile' }}</div>
-                  <div class="text-[10px] font-mono text-muted-foreground">MRN: {{ apt.patientCode || apt.patient?.patientCode || 'N/A' }}</div>
+                  <div class="font-bold text-foreground text-xs">
+                    {{ apt.patientName || apt.patient?.fullName || 'Patient Profile' }}
+                  </div>
+                  <div class="text-[10px] font-mono text-muted-foreground">
+                    MRN: {{ apt.patientCode || apt.patient?.patientCode || 'N/A' }}
+                  </div>
                 </td>
                 <td hlmTableCell>
-                  <div class="text-xs text-foreground font-medium">{{ apt.doctorName || apt.doctor?.fullName || 'Assigned Staff' }}</div>
-                  <div class="text-[10px] text-muted-foreground">{{ apt.reason || 'General Consult' }}</div>
+                  <div class="text-xs text-foreground font-medium">
+                    {{ apt.doctorName || apt.doctor?.fullName || 'Assigned Staff' }}
+                  </div>
+                  <div class="text-[10px] text-muted-foreground">
+                    {{ apt.reason || 'General Consult' }}
+                  </div>
                 </td>
                 <td hlmTableCell>
                   <div class="flex items-center gap-1.5">
-                    <span *ngIf="apt.insuranceVerified" hlmBadge variant="outline" class="text-[10px] bg-emerald-500/10 text-emerald-600 border-emerald-500/30 gap-1">
+                    <span
+                      *ngIf="apt.insuranceVerified"
+                      hlmBadge
+                      variant="outline"
+                      class="text-[10px] bg-emerald-500/10 text-emerald-600 border-emerald-500/30 gap-1"
+                    >
                       <ng-icon name="lucideCheckCircle2" size="12" /> Verified
                     </span>
-                    <span *ngIf="!apt.insuranceVerified" hlmBadge variant="outline" class="text-[10px] bg-amber-500/10 text-amber-600 border-amber-500/30 gap-1">
+                    <span
+                      *ngIf="!apt.insuranceVerified"
+                      hlmBadge
+                      variant="outline"
+                      class="text-[10px] bg-amber-500/10 text-amber-600 border-amber-500/30 gap-1"
+                    >
                       <ng-icon name="lucideAlertTriangle" size="12" /> Pending
                     </span>
                   </div>
                 </td>
                 <td hlmTableCell>
-                  <span hlmBadge [variant]="getStageVariant(apt.stage || apt.status)" class="text-[10px] font-medium">
+                  <span
+                    hlmBadge
+                    [variant]="getStageVariant(apt.stage || apt.status)"
+                    class="text-[10px] font-medium"
+                  >
                     {{ getStageLabel(apt.stage || apt.status) }}
                   </span>
                 </td>
@@ -288,45 +398,64 @@ import { StatCardComponent } from '../../shared/ui/stat-card.component';
                   <div class="flex items-center justify-end gap-1.5">
                     <!-- Arrived action button: ONLY visible for TODAY'S appointments in SCHEDULED state -->
                     <button
-                      *ngIf="(apt.stage === 'SCHEDULED' || apt.status === 'SCHEDULED') && isToday(apt.appointmentDate)"
-                      hlmBtn size="sm" variant="default"
+                      *ngIf="
+                        (apt.stage === 'SCHEDULED' || apt.status === 'SCHEDULED') &&
+                        isToday(apt.appointmentDate)
+                      "
+                      hlmBtn
+                      size="sm"
+                      variant="default"
                       class="text-xs gap-1 bg-emerald-600 hover:bg-emerald-700 h-8"
-                      (click)="updateStage(apt, 'ARRIVED')">
+                      (click)="updateStage(apt, 'ARRIVED')"
+                    >
                       <ng-icon name="lucideClock" size="14" />
                       <span>Mark Lobby Arrival</span>
                     </button>
                     <!-- Indicator badge for scheduled appointments on future or past dates -->
                     <span
-                      *ngIf="(apt.stage === 'SCHEDULED' || apt.status === 'SCHEDULED') && !isToday(apt.appointmentDate)"
-                      hlmBadge variant="outline"
-                      class="text-[10px] text-muted-foreground font-mono">
-                      Scheduled ({{ apt.appointmentDate | date:'shortDate' }})
+                      *ngIf="
+                        (apt.stage === 'SCHEDULED' || apt.status === 'SCHEDULED') &&
+                        !isToday(apt.appointmentDate)
+                      "
+                      hlmBadge
+                      variant="outline"
+                      class="text-[10px] text-muted-foreground font-mono"
+                    >
+                      Scheduled ({{ apt.appointmentDate | date: 'shortDate' }})
                     </span>
                     <!-- Check in action for Arrived patients -->
                     <button
                       *ngIf="apt.stage === 'ARRIVED'"
-                      hlmBtn size="sm" variant="secondary"
+                      hlmBtn
+                      size="sm"
+                      variant="secondary"
                       class="text-xs gap-1 bg-sky-600 text-white hover:bg-sky-700 h-8"
-                      (click)="updateStage(apt, 'CHECKED_IN')">
+                      (click)="updateStage(apt, 'CHECKED_IN')"
+                    >
                       <ng-icon name="lucideUserCheck" size="14" />
                       <span>Complete Desk Check-In</span>
                     </button>
                     <span
                       *ngIf="apt.stage === 'CHECKED_IN'"
-                      class="text-xs font-semibold text-amber-600 px-2 py-1 rounded bg-amber-500/10 border border-amber-500/20">
+                      class="text-xs font-semibold text-amber-600 px-2 py-1 rounded bg-amber-500/10 border border-amber-500/20"
+                    >
                       Awaiting Nurse Triage
                     </span>
                     <span
                       *ngIf="apt.stage === 'TRIAGED'"
-                      class="text-xs font-semibold text-sky-600 px-2 py-1 rounded bg-sky-500/10 border border-sky-500/20">
+                      class="text-xs font-semibold text-sky-600 px-2 py-1 rounded bg-sky-500/10 border border-sky-500/20"
+                    >
                       Ready for Doctor
                     </span>
                     <!-- Cancellation button -->
                     <button
                       *ngIf="apt.stage !== 'CANCELLED' && apt.status !== 'CANCELLED'"
-                      hlmBtn size="sm" variant="ghost"
+                      hlmBtn
+                      size="sm"
+                      variant="ghost"
                       class="text-xs gap-1 text-red-600 hover:text-red-700 h-8"
-                      (click)="openCancelModal(apt)">
+                      (click)="openCancelModal(apt)"
+                    >
                       <ng-icon name="lucideXCircle" size="14" />
                       <span>Cancel</span>
                     </button>
@@ -334,15 +463,22 @@ import { StatCardComponent } from '../../shared/ui/stat-card.component';
                     <button
                       *ngIf="apt.patientId || apt.patient?.id"
                       (click)="openRteModal(apt.patientId || apt.patient!.id)"
-                      hlmBtn size="sm" variant="ghost"
-                      class="text-xs text-sky-600 hover:text-sky-700 h-8">
+                      hlmBtn
+                      size="sm"
+                      variant="ghost"
+                      class="text-xs text-sky-600 hover:text-sky-700 h-8"
+                    >
                       RTE Check
                     </button>
                   </div>
                 </td>
               </tr>
               <tr *ngIf="filteredAppointments().length === 0" hlmTableRow>
-                <td hlmTableCell colspan="6" class="text-center text-xs text-muted-foreground py-10">
+                <td
+                  hlmTableCell
+                  colspan="6"
+                  class="text-center text-xs text-muted-foreground py-10"
+                >
                   No appointments matching filter criteria for the selected date scope.
                 </td>
               </tr>
@@ -352,20 +488,33 @@ import { StatCardComponent } from '../../shared/ui/stat-card.component';
       </div>
 
       <!-- Cancel Modal -->
-      <div *ngIf="selectedCancelApt()" class="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+      <div
+        *ngIf="selectedCancelApt()"
+        class="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+      >
         <div hlmCard class="w-full max-w-md p-6 space-y-4 border border-border shadow-lg">
           <div class="flex items-center justify-between pb-3 border-b border-border">
             <h3 class="text-base font-bold text-foreground flex items-center gap-2">
               <ng-icon name="lucideXCircle" size="18" class="text-red-500" />
               Cancel Appointment #{{ selectedCancelApt()?.id }}
             </h3>
-            <button class="text-muted-foreground hover:text-foreground text-xs font-bold" (click)="selectedCancelApt.set(null)">&times;</button>
+            <button
+              class="text-muted-foreground hover:text-foreground text-xs font-bold"
+              (click)="selectedCancelApt.set(null)"
+            >
+              &times;
+            </button>
           </div>
 
           <div class="space-y-3 text-xs">
             <div class="space-y-1">
-              <label class="font-medium text-foreground">Cancellation Reason Code <span class="text-red-500">*</span></label>
-              <select [(ngModel)]="cancelReason" class="w-full p-2 rounded-lg border border-border bg-background text-xs text-foreground">
+              <label class="font-medium text-foreground"
+                >Cancellation Reason Code <span class="text-red-500">*</span></label
+              >
+              <select
+                [(ngModel)]="cancelReason"
+                class="w-full p-2 rounded-lg border border-border bg-background text-xs text-foreground"
+              >
                 <option value="PATIENT_NO_SHOW">Patient No-Show</option>
                 <option value="PATIENT_CANCELLED">Patient Requested Cancellation</option>
                 <option value="PROVIDER_UNAVAILABLE">Provider Emergency / Unavailable</option>
@@ -374,13 +523,34 @@ import { StatCardComponent } from '../../shared/ui/stat-card.component';
             </div>
             <div class="space-y-1">
               <label class="font-medium text-foreground">Additional Comments</label>
-              <textarea hlmInput [(ngModel)]="cancelComment" rows="2" placeholder="Optional notes for cancellation record..." class="w-full text-xs p-2"></textarea>
+              <textarea
+                hlmInput
+                [(ngModel)]="cancelComment"
+                rows="2"
+                placeholder="Optional notes for cancellation record..."
+                class="w-full text-xs p-2"
+              ></textarea>
             </div>
           </div>
 
           <div class="flex justify-end gap-2 pt-2">
-            <button hlmBtn variant="ghost" size="sm" (click)="selectedCancelApt.set(null)" class="text-xs">Close</button>
-            <button hlmBtn variant="destructive" size="sm" (click)="submitCancel()" [disabled]="cancelling()" class="text-xs">
+            <button
+              hlmBtn
+              variant="ghost"
+              size="sm"
+              (click)="selectedCancelApt.set(null)"
+              class="text-xs"
+            >
+              Close
+            </button>
+            <button
+              hlmBtn
+              variant="destructive"
+              size="sm"
+              (click)="submitCancel()"
+              [disabled]="cancelling()"
+              class="text-xs"
+            >
               {{ cancelling() ? 'Cancelling...' : 'Confirm Cancellation' }}
             </button>
           </div>
@@ -389,14 +559,22 @@ import { StatCardComponent } from '../../shared/ui/stat-card.component';
     </div>
 
     <!-- Modal: Book Appointment -->
-    <div *ngIf="showBookModal()" class="fixed inset-0 z-50 bg-background/80 backdrop-blur-xs flex items-center justify-center p-4">
-      <div class="w-full max-w-lg rounded-2xl border border-border bg-card p-6 shadow-2xl space-y-4">
+    <div
+      *ngIf="showBookModal()"
+      class="fixed inset-0 z-50 bg-background/80 backdrop-blur-xs flex items-center justify-center p-4"
+    >
+      <div
+        class="w-full max-w-lg rounded-2xl border border-border bg-card p-6 shadow-2xl space-y-4"
+      >
         <div class="flex justify-between items-center border-b border-border pb-3">
           <h3 class="text-base font-bold text-foreground flex items-center gap-2">
             <ng-icon name="lucideCalendar" size="18" class="text-sky-600" />
             Book Patient Consultation Appointment
           </h3>
-          <button (click)="showBookModal.set(false)" class="p-1 rounded-lg text-muted-foreground hover:text-foreground">
+          <button
+            (click)="showBookModal.set(false)"
+            class="p-1 rounded-lg text-muted-foreground hover:text-foreground"
+          >
             <ng-icon name="lucideXCircle" size="16" />
           </button>
         </div>
@@ -404,7 +582,10 @@ import { StatCardComponent } from '../../shared/ui/stat-card.component';
         <div class="space-y-3 text-xs">
           <div>
             <label class="font-medium text-foreground block mb-1">Select Patient *</label>
-            <select [(ngModel)]="newAppointment.patientId" class="w-full p-2.5 rounded-lg border border-input bg-background text-xs">
+            <select
+              [(ngModel)]="newAppointment.patientId"
+              class="w-full p-2.5 rounded-lg border border-input bg-background text-xs"
+            >
               <option value="" disabled selected>-- Choose Patient from MPI --</option>
               <option *ngFor="let p of patientOptions()" [value]="p.id">
                 {{ p.fullName }} (MRN: {{ p.patientCode || p.mrn || p.id }})
@@ -415,7 +596,10 @@ import { StatCardComponent } from '../../shared/ui/stat-card.component';
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="font-medium text-foreground block mb-1">Attending Physician *</label>
-              <select [(ngModel)]="newAppointment.doctorId" class="w-full p-2.5 rounded-lg border border-input bg-background text-xs">
+              <select
+                [(ngModel)]="newAppointment.doctorId"
+                class="w-full p-2.5 rounded-lg border border-input bg-background text-xs"
+              >
                 <option value="1">Dr. John Smith (Cardiology)</option>
                 <option value="2">Dr. Sarah Wilson (Internal Medicine)</option>
                 <option value="3">Dr. Ananya Patel (Endocrinology)</option>
@@ -424,7 +608,10 @@ import { StatCardComponent } from '../../shared/ui/stat-card.component';
             </div>
             <div>
               <label class="font-medium text-foreground block mb-1">Visit Type</label>
-              <select [(ngModel)]="newAppointment.type" class="w-full p-2.5 rounded-lg border border-input bg-background text-xs">
+              <select
+                [(ngModel)]="newAppointment.type"
+                class="w-full p-2.5 rounded-lg border border-input bg-background text-xs"
+              >
                 <option value="GENERAL_CONSULTATION">General Consultation</option>
                 <option value="SPECIALIST_FOLLOWUP">Specialist Follow-Up</option>
                 <option value="ANNUAL_CHECKUP">Annual Preventive Checkup</option>
@@ -436,23 +623,53 @@ import { StatCardComponent } from '../../shared/ui/stat-card.component';
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="font-medium text-foreground block mb-1">Appointment Date *</label>
-              <input type="date" [(ngModel)]="newAppointment.date" class="w-full p-2 rounded-lg border border-input bg-background text-xs" />
+              <input
+                type="date"
+                [(ngModel)]="newAppointment.date"
+                class="w-full p-2 rounded-lg border border-input bg-background text-xs"
+              />
             </div>
             <div>
               <label class="font-medium text-foreground block mb-1">Time Slot *</label>
-              <input type="time" [(ngModel)]="newAppointment.time" class="w-full p-2 rounded-lg border border-input bg-background text-xs" />
+              <input
+                type="time"
+                [(ngModel)]="newAppointment.time"
+                class="w-full p-2 rounded-lg border border-input bg-background text-xs"
+              />
             </div>
           </div>
 
           <div>
-            <label class="font-medium text-foreground block mb-1">Reason for Visit / Symptoms *</label>
-            <input type="text" [(ngModel)]="newAppointment.reason" placeholder="e.g. Chest tightness, routine diabetic follow-up, general checkup" class="w-full p-2.5 rounded-lg border border-input bg-background text-xs" />
+            <label class="font-medium text-foreground block mb-1"
+              >Reason for Visit / Symptoms *</label
+            >
+            <input
+              type="text"
+              [(ngModel)]="newAppointment.reason"
+              placeholder="e.g. Chest tightness, routine diabetic follow-up, general checkup"
+              class="w-full p-2.5 rounded-lg border border-input bg-background text-xs"
+            />
           </div>
         </div>
 
         <div class="flex justify-end gap-2 pt-3 border-t border-border">
-          <button hlmBtn variant="outline" size="sm" (click)="showBookModal.set(false)" class="text-xs">Cancel</button>
-          <button hlmBtn variant="default" size="sm" [disabled]="!newAppointment.patientId || !newAppointment.reason" (click)="submitBookAppointment()" class="text-xs bg-sky-600 hover:bg-sky-700 text-white">
+          <button
+            hlmBtn
+            variant="outline"
+            size="sm"
+            (click)="showBookModal.set(false)"
+            class="text-xs"
+          >
+            Cancel
+          </button>
+          <button
+            hlmBtn
+            variant="default"
+            size="sm"
+            [disabled]="!newAppointment.patientId || !newAppointment.reason"
+            (click)="submitBookAppointment()"
+            class="text-xs bg-sky-600 hover:bg-sky-700 text-white"
+          >
             <ng-icon name="lucideCalendar" size="14" class="mr-1" /> Confirm Booking
           </button>
         </div>
@@ -463,14 +680,16 @@ import { StatCardComponent } from '../../shared/ui/stat-card.component';
     <app-receptionist-intake
       *ngIf="showIntakeModal()"
       [isModal]="true"
-      (close)="showIntakeModal.set(false); loadData()">
+      (close)="showIntakeModal.set(false); loadData()"
+    >
     </app-receptionist-intake>
 
     <app-receptionist-eligibility
       *ngIf="showRteModal()"
       [isModal]="true"
       [patientIdInput]="rtePatientId()"
-      (close)="showRteModal.set(false); loadData()">
+      (close)="showRteModal.set(false); loadData()"
+    >
     </app-receptionist-eligibility>
   `,
 })
@@ -525,9 +744,11 @@ export class ReceptionistAppointmentsComponent implements OnInit {
       const patName = apt.patientName || apt.patient?.fullName || '';
       const patCode = apt.patientCode || apt.patient?.patientCode || '';
 
-      const docMatch = this.selectedDoctor === 'ALL' || (docName === this.selectedDoctor);
-      const stageMatch = this.selectedStage === 'ALL' || (apt.stage || apt.status) === this.selectedStage;
-      const termMatch = !this.searchTerm.trim() ||
+      const docMatch = this.selectedDoctor === 'ALL' || docName === this.selectedDoctor;
+      const stageMatch =
+        this.selectedStage === 'ALL' || (apt.stage || apt.status) === this.selectedStage;
+      const termMatch =
+        !this.searchTerm.trim() ||
         patName.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
         patCode.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
         docName.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
@@ -537,16 +758,19 @@ export class ReceptionistAppointmentsComponent implements OnInit {
     });
   });
 
-  scheduledCount = computed(() =>
-    this.dateScopedAppointments().filter((a) => (a.stage || a.status) === 'SCHEDULED').length
+  scheduledCount = computed(
+    () => this.dateScopedAppointments().filter((a) => (a.stage || a.status) === 'SCHEDULED').length,
   );
 
-  arrivedCount = computed(() =>
-    this.dateScopedAppointments().filter((a) => ['ARRIVED', 'CHECKED_IN', 'IN_CONSULTATION'].includes(a.stage || a.status)).length
+  arrivedCount = computed(
+    () =>
+      this.dateScopedAppointments().filter((a) =>
+        ['ARRIVED', 'CHECKED_IN', 'IN_CONSULTATION'].includes(a.stage || a.status),
+      ).length,
   );
 
-  cancelledCount = computed(() =>
-    this.dateScopedAppointments().filter((a) => (a.stage || a.status) === 'CANCELLED').length
+  cancelledCount = computed(
+    () => this.dateScopedAppointments().filter((a) => (a.stage || a.status) === 'CANCELLED').length,
   );
 
   showBookModal = signal(false);
@@ -562,8 +786,8 @@ export class ReceptionistAppointmentsComponent implements OnInit {
 
   constructor(
     public authService: AuthService,
-    private apiService: ApiService
-  ) { }
+    private apiService: ApiService,
+  ) {}
 
   ngOnInit(): void {
     this.loadData();
@@ -594,7 +818,9 @@ export class ReceptionistAppointmentsComponent implements OnInit {
   submitBookAppointment(): void {
     if (!this.newAppointment.patientId || !this.newAppointment.reason) return;
 
-    const chosenPat = this.patientOptions().find((p) => String(p.id) === String(this.newAppointment.patientId));
+    const chosenPat = this.patientOptions().find(
+      (p) => String(p.id) === String(this.newAppointment.patientId),
+    );
     const aptPayload: AppointmentRequestDTO = {
       patientId: this.newAppointment.patientId,
       doctorId: this.newAppointment.doctorId,
@@ -617,7 +843,12 @@ export class ReceptionistAppointmentsComponent implements OnInit {
           patientName: chosenPat?.fullName || 'Registered Patient',
           patientCode: chosenPat?.patientCode || 'PAT-' + Date.now().toString().slice(-4),
           patient: chosenPat,
-          doctorName: this.newAppointment.doctorId === '1' ? 'Dr. John Smith' : this.newAppointment.doctorId === '2' ? 'Dr. Sarah Wilson' : 'Dr. Attending Physician',
+          doctorName:
+            this.newAppointment.doctorId === '1'
+              ? 'Dr. John Smith'
+              : this.newAppointment.doctorId === '2'
+                ? 'Dr. Sarah Wilson'
+                : 'Dr. Attending Physician',
           appointmentDate: `${this.newAppointment.date}T${this.newAppointment.time}:00`,
           status: 'SCHEDULED',
           stage: 'SCHEDULED',
@@ -665,7 +896,8 @@ export class ReceptionistAppointmentsComponent implements OnInit {
   getActiveDateLabel(): string {
     const mode = this.dateFilterMode();
     if (mode === 'TODAY') return `Today (${this.getLocalDateString(new Date())})`;
-    if (mode === 'TOMORROW') return `Tomorrow (${this.getLocalDateString(new Date(Date.now() + 86400000))})`;
+    if (mode === 'TOMORROW')
+      return `Tomorrow (${this.getLocalDateString(new Date(Date.now() + 86400000))})`;
     if (mode === 'ALL') return 'All Historical & Future Dates';
     return this.selectedDate();
   }
@@ -708,36 +940,52 @@ export class ReceptionistAppointmentsComponent implements OnInit {
     this.reminding.set(true);
     setTimeout(() => {
       this.reminding.set(false);
-      this.reminderBanner.set('Automated SMS & Email appointment reminders successfully dispatched to scheduled patients.');
+      this.reminderBanner.set(
+        'Automated SMS & Email appointment reminders successfully dispatched to scheduled patients.',
+      );
       setTimeout(() => this.reminderBanner.set(null), 5000);
     }, 600);
   }
 
   getStageLabel(stage: string): string {
     switch (stage) {
-      case 'SCHEDULED': return '1. Booked (Pre-Arrival)';
-      case 'ARRIVED': return '2. Lobby Arrival';
-      case 'CHECKED_IN': return '3. Desk Checked In (Awaiting Triage)';
-      case 'TRIAGED': return '4. Triaged (Ready for Physician)';
-      case 'IN_CONSULTATION': return '5. Clinical Consultation';
-      case 'COMPLETED': return '6. Discharged & Completed';
-      case 'CANCELLED': return 'Cancelled / No-Show';
-      default: return stage || 'Scheduled';
+      case 'SCHEDULED':
+        return '1. Booked (Pre-Arrival)';
+      case 'ARRIVED':
+        return '2. Lobby Arrival';
+      case 'CHECKED_IN':
+        return '3. Desk Checked In (Awaiting Triage)';
+      case 'TRIAGED':
+        return '4. Triaged (Ready for Physician)';
+      case 'IN_CONSULTATION':
+        return '5. Clinical Consultation';
+      case 'COMPLETED':
+        return '6. Discharged & Completed';
+      case 'CANCELLED':
+        return 'Cancelled / No-Show';
+      default:
+        return stage || 'Scheduled';
     }
   }
 
   getStageVariant(stage: string): 'outline' | 'secondary' | 'default' | 'destructive' {
     switch (stage) {
-      case 'SCHEDULED': return 'outline';
-      case 'ARRIVED': return 'secondary';
-      case 'CHECKED_IN': return 'outline';
-      case 'TRIAGED': return 'secondary';
-      case 'IN_CONSULTATION': return 'default';
-      case 'COMPLETED': return 'secondary';
-      case 'CANCELLED': return 'destructive';
-      default: return 'outline';
+      case 'SCHEDULED':
+        return 'outline';
+      case 'ARRIVED':
+        return 'secondary';
+      case 'CHECKED_IN':
+        return 'outline';
+      case 'TRIAGED':
+        return 'secondary';
+      case 'IN_CONSULTATION':
+        return 'default';
+      case 'COMPLETED':
+        return 'secondary';
+      case 'CANCELLED':
+        return 'destructive';
+      default:
+        return 'outline';
     }
   }
 }
-
-

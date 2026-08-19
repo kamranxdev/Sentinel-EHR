@@ -10,17 +10,25 @@ import { lucideAlertTriangle, lucideLoader2, lucideX } from '@ng-icons/lucide';
   imports: [CommonModule, HlmButtonImports, NgIcon],
   providers: [provideIcons({ lucideAlertTriangle, lucideLoader2, lucideX })],
   template: `
-    <div *ngIf="isOpen" class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-200">
-      <div class="bg-card border border-border rounded-xl shadow-2xl max-w-md w-full p-6 space-y-4 text-foreground relative">
+    <div
+      *ngIf="isOpen"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-xs p-4 animate-in fade-in duration-200"
+    >
+      <div
+        class="bg-card border border-border rounded-xl shadow-2xl max-w-md w-full p-6 space-y-4 text-foreground relative"
+      >
         <button
           type="button"
           (click)="onCancel()"
-          class="absolute top-4 right-4 text-muted-foreground hover:text-foreground text-sm p-1 rounded-md">
+          class="absolute top-4 right-4 text-muted-foreground hover:text-foreground text-sm p-1 rounded-md"
+        >
           <ng-icon name="lucideX" size="16" />
         </button>
 
         <div class="flex items-center gap-3">
-          <div class="size-10 rounded-full bg-destructive/10 text-destructive flex items-center justify-center shrink-0">
+          <div
+            class="size-10 rounded-full bg-destructive/10 text-destructive flex items-center justify-center shrink-0"
+          >
             <ng-icon name="lucideAlertTriangle" size="20" />
           </div>
           <div>
@@ -34,7 +42,15 @@ import { lucideAlertTriangle, lucideLoader2, lucideX } from '@ng-icons/lucide';
         </div>
 
         <div class="flex justify-end gap-2 pt-2">
-          <button hlmBtn type="button" variant="ghost" size="sm" (click)="onCancel()" [disabled]="loading" class="text-xs h-9">
+          <button
+            hlmBtn
+            type="button"
+            variant="ghost"
+            size="sm"
+            (click)="onCancel()"
+            [disabled]="loading"
+            class="text-xs h-9"
+          >
             {{ cancelText }}
           </button>
           <button
@@ -44,7 +60,8 @@ import { lucideAlertTriangle, lucideLoader2, lucideX } from '@ng-icons/lucide';
             size="sm"
             (click)="onConfirm()"
             [disabled]="loading"
-            class="text-xs h-9 gap-1.5 font-bold">
+            class="text-xs h-9 gap-1.5 font-bold"
+          >
             <ng-icon *ngIf="loading" name="lucideLoader2" size="14" class="animate-spin" />
             <span>{{ confirmText }}</span>
           </button>

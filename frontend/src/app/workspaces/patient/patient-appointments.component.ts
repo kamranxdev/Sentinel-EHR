@@ -5,7 +5,11 @@ import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
 import { User, OrganizationContextDTO } from '../../core/models/auth-user.model';
 import { Patient } from '../../core/models/patient.model';
-import { Appointment, AppointmentRequestDTO, DoctorRecommendationDTO } from '../../core/models/appointment.model';
+import {
+  Appointment,
+  AppointmentRequestDTO,
+  DoctorRecommendationDTO,
+} from '../../core/models/appointment.model';
 import { Organization } from '../../core/models/organization.model';
 import { toast } from '@spartan-ng/brain/sonner';
 
@@ -90,18 +94,25 @@ import {
   template: `
     <div class="space-y-6">
       <!-- Header Banner & Booking Action -->
-      <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-border">
+      <div
+        class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-border"
+      >
         <div class="flex items-center gap-3">
-          <div class="size-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 border border-primary/20">
+          <div
+            class="size-12 rounded-xl bg-primary/10 text-primary flex items-center justify-center shrink-0 border border-primary/20"
+          >
             <ng-icon name="lucideCalendarClock" size="24" />
           </div>
           <div>
             <div class="flex items-center gap-2">
-              <h1 class="text-xl font-bold tracking-tight text-foreground">My Consultation Schedule</h1>
+              <h1 class="text-xl font-bold tracking-tight text-foreground">
+                My Consultation Schedule
+              </h1>
               <span hlmBadge variant="outline" class="text-[10px]">Patient Portal</span>
             </div>
             <p class="text-xs text-muted-foreground mt-0.5">
-              Book new clinical consultations with Smart Doctor Match, view schedule, and manage visits.
+              Book new clinical consultations with Smart Doctor Match, view schedule, and manage
+              visits.
             </p>
           </div>
         </div>
@@ -120,7 +131,9 @@ import {
       <!-- Filter Controls & Search -->
       <div class="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3">
         <!-- Status Tabs -->
-        <div class="flex items-center p-1 rounded-lg bg-muted/60 border border-border w-fit text-xs">
+        <div
+          class="flex items-center p-1 rounded-lg bg-muted/60 border border-border w-fit text-xs"
+        >
           <button
             *ngFor="let status of ['ALL', 'SCHEDULED', 'COMPLETED', 'CANCELLED']"
             (click)="activeFilter.set(status)"
@@ -135,7 +148,11 @@ import {
 
         <!-- Search Bar -->
         <div class="relative w-full sm:w-64">
-          <ng-icon name="lucideSearch" size="14" class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <ng-icon
+            name="lucideSearch"
+            size="14"
+            class="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
+          />
           <input
             type="text"
             [(ngModel)]="searchQuery"
@@ -159,25 +176,38 @@ import {
               </tr>
             </thead>
             <tbody hlmTableBody class="divide-y divide-border">
-              <tr *ngFor="let apt of filteredAppointments()" hlmTableRow class="hover:bg-muted/40 transition-colors">
+              <tr
+                *ngFor="let apt of filteredAppointments()"
+                hlmTableRow
+                class="hover:bg-muted/40 transition-colors"
+              >
                 <!-- Date & Time -->
                 <td hlmTableCell class="py-3.5 px-4 font-mono text-foreground font-medium">
                   <div class="flex items-center gap-2">
                     <ng-icon name="lucideCalendar" size="14" class="text-primary" />
-                    <span>{{ apt.appointmentDate | date:'mediumDate' }}</span>
-                    <span class="text-muted-foreground">• {{ apt.appointmentDate | date:'shortTime' }}</span>
+                    <span>{{ apt.appointmentDate | date: 'mediumDate' }}</span>
+                    <span class="text-muted-foreground"
+                      >• {{ apt.appointmentDate | date: 'shortTime' }}</span
+                    >
                   </div>
                 </td>
 
                 <!-- Attending Doctor -->
                 <td hlmTableCell class="py-3.5 px-4">
                   <div class="flex items-center gap-2">
-                    <div class="size-7 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold shrink-0">
+                    <div
+                      class="size-7 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold shrink-0"
+                    >
                       Dr
                     </div>
                     <div>
-                      <div class="font-semibold text-foreground">{{ getDoctorDisplayName(apt) }}</div>
-                      <div class="text-[10px] text-muted-foreground" *ngIf="getDoctorSpecialization(apt)">
+                      <div class="font-semibold text-foreground">
+                        {{ getDoctorDisplayName(apt) }}
+                      </div>
+                      <div
+                        class="text-[10px] text-muted-foreground"
+                        *ngIf="getDoctorSpecialization(apt)"
+                      >
                         {{ getDoctorSpecialization(apt) }}
                       </div>
                     </div>
@@ -186,8 +216,12 @@ import {
 
                 <!-- Reason -->
                 <td hlmTableCell class="py-3.5 px-4 text-muted-foreground max-w-xs truncate">
-                  <span class="text-foreground font-medium">{{ apt.reason || 'General Consultation' }}</span>
-                  <p *ngIf="apt.notes" class="text-[10px] text-muted-foreground truncate">{{ apt.notes }}</p>
+                  <span class="text-foreground font-medium">{{
+                    apt.reason || 'General Consultation'
+                  }}</span>
+                  <p *ngIf="apt.notes" class="text-[10px] text-muted-foreground truncate">
+                    {{ apt.notes }}
+                  </p>
                 </td>
 
                 <!-- Status Badge -->
@@ -195,23 +229,30 @@ import {
                   <span
                     hlmBadge
                     [variant]="
-                      (apt.stage || apt.status) === 'SCHEDULED' ? 'default' :
-                      (apt.stage || apt.status) === 'COMPLETED' ? 'secondary' :
-                      (apt.stage || apt.status) === 'IN_CONSULTATION' ? 'default' : 'outline'
+                      (apt.stage || apt.status) === 'SCHEDULED'
+                        ? 'default'
+                        : (apt.stage || apt.status) === 'COMPLETED'
+                          ? 'secondary'
+                          : (apt.stage || apt.status) === 'IN_CONSULTATION'
+                            ? 'default'
+                            : 'outline'
                     "
-                    [class.bg-emerald-500\/15]="(apt.stage || apt.status) === 'COMPLETED'"
+                    [class.bg-emerald-500/15]="(apt.stage || apt.status) === 'COMPLETED'"
                     [class.text-emerald-700]="(apt.stage || apt.status) === 'COMPLETED'"
                     [class.dark:text-emerald-400]="(apt.stage || apt.status) === 'COMPLETED'"
-                    [class.bg-rose-500\/15]="(apt.stage || apt.status) === 'CANCELLED'"
+                    [class.bg-rose-500/15]="(apt.stage || apt.status) === 'CANCELLED'"
                     [class.text-rose-700]="(apt.stage || apt.status) === 'CANCELLED'"
                     [class.dark:text-rose-400]="(apt.stage || apt.status) === 'CANCELLED'"
                     class="text-[10px] font-bold tracking-wider px-2 py-0.5"
                   >
                     {{
-                      (apt.stage || apt.status) === 'CHECKED_IN' ? 'Checked In (Desk)' :
-                      (apt.stage || apt.status) === 'TRIAGED' ? 'Triaged (Nurse)' :
-                      (apt.stage || apt.status) === 'IN_CONSULTATION' ? 'In Consultation' :
-                      (apt.stage || apt.status)
+                      (apt.stage || apt.status) === 'CHECKED_IN'
+                        ? 'Checked In (Desk)'
+                        : (apt.stage || apt.status) === 'TRIAGED'
+                          ? 'Triaged (Nurse)'
+                          : (apt.stage || apt.status) === 'IN_CONSULTATION'
+                            ? 'In Consultation'
+                            : apt.stage || apt.status
                     }}
                   </span>
                 </td>
@@ -230,20 +271,30 @@ import {
                       <ng-icon name="lucideBan" size="13" />
                       <span>Cancel</span>
                     </button>
-                    <span *ngIf="apt.status !== 'SCHEDULED'" class="text-[11px] text-muted-foreground">--</span>
+                    <span
+                      *ngIf="apt.status !== 'SCHEDULED'"
+                      class="text-[11px] text-muted-foreground"
+                      >--</span
+                    >
                   </div>
                 </td>
               </tr>
 
               <!-- Empty State -->
               <tr *ngIf="filteredAppointments().length === 0" hlmTableRow>
-                <td colspan="5" hlmTableCell class="py-12 text-center text-muted-foreground text-xs">
+                <td
+                  colspan="5"
+                  hlmTableCell
+                  class="py-12 text-center text-muted-foreground text-xs"
+                >
                   <div class="flex flex-col items-center justify-center space-y-2">
                     <div class="size-10 rounded-full bg-muted flex items-center justify-center">
                       <ng-icon name="lucideCalendarClock" size="20" class="text-muted-foreground" />
                     </div>
                     <p class="font-medium text-foreground">No consultations found</p>
-                    <p class="text-muted-foreground text-[11px]">Click "Book Consultation" above to schedule a new appointment.</p>
+                    <p class="text-muted-foreground text-[11px]">
+                      Click "Book Consultation" above to schedule a new appointment.
+                    </p>
                   </div>
                 </td>
               </tr>
@@ -259,16 +310,24 @@ import {
         *ngIf="showBookingModal()"
         class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto animate-in fade-in duration-200"
       >
-        <div class="w-full max-w-2xl bg-card border border-border rounded-2xl shadow-2xl overflow-hidden my-6">
+        <div
+          class="w-full max-w-2xl bg-card border border-border rounded-2xl shadow-2xl overflow-hidden my-6"
+        >
           <!-- Modal Header -->
-          <div class="px-6 py-4 border-b border-border flex items-center justify-between bg-muted/30">
+          <div
+            class="px-6 py-4 border-b border-border flex items-center justify-between bg-muted/30"
+          >
             <div class="flex items-center gap-2">
-              <div class="size-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+              <div
+                class="size-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center"
+              >
                 <ng-icon name="lucideStethoscope" size="18" />
               </div>
               <div>
                 <h2 class="text-base font-bold text-foreground">Book Clinical Consultation</h2>
-                <p class="text-[11px] text-muted-foreground">Step {{ bookingStep() }} of 3 - {{ getStepTitle() }}</p>
+                <p class="text-[11px] text-muted-foreground">
+                  Step {{ bookingStep() }} of 3 - {{ getStepTitle() }}
+                </p>
               </div>
             </div>
             <button
@@ -280,32 +339,52 @@ import {
           </div>
 
           <!-- Step Progress Indicator -->
-          <div class="grid grid-cols-3 border-b border-border bg-muted/10 text-center text-xs font-semibold">
+          <div
+            class="grid grid-cols-3 border-b border-border bg-muted/10 text-center text-xs font-semibold"
+          >
             <div
               class="py-2.5 px-3 border-r border-border transition-colors flex items-center justify-center gap-1.5"
-              [class.bg-primary\/10]="bookingStep() === 1"
+              [class.bg-primary/10]="bookingStep() === 1"
               [class.text-primary]="bookingStep() === 1"
               [class.text-muted-foreground]="bookingStep() !== 1"
             >
-              <span class="size-5 rounded-full text-[10px] flex items-center justify-center" [class.bg-primary]="bookingStep() === 1" [class.text-primary-foreground]="bookingStep() === 1" [class.bg-muted]="bookingStep() !== 1">1</span>
+              <span
+                class="size-5 rounded-full text-[10px] flex items-center justify-center"
+                [class.bg-primary]="bookingStep() === 1"
+                [class.text-primary-foreground]="bookingStep() === 1"
+                [class.bg-muted]="bookingStep() !== 1"
+                >1</span
+              >
               <span>Reason & Schedule</span>
             </div>
             <div
               class="py-2.5 px-3 border-r border-border transition-colors flex items-center justify-center gap-1.5"
-              [class.bg-primary\/10]="bookingStep() === 2"
+              [class.bg-primary/10]="bookingStep() === 2"
               [class.text-primary]="bookingStep() === 2"
               [class.text-muted-foreground]="bookingStep() !== 2"
             >
-              <span class="size-5 rounded-full text-[10px] flex items-center justify-center" [class.bg-primary]="bookingStep() === 2" [class.text-primary-foreground]="bookingStep() === 2" [class.bg-muted]="bookingStep() !== 2">2</span>
+              <span
+                class="size-5 rounded-full text-[10px] flex items-center justify-center"
+                [class.bg-primary]="bookingStep() === 2"
+                [class.text-primary-foreground]="bookingStep() === 2"
+                [class.bg-muted]="bookingStep() !== 2"
+                >2</span
+              >
               <span>Smart Doctor Match</span>
             </div>
             <div
               class="py-2.5 px-3 transition-colors flex items-center justify-center gap-1.5"
-              [class.bg-primary\/10]="bookingStep() === 3"
+              [class.bg-primary/10]="bookingStep() === 3"
               [class.text-primary]="bookingStep() === 3"
               [class.text-muted-foreground]="bookingStep() !== 3"
             >
-              <span class="size-5 rounded-full text-[10px] flex items-center justify-center" [class.bg-primary]="bookingStep() === 3" [class.text-primary-foreground]="bookingStep() === 3" [class.bg-muted]="bookingStep() !== 3">3</span>
+              <span
+                class="size-5 rounded-full text-[10px] flex items-center justify-center"
+                [class.bg-primary]="bookingStep() === 3"
+                [class.text-primary-foreground]="bookingStep() === 3"
+                [class.bg-muted]="bookingStep() !== 3"
+                >3</span
+              >
               <span>Review & Confirm</span>
             </div>
           </div>
@@ -317,9 +396,14 @@ import {
               <!-- Hospital Selection Section -->
               <div class="space-y-3">
                 <div>
-                  <label class="block text-xs font-bold text-foreground mb-1.5 flex items-center justify-between">
+                  <label
+                    class="block text-xs font-bold text-foreground mb-1.5 flex items-center justify-between"
+                  >
                     <span>Select Hospital / Clinic <span class="text-rose-500">*</span></span>
-                    <span *ngIf="selectedHospital()" class="text-[11px] text-primary font-semibold flex items-center gap-1">
+                    <span
+                      *ngIf="selectedHospital()"
+                      class="text-[11px] text-primary font-semibold flex items-center gap-1"
+                    >
                       <ng-icon name="lucideCheckCircle2" size="12" />
                       {{ selectedHospital()?.name }}
                     </span>
@@ -332,21 +416,26 @@ import {
                       (ngModelChange)="onHospitalSelectChange($event)"
                       class="w-full p-2.5 pl-3 pr-8 text-xs font-semibold rounded-xl border border-border bg-background text-foreground shadow-xs focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all cursor-pointer"
                     >
-                      <option [value]="undefined" disabled>-- Choose a Hospital or Clinic --</option>
+                      <option [value]="undefined" disabled>
+                        -- Choose a Hospital or Clinic --
+                      </option>
                       <option *ngFor="let org of allOrganizations()" [value]="org.id">
                         {{ org.name }} ({{ org.code }}) — {{ org.organizationType || 'Hospital' }}
                       </option>
                     </select>
                   </div>
                   <p class="text-[10px] text-muted-foreground mt-1">
-                    Choose the hospital or clinic (e.g. AIIMS Delhi, AIIMS Gorakhpur, Apollo) where you want to consult a physician.
+                    Choose the hospital or clinic (e.g. AIIMS Delhi, AIIMS Gorakhpur, Apollo) where
+                    you want to consult a physician.
                   </p>
                 </div>
 
                 <!-- Searchable Hospital Filter & Quick Selection Grid -->
                 <div class="p-3 rounded-xl border border-border/80 bg-muted/20 space-y-2">
                   <div class="flex items-center justify-between">
-                    <span class="text-[11px] font-bold text-muted-foreground flex items-center gap-1">
+                    <span
+                      class="text-[11px] font-bold text-muted-foreground flex items-center gap-1"
+                    >
                       <ng-icon name="lucideSearch" size="12" /> Search & Quick Select Hospital:
                     </span>
                     <span class="text-[10px] text-muted-foreground font-medium">
@@ -355,7 +444,11 @@ import {
                   </div>
 
                   <div class="relative">
-                    <ng-icon name="lucideSearch" size="13" class="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                    <ng-icon
+                      name="lucideSearch"
+                      size="13"
+                      class="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
+                    />
                     <input
                       hlmInput
                       type="text"
@@ -366,13 +459,15 @@ import {
                   </div>
 
                   <!-- Hospital Cards Grid -->
-                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-36 overflow-y-auto pr-0.5">
+                  <div
+                    class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-36 overflow-y-auto pr-0.5"
+                  >
                     <button
                       *ngFor="let org of filteredOrganizations()"
                       type="button"
                       (click)="selectHospital(org)"
                       [class.border-primary]="selectedHospital()?.id === org.id"
-                      [class.bg-primary\/10]="selectedHospital()?.id === org.id"
+                      [class.bg-primary/10]="selectedHospital()?.id === org.id"
                       [class.ring-1]="selectedHospital()?.id === org.id"
                       [class.ring-primary]="selectedHospital()?.id === org.id"
                       class="p-2 rounded-lg border border-border bg-card hover:border-primary/50 text-left transition-all flex items-center justify-between gap-2"
@@ -388,14 +483,26 @@ import {
                           <ng-icon name="lucideHospital" size="13" />
                         </div>
                         <div class="truncate">
-                          <div class="text-[11px] font-bold text-foreground truncate">{{ org.name }}</div>
-                          <div class="text-[9px] text-muted-foreground">{{ org.code }} • {{ org.organizationType || 'Hospital' }}</div>
+                          <div class="text-[11px] font-bold text-foreground truncate">
+                            {{ org.name }}
+                          </div>
+                          <div class="text-[9px] text-muted-foreground">
+                            {{ org.code }} • {{ org.organizationType || 'Hospital' }}
+                          </div>
                         </div>
                       </div>
-                      <ng-icon *ngIf="selectedHospital()?.id === org.id" name="lucideCheckCircle2" size="13" class="text-primary shrink-0" />
+                      <ng-icon
+                        *ngIf="selectedHospital()?.id === org.id"
+                        name="lucideCheckCircle2"
+                        size="13"
+                        class="text-primary shrink-0"
+                      />
                     </button>
                   </div>
-                  <div *ngIf="filteredOrganizations().length === 0" class="text-center py-2 text-[11px] text-muted-foreground">
+                  <div
+                    *ngIf="filteredOrganizations().length === 0"
+                    class="text-center py-2 text-[11px] text-muted-foreground"
+                  >
                     No hospitals found matching "{{ hospitalSearchQuery }}".
                   </div>
                 </div>
@@ -416,7 +523,9 @@ import {
 
               <!-- Quick Symptom Tags / Presets -->
               <div>
-                <label class="block text-[11px] font-medium text-muted-foreground mb-1.5">Quick Select Common Reasons:</label>
+                <label class="block text-[11px] font-medium text-muted-foreground mb-1.5"
+                  >Quick Select Common Reasons:</label
+                >
                 <div class="flex flex-wrap gap-1.5">
                   <button
                     *ngFor="let preset of commonReasons"
@@ -450,12 +559,7 @@ import {
                   <label class="block text-xs font-bold text-foreground mb-1">
                     Preferred Time Slot <span class="text-rose-500">*</span>
                   </label>
-                  <input
-                    hlmInput
-                    type="time"
-                    [(ngModel)]="bookingTime"
-                    class="w-full text-xs"
-                  />
+                  <input hlmInput type="time" [(ngModel)]="bookingTime" class="w-full text-xs" />
                 </div>
               </div>
             </div>
@@ -463,14 +567,23 @@ import {
             <!-- ================= STEP 2 ================= -->
             <div *ngIf="bookingStep() === 2" class="space-y-4">
               <!-- Selected Hospital Header Banner -->
-              <div class="p-3 rounded-xl bg-muted/40 border border-border flex items-center justify-between gap-3">
+              <div
+                class="p-3 rounded-xl bg-muted/40 border border-border flex items-center justify-between gap-3"
+              >
                 <div class="flex items-center gap-2.5">
-                  <div class="size-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                  <div
+                    class="size-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0"
+                  >
                     <ng-icon name="lucideHospital" size="16" />
                   </div>
                   <div>
-                    <span class="text-[10px] text-muted-foreground uppercase font-bold tracking-wider block">Selected Hospital / Clinic</span>
-                    <h4 class="text-xs font-bold text-foreground">{{ selectedHospital()?.name }} ({{ selectedHospital()?.code }})</h4>
+                    <span
+                      class="text-[10px] text-muted-foreground uppercase font-bold tracking-wider block"
+                      >Selected Hospital / Clinic</span
+                    >
+                    <h4 class="text-xs font-bold text-foreground">
+                      {{ selectedHospital()?.name }} ({{ selectedHospital()?.code }})
+                    </h4>
                   </div>
                 </div>
                 <button
@@ -486,36 +599,61 @@ import {
               </div>
 
               <!-- AI Recommendation Engine Header Banner -->
-              <div class="p-3.5 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-start gap-3">
-                <div class="size-8 rounded-lg bg-purple-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
+              <div
+                class="p-3.5 rounded-xl bg-purple-500/10 border border-purple-500/30 flex items-start gap-3"
+              >
+                <div
+                  class="size-8 rounded-lg bg-purple-500/20 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0"
+                >
                   <ng-icon name="lucideSparkles" size="18" />
                 </div>
                 <div>
                   <div class="flex items-center gap-2">
                     <h3 class="text-xs font-bold text-foreground">Smart Doctor Match Engine</h3>
-                    <span hlmBadge variant="outline" class="text-[9px] border-purple-500/40 text-purple-600 dark:text-purple-400">Hospital Match Active</span>
+                    <span
+                      hlmBadge
+                      variant="outline"
+                      class="text-[9px] border-purple-500/40 text-purple-600 dark:text-purple-400"
+                      >Hospital Match Active</span
+                    >
                   </div>
                   <p class="text-[11px] text-muted-foreground mt-0.5">
-                    Matching complaint "<span class="font-semibold text-foreground">{{ bookingReason }}</span>" with available specialists at <span class="font-semibold text-foreground">{{ selectedHospital()?.name }}</span>.
+                    Matching complaint "<span class="font-semibold text-foreground">{{
+                      bookingReason
+                    }}</span
+                    >" with available specialists at
+                    <span class="font-semibold text-foreground">{{ selectedHospital()?.name }}</span
+                    >.
                   </p>
                 </div>
               </div>
 
               <!-- Recommended Doctors List Loading -->
-              <div *ngIf="loadingRecommendations()" class="py-8 text-center text-xs text-muted-foreground flex items-center justify-center gap-2">
+              <div
+                *ngIf="loadingRecommendations()"
+                class="py-8 text-center text-xs text-muted-foreground flex items-center justify-center gap-2"
+              >
                 <ng-icon name="lucideClock" size="16" class="animate-spin text-primary" />
                 <span>Evaluating doctor matching engine at {{ selectedHospital()?.name }}...</span>
               </div>
 
               <!-- Recommended Doctors Empty State -->
-              <div *ngIf="!loadingRecommendations() && recommendedDoctors().length === 0" class="p-6 text-center rounded-xl border border-dashed border-border bg-muted/20 space-y-3">
-                <div class="size-10 rounded-full bg-muted flex items-center justify-center mx-auto text-muted-foreground">
+              <div
+                *ngIf="!loadingRecommendations() && recommendedDoctors().length === 0"
+                class="p-6 text-center rounded-xl border border-dashed border-border bg-muted/20 space-y-3"
+              >
+                <div
+                  class="size-10 rounded-full bg-muted flex items-center justify-center mx-auto text-muted-foreground"
+                >
                   <ng-icon name="lucideStethoscope" size="20" />
                 </div>
                 <div>
-                  <h4 class="text-xs font-bold text-foreground">No Physicians Available for {{ selectedHospital()?.name }}</h4>
+                  <h4 class="text-xs font-bold text-foreground">
+                    No Physicians Available for {{ selectedHospital()?.name }}
+                  </h4>
                   <p class="text-[11px] text-muted-foreground mt-0.5">
-                    No active physicians were found for the selected hospital. Please choose another hospital to schedule your consultation.
+                    No active physicians were found for the selected hospital. Please choose another
+                    hospital to schedule your consultation.
                   </p>
                 </div>
                 <button
@@ -529,57 +667,86 @@ import {
               </div>
 
               <!-- Recommended Doctors Cards -->
-              <div *ngIf="!loadingRecommendations() && recommendedDoctors().length > 0" class="space-y-3">
+              <div
+                *ngIf="!loadingRecommendations() && recommendedDoctors().length > 0"
+                class="space-y-3"
+              >
                 <div
                   *ngFor="let rec of recommendedDoctors()"
                   (click)="selectDoctor(rec.doctor, rec.recommendedSlots?.[0])"
                   [class.border-primary]="selectedDoctor?.id === rec.doctor.id"
-                  [class.bg-primary\/5]="selectedDoctor?.id === rec.doctor.id"
+                  [class.bg-primary/5]="selectedDoctor?.id === rec.doctor.id"
                   class="p-4 rounded-xl border border-border bg-card hover:border-primary/50 transition-all cursor-pointer space-y-2.5 relative"
                 >
                   <!-- Top Row: Doctor Info & Match Score Pill -->
                   <div class="flex items-start justify-between gap-3">
                     <div class="flex items-center gap-3">
-                      <div class="size-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm shrink-0 border border-primary/20">
+                      <div
+                        class="size-10 rounded-full bg-primary/10 text-primary flex items-center justify-center font-bold text-sm shrink-0 border border-primary/20"
+                      >
                         Dr
                       </div>
                       <div>
                         <div class="flex items-center gap-2">
-                          <h4 class="text-xs font-bold text-foreground">{{ formatDoctorName(rec.doctor) }}</h4>
-                          <span *ngIf="rec.verifiedLicense" hlmBadge variant="secondary" class="text-[9px] gap-1 bg-emerald-500/10 text-emerald-600 border-emerald-500/20">
+                          <h4 class="text-xs font-bold text-foreground">
+                            {{ formatDoctorName(rec.doctor) }}
+                          </h4>
+                          <span
+                            *ngIf="rec.verifiedLicense"
+                            hlmBadge
+                            variant="secondary"
+                            class="text-[9px] gap-1 bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
+                          >
                             <ng-icon name="lucideShieldCheck" size="11" /> Verified
                           </span>
                         </div>
                         <p class="text-[11px] text-muted-foreground">
-                          {{ rec.doctor.specialization || rec.recommendedSpecialty }} • {{ rec.doctor.yearsOfExperience || 8 }}+ Yrs Exp
+                          {{ rec.doctor.specialization || rec.recommendedSpecialty }} •
+                          {{ rec.doctor.yearsOfExperience || 8 }}+ Yrs Exp
                         </p>
                       </div>
                     </div>
 
                     <!-- Match Score Pill -->
                     <div class="text-right shrink-0">
-                      <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-extrabold bg-purple-500/15 text-purple-700 dark:text-purple-300 border border-purple-500/30">
+                      <span
+                        class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-extrabold bg-purple-500/15 text-purple-700 dark:text-purple-300 border border-purple-500/30"
+                      >
                         <ng-icon name="lucideSparkles" size="12" /> {{ rec.matchScore }}% Match
                       </span>
                     </div>
                   </div>
 
                   <!-- Match Rationale -->
-                  <div class="text-[11px] text-muted-foreground bg-muted/40 p-2 rounded-lg border border-border/50">
-                    <span class="font-semibold text-foreground">Match Insight:</span> {{ rec.matchReason }}
+                  <div
+                    class="text-[11px] text-muted-foreground bg-muted/40 p-2 rounded-lg border border-border/50"
+                  >
+                    <span class="font-semibold text-foreground">Match Insight:</span>
+                    {{ rec.matchReason }}
                   </div>
 
                   <!-- Recommended Smart Slots -->
                   <div *ngIf="rec.recommendedSlots && rec.recommendedSlots.length > 0" class="pt-1">
-                    <span class="text-[10px] font-semibold text-muted-foreground block mb-1">Available Doctor Time Slots:</span>
+                    <span class="text-[10px] font-semibold text-muted-foreground block mb-1"
+                      >Available Doctor Time Slots:</span
+                    >
                     <div class="flex flex-wrap gap-1.5">
                       <button
                         *ngFor="let slot of getFormattedSlots(rec.recommendedSlots)"
                         type="button"
                         (click)="selectDoctorAndSlot(rec.doctor, slot, $event)"
-                        [class.bg-primary]="selectedDoctor?.id === rec.doctor.id && cleanSlot(selectedSlot) === cleanSlot(slot)"
-                        [class.text-primary-foreground]="selectedDoctor?.id === rec.doctor.id && cleanSlot(selectedSlot) === cleanSlot(slot)"
-                        [class.bg-background]="selectedDoctor?.id !== rec.doctor.id || cleanSlot(selectedSlot) !== cleanSlot(slot)"
+                        [class.bg-primary]="
+                          selectedDoctor?.id === rec.doctor.id &&
+                          cleanSlot(selectedSlot) === cleanSlot(slot)
+                        "
+                        [class.text-primary-foreground]="
+                          selectedDoctor?.id === rec.doctor.id &&
+                          cleanSlot(selectedSlot) === cleanSlot(slot)
+                        "
+                        [class.bg-background]="
+                          selectedDoctor?.id !== rec.doctor.id ||
+                          cleanSlot(selectedSlot) !== cleanSlot(slot)
+                        "
                         class="px-2.5 py-1 rounded-md text-[11px] font-medium border border-border hover:border-primary transition-all flex items-center gap-1.5"
                       >
                         <ng-icon name="lucideClock" size="12" />
@@ -589,7 +756,10 @@ import {
                   </div>
 
                   <!-- Radio checkmark -->
-                  <div *ngIf="selectedDoctor?.id === rec.doctor.id" class="absolute top-3 right-3 text-primary">
+                  <div
+                    *ngIf="selectedDoctor?.id === rec.doctor.id"
+                    class="absolute top-3 right-3 text-primary"
+                  >
                     <ng-icon name="lucideCheckCircle2" size="18" />
                   </div>
                 </div>
@@ -617,13 +787,22 @@ import {
             <div *ngIf="bookingStep() === 3" class="space-y-4">
               <!-- Summary Card -->
               <div hlmCard class="p-4 border border-border bg-card space-y-3">
-                <h3 class="text-xs font-bold text-foreground uppercase tracking-wider text-muted-foreground">Consultation Summary</h3>
+                <h3
+                  class="text-xs font-bold text-foreground uppercase tracking-wider text-muted-foreground"
+                >
+                  Consultation Summary
+                </h3>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                   <div>
                     <span class="text-muted-foreground block text-[11px]">Attending Physician</span>
-                    <span class="font-bold text-foreground">{{ selectedDoctor ? formatDoctorName(selectedDoctor) : 'Not Selected' }}</span>
-                    <span class="text-[10px] text-muted-foreground block" *ngIf="selectedDoctor?.specialization">
+                    <span class="font-bold text-foreground">{{
+                      selectedDoctor ? formatDoctorName(selectedDoctor) : 'Not Selected'
+                    }}</span>
+                    <span
+                      class="text-[10px] text-muted-foreground block"
+                      *ngIf="selectedDoctor?.specialization"
+                    >
                       {{ selectedDoctor?.specialization }}
                     </span>
                   </div>
@@ -634,8 +813,12 @@ import {
                   </div>
 
                   <div>
-                    <span class="text-muted-foreground block text-[11px]">Scheduled Date & Time</span>
-                    <span class="font-bold text-primary">{{ bookingDate }} • {{ getFormattedSelectedSlot() }}</span>
+                    <span class="text-muted-foreground block text-[11px]"
+                      >Scheduled Date & Time</span
+                    >
+                    <span class="font-bold text-primary"
+                      >{{ bookingDate }} • {{ getFormattedSelectedSlot() }}</span
+                    >
                   </div>
 
                   <div>
@@ -710,7 +893,12 @@ import {
                 class="text-xs font-bold gap-1 bg-primary text-primary-foreground hover:bg-primary/90"
               >
                 <ng-icon *ngIf="!bookingInProgress()" name="lucideCheck" size="14" />
-                <ng-icon *ngIf="bookingInProgress()" name="lucideClock" size="14" class="animate-spin" />
+                <ng-icon
+                  *ngIf="bookingInProgress()"
+                  name="lucideClock"
+                  size="14"
+                  class="animate-spin"
+                />
                 <span>{{ bookingInProgress() ? 'Confirming...' : 'Confirm Appointment' }}</span>
               </button>
             </div>
@@ -719,38 +907,61 @@ import {
       </div>
 
       <!-- ================= CANCELLATION MODAL ================= -->
-      <div *ngIf="showCancelModal()" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in">
-        <div class="w-full max-w-md bg-card border border-border rounded-2xl shadow-2xl p-6 space-y-4">
+      <div
+        *ngIf="showCancelModal()"
+        class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-sm animate-in fade-in"
+      >
+        <div
+          class="w-full max-w-md bg-card border border-border rounded-2xl shadow-2xl p-6 space-y-4"
+        >
           <div class="flex items-center justify-between pb-3 border-b border-border">
             <div class="flex items-center gap-2 text-rose-600 dark:text-rose-400">
               <ng-icon name="lucideAlertCircle" size="20" />
               <h3 class="text-sm font-bold text-foreground">Cancel Appointment</h3>
             </div>
-            <button (click)="closeCancelModal()" class="text-muted-foreground hover:text-foreground">
+            <button
+              (click)="closeCancelModal()"
+              class="text-muted-foreground hover:text-foreground"
+            >
               <ng-icon name="lucideX" size="16" />
             </button>
           </div>
 
           <p class="text-xs text-muted-foreground">
             Are you sure you want to cancel your scheduled appointment with
-            <strong class="text-foreground">{{ appointmentToCancel ? getDoctorDisplayName(appointmentToCancel) : 'Physician' }}</strong>
-            on <strong class="text-foreground">{{ appointmentToCancel?.appointmentDate | date:'mediumDate' }}</strong>?
+            <strong class="text-foreground">{{
+              appointmentToCancel ? getDoctorDisplayName(appointmentToCancel) : 'Physician'
+            }}</strong>
+            on
+            <strong class="text-foreground">{{
+              appointmentToCancel?.appointmentDate | date: 'mediumDate'
+            }}</strong
+            >?
           </p>
 
           <div class="space-y-3">
             <div>
-              <label class="block text-xs font-bold text-foreground mb-1">Reason for Cancellation</label>
-              <select [(ngModel)]="cancelReason" class="w-full p-2 text-xs rounded-lg border border-border bg-background text-foreground">
+              <label class="block text-xs font-bold text-foreground mb-1"
+                >Reason for Cancellation</label
+              >
+              <select
+                [(ngModel)]="cancelReason"
+                class="w-full p-2 text-xs rounded-lg border border-border bg-background text-foreground"
+              >
                 <option value="Schedule Conflict">Schedule Conflict</option>
                 <option value="Symptoms Resolved">Symptoms Resolved / Improved</option>
-                <option value="Provider Reschedule Requested">Rescheduled with Another Provider</option>
+                <option value="Provider Reschedule Requested">
+                  Rescheduled with Another Provider
+                </option>
                 <option value="Personal Emergency">Personal Emergency</option>
                 <option value="Other">Other</option>
               </select>
             </div>
 
             <div>
-              <label class="block text-xs font-bold text-foreground mb-1">Additional Comment (Optional)</label>
+              <label class="block text-xs font-bold text-foreground mb-1"
+                >Additional Comment (Optional)</label
+              >
               <textarea
                 hlmInput
                 rows="2"
@@ -762,7 +973,13 @@ import {
           </div>
 
           <div class="flex items-center justify-end gap-2 pt-3 border-t border-border">
-            <button hlmBtn variant="ghost" size="sm" (click)="closeCancelModal()" class="text-xs font-semibold">
+            <button
+              hlmBtn
+              variant="ghost"
+              size="sm"
+              (click)="closeCancelModal()"
+              class="text-xs font-semibold"
+            >
               Keep Appointment
             </button>
             <button
@@ -834,10 +1051,11 @@ export class PatientAppointmentsComponent implements OnInit {
     const list = this.allOrganizations();
     const q = this.hospitalSearchQuery.toLowerCase().trim();
     if (!q) return list;
-    return list.filter((org) =>
-      (org.name && org.name.toLowerCase().includes(q)) ||
-      (org.code && org.code.toLowerCase().includes(q)) ||
-      (org.organizationType && org.organizationType.toLowerCase().includes(q))
+    return list.filter(
+      (org) =>
+        (org.name && org.name.toLowerCase().includes(q)) ||
+        (org.code && org.code.toLowerCase().includes(q)) ||
+        (org.organizationType && org.organizationType.toLowerCase().includes(q)),
     );
   });
 
@@ -863,10 +1081,18 @@ export class PatientAppointmentsComponent implements OnInit {
       return hosp.name || hosp.code || 'Sentinel Hospital';
     }
     if (this.selectedOrgName()) return this.selectedOrgName();
-    if (this.selectedDoctor && this.selectedDoctor.organizations && this.selectedDoctor.organizations.length > 0) {
-      const found = this.selectedDoctor.organizations.find((o: OrganizationContextDTO) => o.id === this.selectedOrgId());
+    if (
+      this.selectedDoctor &&
+      this.selectedDoctor.organizations &&
+      this.selectedDoctor.organizations.length > 0
+    ) {
+      const found = this.selectedDoctor.organizations.find(
+        (o: OrganizationContextDTO) => o.id === this.selectedOrgId(),
+      );
       if (found) return found.name || found.code || '';
-      return this.selectedDoctor.organizations[0].name || this.selectedDoctor.organizations[0].code || '';
+      return (
+        this.selectedDoctor.organizations[0].name || this.selectedDoctor.organizations[0].code || ''
+      );
     }
     return 'Sentinel Central Hospital';
   }
@@ -916,7 +1142,7 @@ export class PatientAppointmentsComponent implements OnInit {
           a.doctorName?.toLowerCase().includes(q) ||
           a.doctor?.fullName?.toLowerCase().includes(q) ||
           a.doctorSpecialization?.toLowerCase().includes(q) ||
-          a.doctor?.specialization?.toLowerCase().includes(q)
+          a.doctor?.specialization?.toLowerCase().includes(q),
       );
     }
 
@@ -925,8 +1151,8 @@ export class PatientAppointmentsComponent implements OnInit {
 
   constructor(
     private apiService: ApiService,
-    public authService: AuthService
-  ) { }
+    public authService: AuthService,
+  ) {}
 
   ngOnInit(): void {
     this.loadOrganizations();
@@ -999,7 +1225,9 @@ export class PatientAppointmentsComponent implements OnInit {
       },
       error: (err: any) => {
         console.error('Could not load patient profile for appointments', err);
-        toast.error('Failed to load appointments: ' + (err.error?.message || 'Unknown network error'));
+        toast.error(
+          'Failed to load appointments: ' + (err.error?.message || 'Unknown network error'),
+        );
       },
     });
   }
@@ -1106,25 +1334,27 @@ export class PatientAppointmentsComponent implements OnInit {
     const patientId = this.patientProfile()?.id;
     const hospitalId = this.selectedHospital()?.id;
     this.loadingRecommendations.set(true);
-    this.apiService.getRecommendedDoctors(patientId, this.bookingReason, this.bookingDate, hospitalId).subscribe({
-      next: (recs: DoctorRecommendationDTO[]) => {
-        this.recommendedDoctors.set(recs);
-        this.loadingRecommendations.set(false);
+    this.apiService
+      .getRecommendedDoctors(patientId, this.bookingReason, this.bookingDate, hospitalId)
+      .subscribe({
+        next: (recs: DoctorRecommendationDTO[]) => {
+          this.recommendedDoctors.set(recs);
+          this.loadingRecommendations.set(false);
 
-        // Auto select top recommendation if available
-        if (recs.length > 0) {
-          const top = recs[0];
-          this.selectDoctor(top.doctor, top.recommendedSlots?.[0]);
-        } else {
-          this.selectedDoctor = null;
-          this.selectedSlot = '';
-        }
-      },
-      error: (err: unknown) => {
-        console.warn('Recommendation engine warning', err);
-        this.loadingRecommendations.set(false);
-      },
-    });
+          // Auto select top recommendation if available
+          if (recs.length > 0) {
+            const top = recs[0];
+            this.selectDoctor(top.doctor, top.recommendedSlots?.[0]);
+          } else {
+            this.selectedDoctor = null;
+            this.selectedSlot = '';
+          }
+        },
+        error: (err: unknown) => {
+          console.warn('Recommendation engine warning', err);
+          this.loadingRecommendations.set(false);
+        },
+      });
   }
 
   selectDoctor(doctor: User, slot?: string): void {
@@ -1189,7 +1419,9 @@ export class PatientAppointmentsComponent implements OnInit {
       return;
     }
 
-    const timeStr = this.selectedSlot ? this.extractTimeFromSlot(this.selectedSlot) : this.bookingTime;
+    const timeStr = this.selectedSlot
+      ? this.extractTimeFromSlot(this.selectedSlot)
+      : this.bookingTime;
     const dateTimeStr = `${this.bookingDate}T${timeStr}:00`;
     let dateTimeIso = dateTimeStr;
     try {
