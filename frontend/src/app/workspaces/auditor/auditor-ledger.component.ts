@@ -261,7 +261,7 @@ export class AuditorLedgerComponent implements OnInit {
   loading = signal(false);
   logs = signal<AuditLog[]>([]);
   securityEvents = signal<SecurityEventLog[]>([]);
-  breakGlassLogs = signal<any[]>([]);
+  breakGlassLogs = signal<BreakGlassRecord[]>([]);
   selectedLog = signal<AuditLog | null>(null);
 
   searchQuery = '';

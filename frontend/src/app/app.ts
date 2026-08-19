@@ -33,6 +33,10 @@ import {
   lucideStethoscope,
   lucideShieldAlert,
   lucideBed,
+  lucideBuilding2,
+  lucideBoxes,
+  lucideServer,
+  lucideLock,
 } from '@ng-icons/lucide';
 
 import { AuthService } from './core/services/auth.service';
@@ -117,6 +121,10 @@ interface PatientOption {
       lucideStethoscope,
       lucideShieldAlert,
       lucideBed,
+      lucideBuilding2,
+      lucideBoxes,
+      lucideServer,
+      lucideLock,
     }),
   ],
   templateUrl: './app.component.html',
@@ -452,9 +460,10 @@ export class App implements OnInit, OnDestroy {
         {
           label: 'Clinical Pharmacy Workspace',
           items: [
-            { icon: 'lucidePill', label: 'Pharmacy Dashboard', routerLink: '/pharmacist/dashboard' },
-            { icon: 'lucideListChecks', label: 'Active eRx Queue', routerLink: '/pharmacist/erx' },
-            { icon: 'lucideShieldCheck', label: 'Dispense & MAR Log', routerLink: '/pharmacist/dispense' },
+            { icon: 'lucideLayoutDashboard', label: 'Pharmacy Dashboard', routerLink: '/pharmacist/dashboard' },
+            { icon: 'lucideListChecks', label: 'Prescription Verification', routerLink: '/pharmacist/erx' },
+            { icon: 'lucidePill', label: 'Dispense Station & MAR', routerLink: '/pharmacist/dispense' },
+            { icon: 'lucideBoxes', label: 'Inventory & FEFO Batches', routerLink: '/pharmacist/inventory' },
           ],
         },
       ];
@@ -464,9 +473,9 @@ export class App implements OnInit, OnDestroy {
         {
           label: 'Revenue Cycle Workspace',
           items: [
-            { icon: 'lucideReceipt', label: 'Revenue Dashboard', routerLink: '/billing-staff/dashboard' },
-            { icon: 'lucideFileText', label: 'Patient Invoices', routerLink: '/billing-staff/invoices' },
-            { icon: 'lucideCalendarClock', label: 'Insurance & PM-JAY Claims', routerLink: '/billing-staff/claims' },
+            { icon: 'lucideLayoutDashboard', label: 'Revenue Dashboard', routerLink: '/billing-staff/dashboard' },
+            { icon: 'lucideReceipt', label: 'Invoices & Charge Ledger', routerLink: '/billing-staff/invoices' },
+            { icon: 'lucideFileText', label: 'Insurance & PM-JAY Claims', routerLink: '/billing-staff/claims' },
           ],
         },
       ];
@@ -476,12 +485,11 @@ export class App implements OnInit, OnDestroy {
         {
           label: 'Platform & Infrastructure',
           items: [
-            { icon: 'lucideLayoutDashboard', label: 'Super Admin Command Desk', routerLink: '/super-admin/dashboard' },
-            { icon: 'lucideBuilding2', label: 'Clinic Onboarding & Network', routerLink: '/super-admin/organizations' },
-            { icon: 'lucideSettings', label: 'Global RBAC User Management', routerLink: '/super-admin/users' },
-            { icon: 'lucideHeartPulse', label: 'Master Patient Index (MPI)', routerLink: '/super-admin/patients' },
-            { icon: 'lucideCalendarClock', label: 'Facility Schedule Analytics', routerLink: '/super-admin/schedule-analytics' },
-            { icon: 'lucideShieldCheck', label: 'ABDM & DPDP Compliance Ledger', routerLink: '/auditor/ledger' },
+            { icon: 'lucideLayoutDashboard', label: 'Platform Command Desk', routerLink: '/super-admin/dashboard' },
+            { icon: 'lucideBuilding2', label: 'Organizations & Tenants', routerLink: '/super-admin/organizations' },
+            { icon: 'lucideUsers', label: 'Platform Users & RBAC', routerLink: '/super-admin/users' },
+            { icon: 'lucideShieldCheck', label: 'Platform Audit Vault', routerLink: '/super-admin/audit' },
+            { icon: 'lucideServer', label: 'System Health & Terminology', routerLink: '/super-admin/system-health' },
           ],
         },
       ];
@@ -491,11 +499,11 @@ export class App implements OnInit, OnDestroy {
         {
           label: 'Facility Administration',
           items: [
-            { icon: 'lucideLayoutDashboard', label: 'Org Admin Workspace', routerLink: '/organization-admin/dashboard' },
-            { icon: 'lucideBuilding2', label: 'Facility Demographics & Settings', routerLink: '/organization-admin/facility-settings' },
+            { icon: 'lucideLayoutDashboard', label: 'Org Admin Command Center', routerLink: '/organization-admin/dashboard' },
+            { icon: 'lucideBuilding2', label: 'Facility Spatial Layout', routerLink: '/organization-admin/facility-settings' },
             { icon: 'lucideUsers', label: 'Facility Staff Roster', routerLink: '/organization-admin/users' },
-            { icon: 'lucideHeartPulse', label: 'Master Patient Index (MPI)', routerLink: '/organization-admin/patients' },
-            { icon: 'lucideCalendarClock', label: 'Facility Schedule Analytics', routerLink: '/organization-admin/schedule-analytics' },
+            { icon: 'lucideActivity', label: 'Patient Census Policies', routerLink: '/organization-admin/patients' },
+            { icon: 'lucideCalendarClock', label: 'Consultation Load Analytics', routerLink: '/organization-admin/schedule-analytics' },
           ],
         },
       ];

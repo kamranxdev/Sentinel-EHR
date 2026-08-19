@@ -2,8 +2,25 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of, forkJoin, throwError } from 'rxjs';
 import { map, catchError, switchMap } from 'rxjs/operators';
-import { User } from '../models/auth-user.model';
-import { Patient, BreakGlassRecord, BreakGlassRequestDTO, MPIMatchCandidateDTO, MPIMergeRequestDTO, EmergencyContact } from '../models/patient.model';
+import { User, UserUpdateRequestDTO } from '../models/auth-user.model';
+import {
+  Patient,
+  PatientClinicalHistoryDTO,
+  BreakGlassRecord,
+  BreakGlassRequestDTO,
+  MPIMatchCandidateDTO,
+  MPIMergeRequestDTO,
+  EmergencyContact,
+  PatientAddress,
+  PatientDemographics,
+  PatientMedicalHistory,
+  PatientSocialHistory,
+  PatientDietaryHistory,
+  PatientInsurancePolicy,
+  InpatientAdmissionRecord,
+  InpatientDischargeRecord,
+  InpatientTransferRecord,
+} from '../models/patient.model';
 import { Encounter, Allergy, Diagnosis, MedicalRecord, Vitals, Prescription, SafetyCheckResult } from '../models/clinical.model';
 import {
   Appointment,
@@ -44,11 +61,15 @@ import { ImagingOrder, ImagingStudy, ImagingSeries, ImagingReport, CreateImaging
 import { ProcedureOrder, ProcedurePerformance, ProcedureNote, ProcedureParticipant, CreateProcedureOrderRequest, PerformProcedureRequest } from '../models/procedure.model';
 import { ConsentType, PatientConsent, CreatePatientConsentRequest, RevokeConsentRequest } from '../models/consent.model';
 import { ClinicalDocument, DocumentVersion, DocumentLink, CreateClinicalDocumentRequest } from '../models/document.model';
-import { InsurancePayer, InsurancePlan, PatientInsurancePolicy, InsuranceAuthorization, InsuranceClaim, ClaimItem, CreateInsuranceClaimRequest, CreateInsuranceAuthorizationRequest } from '../models/insurance.model';
+import { InsurancePayer, InsurancePlan, InsuranceAuthorization, InsuranceClaim, ClaimItem, CreateInsuranceClaimRequest, CreateInsuranceAuthorizationRequest } from '../models/insurance.model';
 import { CodeSystem, TerminologyCode, TerminologySearchResult } from '../models/terminology.model';
 import { AbacPolicy, RbacRole, SecurityEventLog, CreateAbacPolicyRequest } from '../models/security-policy.model';
 import { CareTeam, CareTeamMember, AddCareTeamMemberRequest } from '../models/care-team.model';
 import { Facility, Department, Ward, Room, BedDetail, PriceList, PriceListItem } from '../models/tenancy.model';
+import { MedicationOrder, MedicationBatch, InventoryItem, MedicationCatalogItem, StockReceiptDTO, StockAdjustmentDTO, DispensationRecord, PharmacySafetyEvaluation } from '../models/pharmacy.model';
+import { BillingAccount, ChargeItem, Invoice, InvoiceItem, Payment, RefundRequestDTO } from '../models/billing.model';
+import { Organization } from '../models/organization.model';
+import { FhirBundle, FhirResource, FhirCapabilityStatement, FhirPatient } from '../models/fhir.model';
 
 @Injectable({
   providedIn: 'root',
@@ -120,8 +141,8 @@ export class ApiService {
     );
   }
 
-  getPatientClinicalHistory(id: string): Observable<any> {
-    return this.get<any>(`/patients/${id}/clinical-history`).pipe(
+  getPatientClinicalHistory(id: string): Observable<PatientClinicalHistoryDTO> {
+    return this.get<PatientClinicalHistoryDTO>(`/patients/${id}/clinical-history`).pipe(
       catchError(() =>
         forkJoin({
           allergies: this.getAllergiesByPatient(id),
@@ -203,7 +224,7 @@ export class ApiService {
   updatePatient(id: string, patient: Partial<Patient>): Observable<Patient> {
     return this.patch<Patient>(`/patients/${id}`, patient).pipe(
       switchMap((updated) => {
-        const tasks: Observable<any>[] = [];
+        const tasks: Observable<unknown>[] = [];
 
         if (patient.bloodGroup || patient.rhFactor || patient.maritalStatus || patient.preferredLanguage) {
           tasks.push(
@@ -288,9 +309,9 @@ export class ApiService {
     );
   }
 
-  savePatientEmergencyContact(patientId: string, contact: EmergencyContact): Observable<any> {
+  savePatientEmergencyContact(patientId: string, contact: EmergencyContact): Observable<EmergencyContact> {
     if (contact.id) {
-      return this.patch(`/emergency-contacts/${contact.id}`, {
+      return this.patch<EmergencyContact>(`/emergency-contacts/${contact.id}`, {
         name: contact.name,
         relationship: contact.relationship,
         phone: contact.phone,
@@ -299,7 +320,7 @@ export class ApiService {
         isPrimary: contact.isPrimary ?? true,
       });
     }
-    return this.post(`/patients/${patientId}/emergency-contacts`, {
+    return this.post<EmergencyContact>(`/patients/${patientId}/emergency-contacts`, {
       name: contact.name,
       relationship: contact.relationship,
       phone: contact.phone,
@@ -309,61 +330,61 @@ export class ApiService {
     });
   }
 
-  getPatientAddresses(patientId: string): Observable<any[]> {
-    return this.get<any[]>(`/patients/${patientId}/addresses`).pipe(
+  getPatientAddresses(patientId: string): Observable<PatientAddress[]> {
+    return this.get<PatientAddress[]>(`/patients/${patientId}/addresses`).pipe(
       map((list) => (Array.isArray(list) ? list : [])),
       catchError(() => of([])),
     );
   }
 
-  savePatientAddress(patientId: string, address: any): Observable<any> {
+  savePatientAddress(patientId: string, address: PatientAddress): Observable<PatientAddress> {
     if (address.id) {
-      return this.patch(`/patient-addresses/${address.id}`, address);
+      return this.patch<PatientAddress>(`/patient-addresses/${address.id}`, address);
     }
-    return this.post(`/patients/${patientId}/addresses`, address);
+    return this.post<PatientAddress>(`/patients/${patientId}/addresses`, address);
   }
 
-  getPatientDemographics(patientId: string): Observable<any> {
-    return this.get<any>(`/patients/${patientId}/demographics`).pipe(catchError(() => of(null)));
+  getPatientDemographics(patientId: string): Observable<PatientDemographics | null> {
+    return this.get<PatientDemographics>(`/patients/${patientId}/demographics`).pipe(catchError(() => of(null)));
   }
 
-  updatePatientDemographics(patientId: string, demographics: any): Observable<any> {
-    return this.put(`/patients/${patientId}/demographics`, demographics);
+  updatePatientDemographics(patientId: string, demographics: PatientDemographics): Observable<PatientDemographics> {
+    return this.put<PatientDemographics>(`/patients/${patientId}/demographics`, demographics);
   }
 
-  getPatientMedicalHistory(patientId: string): Observable<any> {
-    return this.get<any>(`/patients/${patientId}/medical-history`).pipe(catchError(() => of(null)));
+  getPatientMedicalHistory(patientId: string): Observable<PatientMedicalHistory | null> {
+    return this.get<PatientMedicalHistory>(`/patients/${patientId}/medical-history`).pipe(catchError(() => of(null)));
   }
 
-  savePatientMedicalHistory(patientId: string, history: any): Observable<any> {
-    return this.post(`/patients/${patientId}/medical-history`, history);
+  savePatientMedicalHistory(patientId: string, history: PatientMedicalHistory): Observable<PatientMedicalHistory> {
+    return this.post<PatientMedicalHistory>(`/patients/${patientId}/medical-history`, history);
   }
 
-  getPatientSocialHistory(patientId: string): Observable<any> {
-    return this.get<any>(`/patients/${patientId}/social-history`).pipe(catchError(() => of(null)));
+  getPatientSocialHistory(patientId: string): Observable<PatientSocialHistory | null> {
+    return this.get<PatientSocialHistory>(`/patients/${patientId}/social-history`).pipe(catchError(() => of(null)));
   }
 
-  updatePatientSocialHistory(patientId: string, social: any): Observable<any> {
-    return this.put(`/patients/${patientId}/social-history`, social);
+  updatePatientSocialHistory(patientId: string, social: PatientSocialHistory): Observable<PatientSocialHistory> {
+    return this.put<PatientSocialHistory>(`/patients/${patientId}/social-history`, social);
   }
 
-  getPatientDietaryHistory(patientId: string): Observable<any> {
-    return this.get<any>(`/patients/${patientId}/dietary-history`).pipe(catchError(() => of(null)));
+  getPatientDietaryHistory(patientId: string): Observable<PatientDietaryHistory | null> {
+    return this.get<PatientDietaryHistory>(`/patients/${patientId}/dietary-history`).pipe(catchError(() => of(null)));
   }
 
-  updatePatientDietaryHistory(patientId: string, dietary: any): Observable<any> {
-    return this.put(`/patients/${patientId}/dietary-history`, dietary);
+  updatePatientDietaryHistory(patientId: string, dietary: PatientDietaryHistory): Observable<PatientDietaryHistory> {
+    return this.put<PatientDietaryHistory>(`/patients/${patientId}/dietary-history`, dietary);
   }
 
-  getPatientInsurances(patientId: string): Observable<any[]> {
-    return this.get<any[]>(`/patients/${patientId}/insurances`).pipe(
+  getPatientInsurances(patientId: string): Observable<PatientInsurancePolicy[]> {
+    return this.get<PatientInsurancePolicy[]>(`/patients/${patientId}/insurances`).pipe(
       map((list) => (Array.isArray(list) ? list : [])),
       catchError(() => of([])),
     );
   }
 
-  addPatientInsurance(patientId: string, insurance: any): Observable<any> {
-    return this.post(`/patients/${patientId}/insurances`, insurance);
+  addPatientInsurance(patientId: string, insurance: PatientInsurancePolicy): Observable<PatientInsurancePolicy> {
+    return this.post<PatientInsurancePolicy>(`/patients/${patientId}/insurances`, insurance);
   }
 
   private normalizePatient(p: any): Patient {
@@ -513,32 +534,32 @@ export class ApiService {
   // =========================================================================
   // 5. Inpatient Admissions, Discharges & Bed Transfers
   // =========================================================================
-  admitPatient(encounterId: string, payload: { wardId?: string; roomId?: string; bedId?: string; admissionReason?: string; attendingPractitionerId?: string; admittedAt?: string }): Observable<any> {
-    return this.post<any>(`/encounters/${encounterId}/admission`, payload);
+  admitPatient(encounterId: string, payload: { wardId?: string; roomId?: string; bedId?: string; admissionReason?: string; attendingPractitionerId?: string; admittedAt?: string }): Observable<InpatientAdmissionRecord> {
+    return this.post<InpatientAdmissionRecord>(`/encounters/${encounterId}/admission`, payload);
   }
 
-  getAdmission(encounterId: string): Observable<any> {
-    return this.get<any>(`/encounters/${encounterId}/admission`);
+  getAdmission(encounterId: string): Observable<InpatientAdmissionRecord> {
+    return this.get<InpatientAdmissionRecord>(`/encounters/${encounterId}/admission`);
   }
 
-  cancelAdmission(admissionId: string): Observable<any> {
-    return this.post<any>(`/admissions/${admissionId}/cancel`, {});
+  cancelAdmission(admissionId: string): Observable<{ status: string }> {
+    return this.post<{ status: string }>(`/admissions/${admissionId}/cancel`, {});
   }
 
-  dischargePatient(encounterId: string, payload: { dischargeDisposition?: string; dischargeNotes?: string; followUpInstructions?: string; dischargedAt?: string }): Observable<any> {
-    return this.post<any>(`/encounters/${encounterId}/discharge`, payload);
+  dischargePatient(encounterId: string, payload: { dischargeDisposition?: string; dischargeNotes?: string; followUpInstructions?: string; dischargedAt?: string }): Observable<InpatientDischargeRecord> {
+    return this.post<InpatientDischargeRecord>(`/encounters/${encounterId}/discharge`, payload);
   }
 
-  getDischarge(encounterId: string): Observable<any> {
-    return this.get<any>(`/encounters/${encounterId}/discharge`);
+  getDischarge(encounterId: string): Observable<InpatientDischargeRecord> {
+    return this.get<InpatientDischargeRecord>(`/encounters/${encounterId}/discharge`);
   }
 
-  transferPatientInpatient(encounterId: string, payload: { toWardId?: string; toRoomId?: string; toBedId?: string; transferReason?: string; notes?: string }): Observable<any> {
-    return this.post<any>(`/encounters/${encounterId}/transfer`, payload);
+  transferPatientInpatient(encounterId: string, payload: { toWardId?: string; toRoomId?: string; toBedId?: string; transferReason?: string; notes?: string }): Observable<InpatientTransferRecord> {
+    return this.post<InpatientTransferRecord>(`/encounters/${encounterId}/transfer`, payload);
   }
 
-  getTransfers(encounterId: string): Observable<any[]> {
-    return this.get<any[]>(`/encounters/${encounterId}/transfers`).pipe(catchError(() => of([])));
+  getTransfers(encounterId: string): Observable<InpatientTransferRecord[]> {
+    return this.get<InpatientTransferRecord[]>(`/encounters/${encounterId}/transfers`).pipe(catchError(() => of([])));
   }
 
   // =========================================================================
@@ -1073,6 +1094,10 @@ export class ApiService {
     );
   }
 
+  createAppointment(appointment: AppointmentRequestDTO | Partial<Appointment>): Observable<Appointment> {
+    return this.scheduleAppointment(appointment);
+  }
+
   checkInPatient(
     id: string,
     payload: {
@@ -1268,18 +1293,7 @@ export class ApiService {
   }
 
   generateBilling(id: string, payload: any): Observable<AppointmentBilling> {
-    return of({
-      id: `BILL-${id.substring(0, 6)}`,
-      appointmentId: id,
-      consultationFee: payload.consultationFee || 100,
-      triageFee: payload.triageFee || 25,
-      labFee: 0,
-      pharmacyFee: 0,
-      insuranceCoverage: 0,
-      netPayable: (payload.consultationFee || 100) + (payload.triageFee || 25),
-      paymentStatus: 'PENDING',
-      generatedAt: new Date().toISOString(),
-    });
+    return this.post<AppointmentBilling>(`/appointments/${id}/billing`, payload);
   }
 
   getBillingDetails(id: string): Observable<AppointmentBilling> {
@@ -1289,64 +1303,64 @@ export class ApiService {
   // =========================================================================
   // 15. Billing, Invoices & Ledger
   // =========================================================================
-  getPatientInvoices(patientId: string): Observable<any[]> {
-    return this.get<any[]>(`/billing/invoices/patient/${patientId}`).pipe(catchError(() => of([])));
+  getPatientInvoices(patientId: string): Observable<Invoice[]> {
+    return this.get<Invoice[]>(`/billing/invoices/patient/${patientId}`).pipe(catchError(() => of([])));
   }
 
-  getPatientPayments(patientId: string): Observable<any[]> {
-    return this.get<any[]>(`/billing/payments/patient/${patientId}`).pipe(catchError(() => of([])));
+  getPatientPayments(patientId: string): Observable<Payment[]> {
+    return this.get<Payment[]>(`/billing/payments/patient/${patientId}`).pipe(catchError(() => of([])));
   }
 
-  createInvoice(invoice: any): Observable<any> {
-    return this.post<any>('/billing/invoices', invoice);
+  createInvoice(invoice: Partial<Invoice>): Observable<Invoice> {
+    return this.post<Invoice>('/billing/invoices', invoice);
   }
 
-  recordPayment(payment: any): Observable<any> {
-    return this.post<any>('/billing/payments', payment);
+  recordPayment(payment: Partial<Payment>): Observable<Payment> {
+    return this.post<Payment>('/billing/payments', payment);
   }
 
-  createBillingAccount(patientId: string, payload: { accountType?: string; coverageType?: string }): Observable<any> {
-    return this.post<any>(`/patients/${patientId}/billing-accounts`, payload);
+  createBillingAccount(patientId: string, payload: { accountType?: string; coverageType?: string }): Observable<BillingAccount> {
+    return this.post<BillingAccount>(`/patients/${patientId}/billing-accounts`, payload);
   }
 
-  getBillingAccounts(patientId: string): Observable<any[]> {
-    return this.get<any[]>(`/patients/${patientId}/billing-accounts`).pipe(catchError(() => of([])));
+  getBillingAccounts(patientId: string): Observable<BillingAccount[]> {
+    return this.get<BillingAccount[]>(`/patients/${patientId}/billing-accounts`).pipe(catchError(() => of([])));
   }
 
-  getBillingAccount(accountId: string): Observable<any> {
-    return this.get<any>(`/billing-accounts/${accountId}`);
+  getBillingAccount(accountId: string): Observable<BillingAccount> {
+    return this.get<BillingAccount>(`/billing-accounts/${accountId}`);
   }
 
-  createAccountInvoice(accountId: string, payload: any): Observable<any> {
-    return this.post<any>(`/billing-accounts/${accountId}/invoices`, payload);
+  createAccountInvoice(accountId: string, payload: Partial<Invoice>): Observable<Invoice> {
+    return this.post<Invoice>(`/billing-accounts/${accountId}/invoices`, payload);
   }
 
-  getAccountInvoices(accountId: string): Observable<any[]> {
-    return this.get<any[]>(`/billing-accounts/${accountId}/invoices`).pipe(catchError(() => of([])));
+  getAccountInvoices(accountId: string): Observable<Invoice[]> {
+    return this.get<Invoice[]>(`/billing-accounts/${accountId}/invoices`).pipe(catchError(() => of([])));
   }
 
-  getInvoice(invoiceId: string): Observable<any> {
-    return this.get<any>(`/invoices/${invoiceId}`);
+  getInvoice(invoiceId: string): Observable<Invoice> {
+    return this.get<Invoice>(`/invoices/${invoiceId}`);
   }
 
-  addInvoiceItem(invoiceId: string, payload: any): Observable<any> {
-    return this.post<any>(`/invoices/${invoiceId}/items`, payload);
+  addInvoiceItem(invoiceId: string, payload: InvoiceItem): Observable<InvoiceItem> {
+    return this.post<InvoiceItem>(`/invoices/${invoiceId}/items`, payload);
   }
 
-  finalizeInvoice(invoiceId: string): Observable<any> {
-    return this.post<any>(`/invoices/${invoiceId}/finalize`, {});
+  finalizeInvoice(invoiceId: string): Observable<Invoice> {
+    return this.post<Invoice>(`/invoices/${invoiceId}/finalize`, {});
   }
 
-  recordInvoicePayment(invoiceId: string, payload: any): Observable<any> {
-    return this.post<any>(`/invoices/${invoiceId}/payments`, payload);
+  recordInvoicePayment(invoiceId: string, payload: Partial<Payment>): Observable<Payment> {
+    return this.post<Payment>(`/invoices/${invoiceId}/payments`, payload);
   }
 
-  getInvoicePayments(invoiceId: string): Observable<any[]> {
-    return this.get<any[]>(`/invoices/${invoiceId}/payments`).pipe(catchError(() => of([])));
+  getInvoicePayments(invoiceId: string): Observable<Payment[]> {
+    return this.get<Payment[]>(`/invoices/${invoiceId}/payments`).pipe(catchError(() => of([])));
   }
 
-  processRefund(paymentId: string, payload: any): Observable<any> {
-    return this.post<any>(`/payments/${paymentId}/refund`, payload);
+  processRefund(paymentId: string, payload: RefundRequestDTO): Observable<Payment> {
+    return this.post<Payment>(`/payments/${paymentId}/refund`, payload);
   }
 
   // =========================================================================
@@ -1391,13 +1405,7 @@ export class ApiService {
         }),
       );
     }
-    return of({
-      id: 'TRG-' + Date.now(),
-      patientId: record.patientId,
-      triagePriority: record.triagePriority || 'ROUTINE',
-      recordedBy: 'Nurse Desk',
-      recordedAt: new Date().toISOString(),
-    } as TriageEwsResponseDTO);
+    return this.post<TriageEwsResponseDTO>('/triage', record);
   }
 
   getTriageRecordsForPatient(patientId: string): Observable<TriageEwsResponseDTO[]> {
@@ -1435,15 +1443,7 @@ export class ApiService {
     if (emar.prescriptionId) {
       return this.administerMedication(emar.prescriptionId, emar);
     }
-    return of({
-      id: 'ADM-' + Date.now(),
-      patientId: emar.patientId,
-      medicationName: emar.medicationName,
-      dose: emar.dose,
-      administeredBy: 'Staff Nurse',
-      administeredAt: new Date().toISOString(),
-      status: 'ADMINISTERED',
-    } as EmarRecordResponseDTO);
+    return this.post<EmarRecordResponseDTO>('/administrations', emar);
   }
 
   getEmarHistoryForPatient(patientId: string): Observable<EmarRecordResponseDTO[]> {
@@ -1457,23 +1457,23 @@ export class ApiService {
     return this.get<User[]>('/users').pipe(catchError(() => of([])));
   }
 
-  updateUser(id: string, payload: any): Observable<User> {
+  updateUser(id: string, payload: UserUpdateRequestDTO): Observable<User> {
     return this.patch<User>(`/users/${id}`, payload);
   }
 
-  updateUserStatus(id: string, status: string): Observable<any> {
+  updateUserStatus(id: string, status: string): Observable<User> {
     if (status === 'ACTIVE') {
-      return this.post(`/users/${id}/activate`, {});
+      return this.post<User>(`/users/${id}/activate`, {});
     }
-    return this.post(`/users/${id}/deactivate`, {});
+    return this.post<User>(`/users/${id}/deactivate`, {});
   }
 
-  resetUserPassword(id: string, newPassword?: string): Observable<any> {
-    return this.patch(`/users/${id}`, { password: newPassword });
+  resetUserPassword(id: string, newPassword?: string): Observable<User> {
+    return this.patch<User>(`/users/${id}`, { password: newPassword });
   }
 
-  deleteUser(id: string): Observable<any> {
-    return this.post(`/users/${id}/deactivate`, {});
+  deleteUser(id: string): Observable<User> {
+    return this.post<User>(`/users/${id}/deactivate`, {});
   }
 
   getAuditLogs(search?: string): Observable<AuditLog[]> {
@@ -1525,35 +1525,35 @@ export class ApiService {
   // =========================================================================
   private fhirUrl = 'http://localhost:8080/fhir';
 
-  getFhirMetadata(): Observable<any> {
-    return this.http.get<any>(`${this.fhirUrl}/metadata`);
+  getFhirMetadata(): Observable<FhirCapabilityStatement> {
+    return this.http.get<FhirCapabilityStatement>(`${this.fhirUrl}/metadata`);
   }
 
-  getFhirPatients(name?: string, gender?: string, identifier?: string): Observable<any> {
+  getFhirPatients(name?: string, gender?: string, identifier?: string): Observable<FhirBundle<FhirPatient>> {
     let query = '';
     const params: string[] = [];
     if (name) params.push(`name=${encodeURIComponent(name)}`);
     if (gender) params.push(`gender=${encodeURIComponent(gender)}`);
     if (identifier) params.push(`identifier=${encodeURIComponent(identifier)}`);
     if (params.length > 0) query = '?' + params.join('&');
-    return this.http.get<any>(`${this.fhirUrl}/Patient${query}`);
+    return this.http.get<FhirBundle<FhirPatient>>(`${this.fhirUrl}/Patient${query}`);
   }
 
-  getFhirResource(resourceType: string, patientId?: string): Observable<any> {
+  getFhirResource(resourceType: string, patientId?: string): Observable<FhirBundle<FhirResource> | FhirResource> {
     const query = patientId ? `?patientId=${patientId}` : '';
-    return this.http.get<any>(`${this.fhirUrl}/${resourceType}${query}`);
+    return this.http.get<FhirBundle<FhirResource> | FhirResource>(`${this.fhirUrl}/${resourceType}${query}`);
   }
 
-  getFhirResourceById(resourceType: string, id: string): Observable<any> {
-    return this.http.get<any>(`${this.fhirUrl}/${resourceType}/${id}`);
+  getFhirResourceById(resourceType: string, id: string): Observable<FhirResource> {
+    return this.http.get<FhirResource>(`${this.fhirUrl}/${resourceType}/${id}`);
   }
 
-  getFhirPatientEverything(patientId: string): Observable<any> {
-    return this.http.get<any>(`${this.fhirUrl}/Patient/${patientId}/$everything`);
+  getFhirPatientEverything(patientId: string): Observable<FhirBundle<FhirResource>> {
+    return this.http.get<FhirBundle<FhirResource>>(`${this.fhirUrl}/Patient/${patientId}/$everything`);
   }
 
-  createFhirPatient(payload: any): Observable<any> {
-    return this.http.post<any>(`${this.fhirUrl}/Patient`, payload);
+  createFhirPatient(payload: Partial<FhirPatient>): Observable<FhirPatient> {
+    return this.http.post<FhirPatient>(`${this.fhirUrl}/Patient`, payload);
   }
 
   // =========================================================================
@@ -1699,8 +1699,8 @@ export class ApiService {
     return this.post<CareTeamMember>(`/care-teams/${careTeamId}/members`, payload);
   }
 
-  removeCareTeamMember(careTeamId: number | string, memberId: number | string): Observable<any> {
-    return this.delete(`/care-teams/${careTeamId}/members/${memberId}`);
+  removeCareTeamMember(careTeamId: number | string, memberId: number | string): Observable<{ success: boolean; message?: string }> {
+    return this.delete<{ success: boolean; message?: string }>(`/care-teams/${careTeamId}/members/${memberId}`);
   }
 
   // =========================================================================
@@ -1839,8 +1839,8 @@ export class ApiService {
     return this.get<string[]>(`/roles/${roleId}/permissions`).pipe(catchError(() => of([])));
   }
 
-  assignRolePermissions(roleId: number | string, permissions: string[]): Observable<any> {
-    return this.post(`/roles/${roleId}/permissions`, { permissions });
+  assignRolePermissions(roleId: number | string, permissions: string[]): Observable<RbacRole> {
+    return this.post<RbacRole>(`/roles/${roleId}/permissions`, { permissions });
   }
 
   getSecurityEvents(): Observable<SecurityEventLog[]> {
@@ -1859,5 +1859,242 @@ export class ApiService {
     if (system) params.push(`system=${encodeURIComponent(system)}`);
     return this.get<TerminologySearchResult[]>(`/terminology/search?${params.join('&')}`).pipe(catchError(() => of([])));
   }
+
+  // =========================================================================
+  // 29. Platform Operator Management (Super Admin SaaS)
+  // =========================================================================
+  getPlatformOrganizations(): Observable<Organization[]> {
+    return this.get<Organization[]>('/organizations').pipe(
+      catchError(() => this.get<Organization[]>('/sys-admin/organizations')),
+      catchError(() => of([])),
+    );
+  }
+
+  createPlatformOrganization(payload: Partial<Organization>): Observable<Organization> {
+    return this.post<Organization>('/organizations', payload).pipe(
+      catchError(() => this.post<Organization>('/organizations/register', payload)),
+    );
+  }
+
+  activatePlatformOrganization(id: string): Observable<Organization> {
+    return this.patch<Organization>(`/organizations/${id}`, { status: 'ACTIVE' }).pipe(
+      catchError(() => this.patch<Organization>(`/sys-admin/organizations/${id}/status`, { status: 'VERIFIED' })),
+    );
+  }
+
+  suspendPlatformOrganization(id: string): Observable<Organization> {
+    return this.patch<Organization>(`/organizations/${id}`, { status: 'SUSPENDED' }).pipe(
+      catchError(() => this.delete<Organization>(`/organizations/${id}`)),
+    );
+  }
+
+  getPlatformUsers(): Observable<User[]> {
+    return this.get<User[]>('/users').pipe(catchError(() => of([])));
+  }
+
+  forcePasswordResetPlatformUser(id: string | number): Observable<User> {
+    return this.patch<User>(`/users/${id}`, { passwordResetRequired: true }).pipe(
+      catchError(() => this.post<User>(`/platform/users/${id}/force-password-reset`, {})),
+    );
+  }
+
+  getPlatformAuditEvents(query?: string): Observable<AuditLog[]> {
+    const qs = query ? `?query=${encodeURIComponent(query)}` : '';
+    return this.get<AuditLog[]>(`/audit-events${qs}`).pipe(
+      catchError(() => this.get<AuditLog[]>(`/audit-logs${qs}`)),
+      catchError(() => of([])),
+    );
+  }
+
+  getPlatformSecurityEvents(): Observable<SecurityEventLog[]> {
+    return this.get<SecurityEventLog[]>('/security-events').pipe(catchError(() => of([])));
+  }
+
+  getPlatformHealth(): Observable<{ status: string; uptimeSeconds?: number; services?: Record<string, any> }> {
+    return this.get<{ status: string; uptimeSeconds?: number; services?: Record<string, any> }>('/platform/health');
+  }
+
+  // =========================================================================
+  // 30. Clinical Pharmacy & Dispensing Engine (Pharmacist)
+  // =========================================================================
+  getPharmacyMedicationOrders(): Observable<MedicationOrder[]> {
+    return this.get<MedicationOrder[]>('/pharmacy/orders').pipe(
+      catchError(() =>
+        this.getPatients().pipe(
+          switchMap((patients: Patient[]) => {
+            if (!patients || patients.length === 0) return of([]);
+            const tasks = patients.slice(0, 15).map((p) =>
+              this.getPrescriptionsByPatient(p.id!).pipe(
+                map((rxs: Prescription[]) =>
+                  Array.isArray(rxs)
+                    ? rxs.map((r: Prescription) => ({
+                        id: r.id || String(Date.now()),
+                        patientId: p.id!,
+                        patient: p,
+                        encounterId: r.encounterId,
+                        medicationName: r.medicationName,
+                        medicationCode: r.medicationCode,
+                        rxNormCode: r.rxNormCode,
+                        dosage: r.dosage || r.dose || 'Standard',
+                        route: r.route || 'Oral',
+                        frequency: r.frequency || 'Daily',
+                        quantity: r.quantity || 1,
+                        refills: r.refills || 0,
+                        instructions: r.instructions,
+                        status: r.status || 'PENDING_VERIFICATION',
+                        doctorName: (r as any).prescriberName || (r as any).doctorName,
+                        orderedAt: r.prescribedAt || (r as any).createdAt || new Date().toISOString(),
+                      } as MedicationOrder))
+                    : [],
+                ),
+                catchError(() => of([])),
+              ),
+            );
+            return forkJoin(tasks).pipe(
+              map((results: MedicationOrder[][]) => results.reduce((acc, val) => acc.concat(val), [])),
+            );
+          }),
+          catchError(() => of([])),
+        ),
+      ),
+    );
+  }
+
+  verifyPharmacyOrder(orderId: string, notes?: string): Observable<MedicationOrder> {
+    return this.post<MedicationOrder>('/pharmacy/orders/' + orderId + '/verify', { notes });
+  }
+
+  rejectPharmacyOrder(orderId: string, reason: string): Observable<MedicationOrder> {
+    return this.post<MedicationOrder>('/pharmacy/orders/' + orderId + '/reject', { reason });
+  }
+
+  requestPharmacyClarification(orderId: string, clarificationText: string): Observable<MedicationOrder> {
+    return this.post<MedicationOrder>('/pharmacy/orders/' + orderId + '/request-clarification', { clarificationText });
+  }
+
+  dispensePharmacyOrder(orderId: string, payload: { batchId?: string; quantity: number; notes?: string }): Observable<DispensationRecord> {
+    return this.post<DispensationRecord>('/pharmacy/orders/' + orderId + '/dispense', payload);
+  }
+
+  searchMedications(query: string = ''): Observable<MedicationCatalogItem[]> {
+    const params = query ? `?query=${encodeURIComponent(query)}` : '';
+    return this.get<MedicationCatalogItem[]>(`/medications/search${params}`).pipe(
+      catchError(() => this.get<MedicationCatalogItem[]>('/medications').pipe(catchError(() => of([])))),
+    );
+  }
+
+  getDepartmentsByFacility(facilityId: string): Observable<Department[]> {
+    return this.get<Department[]>(`/facilities/${facilityId}/departments`).pipe(catchError(() => of([])));
+  }
+
+  getPharmacyInventory(): Observable<InventoryItem[]> {
+    return this.get<InventoryItem[]>('/pharmacy/inventory').pipe(
+      catchError(() =>
+        this.searchMedications('').pipe(
+          map((meds: MedicationCatalogItem[]) =>
+            (meds || []).map((m: MedicationCatalogItem) => ({
+              id: m.id || m.code || '',
+              medicationName: m.name || m.medicationName || 'Medication',
+              genericName: m.genericName || m.name,
+              dosageForm: m.form || m.dosageForm || 'Tablet',
+              strength: m.strength || 'Standard',
+              category: m.category || 'THERAPEUTIC',
+              totalQuantityOnHand: m.stockQuantity || 0,
+              reorderLevel: m.reorderThreshold || 50,
+              unitOfMeasure: 'Units',
+              unitPrice: m.unitPrice || 0,
+              batches: m.batches || [],
+            } as InventoryItem)),
+          ),
+          catchError(() => of([])),
+        ),
+      ),
+    );
+  }
+
+  getMedicationBatches(medicationName?: string): Observable<MedicationBatch[]> {
+    return this.get<MedicationBatch[]>('/pharmacy/batches').pipe(
+      catchError(() =>
+        this.getPharmacyInventory().pipe(
+          map((items: InventoryItem[]) => {
+            const allBatches = items.flatMap((i) => i.batches || []);
+            if (medicationName) {
+              const q = medicationName.toLowerCase();
+              return allBatches.filter((b) => b.medicationName.toLowerCase().includes(q));
+            }
+            return allBatches;
+          }),
+        ),
+      ),
+    );
+  }
+
+  receiveStockBatch(payload: StockReceiptDTO): Observable<InventoryItem> {
+    return this.post<InventoryItem>('/pharmacy/inventory/receipts', payload);
+  }
+
+  adjustStockBatch(payload: StockAdjustmentDTO): Observable<InventoryItem> {
+    return this.post<InventoryItem>('/pharmacy/inventory/adjustments', payload);
+  }
+
+  // =========================================================================
+  // 31. Financial Revenue & Billing Accounts (Billing Staff)
+  // =========================================================================
+  getAllBillingAccounts(): Observable<BillingAccount[]> {
+    return this.get<BillingAccount[]>('/billing/accounts').pipe(catchError(() => of([])));
+  }
+
+  getAllInvoices(): Observable<Invoice[]> {
+    return this.get<Invoice[]>('/billing/invoices').pipe(
+      catchError(() =>
+        this.getPatients().pipe(
+          switchMap((patients: Patient[]) => {
+            if (!patients || patients.length === 0) return of([]);
+            const tasks = patients.slice(0, 15).map((p) =>
+              this.getPatientInvoices(p.id!).pipe(
+                map((invs: Invoice[]) =>
+                  Array.isArray(invs)
+                    ? invs.map((inv: Invoice) => ({
+                        ...inv,
+                        patientId: p.id,
+                        patientName: p.fullName,
+                      } as Invoice))
+                    : [],
+                ),
+                catchError(() => of([])),
+              ),
+            );
+            return forkJoin(tasks).pipe(
+              map((results: Invoice[][]) => results.reduce((acc, val) => acc.concat(val), [])),
+            );
+          }),
+          catchError(() => of([])),
+        ),
+      ),
+    );
+  }
+
+  getAllChargeItems(): Observable<ChargeItem[]> {
+    return this.get<ChargeItem[]>('/billing/charges').pipe(catchError(() => of([])));
+  }
+
+  voidInvoice(invoiceId: string): Observable<Invoice> {
+    return this.post<Invoice>('/billing/invoices/' + invoiceId + '/void', {});
+  }
+
+  confirmAppointment(id: string): Observable<Appointment> {
+    return this.post<Appointment>('/reception/appointments/' + id + '/confirm', {}).pipe(
+      catchError(() => this.updateAppointmentStatus(id, 'CONFIRMED')),
+    );
+  }
+
+  markNoShowAppointment(id: string): Observable<Appointment> {
+    return this.post<Appointment>('/reception/appointments/' + id + '/no-show', {}).pipe(
+      catchError(() => this.updateAppointmentStatus(id, 'NO_SHOW')),
+    );
+  }
 }
+
+
+
 

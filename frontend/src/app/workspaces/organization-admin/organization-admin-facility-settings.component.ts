@@ -255,52 +255,15 @@ export class OrganizationAdminFacilitySettingsComponent implements OnInit {
   saving = signal(false);
 
   facility = {
-    name: 'Sentinel Memorial Hospital',
-    orgCode: 'SENT-MEM-001',
-    licenseNumber: 'NABH-HC-2024-8849',
-    email: 'admin@sentinelhealth.org',
-    phone: '+1 (555) 234-5678',
-    address: '450 Healthcare Boulevard, Suite 100, Medical District',
+    name: '',
+    orgCode: '',
+    licenseNumber: '',
+    email: '',
+    phone: '',
+    address: '',
   };
 
-  departments = signal<Department[]>([
-    {
-      id: '1',
-      facilityId: '1',
-      name: 'Department of Internal Medicine',
-      departmentCode: 'INT-MED',
-      specialty: 'Internal Medicine',
-      status: 'ACTIVE',
-      wards: [
-        { id: '1', departmentId: '1', name: 'General Ward 3A', wardType: 'GENERAL', floor: '3rd', status: 'ACTIVE' },
-        { id: '2', departmentId: '1', name: 'Step-down Unit 3B', wardType: 'GENERAL', floor: '3rd', status: 'ACTIVE' },
-      ],
-    },
-    {
-      id: '2',
-      facilityId: '1',
-      name: 'Critical Care & Resuscitation',
-      departmentCode: 'CCU-ICU',
-      specialty: 'Critical Care',
-      status: 'ACTIVE',
-      wards: [
-        { id: '3', departmentId: '2', name: 'Intensive Care Unit (ICU)', wardType: 'ICU', floor: '2nd', status: 'ACTIVE' },
-        { id: '4', departmentId: '2', name: 'Coronary Care Unit (CCU)', wardType: 'ICU', floor: '2nd', status: 'ACTIVE' },
-      ],
-    },
-    {
-      id: '3',
-      facilityId: '1',
-      name: 'Department of General Surgery',
-      departmentCode: 'SURG',
-      specialty: 'Surgery',
-      status: 'ACTIVE',
-      wards: [
-        { id: '5', departmentId: '3', name: 'Post-Anesthesia Care (PACU)', wardType: 'SURGICAL', floor: '4th', status: 'ACTIVE' },
-        { id: '6', departmentId: '3', name: 'Surgical Recovery Ward 4B', wardType: 'SURGICAL', floor: '4th', status: 'ACTIVE' },
-      ],
-    },
-  ]);
+  departments = signal<Department[]>([]);
 
   showAddDeptModal = signal(false);
   newDept = { name: '', departmentCode: '', specialty: '' };
@@ -315,14 +278,20 @@ export class OrganizationAdminFacilitySettingsComponent implements OnInit {
     this.organizationService.getOrgAdminFacility().subscribe({
       next: (org: Organization | null) => {
         if (org) {
-          this.facility.name = org.name || this.facility.name;
-          this.facility.orgCode = org.orgCode || this.facility.orgCode;
-          this.facility.email = org.email || this.facility.email;
-          this.facility.phone = org.phone || this.facility.phone;
-          this.facility.address = org.address || this.facility.address;
+          this.facility.name = org.name || '';
+          this.facility.orgCode = org.orgCode || (org as any).code || '';
+          this.facility.licenseNumber = org.licenseNumber || '';
+          this.facility.email = org.email || '';
+          this.facility.phone = org.phone || '';
+          this.facility.address = org.address || '';
         }
       },
       error: () => {},
+    });
+
+    this.apiService.getDepartmentsByFacility('1').subscribe({
+      next: (depts: Department[]) => this.departments.set(depts || []),
+      error: () => this.departments.set([]),
     });
   }
 

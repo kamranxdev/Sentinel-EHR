@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
+import { MPIMatchCandidateDTO, Patient } from '../../core/models/patient.model';
 
 import { HlmCardImports } from '@spartan-ng/helm/card';
 import { HlmBadgeImports } from '@spartan-ng/helm/badge';
@@ -190,7 +191,7 @@ import {
                   </div>
                 </td>
                 <td hlmTableCell class="text-right">
-                  <button hlmBtn size="sm" variant="outline" class="text-xs gap-1 text-purple-600 hover:text-purple-700 h-8" (click)="openMergeModal(candidate.patient)">
+                  <button hlmBtn size="sm" variant="outline" class="text-xs gap-1 text-purple-600 hover:text-purple-700 h-8" (click)="openMergeModal(candidate.patient || candidate)">
                     <ng-icon name="lucideGitMerge" size="14" />
                     <span>Execute Chart Merge</span>
                   </button>
@@ -263,9 +264,9 @@ export class ReceptionistMPIComponent implements OnInit {
   searching = signal(false);
   merging = signal(false);
   mergeNotice = signal<string | null>(null);
-  candidates = signal<any[]>([]);
+  candidates = signal<MPIMatchCandidateDTO[]>([]);
 
-  selectedMergePatient = signal<any>(null);
+  selectedMergePatient = signal<MPIMatchCandidateDTO | null>(null);
   primaryPatientId: number | null = 1;
   mergeReason = 'Duplicate patient identity confirmed via DOB and phone/ABHA matching.';
 
@@ -323,9 +324,9 @@ export class ReceptionistMPIComponent implements OnInit {
     });
   }
 
-  openMergeModal(patient: any): void {
-    this.selectedMergePatient.set(patient);
-    this.primaryPatientId = patient.id === 1 ? 2 : 1;
+  openMergeModal(patient: MPIMatchCandidateDTO | Patient): void {
+    this.selectedMergePatient.set(patient as MPIMatchCandidateDTO);
+    this.primaryPatientId = (patient as any).id === 1 ? 2 : 1;
   }
 
   submitMerge(): void {
@@ -336,7 +337,7 @@ export class ReceptionistMPIComponent implements OnInit {
     this.apiService
       .requestMPIMerge({
         primaryPatientId: String(this.primaryPatientId),
-        duplicatePatientId: String(dup.id || dup.patientId),
+        duplicatePatientId: String((dup as any).id || dup.patientId),
         mergeReason: this.mergeReason,
       })
       .subscribe({
@@ -361,7 +362,7 @@ export class ReceptionistMPIComponent implements OnInit {
     return 'text-muted-foreground';
   }
 
-  getClassificationVariant(classification: string): 'default' | 'secondary' | 'outline' | 'destructive' {
+  getClassificationVariant(classification?: string): 'default' | 'secondary' | 'outline' | 'destructive' {
     switch (classification) {
       case 'EXACT_MATCH': return 'default';
       case 'HIGH_PROBABILITY_MATCH': return 'secondary';

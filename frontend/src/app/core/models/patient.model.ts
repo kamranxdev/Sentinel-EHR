@@ -1,5 +1,5 @@
 import { User } from './auth-user.model';
-import { Allergy, Diagnosis, MedicalRecord, Prescription, Vitals } from './clinical.model';
+import { Allergy, Diagnosis, Encounter, MedicalRecord, Prescription, Vitals } from './clinical.model';
 
 export interface EmergencyContact {
   id?: string;
@@ -68,12 +68,14 @@ export interface Patient {
 }
 
 export interface PatientClinicalHistoryDTO {
-  patient: Patient;
-  pastIllnesses: Diagnosis[];
-  allergies: Allergy[];
-  prescriptions: Prescription[];
-  vitals: Vitals[];
-  medicalRecords: MedicalRecord[];
+  patient?: Patient;
+  pastIllnesses?: Diagnosis[];
+  allergies?: Allergy[];
+  prescriptions?: Prescription[];
+  vitals?: Vitals[];
+  medicalRecords?: MedicalRecord[];
+  encounters?: Encounter[];
+  problems?: Diagnosis[];
   habitsSummary?: string;
   foodAllergiesSummary?: string;
   seriousConditionsSummary?: string;
@@ -95,6 +97,9 @@ export interface MPIMatchCandidateDTO {
   matchClassification?: string;
   matchReason?: string;
   matchDetails?: string;
+  patient?: Patient;
+  matchingFields?: string[];
+  conflictingFields?: string[];
 }
 
 export interface MPIMergeRequestDTO {
@@ -114,12 +119,137 @@ export interface BreakGlassRecord {
   patientId?: string;
   patient?: Patient;
   user?: User;
+  username?: string;
+  requestedBy?: string;
   category: string;
   justification: string;
+  reason?: string;
   requestedAt?: string;
+  accessedAt?: string;
+  createdAt?: string;
   expiresAt?: string;
   status?: string;
   clientIp?: string;
+}
+
+export interface PatientAddress {
+  id?: string;
+  patientId?: string;
+  addressLine1: string;
+  addressLine2?: string;
+  city?: string;
+  district?: string;
+  state?: string;
+  countryCode?: string;
+  postalCode?: string;
+  isPrimary?: boolean;
+  addressType?: 'HOME' | 'WORK' | 'TEMPORARY' | string;
+}
+
+export interface PatientDemographics {
+  id?: string;
+  patientId?: string;
+  dateOfBirth?: string;
+  gender?: string;
+  sexAtBirth?: string;
+  genderIdentity?: string;
+  sexualOrientation?: string;
+  maritalStatus?: string;
+  preferredLanguage?: string;
+  race?: string;
+  ethnicity?: string;
+  bloodType?: string;
+  bloodGroup?: string;
+  rhFactor?: string;
+}
+
+export interface PatientMedicalHistory {
+  id?: string;
+  patientId?: string;
+  condition?: string;
+  diagnosis?: string;
+  notes?: string;
+  pastMedicalHistory?: string;
+  seriousConditions?: string;
+  surgeriesAndProcedures?: string;
+  familyMedicalHistory?: string;
+  updatedAt?: string;
+}
+
+export interface PatientSocialHistory {
+  id?: string;
+  patientId?: string;
+  smokingStatus?: string;
+  alcoholConsumption?: string;
+  exerciseRoutine?: string;
+  occupationalHazards?: string;
+  updatedAt?: string;
+}
+
+export interface PatientDietaryHistory {
+  id?: string;
+  patientId?: string;
+  dietType?: string;
+  dietaryHabits?: string;
+  foodAllergies?: string;
+  restrictions?: string;
+  nutritionalRestrictions?: string;
+  notes?: string;
+  updatedAt?: string;
+}
+
+export interface PatientInsurancePolicy {
+  id?: string;
+  patientId?: string;
+  insuranceProvider: string;
+  payerName?: string;
+  policyNumber: string;
+  memberId?: string;
+  groupNumber?: string;
+  coveragePlan?: string;
+  planType?: string;
+  primaryPolicyHolder?: string;
+  relationshipToHolder?: string;
+  validFrom?: string;
+  validTo?: string;
+  status?: 'ACTIVE' | 'EXPIRED' | 'PENDING_VERIFICATION' | string;
+}
+
+export interface InpatientAdmissionRecord {
+  id: string;
+  encounterId: string;
+  patientId?: string;
+  wardId?: string;
+  roomId?: string;
+  bedId?: string;
+  admissionReason?: string;
+  attendingPractitionerId?: string;
+  admittedAt: string;
+  status: 'ADMITTED' | 'TRANSFERRED' | 'DISCHARGED' | 'CANCELLED';
+}
+
+export interface InpatientDischargeRecord {
+  id: string;
+  encounterId: string;
+  dischargeDisposition?: string;
+  dischargeNotes?: string;
+  followUpInstructions?: string;
+  dischargedAt: string;
+  dischargedBy?: string;
+}
+
+export interface InpatientTransferRecord {
+  id: string;
+  encounterId: string;
+  fromWardId?: string;
+  toWardId?: string;
+  fromRoomId?: string;
+  toRoomId?: string;
+  fromBedId?: string;
+  toBedId?: string;
+  transferReason?: string;
+  transferredAt: string;
+  notes?: string;
 }
 
 

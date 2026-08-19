@@ -1,15 +1,25 @@
 package com.sentinel.tenancy.service;
 
 import com.sentinel.common.exception.ResourceNotFoundException;
+import com.sentinel.identity.entity.Person;
+import com.sentinel.identity.entity.User;
+import com.sentinel.identity.entity.UserOrganization;
+import com.sentinel.identity.repository.PersonRepository;
+import com.sentinel.identity.repository.UserOrganizationRepository;
+import com.sentinel.identity.repository.UserRepository;
+import com.sentinel.security.entity.Role;
+import com.sentinel.security.repository.RoleRepository;
 import com.sentinel.tenancy.dto.CreateOrganizationRequest;
 import com.sentinel.tenancy.dto.OrganizationResponseDTO;
 import com.sentinel.tenancy.dto.OrganizationSearchCriteria;
 import com.sentinel.tenancy.dto.UpdateOrganizationRequest;
 import com.sentinel.tenancy.entity.Organization;
 import com.sentinel.tenancy.repository.OrganizationRepository;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -20,24 +30,49 @@ import java.util.stream.Collectors;
 public class OrganizationService {
 
     private final OrganizationRepository organizationRepository;
+    private final UserRepository userRepository;
+    private final PersonRepository personRepository;
+    private final RoleRepository roleRepository;
+    private final UserOrganizationRepository userOrganizationRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public OrganizationService(OrganizationRepository organizationRepository) {
+    public OrganizationService(OrganizationRepository organizationRepository,
+                               UserRepository userRepository,
+                               PersonRepository personRepository,
+                               RoleRepository roleRepository,
+                               UserOrganizationRepository userOrganizationRepository,
+                               PasswordEncoder passwordEncoder) {
         this.organizationRepository = organizationRepository;
+        this.userRepository = userRepository;
+        this.personRepository = personRepository;
+        this.roleRepository = roleRepository;
+        this.userOrganizationRepository = userOrganizationRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public OrganizationResponseDTO createOrganization(CreateOrganizationRequest request) {
-        if (organizationRepository.existsByCode(request.getCode())) {
-            throw new IllegalArgumentException("Organization code already exists: " + request.getCode());
+        String code = request.getCode();
+        String name = request.getName();
+
+        if (code == null || code.isBlank()) {
+            throw new IllegalArgumentException("Organization code is required");
         }
-        if (organizationRepository.existsByName(request.getName())) {
-            throw new IllegalArgumentException("Organization name already exists: " + request.getName());
+        if (name == null || name.isBlank()) {
+            throw new IllegalArgumentException("Organization name is required");
+        }
+
+        if (organizationRepository.existsByCode(code)) {
+            throw new IllegalArgumentException("Organization code already exists: " + code);
+        }
+        if (organizationRepository.existsByName(name)) {
+            throw new IllegalArgumentException("Organization name already exists: " + name);
         }
 
         Organization org = new Organization();
-        org.setCode(request.getCode());
-        org.setName(request.getName());
-        org.setLegalName(request.getLegalName());
-        org.setOrganizationType(request.getOrganizationType());
+        org.setCode(code.trim().toUpperCase());
+        org.setName(name.trim());
+        org.setLegalName(request.getLegalName() != null ? request.getLegalName().trim() : name.trim());
+        org.setOrganizationType(request.getOrganizationType() != null ? request.getOrganizationType() : "HOSPITAL");
         if (request.getTimezone() != null) org.setTimezone(request.getTimezone());
         if (request.getCountryCode() != null) org.setCountryCode(request.getCountryCode());
         org.setPhone(request.getPhone());
@@ -48,6 +83,58 @@ public class OrganizationService {
         org.setUpdatedAt(OffsetDateTime.now());
 
         Organization saved = organizationRepository.save(org);
+
+        // Provision Primary Administrator Account if provided
+        if (request.getAdminUsername() != null && !request.getAdminUsername().isBlank()) {
+            String adminUsername = request.getAdminUsername().trim();
+            if (userRepository.existsByUsername(adminUsername)) {
+                throw new IllegalArgumentException("Admin username already exists: " + adminUsername);
+            }
+            String adminEmail = request.getAdminEmail() != null && !request.getAdminEmail().isBlank()
+                    ? request.getAdminEmail().trim()
+                    : adminUsername + "@" + code.toLowerCase() + ".org";
+            if (userRepository.existsByEmail(adminEmail)) {
+                throw new IllegalArgumentException("Admin email already in use: " + adminEmail);
+            }
+
+            Person person = new Person();
+            String fullName = request.getAdminFullName() != null && !request.getAdminFullName().isBlank()
+                    ? request.getAdminFullName().trim()
+                    : adminUsername;
+            person.setFirstName(fullName);
+            person.setEmail(adminEmail);
+            person.setPhone(request.getPhone());
+            person.setCreatedAt(OffsetDateTime.now());
+            person.setUpdatedAt(OffsetDateTime.now());
+            Person savedPerson = personRepository.save(person);
+
+            User user = new User();
+            user.setUsername(adminUsername);
+            user.setEmail(adminEmail);
+            String rawPassword = request.getAdminPassword() != null && !request.getAdminPassword().isBlank()
+                    ? request.getAdminPassword()
+                    : "Sentinel@Admin2026";
+            user.setPassword(passwordEncoder.encode(rawPassword));
+            user.setPerson(savedPerson);
+            user.setStatus("ACTIVE");
+            user.setMfaEnabled(false);
+            user.setCreatedAt(OffsetDateTime.now());
+            user.setUpdatedAt(OffsetDateTime.now());
+
+            Role orgAdminRole = roleRepository.findByName("ORGANIZATION_ADMIN")
+                    .orElseGet(() -> roleRepository.save(new Role("ORGANIZATION_ADMIN", "Organization Administrator")));
+            user.getRoles().add(orgAdminRole);
+
+            User savedUser = userRepository.save(user);
+
+            UserOrganization uo = new UserOrganization();
+            uo.setUser(savedUser);
+            uo.setOrganization(saved);
+            uo.setStatus("ACTIVE");
+            uo.setJoinedAt(LocalDate.now());
+            userOrganizationRepository.save(uo);
+        }
+
         return mapToDTO(saved);
     }
 
@@ -114,3 +201,4 @@ public class OrganizationService {
         return dto;
     }
 }
+

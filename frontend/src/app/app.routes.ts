@@ -184,6 +184,12 @@ export const routes: Routes = [
       import('./auth/register-org/register-org.component').then((m) => m.RegisterOrgComponent),
     data: { standalone: true },
   },
+  {
+    path: 'register-org',
+    loadComponent: () =>
+      import('./auth/register-org/register-org.component').then((m) => m.RegisterOrgComponent),
+    data: { standalone: true },
+  },
 
   // --- SUPER ADMIN WORKSPACE ROUTES ---
   {
@@ -208,18 +214,28 @@ export const routes: Routes = [
     data: { roles: ['SUPER_ADMIN'] },
   },
   {
-    path: 'super-admin/patients',
+    path: 'super-admin/audit',
     loadComponent: () =>
-      import('./workspaces/super-admin/super-admin-patients.component').then((m) => m.SuperAdminPatientsComponent),
+      import('./workspaces/super-admin/super-admin-audit.component').then((m) => m.SuperAdminAuditComponent),
     canActivate: [authGuard, roleGuard],
     data: { roles: ['SUPER_ADMIN'] },
   },
   {
-    path: 'super-admin/schedule-analytics',
+    path: 'super-admin/system-health',
     loadComponent: () =>
-      import('./workspaces/super-admin/super-admin-schedule-analytics.component').then((m) => m.SuperAdminScheduleAnalyticsComponent),
+      import('./workspaces/super-admin/super-admin-system-health.component').then((m) => m.SuperAdminSystemHealthComponent),
     canActivate: [authGuard, roleGuard],
     data: { roles: ['SUPER_ADMIN'] },
+  },
+  {
+    path: 'super-admin/patients',
+    redirectTo: () => '/super-admin/dashboard',
+    pathMatch: 'full',
+  },
+  {
+    path: 'super-admin/schedule-analytics',
+    redirectTo: () => '/super-admin/system-health',
+    pathMatch: 'full',
   },
 
   // --- ORGANIZATION ADMIN WORKSPACE ROUTES ---
@@ -416,6 +432,13 @@ export const routes: Routes = [
     path: 'pharmacist/dispense',
     loadComponent: () =>
       import('./workspaces/pharmacist/pharmacist-dispense.component').then((m) => m.PharmacistDispenseComponent),
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['PHARMACIST'] },
+  },
+  {
+    path: 'pharmacist/inventory',
+    loadComponent: () =>
+      import('./workspaces/pharmacist/pharmacist-inventory.component').then((m) => m.PharmacistInventoryComponent),
     canActivate: [authGuard, roleGuard],
     data: { roles: ['PHARMACIST'] },
   },

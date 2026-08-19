@@ -5,6 +5,7 @@ export interface User {
   fullName: string;
   email?: string;
   specialization?: string;
+  specialty?: string;
   department?: string;
   licenseNumber?: string;
   qualifications?: string;

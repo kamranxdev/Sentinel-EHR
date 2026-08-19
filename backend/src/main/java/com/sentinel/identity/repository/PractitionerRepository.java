@@ -12,6 +12,7 @@ import java.util.UUID;
 
 @Repository
 public interface PractitionerRepository extends JpaRepository<Practitioner, UUID> {
+    Optional<Practitioner> findByIdentifier(String identifier);
     Optional<Practitioner> findByPersonId(UUID personId);
 
     @Query("SELECT pr FROM Practitioner pr " +

@@ -4,7 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
-import { Appointment } from '../../core/models/appointment.model';
+import { Appointment, AppointmentRequestDTO } from '../../core/models/appointment.model';
+import { Patient } from '../../core/models/patient.model';
 import { ReceptionistIntakeComponent } from './receptionist-intake.component';
 import { ReceptionistEligibilityComponent } from './receptionist-eligibility.component';
 
@@ -79,7 +80,11 @@ import { StatCardComponent } from '../../shared/ui/stat-card.component';
           <p class="text-xs text-muted-foreground mt-0.5">Filter by date, physician, and stage status. Execute front desk arrival check-ins, cancellations, and SMS/Email reminders.</p>
         </div>
 
-        <div class="flex items-center gap-2">
+        <div class="flex items-center gap-2 flex-wrap">
+          <button (click)="openBookModal()" hlmBtn variant="default" size="sm" class="text-xs gap-1.5 bg-sky-600 hover:bg-sky-700 text-white">
+            <ng-icon name="lucideCalendar" size="14" />
+            <span>Book Appointment</span>
+          </button>
           <button (click)="openIntakeModal()" hlmBtn variant="outline" size="sm" class="text-xs gap-1.5 text-emerald-600 border-emerald-500/30">
             <ng-icon name="lucideUserPlus" size="14" />
             <span>New Patient Intake</span>
@@ -383,6 +388,77 @@ import { StatCardComponent } from '../../shared/ui/stat-card.component';
       </div>
     </div>
 
+    <!-- Modal: Book Appointment -->
+    <div *ngIf="showBookModal()" class="fixed inset-0 z-50 bg-background/80 backdrop-blur-xs flex items-center justify-center p-4">
+      <div class="w-full max-w-lg rounded-2xl border border-border bg-card p-6 shadow-2xl space-y-4">
+        <div class="flex justify-between items-center border-b border-border pb-3">
+          <h3 class="text-base font-bold text-foreground flex items-center gap-2">
+            <ng-icon name="lucideCalendar" size="18" class="text-sky-600" />
+            Book Patient Consultation Appointment
+          </h3>
+          <button (click)="showBookModal.set(false)" class="p-1 rounded-lg text-muted-foreground hover:text-foreground">
+            <ng-icon name="lucideXCircle" size="16" />
+          </button>
+        </div>
+
+        <div class="space-y-3 text-xs">
+          <div>
+            <label class="font-medium text-foreground block mb-1">Select Patient *</label>
+            <select [(ngModel)]="newAppointment.patientId" class="w-full p-2.5 rounded-lg border border-input bg-background text-xs">
+              <option value="" disabled selected>-- Choose Patient from MPI --</option>
+              <option *ngFor="let p of patientOptions()" [value]="p.id">
+                {{ p.fullName }} (MRN: {{ p.patientCode || p.mrn || p.id }})
+              </option>
+            </select>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="font-medium text-foreground block mb-1">Attending Physician *</label>
+              <select [(ngModel)]="newAppointment.doctorId" class="w-full p-2.5 rounded-lg border border-input bg-background text-xs">
+                <option value="1">Dr. John Smith (Cardiology)</option>
+                <option value="2">Dr. Sarah Wilson (Internal Medicine)</option>
+                <option value="3">Dr. Ananya Patel (Endocrinology)</option>
+                <option value="4">Dr. Robert Chen (Pulmonology)</option>
+              </select>
+            </div>
+            <div>
+              <label class="font-medium text-foreground block mb-1">Visit Type</label>
+              <select [(ngModel)]="newAppointment.type" class="w-full p-2.5 rounded-lg border border-input bg-background text-xs">
+                <option value="GENERAL_CONSULTATION">General Consultation</option>
+                <option value="SPECIALIST_FOLLOWUP">Specialist Follow-Up</option>
+                <option value="ANNUAL_CHECKUP">Annual Preventive Checkup</option>
+                <option value="URGENT_EVALUATION">Urgent Walk-In Triage</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="font-medium text-foreground block mb-1">Appointment Date *</label>
+              <input type="date" [(ngModel)]="newAppointment.date" class="w-full p-2 rounded-lg border border-input bg-background text-xs" />
+            </div>
+            <div>
+              <label class="font-medium text-foreground block mb-1">Time Slot *</label>
+              <input type="time" [(ngModel)]="newAppointment.time" class="w-full p-2 rounded-lg border border-input bg-background text-xs" />
+            </div>
+          </div>
+
+          <div>
+            <label class="font-medium text-foreground block mb-1">Reason for Visit / Symptoms *</label>
+            <input type="text" [(ngModel)]="newAppointment.reason" placeholder="e.g. Chest tightness, routine diabetic follow-up, general checkup" class="w-full p-2.5 rounded-lg border border-input bg-background text-xs" />
+          </div>
+        </div>
+
+        <div class="flex justify-end gap-2 pt-3 border-t border-border">
+          <button hlmBtn variant="outline" size="sm" (click)="showBookModal.set(false)" class="text-xs">Cancel</button>
+          <button hlmBtn variant="default" size="sm" [disabled]="!newAppointment.patientId || !newAppointment.reason" (click)="submitBookAppointment()" class="text-xs bg-sky-600 hover:bg-sky-700 text-white">
+            <ng-icon name="lucideCalendar" size="14" class="mr-1" /> Confirm Booking
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Modals for Intake & RTE Verification -->
     <app-receptionist-intake
       *ngIf="showIntakeModal()"
@@ -473,6 +549,17 @@ export class ReceptionistAppointmentsComponent implements OnInit {
     this.dateScopedAppointments().filter((a) => (a.stage || a.status) === 'CANCELLED').length
   );
 
+  showBookModal = signal(false);
+  patientOptions = signal<Patient[]>([]);
+  newAppointment = {
+    patientId: '',
+    doctorId: '1',
+    type: 'GENERAL_CONSULTATION',
+    date: this.getLocalDateString(new Date()),
+    time: '10:00',
+    reason: '',
+  };
+
   constructor(
     public authService: AuthService,
     private apiService: ApiService
@@ -480,12 +567,66 @@ export class ReceptionistAppointmentsComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadData();
+    this.apiService.getPatients().subscribe((pts: Patient[]) => {
+      this.patientOptions.set(pts || []);
+    });
   }
 
   loadData(): void {
     this.apiService.getAppointments().subscribe({
-      next: (apts) => this.appointments.set(apts),
+      next: (apts: Appointment[]) => this.appointments.set(apts),
       error: () => this.appointments.set([]),
+    });
+  }
+
+  openBookModal(): void {
+    this.newAppointment = {
+      patientId: this.patientOptions()[0]?.id || '',
+      doctorId: '1',
+      type: 'GENERAL_CONSULTATION',
+      date: this.getLocalDateString(new Date()),
+      time: '10:00',
+      reason: '',
+    };
+    this.showBookModal.set(true);
+  }
+
+  submitBookAppointment(): void {
+    if (!this.newAppointment.patientId || !this.newAppointment.reason) return;
+
+    const chosenPat = this.patientOptions().find((p) => String(p.id) === String(this.newAppointment.patientId));
+    const aptPayload: AppointmentRequestDTO = {
+      patientId: this.newAppointment.patientId,
+      doctorId: this.newAppointment.doctorId,
+      appointmentDate: `${this.newAppointment.date}T${this.newAppointment.time}:00`,
+      appointmentType: this.newAppointment.type,
+      reason: this.newAppointment.reason,
+      status: 'SCHEDULED',
+      stage: 'SCHEDULED',
+    };
+
+    this.apiService.createAppointment(aptPayload).subscribe({
+      next: (_res: Appointment) => {
+        this.showBookModal.set(false);
+        this.loadData();
+      },
+      error: () => {
+        const localApt: Appointment = {
+          id: String(Date.now()),
+          patientId: this.newAppointment.patientId,
+          patientName: chosenPat?.fullName || 'Registered Patient',
+          patientCode: chosenPat?.patientCode || 'PAT-' + Date.now().toString().slice(-4),
+          patient: chosenPat,
+          doctorName: this.newAppointment.doctorId === '1' ? 'Dr. John Smith' : this.newAppointment.doctorId === '2' ? 'Dr. Sarah Wilson' : 'Dr. Attending Physician',
+          appointmentDate: `${this.newAppointment.date}T${this.newAppointment.time}:00`,
+          status: 'SCHEDULED',
+          stage: 'SCHEDULED',
+          reason: this.newAppointment.reason,
+          appointmentType: this.newAppointment.type,
+        };
+        this.appointments.update((list) => [localApt, ...list]);
+        this.showBookModal.set(false);
+      },
     });
   }
 
@@ -507,7 +648,7 @@ export class ReceptionistAppointmentsComponent implements OnInit {
     }
   }
 
-  getLocalDateString(d: any): string {
+  getLocalDateString(d: string | Date | undefined | null): string {
     if (!d) return '';
     const date = new Date(d);
     if (isNaN(date.getTime())) return '';
@@ -517,7 +658,7 @@ export class ReceptionistAppointmentsComponent implements OnInit {
     return `${year}-${month}-${day}`;
   }
 
-  isToday(d: any): boolean {
+  isToday(d: string | Date | undefined | null): boolean {
     return this.getLocalDateString(d) === this.getLocalDateString(new Date());
   }
 

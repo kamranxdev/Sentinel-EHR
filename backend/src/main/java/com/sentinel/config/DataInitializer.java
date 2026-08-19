@@ -1,27 +1,38 @@
 package com.sentinel.config;
 
-import com.sentinel.billing.entity.Invoice;
-import com.sentinel.billing.repository.InvoiceRepository;
+import com.sentinel.audit.entity.AuditLog;
+import com.sentinel.audit.repository.AuditLogRepository;
+import com.sentinel.billing.entity.*;
+import com.sentinel.billing.repository.*;
 import com.sentinel.clinical.entity.*;
 import com.sentinel.clinical.repository.*;
+import com.sentinel.consent.entity.*;
+import com.sentinel.consent.repository.*;
+import com.sentinel.documents.entity.*;
+import com.sentinel.documents.repository.*;
 import com.sentinel.identity.entity.*;
 import com.sentinel.identity.repository.*;
+import com.sentinel.imaging.entity.*;
+import com.sentinel.imaging.repository.*;
+import com.sentinel.insurance.entity.*;
+import com.sentinel.insurance.repository.*;
+import com.sentinel.laboratory.entity.*;
+import com.sentinel.laboratory.repository.*;
 import com.sentinel.patient.entity.*;
 import com.sentinel.patient.repository.*;
-import com.sentinel.pharmacy.entity.Medication;
-import com.sentinel.pharmacy.entity.Prescription;
-import com.sentinel.pharmacy.repository.MedicationRepository;
-import com.sentinel.pharmacy.repository.PrescriptionRepository;
-import com.sentinel.scheduling.entity.Appointment;
-import com.sentinel.scheduling.repository.AppointmentRepository;
-import com.sentinel.security.entity.AbacPolicy;
-import com.sentinel.security.entity.Permission;
-import com.sentinel.security.entity.Role;
-import com.sentinel.security.repository.AbacPolicyRepository;
-import com.sentinel.security.repository.PermissionRepository;
-import com.sentinel.security.repository.RoleRepository;
+import com.sentinel.pharmacy.entity.*;
+import com.sentinel.pharmacy.repository.*;
+import com.sentinel.procedure.entity.*;
+import com.sentinel.procedure.repository.*;
+import com.sentinel.scheduling.entity.*;
+import com.sentinel.scheduling.repository.*;
+import com.sentinel.security.entity.*;
+import com.sentinel.security.repository.*;
 import com.sentinel.tenancy.entity.*;
 import com.sentinel.tenancy.repository.*;
+import com.sentinel.terminology.entity.*;
+import com.sentinel.terminology.repository.*;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
@@ -32,6 +43,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.util.*;
 
@@ -40,13 +52,12 @@ public class DataInitializer implements ApplicationRunner {
 
     private static final Logger log = LoggerFactory.getLogger(DataInitializer.class);
 
-    private final RoleRepository roleRepository;
-    private final PermissionRepository permissionRepository;
-    private final UserRepository userRepository;
-    private final PersonRepository personRepository;
-    private final PractitionerRepository practitionerRepository;
-    private final AbacPolicyRepository abacPolicyRepository;
+    // 1. Terminology
+    private final CodeSystemRepository codeSystemRepository;
+    private final TerminologyCodeRepository terminologyCodeRepository;
+    private final TerminologyUnitRepository terminologyUnitRepository;
 
+    // 2. Tenancy
     private final OrganizationRepository organizationRepository;
     private final FacilityRepository facilityRepository;
     private final DepartmentRepository departmentRepository;
@@ -54,118 +65,925 @@ public class DataInitializer implements ApplicationRunner {
     private final RoomRepository roomRepository;
     private final BedRepository bedRepository;
 
+    // 3. Security
+    private final PermissionRepository permissionRepository;
+    private final RoleRepository roleRepository;
+    private final AbacPolicyRepository abacPolicyRepository;
+    private final BreakGlassRepository breakGlassRepository;
+    private final SecurityEventRepository securityEventRepository;
+
+    // 4. Identity
+    private final PersonRepository personRepository;
+    private final UserRepository userRepository;
+    private final UserOrganizationRepository userOrganizationRepository;
+    private final UserFacilityRepository userFacilityRepository;
+    private final UserDepartmentRepository userDepartmentRepository;
+    private final PractitionerRepository practitionerRepository;
+    private final PractitionerSpecialtyRepository practitionerSpecialtyRepository;
+    private final PractitionerLicenseRepository practitionerLicenseRepository;
+
+    // 5. Patient
     private final PatientRepository patientRepository;
     private final PatientOrganizationRepository patientOrganizationRepository;
-    private final EmergencyContactRepository emergencyContactRepository;
     private final PatientDemographicsRepository patientDemographicsRepository;
+    private final PatientAddressRepository patientAddressRepository;
+    private final PatientPhoneNumberRepository patientPhoneNumberRepository;
+    private final PatientEmailAddressRepository patientEmailAddressRepository;
+    private final EmergencyContactRepository emergencyContactRepository;
+    private final PatientMedicalAlertRepository patientMedicalAlertRepository;
+    private final PatientConditionRepository patientConditionRepository;
+    private final PatientMedicalHistoryRepository patientMedicalHistoryRepository;
+    private final PatientSurgicalHistoryRepository patientSurgicalHistoryRepository;
+    private final PatientFamilyHistoryRepository patientFamilyHistoryRepository;
+    private final PatientSocialHistoryRepository patientSocialHistoryRepository;
+    private final PatientSubstanceUseRepository patientSubstanceUseRepository;
+    private final PatientDietaryHistoryRepository patientDietaryHistoryRepository;
+    private final PatientCommunicationPreferencesRepository patientCommunicationPreferencesRepository;
+    private final PatientContactRepository patientContactRepository;
+    private final PatientIdentifierRepository patientIdentifierRepository;
 
+    // 6. Clinical
     private final EncounterRepository encounterRepository;
+    private final EncounterLocationRepository encounterLocationRepository;
+    private final AdmissionRepository admissionRepository;
     private final VitalsRepository vitalsRepository;
+    private final TriageEwsRecordRepository triageEwsRecordRepository;
     private final AllergyRepository allergyRepository;
     private final DiagnosisRepository diagnosisRepository;
+    private final ProblemListRepository problemListRepository;
+    private final ClinicalObservationRepository clinicalObservationRepository;
     private final ClinicalDocumentRepository clinicalDocumentRepository;
+    private final ClinicalDocumentVersionRepository clinicalDocumentVersionRepository;
+    private final NursingFlowsheetRepository nursingFlowsheetRepository;
+    private final NursingFlowsheetEntryRepository nursingFlowsheetEntryRepository;
+    private final CareTeamRepository careTeamRepository;
+    private final CareTeamMemberRepository careTeamMemberRepository;
+    private final TransferRepository transferRepository;
+    private final DischargeRepository dischargeRepository;
 
+    // 7. Laboratory
+    private final LabTestCatalogRepository labTestCatalogRepository;
+    private final LabOrderRepository labOrderRepository;
+    private final LabOrderItemRepository labOrderItemRepository;
+    private final SpecimenRepository specimenRepository;
+    private final SpecimenCollectionRepository specimenCollectionRepository;
+    private final LabResultRepository labResultRepository;
+    private final LabResultComponentRepository labResultComponentRepository;
+
+    // 8. Pharmacy
     private final MedicationRepository medicationRepository;
+    private final MedicationProductRepository medicationProductRepository;
     private final PrescriptionRepository prescriptionRepository;
+    private final MedicationOrderDoseRepository medicationOrderDoseRepository;
+    private final MedicationAdministrationRepository medicationAdministrationRepository;
+    private final MedicationReconciliationRepository medicationReconciliationRepository;
+
+    // 9. Procedure
+    private final ProcedureCatalogRepository procedureCatalogRepository;
+    private final ProcedureOrderRepository procedureOrderRepository;
+    private final ProcedurePerformanceRepository procedurePerformanceRepository;
+    private final ProcedureParticipantRepository procedureParticipantRepository;
+    private final ProcedureNoteRepository procedureNoteRepository;
+
+    // 10. Imaging
+    private final ImagingOrderRepository imagingOrderRepository;
+    private final ImagingStudyRepository imagingStudyRepository;
+    private final ImagingSeriesRepository imagingSeriesRepository;
+    private final ImagingInstanceRepository imagingInstanceRepository;
+    private final ImagingReportRepository imagingReportRepository;
+    private final ImagingReportVersionRepository imagingReportVersionRepository;
+
+    // 11. Scheduling
+    private final AppointmentTypeRepository appointmentTypeRepository;
+    private final ScheduleSlotRepository scheduleSlotRepository;
     private final AppointmentRepository appointmentRepository;
+    private final AppointmentParticipantRepository appointmentParticipantRepository;
+    private final AppointmentStatusHistoryRepository appointmentStatusHistoryRepository;
+    private final AppointmentNoteRepository appointmentNoteRepository;
+    private final AppointmentCancellationRepository appointmentCancellationRepository;
+    private final AppointmentRescheduleRepository appointmentRescheduleRepository;
+
+    // 12. Billing
+    private final PriceListRepository priceListRepository;
+    private final PriceListItemRepository priceListItemRepository;
+    private final BillingAccountRepository billingAccountRepository;
+    private final ChargeItemRepository chargeItemRepository;
     private final InvoiceRepository invoiceRepository;
+    private final InvoiceItemRepository invoiceItemRepository;
+    private final PaymentRepository paymentRepository;
+    private final PaymentAllocationRepository paymentAllocationRepository;
+    private final RefundRepository refundRepository;
+
+    // 13. Insurance
+    private final InsurancePayerRepository insurancePayerRepository;
+    private final InsurancePlanRepository insurancePlanRepository;
+    private final PatientInsuranceRepository patientInsuranceRepository;
+    private final InsuranceVerificationRepository insuranceVerificationRepository;
+    private final InsuranceAuthorizationRepository insuranceAuthorizationRepository;
+    private final InsuranceClaimRepository insuranceClaimRepository;
+    private final InsuranceClaimItemRepository insuranceClaimItemRepository;
+
+    // 14. Consent
+    private final ConsentTypeRepository consentTypeRepository;
+    private final PatientConsentRepository patientConsentRepository;
+    private final ConsentVersionRepository consentVersionRepository;
+
+    // 15. Documents
+    private final DocumentRepository documentRepository;
+    private final DocumentVersionRepository documentVersionRepository;
+    private final DocumentLinkRepository documentLinkRepository;
+
+    // 16. Audit
+    private final AuditLogRepository auditLogRepository;
 
     private final PasswordEncoder passwordEncoder;
 
     public DataInitializer(
-            RoleRepository roleRepository,
-            PermissionRepository permissionRepository,
-            UserRepository userRepository,
-            PersonRepository personRepository,
-            PractitionerRepository practitionerRepository,
-            AbacPolicyRepository abacPolicyRepository,
+            CodeSystemRepository codeSystemRepository,
+            TerminologyCodeRepository terminologyCodeRepository,
+            TerminologyUnitRepository terminologyUnitRepository,
             OrganizationRepository organizationRepository,
             FacilityRepository facilityRepository,
             DepartmentRepository departmentRepository,
             WardRepository wardRepository,
             RoomRepository roomRepository,
             BedRepository bedRepository,
+            PermissionRepository permissionRepository,
+            RoleRepository roleRepository,
+            AbacPolicyRepository abacPolicyRepository,
+            BreakGlassRepository breakGlassRepository,
+            SecurityEventRepository securityEventRepository,
+            PersonRepository personRepository,
+            UserRepository userRepository,
+            UserOrganizationRepository userOrganizationRepository,
+            UserFacilityRepository userFacilityRepository,
+            UserDepartmentRepository userDepartmentRepository,
+            PractitionerRepository practitionerRepository,
+            PractitionerSpecialtyRepository practitionerSpecialtyRepository,
+            PractitionerLicenseRepository practitionerLicenseRepository,
             PatientRepository patientRepository,
             PatientOrganizationRepository patientOrganizationRepository,
-            EmergencyContactRepository emergencyContactRepository,
             PatientDemographicsRepository patientDemographicsRepository,
+            PatientAddressRepository patientAddressRepository,
+            PatientPhoneNumberRepository patientPhoneNumberRepository,
+            PatientEmailAddressRepository patientEmailAddressRepository,
+            EmergencyContactRepository emergencyContactRepository,
+            PatientMedicalAlertRepository patientMedicalAlertRepository,
+            PatientConditionRepository patientConditionRepository,
+            PatientMedicalHistoryRepository patientMedicalHistoryRepository,
+            PatientSurgicalHistoryRepository patientSurgicalHistoryRepository,
+            PatientFamilyHistoryRepository patientFamilyHistoryRepository,
+            PatientSocialHistoryRepository patientSocialHistoryRepository,
+            PatientSubstanceUseRepository patientSubstanceUseRepository,
+            PatientDietaryHistoryRepository patientDietaryHistoryRepository,
+            PatientCommunicationPreferencesRepository patientCommunicationPreferencesRepository,
+            PatientContactRepository patientContactRepository,
+            PatientIdentifierRepository patientIdentifierRepository,
             EncounterRepository encounterRepository,
+            EncounterLocationRepository encounterLocationRepository,
+            AdmissionRepository admissionRepository,
             VitalsRepository vitalsRepository,
+            TriageEwsRecordRepository triageEwsRecordRepository,
             AllergyRepository allergyRepository,
             DiagnosisRepository diagnosisRepository,
+            ProblemListRepository problemListRepository,
+            ClinicalObservationRepository clinicalObservationRepository,
             ClinicalDocumentRepository clinicalDocumentRepository,
+            ClinicalDocumentVersionRepository clinicalDocumentVersionRepository,
+            NursingFlowsheetRepository nursingFlowsheetRepository,
+            NursingFlowsheetEntryRepository nursingFlowsheetEntryRepository,
+            CareTeamRepository careTeamRepository,
+            CareTeamMemberRepository careTeamMemberRepository,
+            TransferRepository transferRepository,
+            DischargeRepository dischargeRepository,
+            LabTestCatalogRepository labTestCatalogRepository,
+            LabOrderRepository labOrderRepository,
+            LabOrderItemRepository labOrderItemRepository,
+            SpecimenRepository specimenRepository,
+            SpecimenCollectionRepository specimenCollectionRepository,
+            LabResultRepository labResultRepository,
+            LabResultComponentRepository labResultComponentRepository,
             MedicationRepository medicationRepository,
+            MedicationProductRepository medicationProductRepository,
             PrescriptionRepository prescriptionRepository,
+            MedicationOrderDoseRepository medicationOrderDoseRepository,
+            MedicationAdministrationRepository medicationAdministrationRepository,
+            MedicationReconciliationRepository medicationReconciliationRepository,
+            ProcedureCatalogRepository procedureCatalogRepository,
+            ProcedureOrderRepository procedureOrderRepository,
+            ProcedurePerformanceRepository procedurePerformanceRepository,
+            ProcedureParticipantRepository procedureParticipantRepository,
+            ProcedureNoteRepository procedureNoteRepository,
+            ImagingOrderRepository imagingOrderRepository,
+            ImagingStudyRepository imagingStudyRepository,
+            ImagingSeriesRepository imagingSeriesRepository,
+            ImagingInstanceRepository imagingInstanceRepository,
+            ImagingReportRepository imagingReportRepository,
+            ImagingReportVersionRepository imagingReportVersionRepository,
+            AppointmentTypeRepository appointmentTypeRepository,
+            ScheduleSlotRepository scheduleSlotRepository,
             AppointmentRepository appointmentRepository,
+            AppointmentParticipantRepository appointmentParticipantRepository,
+            AppointmentStatusHistoryRepository appointmentStatusHistoryRepository,
+            AppointmentNoteRepository appointmentNoteRepository,
+            AppointmentCancellationRepository appointmentCancellationRepository,
+            AppointmentRescheduleRepository appointmentRescheduleRepository,
+            PriceListRepository priceListRepository,
+            PriceListItemRepository priceListItemRepository,
+            BillingAccountRepository billingAccountRepository,
+            ChargeItemRepository chargeItemRepository,
             InvoiceRepository invoiceRepository,
+            InvoiceItemRepository invoiceItemRepository,
+            PaymentRepository paymentRepository,
+            PaymentAllocationRepository paymentAllocationRepository,
+            RefundRepository refundRepository,
+            InsurancePayerRepository insurancePayerRepository,
+            InsurancePlanRepository insurancePlanRepository,
+            PatientInsuranceRepository patientInsuranceRepository,
+            InsuranceVerificationRepository insuranceVerificationRepository,
+            InsuranceAuthorizationRepository insuranceAuthorizationRepository,
+            InsuranceClaimRepository insuranceClaimRepository,
+            InsuranceClaimItemRepository insuranceClaimItemRepository,
+            ConsentTypeRepository consentTypeRepository,
+            PatientConsentRepository patientConsentRepository,
+            ConsentVersionRepository consentVersionRepository,
+            DocumentRepository documentRepository,
+            DocumentVersionRepository documentVersionRepository,
+            DocumentLinkRepository documentLinkRepository,
+            AuditLogRepository auditLogRepository,
             PasswordEncoder passwordEncoder) {
-        this.roleRepository = roleRepository;
-        this.permissionRepository = permissionRepository;
-        this.userRepository = userRepository;
-        this.personRepository = personRepository;
-        this.practitionerRepository = practitionerRepository;
-        this.abacPolicyRepository = abacPolicyRepository;
+        this.codeSystemRepository = codeSystemRepository;
+        this.terminologyCodeRepository = terminologyCodeRepository;
+        this.terminologyUnitRepository = terminologyUnitRepository;
         this.organizationRepository = organizationRepository;
         this.facilityRepository = facilityRepository;
         this.departmentRepository = departmentRepository;
         this.wardRepository = wardRepository;
         this.roomRepository = roomRepository;
         this.bedRepository = bedRepository;
+        this.permissionRepository = permissionRepository;
+        this.roleRepository = roleRepository;
+        this.abacPolicyRepository = abacPolicyRepository;
+        this.breakGlassRepository = breakGlassRepository;
+        this.securityEventRepository = securityEventRepository;
+        this.personRepository = personRepository;
+        this.userRepository = userRepository;
+        this.userOrganizationRepository = userOrganizationRepository;
+        this.userFacilityRepository = userFacilityRepository;
+        this.userDepartmentRepository = userDepartmentRepository;
+        this.practitionerRepository = practitionerRepository;
+        this.practitionerSpecialtyRepository = practitionerSpecialtyRepository;
+        this.practitionerLicenseRepository = practitionerLicenseRepository;
         this.patientRepository = patientRepository;
         this.patientOrganizationRepository = patientOrganizationRepository;
-        this.emergencyContactRepository = emergencyContactRepository;
         this.patientDemographicsRepository = patientDemographicsRepository;
+        this.patientAddressRepository = patientAddressRepository;
+        this.patientPhoneNumberRepository = patientPhoneNumberRepository;
+        this.patientEmailAddressRepository = patientEmailAddressRepository;
+        this.emergencyContactRepository = emergencyContactRepository;
+        this.patientMedicalAlertRepository = patientMedicalAlertRepository;
+        this.patientConditionRepository = patientConditionRepository;
+        this.patientMedicalHistoryRepository = patientMedicalHistoryRepository;
+        this.patientSurgicalHistoryRepository = patientSurgicalHistoryRepository;
+        this.patientFamilyHistoryRepository = patientFamilyHistoryRepository;
+        this.patientSocialHistoryRepository = patientSocialHistoryRepository;
+        this.patientSubstanceUseRepository = patientSubstanceUseRepository;
+        this.patientDietaryHistoryRepository = patientDietaryHistoryRepository;
+        this.patientCommunicationPreferencesRepository = patientCommunicationPreferencesRepository;
+        this.patientContactRepository = patientContactRepository;
+        this.patientIdentifierRepository = patientIdentifierRepository;
         this.encounterRepository = encounterRepository;
+        this.encounterLocationRepository = encounterLocationRepository;
+        this.admissionRepository = admissionRepository;
         this.vitalsRepository = vitalsRepository;
+        this.triageEwsRecordRepository = triageEwsRecordRepository;
         this.allergyRepository = allergyRepository;
         this.diagnosisRepository = diagnosisRepository;
+        this.problemListRepository = problemListRepository;
+        this.clinicalObservationRepository = clinicalObservationRepository;
         this.clinicalDocumentRepository = clinicalDocumentRepository;
+        this.clinicalDocumentVersionRepository = clinicalDocumentVersionRepository;
+        this.nursingFlowsheetRepository = nursingFlowsheetRepository;
+        this.nursingFlowsheetEntryRepository = nursingFlowsheetEntryRepository;
+        this.careTeamRepository = careTeamRepository;
+        this.careTeamMemberRepository = careTeamMemberRepository;
+        this.transferRepository = transferRepository;
+        this.dischargeRepository = dischargeRepository;
+        this.labTestCatalogRepository = labTestCatalogRepository;
+        this.labOrderRepository = labOrderRepository;
+        this.labOrderItemRepository = labOrderItemRepository;
+        this.specimenRepository = specimenRepository;
+        this.specimenCollectionRepository = specimenCollectionRepository;
+        this.labResultRepository = labResultRepository;
+        this.labResultComponentRepository = labResultComponentRepository;
         this.medicationRepository = medicationRepository;
+        this.medicationProductRepository = medicationProductRepository;
         this.prescriptionRepository = prescriptionRepository;
+        this.medicationOrderDoseRepository = medicationOrderDoseRepository;
+        this.medicationAdministrationRepository = medicationAdministrationRepository;
+        this.medicationReconciliationRepository = medicationReconciliationRepository;
+        this.procedureCatalogRepository = procedureCatalogRepository;
+        this.procedureOrderRepository = procedureOrderRepository;
+        this.procedurePerformanceRepository = procedurePerformanceRepository;
+        this.procedureParticipantRepository = procedureParticipantRepository;
+        this.procedureNoteRepository = procedureNoteRepository;
+        this.imagingOrderRepository = imagingOrderRepository;
+        this.imagingStudyRepository = imagingStudyRepository;
+        this.imagingSeriesRepository = imagingSeriesRepository;
+        this.imagingInstanceRepository = imagingInstanceRepository;
+        this.imagingReportRepository = imagingReportRepository;
+        this.imagingReportVersionRepository = imagingReportVersionRepository;
+        this.appointmentTypeRepository = appointmentTypeRepository;
+        this.scheduleSlotRepository = scheduleSlotRepository;
         this.appointmentRepository = appointmentRepository;
+        this.appointmentParticipantRepository = appointmentParticipantRepository;
+        this.appointmentStatusHistoryRepository = appointmentStatusHistoryRepository;
+        this.appointmentNoteRepository = appointmentNoteRepository;
+        this.appointmentCancellationRepository = appointmentCancellationRepository;
+        this.appointmentRescheduleRepository = appointmentRescheduleRepository;
+        this.priceListRepository = priceListRepository;
+        this.priceListItemRepository = priceListItemRepository;
+        this.billingAccountRepository = billingAccountRepository;
+        this.chargeItemRepository = chargeItemRepository;
         this.invoiceRepository = invoiceRepository;
+        this.invoiceItemRepository = invoiceItemRepository;
+        this.paymentRepository = paymentRepository;
+        this.paymentAllocationRepository = paymentAllocationRepository;
+        this.refundRepository = refundRepository;
+        this.insurancePayerRepository = insurancePayerRepository;
+        this.insurancePlanRepository = insurancePlanRepository;
+        this.patientInsuranceRepository = patientInsuranceRepository;
+        this.insuranceVerificationRepository = insuranceVerificationRepository;
+        this.insuranceAuthorizationRepository = insuranceAuthorizationRepository;
+        this.insuranceClaimRepository = insuranceClaimRepository;
+        this.insuranceClaimItemRepository = insuranceClaimItemRepository;
+        this.consentTypeRepository = consentTypeRepository;
+        this.patientConsentRepository = patientConsentRepository;
+        this.consentVersionRepository = consentVersionRepository;
+        this.documentRepository = documentRepository;
+        this.documentVersionRepository = documentVersionRepository;
+        this.documentLinkRepository = documentLinkRepository;
+        this.auditLogRepository = auditLogRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
     @Override
     @Transactional
     public void run(ApplicationArguments args) {
-        log.info("Starting automated EHR database initialization...");
+        log.info("Starting comprehensive Sentinel EHR database initialization...");
 
-        // 1. Permissions & Roles
-        Map<String, Permission> permissions = initPermissions();
-        Map<String, Role> roles = initRoles(permissions);
+        // 1. Terminology (Code Systems, Codes, Units)
+        TerminologyContext terminology = initTerminology();
 
-        // 2. Staff Users & Admin
-        Map<String, User> users = initUsers(roles);
-
-        // 3. ABAC Security Policies
-        initAbacPolicies();
-
-        // 4. Tenancy Hierarchy
+        // 2. Tenancy Hierarchy (Organizations, Facilities, Departments, Wards, Rooms, Beds)
         TenancyContext tenancy = initTenancy();
 
-        // 5. Practitioners
-        initPractitioners(users);
+        // 3. Security & Authorization (Permissions, Canonical Roles, ABAC Policies)
+        Map<String, Permission> permissions = initPermissions();
+        Map<String, Role> roles = initRoles(permissions);
+        initAbacPolicies();
 
-        // 6. Patients & Demographics
-        List<Patient> patients = initPatients(tenancy.aiims, users);
+        // 4. Identity & Staff Users (Person, User, Practitioners, Licenses, Specialties, User-Org/Dept/Facility)
+        IdentityContext identity = initIdentity(roles, tenancy);
 
-        // 7. Encounters, Vitals, Allergies, Diagnoses, Notes
-        initClinical(tenancy, users, patients);
+        // 5. Patients & Complete Demographics / Histories / Alerts / Contacts
+        List<PatientContext> patients = initPatients(tenancy, identity);
 
-        // 8. Pharmacy Medications & Orders
-        initPharmacy(tenancy, users, patients);
+        // 6. Clinical Encounters, Admissions, Vitals, Triage, Care Teams, Notes, Flowsheets, Transfers, Discharges
+        ClinicalContext clinical = initClinical(tenancy, identity, patients, terminology);
 
-        // 9. Appointments & Scheduling
-        initAppointments(tenancy, users, patients);
+        // 7. Laboratory Test Catalog, Orders, Specimen Collection, Results & Components
+        initLaboratory(tenancy, identity, patients, clinical);
 
-        // 10. Invoices & Billing
-        initBilling(tenancy, patients);
+        // 8. Pharmacy Catalog, Products, Prescriptions, Dosing, eMAR Administrations, Reconciliation
+        initPharmacy(tenancy, identity, patients, clinical);
 
-        log.info("EHR database initialization completed successfully.");
+        // 9. Procedures Catalog, Orders, Performances, Participants, Operative Notes
+        initProcedures(tenancy, identity, patients, clinical);
+
+        // 10. Imaging Orders, DICOM Studies, Series, Instances, Radiology Reports & Versions
+        initImaging(tenancy, identity, patients, clinical);
+
+        // 11. Scheduling Appointment Types, Slots, Multi-stage Appointments, Status History, Notes, Reschedules, Cancellations
+        initScheduling(tenancy, identity, patients);
+
+        // 12. Billing Price Lists, Items, Billing Accounts, Charge Items, Invoices, Items, Payments, Allocations, Refunds
+        initBilling(tenancy, identity, patients, clinical);
+
+        // 13. Insurance Payers, Plans, Patient Coverage, Verifications, Prior Authorizations, Claims & Claim Items
+        initInsurance(tenancy, identity, patients, clinical);
+
+        // 14. Consent Types, Electronic Documents, Versioning, Patient Consents
+        initConsentAndDocuments(tenancy, identity, patients, clinical);
+
+        // 15. Security Events & Audit Logs
+        initSecurityAndAudit(tenancy, identity, patients, clinical);
+
+        log.info("Sentinel EHR database initialization completed successfully with 100% relational integrity across all schemas!");
     }
 
+    // =========================================================================
+    // 1. TERMINOLOGY
+    // =========================================================================
+    private static class TerminologyContext {
+        CodeSystem icd10;
+        CodeSystem snomed;
+        CodeSystem loinc;
+        CodeSystem rxnorm;
+        CodeSystem ucum;
+    }
+
+    private TerminologyContext initTerminology() {
+        TerminologyContext ctx = new TerminologyContext();
+
+        ctx.icd10 = codeSystemRepository.findByCode("ICD-10").orElseGet(() -> {
+            CodeSystem cs = new CodeSystem();
+            cs.setCode("ICD-10");
+            cs.setName("International Classification of Diseases, 10th Revision");
+            cs.setUri("http://hl7.org/fhir/sid/icd-10");
+            cs.setVersion("2019");
+            return codeSystemRepository.save(cs);
+        });
+
+        ctx.snomed = codeSystemRepository.findByCode("SNOMED-CT").orElseGet(() -> {
+            CodeSystem cs = new CodeSystem();
+            cs.setCode("SNOMED-CT");
+            cs.setName("Systematized Nomenclature of Medicine - Clinical Terms");
+            cs.setUri("http://snomed.info/sct");
+            cs.setVersion("2024-03");
+            return codeSystemRepository.save(cs);
+        });
+
+        ctx.loinc = codeSystemRepository.findByCode("LOINC").orElseGet(() -> {
+            CodeSystem cs = new CodeSystem();
+            cs.setCode("LOINC");
+            cs.setName("Logical Observation Identifiers Names and Codes");
+            cs.setUri("http://loinc.org");
+            cs.setVersion("2.76");
+            return codeSystemRepository.save(cs);
+        });
+
+        ctx.rxnorm = codeSystemRepository.findByCode("RxNorm").orElseGet(() -> {
+            CodeSystem cs = new CodeSystem();
+            cs.setCode("RxNorm");
+            cs.setName("RxNorm Normalized Medication Vocabulary");
+            cs.setUri("http://www.nlm.nih.gov/research/umls/rxnorm");
+            cs.setVersion("2024-05");
+            return codeSystemRepository.save(cs);
+        });
+
+        ctx.ucum = codeSystemRepository.findByCode("UCUM").orElseGet(() -> {
+            CodeSystem cs = new CodeSystem();
+            cs.setCode("UCUM");
+            cs.setName("Unified Code for Units of Measure");
+            cs.setUri("http://unitsofmeasure.org");
+            cs.setVersion("2.1");
+            return codeSystemRepository.save(cs);
+        });
+
+        // Terminology Codes
+        if (terminologyCodeRepository.count() == 0) {
+            saveCode(ctx.icd10, "I21.0", "ST elevation myocardial infarction (STEMI) of anterior wall");
+            saveCode(ctx.icd10, "I10", "Essential (primary) hypertension");
+            saveCode(ctx.icd10, "E11.9", "Type 2 diabetes mellitus without complications");
+            saveCode(ctx.icd10, "G44.2", "Tension-type headache");
+            saveCode(ctx.icd10, "J45.9", "Other and unspecified asthma");
+            saveCode(ctx.icd10, "K35.80", "Unspecified acute appendicitis");
+
+            saveCode(ctx.snomed, "22298006", "Myocardial infarction (disorder)");
+            saveCode(ctx.snomed, "38341003", "Hypertensive disorder, systemic arterial (disorder)");
+            saveCode(ctx.snomed, "73211009", "Diabetes mellitus (disorder)");
+            saveCode(ctx.snomed, "415070008", "Percutaneous coronary intervention (procedure)");
+            saveCode(ctx.snomed, "268400002", "12 lead electrocardiogram (procedure)");
+
+            saveCode(ctx.loinc, "49563-0", "Cardiac troponin I [Mass/volume] in Serum or Plasma");
+            saveCode(ctx.loinc, "4548-4", "Hemoglobin A1c/Hemoglobin.total in Blood");
+            saveCode(ctx.loinc, "58410-2", "Complete blood count panel - Blood by Automated count");
+            saveCode(ctx.loinc, "85354-9", "Blood pressure panel with all children optional");
+            saveCode(ctx.loinc, "8867-4", "Heart rate");
+            saveCode(ctx.loinc, "2708-6", "Oxygen saturation in Arterial blood by Pulse oximetry");
+        }
+
+        // Units of Measure
+        if (terminologyUnitRepository.count() == 0) {
+            saveUnit("mmHg", "Millimeters of Mercury", "mm[Hg]");
+            saveUnit("bpm", "Beats Per Minute", "/min");
+            saveUnit("%", "Percent", "%");
+            saveUnit("mg/dL", "Milligrams per Deciliter", "mg/dL");
+            saveUnit("g/dL", "Grams per Deciliter", "g/dL");
+            saveUnit("degC", "Degrees Celsius", "Cel");
+            saveUnit("pg/mL", "Picograms per Milliliter", "pg/mL");
+            saveUnit("kg", "Kilograms", "kg");
+            saveUnit("cm", "Centimeters", "cm");
+            saveUnit("mL", "Milliliters", "mL");
+        }
+
+        return ctx;
+    }
+
+    private void saveCode(CodeSystem cs, String code, String display) {
+        TerminologyCode tc = new TerminologyCode();
+        tc.setCodeSystem(cs);
+        tc.setCode(code);
+        tc.setDisplay(display);
+        tc.setActive(true);
+        tc.setValidFrom(LocalDate.of(2020, 1, 1));
+        terminologyCodeRepository.save(tc);
+    }
+
+    private void saveUnit(String code, String display, String ucum) {
+        TerminologyUnit tu = new TerminologyUnit();
+        tu.setCode(code);
+        tu.setDisplay(display);
+        tu.setUcumCode(ucum);
+        terminologyUnitRepository.save(tu);
+    }
+
+    // =========================================================================
+    // 2. TENANCY HIERARCHY
+    // =========================================================================
+    public static class TenancyContext {
+        public Organization aiims;
+        public Organization apollo;
+        public Organization maxHealthcare;
+
+        public Facility aiimsMain;
+        public Facility aiimsOpd;
+        public Facility aiimsTrauma;
+        public Facility apolloMumbai;
+
+        public Department cardio;
+        public Department neuro;
+        public Department emer;
+        public Department genmed;
+        public Department rad;
+        public Department path;
+
+        public Ward cardWard;
+        public Ward ccu;
+        public Ward neuroWard;
+        public Ward emerBay;
+
+        public Room room101;
+        public Room roomCcu01;
+        public Room room201;
+        public Room roomEr01;
+
+        public Bed bed101_1;
+        public Bed bed101_2;
+        public Bed bedCcu1;
+        public Bed bed201_1;
+        public Bed bedEr1;
+    }
+
+    private TenancyContext initTenancy() {
+        TenancyContext ctx = new TenancyContext();
+
+        // Organizations
+        ctx.aiims = organizationRepository.findByCode("AIIMS-DEL").orElseGet(() -> {
+            Organization o = new Organization("AIIMS-DEL", "AIIMS New Delhi");
+            o.setLegalName("All India Institute of Medical Sciences");
+            o.setOrganizationType("HOSPITAL");
+            o.setPhone("+91-11-26588500");
+            o.setEmail("director@aiims.edu");
+            o.setWebsite("https://www.aiims.edu");
+            o.setStatus("ACTIVE");
+            return organizationRepository.save(o);
+        });
+
+        ctx.apollo = organizationRepository.findByCode("APOLLO-MUM").orElseGet(() -> {
+            Organization o = new Organization("APOLLO-MUM", "Apollo Hospitals Mumbai");
+            o.setLegalName("Apollo Hospitals Enterprise Ltd - Mumbai");
+            o.setOrganizationType("HOSPITAL");
+            o.setPhone("+91-22-66920000");
+            o.setEmail("admin@apollomumbai.com");
+            o.setWebsite("https://www.apollohospitals.com");
+            o.setStatus("ACTIVE");
+            return organizationRepository.save(o);
+        });
+
+        ctx.maxHealthcare = organizationRepository.findByCode("MAX-DEL").orElseGet(() -> {
+            Organization o = new Organization("MAX-DEL", "Max Super Speciality Hospital");
+            o.setLegalName("Max Healthcare Institute Limited");
+            o.setOrganizationType("HOSPITAL");
+            o.setPhone("+91-11-26515050");
+            o.setEmail("contact@maxhealthcare.com");
+            o.setWebsite("https://www.maxhealthcare.in");
+            o.setStatus("ACTIVE");
+            return organizationRepository.save(o);
+        });
+
+        // Facilities
+        ctx.aiimsMain = facilityRepository.findByCode("AIIMS-MAIN").orElseGet(() -> {
+            Facility f = new Facility();
+            f.setOrganization(ctx.aiims);
+            f.setCode("AIIMS-MAIN");
+            f.setName("AIIMS Main Inpatient Hospital");
+            f.setFacilityType("INPATIENT");
+            f.setAddressLine1("Ansari Nagar East");
+            f.setAddressLine2("Aurobindo Marg");
+            f.setCity("New Delhi");
+            f.setState("Delhi");
+            f.setPostalCode("110029");
+            f.setPhone("+91-11-26588500");
+            f.setEmail("main.hospital@aiims.edu");
+            f.setStatus("ACTIVE");
+            return facilityRepository.save(f);
+        });
+
+        ctx.aiimsOpd = facilityRepository.findByCode("AIIMS-OPD").orElseGet(() -> {
+            Facility f = new Facility();
+            f.setOrganization(ctx.aiims);
+            f.setCode("AIIMS-OPD");
+            f.setName("AIIMS Rajkumari Amrit Kaur OPD Block");
+            f.setFacilityType("OUTPATIENT");
+            f.setAddressLine1("Ansari Nagar East");
+            f.setCity("New Delhi");
+            f.setState("Delhi");
+            f.setPostalCode("110029");
+            f.setPhone("+91-11-26588501");
+            f.setEmail("opd@aiims.edu");
+            f.setStatus("ACTIVE");
+            return facilityRepository.save(f);
+        });
+
+        ctx.aiimsTrauma = facilityRepository.findByCode("AIIMS-TRAUMA").orElseGet(() -> {
+            Facility f = new Facility();
+            f.setOrganization(ctx.aiims);
+            f.setCode("AIIMS-TRAUMA");
+            f.setName("Jai Prakash Narayan Apex Trauma Center");
+            f.setFacilityType("EMERGENCY");
+            f.setAddressLine1("Ring Road, Raj Nagar");
+            f.setCity("New Delhi");
+            f.setState("Delhi");
+            f.setPostalCode("110029");
+            f.setPhone("+91-11-26105700");
+            f.setEmail("trauma@aiims.edu");
+            f.setStatus("ACTIVE");
+            return facilityRepository.save(f);
+        });
+
+        ctx.apolloMumbai = facilityRepository.findByCode("APOLLO-NM").orElseGet(() -> {
+            Facility f = new Facility();
+            f.setOrganization(ctx.apollo);
+            f.setCode("APOLLO-NM");
+            f.setName("Apollo Navi Mumbai Multi-Speciality");
+            f.setFacilityType("INPATIENT");
+            f.setAddressLine1("Plot 13, Parsik Hill Rd");
+            f.setCity("Navi Mumbai");
+            f.setState("Maharashtra");
+            f.setPostalCode("400614");
+            f.setPhone("+91-22-33503350");
+            f.setEmail("mumbai@apollohospitals.com");
+            f.setStatus("ACTIVE");
+            return facilityRepository.save(f);
+        });
+
+        // Departments
+        ctx.cardio = departmentRepository.findByFacilityIdAndCode(ctx.aiimsMain.getId(), "CARD").orElseGet(() -> {
+            Department d = new Department();
+            d.setOrganization(ctx.aiims);
+            d.setFacility(ctx.aiimsMain);
+            d.setCode("CARD");
+            d.setName("Department of Cardiology");
+            d.setDepartmentType("CLINICAL");
+            d.setStatus("ACTIVE");
+            return departmentRepository.save(d);
+        });
+
+        ctx.neuro = departmentRepository.findByFacilityIdAndCode(ctx.aiimsMain.getId(), "NEURO").orElseGet(() -> {
+            Department d = new Department();
+            d.setOrganization(ctx.aiims);
+            d.setFacility(ctx.aiimsMain);
+            d.setCode("NEURO");
+            d.setName("Department of Neurology");
+            d.setDepartmentType("CLINICAL");
+            d.setStatus("ACTIVE");
+            return departmentRepository.save(d);
+        });
+
+        ctx.emer = departmentRepository.findByFacilityIdAndCode(ctx.aiimsMain.getId(), "EMER").orElseGet(() -> {
+            Department d = new Department();
+            d.setOrganization(ctx.aiims);
+            d.setFacility(ctx.aiimsMain);
+            d.setCode("EMER");
+            d.setName("Emergency & Critical Care Medicine");
+            d.setDepartmentType("EMERGENCY");
+            d.setStatus("ACTIVE");
+            return departmentRepository.save(d);
+        });
+
+        ctx.genmed = departmentRepository.findByFacilityIdAndCode(ctx.aiimsMain.getId(), "GENMED").orElseGet(() -> {
+            Department d = new Department();
+            d.setOrganization(ctx.aiims);
+            d.setFacility(ctx.aiimsMain);
+            d.setCode("GENMED");
+            d.setName("General Internal Medicine");
+            d.setDepartmentType("CLINICAL");
+            d.setStatus("ACTIVE");
+            return departmentRepository.save(d);
+        });
+
+        ctx.rad = departmentRepository.findByFacilityIdAndCode(ctx.aiimsMain.getId(), "RAD").orElseGet(() -> {
+            Department d = new Department();
+            d.setOrganization(ctx.aiims);
+            d.setFacility(ctx.aiimsMain);
+            d.setCode("RAD");
+            d.setName("Radiodiagnosis & Imaging");
+            d.setDepartmentType("DIAGNOSTIC");
+            d.setStatus("ACTIVE");
+            return departmentRepository.save(d);
+        });
+
+        ctx.path = departmentRepository.findByFacilityIdAndCode(ctx.aiimsMain.getId(), "PATH").orElseGet(() -> {
+            Department d = new Department();
+            d.setOrganization(ctx.aiims);
+            d.setFacility(ctx.aiimsMain);
+            d.setCode("PATH");
+            d.setName("Pathology & Clinical Biochemistry");
+            d.setDepartmentType("LABORATORY");
+            d.setStatus("ACTIVE");
+            return departmentRepository.save(d);
+        });
+
+        // Wards
+        ctx.cardWard = wardRepository.findByFacilityId(ctx.aiimsMain.getId()).stream()
+                .filter(w -> "CARD-W1".equals(w.getCode())).findFirst().orElseGet(() -> {
+                    Ward w = new Ward();
+                    w.setOrganization(ctx.aiims);
+                    w.setFacility(ctx.aiimsMain);
+                    w.setDepartment(ctx.cardio);
+                    w.setCode("CARD-W1");
+                    w.setName("Cardiology Step-Down Ward");
+                    w.setWardType("GENERAL");
+                    w.setGenderPolicy("MIXED");
+                    w.setStatus("ACTIVE");
+                    return wardRepository.save(w);
+                });
+
+        ctx.ccu = wardRepository.findByFacilityId(ctx.aiimsMain.getId()).stream()
+                .filter(w -> "CARD-CCU".equals(w.getCode())).findFirst().orElseGet(() -> {
+                    Ward w = new Ward();
+                    w.setOrganization(ctx.aiims);
+                    w.setFacility(ctx.aiimsMain);
+                    w.setDepartment(ctx.cardio);
+                    w.setCode("CARD-CCU");
+                    w.setName("Coronary Intensive Care Unit (CCU)");
+                    w.setWardType("ICU");
+                    w.setGenderPolicy("MIXED");
+                    w.setStatus("ACTIVE");
+                    return wardRepository.save(w);
+                });
+
+        ctx.neuroWard = wardRepository.findByFacilityId(ctx.aiimsMain.getId()).stream()
+                .filter(w -> "NEURO-W1".equals(w.getCode())).findFirst().orElseGet(() -> {
+                    Ward w = new Ward();
+                    w.setOrganization(ctx.aiims);
+                    w.setFacility(ctx.aiimsMain);
+                    w.setDepartment(ctx.neuro);
+                    w.setCode("NEURO-W1");
+                    w.setName("Neurology Inpatient Ward");
+                    w.setWardType("GENERAL");
+                    w.setGenderPolicy("MIXED");
+                    w.setStatus("ACTIVE");
+                    return wardRepository.save(w);
+                });
+
+        ctx.emerBay = wardRepository.findByFacilityId(ctx.aiimsMain.getId()).stream()
+                .filter(w -> "EMER-TB".equals(w.getCode())).findFirst().orElseGet(() -> {
+                    Ward w = new Ward();
+                    w.setOrganization(ctx.aiims);
+                    w.setFacility(ctx.aiimsMain);
+                    w.setDepartment(ctx.emer);
+                    w.setCode("EMER-TB");
+                    w.setName("Emergency Resuscitation & Triage Bay");
+                    w.setWardType("EMERGENCY");
+                    w.setGenderPolicy("MIXED");
+                    w.setStatus("ACTIVE");
+                    return wardRepository.save(w);
+                });
+
+        // Rooms
+        ctx.room101 = roomRepository.findByWardIdAndRoomNumber(ctx.cardWard.getId(), "101").orElseGet(() -> {
+            Room r = new Room();
+            r.setOrganization(ctx.aiims);
+            r.setFacility(ctx.aiimsMain);
+            r.setWard(ctx.cardWard);
+            r.setRoomNumber("101");
+            r.setRoomType("GENERAL");
+            r.setFloor("1");
+            r.setStatus("ACTIVE");
+            return roomRepository.save(r);
+        });
+
+        ctx.roomCcu01 = roomRepository.findByWardIdAndRoomNumber(ctx.ccu.getId(), "CCU-01").orElseGet(() -> {
+            Room r = new Room();
+            r.setOrganization(ctx.aiims);
+            r.setFacility(ctx.aiimsMain);
+            r.setWard(ctx.ccu);
+            r.setRoomNumber("CCU-01");
+            r.setRoomType("ICU");
+            r.setFloor("2");
+            r.setStatus("ACTIVE");
+            return roomRepository.save(r);
+        });
+
+        ctx.room201 = roomRepository.findByWardIdAndRoomNumber(ctx.neuroWard.getId(), "201").orElseGet(() -> {
+            Room r = new Room();
+            r.setOrganization(ctx.aiims);
+            r.setFacility(ctx.aiimsMain);
+            r.setWard(ctx.neuroWard);
+            r.setRoomNumber("201");
+            r.setRoomType("SEMI_PRIVATE");
+            r.setFloor("2");
+            r.setStatus("ACTIVE");
+            return roomRepository.save(r);
+        });
+
+        ctx.roomEr01 = roomRepository.findByWardIdAndRoomNumber(ctx.emerBay.getId(), "ER-01").orElseGet(() -> {
+            Room r = new Room();
+            r.setOrganization(ctx.aiims);
+            r.setFacility(ctx.aiimsMain);
+            r.setWard(ctx.emerBay);
+            r.setRoomNumber("ER-01");
+            r.setRoomType("TRAUMA");
+            r.setFloor("G");
+            r.setStatus("ACTIVE");
+            return roomRepository.save(r);
+        });
+
+        // Beds
+        ctx.bed101_1 = bedRepository.findByBedCode("B101-1").orElseGet(() -> {
+            Bed b = new Bed();
+            b.setOrganization(ctx.aiims);
+            b.setFacility(ctx.aiimsMain);
+            b.setWard(ctx.cardWard);
+            b.setRoom(ctx.room101);
+            b.setBedCode("B101-1");
+            b.setBedNumber("101-1");
+            b.setBedType("STANDARD");
+            b.setStatus("AVAILABLE");
+            return bedRepository.save(b);
+        });
+
+        ctx.bed101_2 = bedRepository.findByBedCode("B101-2").orElseGet(() -> {
+            Bed b = new Bed();
+            b.setOrganization(ctx.aiims);
+            b.setFacility(ctx.aiimsMain);
+            b.setWard(ctx.cardWard);
+            b.setRoom(ctx.room101);
+            b.setBedCode("B101-2");
+            b.setBedNumber("101-2");
+            b.setBedType("STANDARD");
+            b.setStatus("AVAILABLE");
+            return bedRepository.save(b);
+        });
+
+        ctx.bedCcu1 = bedRepository.findByBedCode("B-CCU-1").orElseGet(() -> {
+            Bed b = new Bed();
+            b.setOrganization(ctx.aiims);
+            b.setFacility(ctx.aiimsMain);
+            b.setWard(ctx.ccu);
+            b.setRoom(ctx.roomCcu01);
+            b.setBedCode("B-CCU-1");
+            b.setBedNumber("CCU-1");
+            b.setBedType("ICU");
+            b.setStatus("OCCUPIED");
+            return bedRepository.save(b);
+        });
+
+        ctx.bed201_1 = bedRepository.findByBedCode("B201-1").orElseGet(() -> {
+            Bed b = new Bed();
+            b.setOrganization(ctx.aiims);
+            b.setFacility(ctx.aiimsMain);
+            b.setWard(ctx.neuroWard);
+            b.setRoom(ctx.room201);
+            b.setBedCode("B201-1");
+            b.setBedNumber("201-1");
+            b.setBedType("STANDARD");
+            b.setStatus("AVAILABLE");
+            return bedRepository.save(b);
+        });
+
+        ctx.bedEr1 = bedRepository.findByBedCode("B-ER-1").orElseGet(() -> {
+            Bed b = new Bed();
+            b.setOrganization(ctx.aiims);
+            b.setFacility(ctx.aiimsMain);
+            b.setWard(ctx.emerBay);
+            b.setRoom(ctx.roomEr01);
+            b.setBedCode("B-ER-1");
+            b.setBedNumber("ER-1");
+            b.setBedType("EMERGENCY");
+            b.setStatus("AVAILABLE");
+            return bedRepository.save(b);
+        });
+
+        return ctx;
+    }
+
+    // =========================================================================
+    // 3. SECURITY & ROLES
+    // =========================================================================
     private Map<String, Permission> initPermissions() {
         String[][] permDefs = {
             {"PATIENT_READ", "Read Patient Demographics", "PATIENT"},
@@ -207,6 +1025,14 @@ public class DataInitializer implements ApplicationRunner {
             {"LAB_RESULT_READ", "Read Lab Results", "LABORATORY"},
             {"LAB_RESULT_CREATE", "Submit Lab Results", "LABORATORY"},
 
+            {"PROCEDURE_READ", "Read Procedures", "PROCEDURE"},
+            {"PROCEDURE_ORDER", "Order Surgical Procedure", "PROCEDURE"},
+            {"PROCEDURE_PERFORM", "Document Procedure Execution", "PROCEDURE"},
+
+            {"IMAGING_READ", "Read Imaging Studies & DICOM", "IMAGING"},
+            {"IMAGING_ORDER", "Order Imaging Diagnostic Study", "IMAGING"},
+            {"IMAGING_REPORT", "Generate Radiologist Report", "IMAGING"},
+
             {"APPOINTMENT_READ", "Read Appointments", "SCHEDULING"},
             {"APPOINTMENT_CREATE", "Create Appointment", "SCHEDULING"},
             {"APPOINTMENT_UPDATE", "Update Appointment", "SCHEDULING"},
@@ -223,6 +1049,18 @@ public class DataInitializer implements ApplicationRunner {
             {"INVOICE_CREATE", "Create Invoice", "BILLING"},
             {"BILLING_READ", "Read Billing Accounts", "BILLING"},
             {"BILLING_WRITE", "Manage Billing Accounts", "BILLING"},
+            {"PAYMENT_CAPTURE", "Record Patient Payment", "BILLING"},
+            {"REFUND_PROCESS", "Process Financial Refund", "BILLING"},
+
+            {"INSURANCE_READ", "Read Insurance Policies & Claims", "INSURANCE"},
+            {"INSURANCE_CLAIM_CREATE", "Submit Insurance Claim", "INSURANCE"},
+            {"INSURANCE_VERIFY", "Verify Real-time Eligibility", "INSURANCE"},
+
+            {"CONSENT_READ", "Read Patient Consents", "CONSENT"},
+            {"CONSENT_MANAGE", "Grant or Revoke Patient Consents", "CONSENT"},
+
+            {"DOCUMENT_READ", "Read Attached Documents", "DOCUMENT"},
+            {"DOCUMENT_UPLOAD", "Upload Clinical Document", "DOCUMENT"},
 
             {"TENANCY_READ", "Read Tenancy & Facilities", "ADMIN"},
             {"TENANCY_WRITE", "Manage Tenancy & Facilities", "ADMIN"},
@@ -248,16 +1086,8 @@ public class DataInitializer implements ApplicationRunner {
 
     private Map<String, Role> initRoles(Map<String, Permission> permissions) {
         String[] canonicalRoles = {
-            "SUPER_ADMIN",
-            "ORGANIZATION_ADMIN",
-            "PHYSICIAN",
-            "NURSE",
-            "RECEPTIONIST",
-            "LAB_TECHNICIAN",
-            "PHARMACIST",
-            "BILLING_STAFF",
-            "AUDITOR",
-            "PATIENT"
+            "SUPER_ADMIN", "ORGANIZATION_ADMIN", "PHYSICIAN", "NURSE", "RECEPTIONIST",
+            "LAB_TECHNICIAN", "PHARMACIST", "RADIOLOGIST", "BILLING_STAFF", "AUDITOR", "PATIENT"
         };
 
         Map<String, Role> map = new HashMap<>();
@@ -265,199 +1095,46 @@ public class DataInitializer implements ApplicationRunner {
             Role role = roleRepository.findByName(roleName)
                 .orElseGet(() -> roleRepository.save(new Role(roleName, roleName + " Role")));
 
-            // Assign full permissions to admin roles
+            // Assign proper sets of permissions
+            Set<Permission> rolePerms = new HashSet<>();
             if (roleName.equals("SUPER_ADMIN") || roleName.equals("ORGANIZATION_ADMIN")) {
-                role.setPermissions(new HashSet<>(permissions.values()));
-                roleRepository.save(role);
+                rolePerms.addAll(permissions.values());
+            } else if (roleName.equals("PHYSICIAN")) {
+                assignPermsByPrefix(rolePerms, permissions, "PATIENT_", "ALLERGY_", "DIAGNOSIS_", "VITALS_", "ENCOUNTER_", "CLINICAL_NOTE_", "PRESCRIPTION_", "LAB_ORDER_", "LAB_RESULT_READ", "PROCEDURE_", "IMAGING_ORDER", "IMAGING_READ", "APPOINTMENT_");
+            } else if (roleName.equals("NURSE")) {
+                assignPermsByPrefix(rolePerms, permissions, "PATIENT_READ", "VITALS_", "ALLERGY_READ", "DIAGNOSIS_READ", "ENCOUNTER_READ", "MAR_", "LAB_ORDER_CREATE", "LAB_RESULT_READ", "APPOINTMENT_TRIAGE", "APPOINTMENT_CHECKIN");
+            } else if (roleName.equals("PHARMACIST")) {
+                assignPermsByPrefix(rolePerms, permissions, "PATIENT_READ", "PRESCRIPTION_", "MEDICATION_DISPENSE", "MAR_READ");
+            } else if (roleName.equals("LAB_TECHNICIAN")) {
+                assignPermsByPrefix(rolePerms, permissions, "PATIENT_READ", "LAB_RESULT_", "LAB_ORDER_");
+            } else if (roleName.equals("RADIOLOGIST")) {
+                assignPermsByPrefix(rolePerms, permissions, "PATIENT_READ", "IMAGING_", "ENCOUNTER_READ");
+            } else if (roleName.equals("RECEPTIONIST")) {
+                assignPermsByPrefix(rolePerms, permissions, "PATIENT_", "MPI_", "APPOINTMENT_", "INVOICE_READ", "CONSENT_");
+            } else if (roleName.equals("BILLING_STAFF")) {
+                assignPermsByPrefix(rolePerms, permissions, "PATIENT_READ", "INVOICE_", "BILLING_", "PAYMENT_", "REFUND_", "INSURANCE_");
+            } else if (roleName.equals("AUDITOR")) {
+                assignPermsByPrefix(rolePerms, permissions, "AUDIT_LOG_READ", "PATIENT_READ", "ENCOUNTER_READ", "INVOICE_READ");
+            } else if (roleName.equals("PATIENT")) {
+                assignPermsByPrefix(rolePerms, permissions, "PATIENT_READ", "APPOINTMENT_READ", "APPOINTMENT_CREATE", "INVOICE_READ", "CONSENT_READ");
             }
+
+            role.setPermissions(rolePerms);
+            roleRepository.save(role);
             map.put(roleName, role);
         }
         return map;
     }
 
-    private Map<String, User> initUsers(Map<String, Role> roles) {
-        String defaultPass = passwordEncoder.encode("Sentinel@123");
-        Map<String, User> userMap = new HashMap<>();
-
-        // 1. Admin
-        User admin = userRepository.findByUsername("admin").orElseGet(() -> {
-            User u = new User();
-            u.setUsername("admin");
-            u.setEmail("admin@sentinel.local");
-            u.setPassword(defaultPass);
-            u.setStatus("ACTIVE");
-            u.setMfaEnabled(false);
-            if (roles.containsKey("SUPER_ADMIN")) u.getRoles().add(roles.get("SUPER_ADMIN"));
-            return userRepository.save(u);
-        });
-        userMap.put("admin", admin);
-
-        // 2. Dr. Arjun Sharma
-        User arjun = userRepository.findByUsername("arjun.sharma").orElseGet(() -> {
-            Person p = personRepository.save(new Person("Arjun", "Sharma", "MALE", LocalDate.of(1985, 6, 15)));
-            User u = new User();
-            u.setUsername("arjun.sharma");
-            u.setEmail("arjun.sharma@aiims.edu");
-            u.setPassword(defaultPass);
-            u.setPerson(p);
-            u.setStatus("ACTIVE");
-            u.setMfaEnabled(false);
-            if (roles.containsKey("PHYSICIAN")) u.getRoles().add(roles.get("PHYSICIAN"));
-            return userRepository.save(u);
-        });
-        userMap.put("arjun.sharma", arjun);
-
-        // 3. Dr. Priya Kapoor
-        User priya = userRepository.findByUsername("priya.kapoor").orElseGet(() -> {
-            Person p = personRepository.save(new Person("Priya", "Kapoor", "FEMALE", LocalDate.of(1990, 3, 22)));
-            User u = new User();
-            u.setUsername("priya.kapoor");
-            u.setEmail("priya.kapoor@aiims.edu");
-            u.setPassword(defaultPass);
-            u.setPerson(p);
-            u.setStatus("ACTIVE");
-            u.setMfaEnabled(false);
-            if (roles.containsKey("PHYSICIAN")) u.getRoles().add(roles.get("PHYSICIAN"));
-            return userRepository.save(u);
-        });
-        userMap.put("priya.kapoor", priya);
-
-        // 4. Dr. Rajesh Patel
-        User rajesh = userRepository.findByUsername("rajesh.patel").orElseGet(() -> {
-            Person p = personRepository.save(new Person("Rajesh", "Patel", "MALE", LocalDate.of(1978, 11, 8)));
-            User u = new User();
-            u.setUsername("rajesh.patel");
-            u.setEmail("rajesh.patel@aiims.edu");
-            u.setPassword(defaultPass);
-            u.setPerson(p);
-            u.setStatus("ACTIVE");
-            u.setMfaEnabled(false);
-            if (roles.containsKey("PHYSICIAN")) u.getRoles().add(roles.get("PHYSICIAN"));
-            return userRepository.save(u);
-        });
-        userMap.put("rajesh.patel", rajesh);
-
-        // 5. Nurse Sunita Verma
-        User sunita = userRepository.findByUsername("sunita.verma").orElseGet(() -> {
-            Person p = personRepository.save(new Person("Sunita", "Verma", "FEMALE", LocalDate.of(1982, 7, 30)));
-            User u = new User();
-            u.setUsername("sunita.verma");
-            u.setEmail("sunita.verma@aiims.edu");
-            u.setPassword(defaultPass);
-            u.setPerson(p);
-            u.setStatus("ACTIVE");
-            u.setMfaEnabled(false);
-            if (roles.containsKey("NURSE")) u.getRoles().add(roles.get("NURSE"));
-            return userRepository.save(u);
-        });
-        userMap.put("sunita.verma", sunita);
-
-        // 6. Org Admin Vikram Singh
-        User vikram = userRepository.findByUsername("vikram.singh").orElseGet(() -> {
-            Person p = personRepository.save(new Person("Vikram", "Singh", "MALE", LocalDate.of(1975, 1, 20)));
-            User u = new User();
-            u.setUsername("vikram.singh");
-            u.setEmail("vikram.singh@apollo.com");
-            u.setPassword(defaultPass);
-            u.setPerson(p);
-            u.setStatus("ACTIVE");
-            u.setMfaEnabled(false);
-            if (roles.containsKey("ORGANIZATION_ADMIN")) u.getRoles().add(roles.get("ORGANIZATION_ADMIN"));
-            return userRepository.save(u);
-        });
-        userMap.put("vikram.singh", vikram);
-
-        // 7. Receptionist Sarita Gupta
-        User sarita = userRepository.findByUsername("sarita.gupta").orElseGet(() -> {
-            Person p = personRepository.save(new Person("Sarita", "Gupta", "FEMALE", LocalDate.of(1992, 9, 14)));
-            User u = new User();
-            u.setUsername("sarita.gupta");
-            u.setEmail("sarita.gupta@aiims.edu");
-            u.setPassword(defaultPass);
-            u.setPerson(p);
-            u.setStatus("ACTIVE");
-            u.setMfaEnabled(false);
-            if (roles.containsKey("RECEPTIONIST")) u.getRoles().add(roles.get("RECEPTIONIST"));
-            return userRepository.save(u);
-        });
-        userMap.put("sarita.gupta", sarita);
-
-        // 8. Lab Tech Amit Roy
-        User amit = userRepository.findByUsername("amit.roy").orElseGet(() -> {
-            Person p = personRepository.save(new Person("Amit", "Roy", "MALE", LocalDate.of(1989, 4, 18)));
-            User u = new User();
-            u.setUsername("amit.roy");
-            u.setEmail("amit.roy@aiims.edu");
-            u.setPassword(defaultPass);
-            u.setPerson(p);
-            u.setStatus("ACTIVE");
-            u.setMfaEnabled(false);
-            if (roles.containsKey("LAB_TECHNICIAN")) u.getRoles().add(roles.get("LAB_TECHNICIAN"));
-            return userRepository.save(u);
-        });
-        userMap.put("amit.roy", amit);
-
-        // 9. Pharmacist Anita Deshmukh
-        User anita = userRepository.findByUsername("anita.deshmukh").orElseGet(() -> {
-            Person p = personRepository.save(new Person("Anita", "Deshmukh", "FEMALE", LocalDate.of(1986, 12, 5)));
-            User u = new User();
-            u.setUsername("anita.deshmukh");
-            u.setEmail("anita.deshmukh@aiims.edu");
-            u.setPassword(defaultPass);
-            u.setPerson(p);
-            u.setStatus("ACTIVE");
-            u.setMfaEnabled(false);
-            if (roles.containsKey("PHARMACIST")) u.getRoles().add(roles.get("PHARMACIST"));
-            return userRepository.save(u);
-        });
-        userMap.put("anita.deshmukh", anita);
-
-        // 10. Billing Staff Vikas Mehta
-        User vikas = userRepository.findByUsername("vikas.mehta").orElseGet(() -> {
-            Person p = personRepository.save(new Person("Vikas", "Mehta", "MALE", LocalDate.of(1984, 8, 27)));
-            User u = new User();
-            u.setUsername("vikas.mehta");
-            u.setEmail("vikas.mehta@aiims.edu");
-            u.setPassword(defaultPass);
-            u.setPerson(p);
-            u.setStatus("ACTIVE");
-            u.setMfaEnabled(false);
-            if (roles.containsKey("BILLING_STAFF")) u.getRoles().add(roles.get("BILLING_STAFF"));
-            return userRepository.save(u);
-        });
-        userMap.put("vikas.mehta", vikas);
-
-        // 11. Auditor Suresh Nair
-        User suresh = userRepository.findByUsername("suresh.nair").orElseGet(() -> {
-            Person p = personRepository.save(new Person("Suresh", "Nair", "MALE", LocalDate.of(1979, 3, 11)));
-            User u = new User();
-            u.setUsername("suresh.nair");
-            u.setEmail("suresh.nair@aiims.edu");
-            u.setPassword(defaultPass);
-            u.setPerson(p);
-            u.setStatus("ACTIVE");
-            u.setMfaEnabled(false);
-            if (roles.containsKey("AUDITOR")) u.getRoles().add(roles.get("AUDITOR"));
-            return userRepository.save(u);
-        });
-        userMap.put("suresh.nair", suresh);
-
-        // 12. Patient Ramesh Kumar
-        User ramesh = userRepository.findByUsername("ramesh.kumar").orElseGet(() -> {
-            Person p = personRepository.save(new Person("Ramesh", "Kumar", "MALE", LocalDate.of(1960, 4, 10)));
-            User u = new User();
-            u.setUsername("ramesh.kumar");
-            u.setEmail("ramesh.kumar@gmail.com");
-            u.setPassword(defaultPass);
-            u.setPerson(p);
-            u.setStatus("ACTIVE");
-            u.setMfaEnabled(false);
-            if (roles.containsKey("PATIENT")) u.getRoles().add(roles.get("PATIENT"));
-            return userRepository.save(u);
-        });
-        userMap.put("ramesh.kumar", ramesh);
-
-        return userMap;
+    private void assignPermsByPrefix(Set<Permission> target, Map<String, Permission> source, String... prefixes) {
+        for (Permission p : source.values()) {
+            for (String prefix : prefixes) {
+                if (p.getCode().startsWith(prefix) || p.getCode().equals(prefix)) {
+                    target.add(p);
+                    break;
+                }
+            }
+        }
     }
 
     private void initAbacPolicies() {
@@ -481,327 +1158,1008 @@ public class DataInitializer implements ApplicationRunner {
             p2.setConstraintExpression("request.reason != null && request.emergency == true");
             p2.setActive(true);
             abacPolicyRepository.save(p2);
+
+            AbacPolicy p3 = new AbacPolicy();
+            p3.setName("ABDM Export Policy");
+            p3.setDescription("Requires explicit granted ABDM consent before FHIR bundle export");
+            p3.setSubjectRole("PHYSICIAN");
+            p3.setResourceType("ABDM_BUNDLE");
+            p3.setAction("EXPORT");
+            p3.setConstraintExpression("patient.hasActiveConsent('ABDM_DATA_SHARE') == true");
+            p3.setActive(true);
+            abacPolicyRepository.save(p3);
         }
     }
 
-    private static class TenancyContext {
-        Organization aiims;
-        Organization apollo;
-        Facility aiimsMain;
-        Facility aiimsOpd;
-        Department cardio;
-        Department neuro;
-        Department emer;
-        Ward cardWard;
-        Room room101;
-        Bed bed1;
+    // =========================================================================
+    // 4. IDENTITY & STAFF USERS
+    // =========================================================================
+    public static class IdentityContext {
+        public User admin;
+        public User arjun;
+        public User priya;
+        public User rajesh;
+        public User vikramRad;
+        public User sunita;
+        public User rahul;
+        public User sarita;
+        public User amit;
+        public User anitaPharm;
+        public User vikas;
+        public User sureshAuditor;
+        public User orgAdminVikram;
+
+        public User rameshUser;
+        public User anitaUser;
+
+        public Practitioner arjunPrac;
+        public Practitioner priyaPrac;
+        public Practitioner rajeshPrac;
+        public Practitioner vikramPrac;
+        public Practitioner sunitaPrac;
+        public Practitioner rahulPrac;
     }
 
-    private TenancyContext initTenancy() {
-        TenancyContext ctx = new TenancyContext();
+    private IdentityContext initIdentity(Map<String, Role> roles, TenancyContext tenancy) {
+        String defaultPass = passwordEncoder.encode("Sentinel@123");
+        IdentityContext ctx = new IdentityContext();
 
-        // Organizations
-        ctx.aiims = organizationRepository.findByCode("AIIMS-DEL").orElseGet(() -> {
-            Organization o = new Organization("AIIMS-DEL", "AIIMS New Delhi");
-            o.setLegalName("All India Institute of Medical Sciences");
-            o.setOrganizationType("HOSPITAL");
-            o.setPhone("+91-11-26588500");
-            o.setEmail("admin@aiims.edu");
-            o.setWebsite("https://www.aiims.edu");
-            return organizationRepository.save(o);
-        });
+        // 1. Admin
+        ctx.admin = createStaffUser("admin", "admin@sentinel.local", defaultPass, "System", "Administrator", "MALE", LocalDate.of(1980, 1, 1), roles.get("SUPER_ADMIN"));
 
-        ctx.apollo = organizationRepository.findByCode("APOLLO-MUM").orElseGet(() -> {
-            Organization o = new Organization("APOLLO-MUM", "Apollo Hospitals Mumbai");
-            o.setLegalName("Apollo Hospitals Enterprise Ltd - Mumbai");
-            o.setOrganizationType("HOSPITAL");
-            o.setPhone("+91-22-66920000");
-            o.setEmail("info@apollomumbai.com");
-            o.setWebsite("https://www.apollohospitals.com");
-            return organizationRepository.save(o);
-        });
+        // 2. Dr. Arjun Sharma (Cardiologist)
+        ctx.arjun = createStaffUser("arjun.sharma", "arjun.sharma@aiims.edu", defaultPass, "Arjun", "Sharma", "MALE", LocalDate.of(1982, 6, 15), roles.get("PHYSICIAN"));
+        linkStaffToTenancy(ctx.arjun, tenancy.aiims, tenancy.aiimsMain, tenancy.cardio, "EMP-AIIMS-CARD-01", "FULL_TIME");
+        ctx.arjunPrac = createPractitioner(ctx.arjun.getPerson(), "MCI-2010-12345", "PHYSICIAN", "Cardiology", "DMC-DL-11029", "Delhi Medical Council", "Interventional Cardiology", "CARD_INTERV");
 
-        // Facilities
-        ctx.aiimsMain = facilityRepository.findByCode("AIIMS-MAIN").orElseGet(() -> {
-            Facility f = new Facility();
-            f.setOrganization(ctx.aiims);
-            f.setCode("AIIMS-MAIN");
-            f.setName("AIIMS Main Hospital");
-            f.setFacilityType("INPATIENT");
-            f.setAddressLine1("Ansari Nagar East");
-            f.setCity("New Delhi");
-            f.setState("Delhi");
-            f.setPostalCode("110029");
-            f.setPhone("+91-11-26588500");
-            return facilityRepository.save(f);
-        });
+        // 3. Dr. Priya Kapoor (Neurologist)
+        ctx.priya = createStaffUser("priya.kapoor", "priya.kapoor@aiims.edu", defaultPass, "Priya", "Kapoor", "FEMALE", LocalDate.of(1988, 3, 22), roles.get("PHYSICIAN"));
+        linkStaffToTenancy(ctx.priya, tenancy.aiims, tenancy.aiimsOpd, tenancy.neuro, "EMP-AIIMS-NEURO-01", "FULL_TIME");
+        ctx.priyaPrac = createPractitioner(ctx.priya.getPerson(), "MCI-2015-67890", "PHYSICIAN", "Neurology", "DMC-DL-18842", "Delhi Medical Council", "Clinical Neurology & Stroke", "NEURO_STROKE");
 
-        ctx.aiimsOpd = facilityRepository.findByCode("AIIMS-OPD").orElseGet(() -> {
-            Facility f = new Facility();
-            f.setOrganization(ctx.aiims);
-            f.setCode("AIIMS-OPD");
-            f.setName("AIIMS OPD Block");
-            f.setFacilityType("OUTPATIENT");
-            f.setAddressLine1("Ansari Nagar East");
-            f.setCity("New Delhi");
-            f.setState("Delhi");
-            f.setPostalCode("110029");
-            f.setPhone("+91-11-26588501");
-            return facilityRepository.save(f);
-        });
+        // 4. Dr. Rajesh Patel (Emergency Medicine)
+        ctx.rajesh = createStaffUser("rajesh.patel", "rajesh.patel@aiims.edu", defaultPass, "Rajesh", "Patel", "MALE", LocalDate.of(1978, 11, 8), roles.get("PHYSICIAN"));
+        linkStaffToTenancy(ctx.rajesh, tenancy.aiims, tenancy.aiimsTrauma, tenancy.emer, "EMP-AIIMS-EMER-01", "FULL_TIME");
+        ctx.rajeshPrac = createPractitioner(ctx.rajesh.getPerson(), "MCI-2008-33445", "PHYSICIAN", "Emergency Medicine", "DMC-DL-09912", "Delhi Medical Council", "Trauma & Resuscitation", "EMER_TRAUMA");
 
-        // Departments
-        // Departments
-        ctx.cardio = departmentRepository.findByFacilityIdAndCode(ctx.aiimsMain.getId(), "CARD").orElseGet(() -> {
-            Department d = new Department();
-            d.setOrganization(ctx.aiims);
-            d.setFacility(ctx.aiimsMain);
-            d.setCode("CARD");
-            d.setName("Cardiology");
-            d.setDepartmentType("CLINICAL");
-            return departmentRepository.save(d);
-        });
+        // 5. Dr. Vikram Sethi (Radiologist)
+        ctx.vikramRad = createStaffUser("vikram.sethi", "vikram.sethi@aiims.edu", defaultPass, "Vikram", "Sethi", "MALE", LocalDate.of(1984, 5, 12), roles.get("RADIOLOGIST"));
+        linkStaffToTenancy(ctx.vikramRad, tenancy.aiims, tenancy.aiimsMain, tenancy.rad, "EMP-AIIMS-RAD-01", "FULL_TIME");
+        ctx.vikramPrac = createPractitioner(ctx.vikramRad.getPerson(), "MCI-2012-77889", "PHYSICIAN", "Radiology", "DMC-DL-14401", "Delhi Medical Council", "Diagnostic Neuroradiology", "RAD_DIAG");
 
-        ctx.neuro = departmentRepository.findByFacilityIdAndCode(ctx.aiimsMain.getId(), "NEURO").orElseGet(() -> {
-            Department d = new Department();
-            d.setOrganization(ctx.aiims);
-            d.setFacility(ctx.aiimsMain);
-            d.setCode("NEURO");
-            d.setName("Neurology");
-            d.setDepartmentType("CLINICAL");
-            return departmentRepository.save(d);
-        });
+        // 6. Nurse Sunita Verma (CCU Senior Nurse)
+        ctx.sunita = createStaffUser("sunita.verma", "sunita.verma@aiims.edu", defaultPass, "Sunita", "Verma", "FEMALE", LocalDate.of(1985, 7, 30), roles.get("NURSE"));
+        linkStaffToTenancy(ctx.sunita, tenancy.aiims, tenancy.aiimsMain, tenancy.cardio, "EMP-AIIMS-NUR-01", "FULL_TIME");
+        ctx.sunitaPrac = createPractitioner(ctx.sunita.getPerson(), "INC-2006-55555", "NURSE", "Critical Care Nursing", "DNC-NUR-5501", "Delhi Nursing Council", "Cardiac Intensive Care", "NUR_CCU");
 
-        ctx.emer = departmentRepository.findByFacilityIdAndCode(ctx.aiimsMain.getId(), "EMER").orElseGet(() -> {
-            Department d = new Department();
-            d.setOrganization(ctx.aiims);
-            d.setFacility(ctx.aiimsMain);
-            d.setCode("EMER");
-            d.setName("Emergency Medicine");
-            d.setDepartmentType("EMERGENCY");
-            return departmentRepository.save(d);
-        });
+        // 7. Nurse Rahul Nair (Emergency / Triage Nurse)
+        ctx.rahul = createStaffUser("rahul.nair", "rahul.nair@aiims.edu", defaultPass, "Rahul", "Nair", "MALE", LocalDate.of(1991, 9, 10), roles.get("NURSE"));
+        linkStaffToTenancy(ctx.rahul, tenancy.aiims, tenancy.aiimsTrauma, tenancy.emer, "EMP-AIIMS-NUR-02", "FULL_TIME");
+        ctx.rahulPrac = createPractitioner(ctx.rahul.getPerson(), "INC-2014-99881", "NURSE", "Emergency Nursing", "DNC-NUR-8820", "Delhi Nursing Council", "Emergency Triage", "NUR_EMER");
 
-        // Wards
-        ctx.cardWard = wardRepository.findByFacilityId(ctx.aiimsMain.getId()).stream()
-                .filter(w -> "CARD-W1".equals(w.getCode()))
-                .findFirst()
-                .orElseGet(() -> {
-                    Ward w = new Ward();
-                    w.setOrganization(ctx.aiims);
-                    w.setFacility(ctx.aiimsMain);
-                    w.setDepartment(ctx.cardio);
-                    w.setCode("CARD-W1");
-                    w.setName("Cardiology Ward 1");
-                    w.setWardType("GENERAL");
-                    w.setGenderPolicy("MIXED");
-                    return wardRepository.save(w);
-                });
+        // 8. Front Desk Receptionist Sarita Gupta
+        ctx.sarita = createStaffUser("sarita.gupta", "sarita.gupta@aiims.edu", defaultPass, "Sarita", "Gupta", "FEMALE", LocalDate.of(1992, 9, 14), roles.get("RECEPTIONIST"));
+        linkStaffToTenancy(ctx.sarita, tenancy.aiims, tenancy.aiimsOpd, tenancy.genmed, "EMP-AIIMS-REC-01", "FULL_TIME");
 
-        // Rooms
-        ctx.room101 = roomRepository.findByWardIdAndRoomNumber(ctx.cardWard.getId(), "101").orElseGet(() -> {
-            Room r = new Room();
-            r.setOrganization(ctx.aiims);
-            r.setFacility(ctx.aiimsMain);
-            r.setWard(ctx.cardWard);
-            r.setRoomNumber("101");
-            r.setRoomType("GENERAL");
-            r.setFloor("1");
-            return roomRepository.save(r);
-        });
+        // 9. Senior Lab Technologist Amit Roy
+        ctx.amit = createStaffUser("amit.roy", "amit.roy@aiims.edu", defaultPass, "Amit", "Roy", "MALE", LocalDate.of(1989, 4, 18), roles.get("LAB_TECHNICIAN"));
+        linkStaffToTenancy(ctx.amit, tenancy.aiims, tenancy.aiimsMain, tenancy.path, "EMP-AIIMS-LAB-01", "FULL_TIME");
 
-        // Beds
-        ctx.bed1 = bedRepository.findByBedCode("B101-1").orElseGet(() -> {
-            Bed b = new Bed();
-            b.setOrganization(ctx.aiims);
-            b.setFacility(ctx.aiimsMain);
-            b.setWard(ctx.cardWard);
-            b.setRoom(ctx.room101);
-            b.setBedCode("B101-1");
-            b.setBedNumber("101-1");
-            b.setBedType("STANDARD");
-            b.setStatus("AVAILABLE");
-            return bedRepository.save(b);
-        });
+        // 10. Chief Pharmacist Anita Deshmukh
+        ctx.anitaPharm = createStaffUser("anita.deshmukh", "anita.deshmukh@aiims.edu", defaultPass, "Anita", "Deshmukh", "FEMALE", LocalDate.of(1986, 12, 5), roles.get("PHARMACIST"));
+        linkStaffToTenancy(ctx.anitaPharm, tenancy.aiims, tenancy.aiimsMain, tenancy.cardio, "EMP-AIIMS-PHARM-01", "FULL_TIME");
+
+        // 11. Financial Officer Vikas Mehta
+        ctx.vikas = createStaffUser("vikas.mehta", "vikas.mehta@aiims.edu", defaultPass, "Vikas", "Mehta", "MALE", LocalDate.of(1984, 8, 27), roles.get("BILLING_STAFF"));
+        linkStaffToTenancy(ctx.vikas, tenancy.aiims, tenancy.aiimsMain, tenancy.genmed, "EMP-AIIMS-FIN-01", "FULL_TIME");
+
+        // 12. Compliance Auditor Suresh Nair
+        ctx.sureshAuditor = createStaffUser("suresh.nair", "suresh.nair@aiims.edu", defaultPass, "Suresh", "Nair", "MALE", LocalDate.of(1979, 3, 11), roles.get("AUDITOR"));
+        linkStaffToTenancy(ctx.sureshAuditor, tenancy.aiims, tenancy.aiimsMain, tenancy.genmed, "EMP-AIIMS-AUD-01", "FULL_TIME");
+
+        // 13. Org Admin Vikram Singh (Apollo)
+        ctx.orgAdminVikram = createStaffUser("vikram.singh", "vikram.singh@apollo.com", defaultPass, "Vikram", "Singh", "MALE", LocalDate.of(1975, 1, 20), roles.get("ORGANIZATION_ADMIN"));
+        linkStaffToTenancy(ctx.orgAdminVikram, tenancy.apollo, tenancy.apolloMumbai, null, "EMP-APL-MUM-01", "FULL_TIME");
+
+        // 14. Patient Portal Users
+        ctx.rameshUser = createStaffUser("ramesh.kumar", "ramesh.kumar@gmail.com", defaultPass, "Ramesh", "Kumar", "MALE", LocalDate.of(1960, 4, 10), roles.get("PATIENT"));
+        ctx.anitaUser = createStaffUser("anita.sharma", "anita.sharma@gmail.com", defaultPass, "Anita", "Sharma", "FEMALE", LocalDate.of(1975, 9, 25), roles.get("PATIENT"));
 
         return ctx;
     }
 
-    private void initPractitioners(Map<String, User> users) {
-        if (practitionerRepository.count() == 0) {
-            User arjun = users.get("arjun.sharma");
-            if (arjun != null && arjun.getPerson() != null) {
-                Practitioner p = new Practitioner();
-                p.setPerson(arjun.getPerson());
-                p.setIdentifier("MCI-2010-12345");
-                p.setPractitionerType("PHYSICIAN");
-                p.setPrimarySpecialty("Cardiology");
-                p.setStatus("ACTIVE");
-                practitionerRepository.save(p);
-            }
+    private User createStaffUser(String username, String email, String passwordHash, String first, String last, String sex, LocalDate dob, Role role) {
+        return userRepository.findByUsername(username).orElseGet(() -> {
+            Person p = new Person();
+            p.setFirstName(first);
+            p.setLastName(last);
+            p.setSexAtBirth(sex);
+            p.setDateOfBirth(dob);
+            p.setNationality("Indian");
+            p.setPreferredLanguage("English, Hindi");
+            p.setCreatedAt(OffsetDateTime.now());
+            p.setUpdatedAt(OffsetDateTime.now());
+            p = personRepository.save(p);
 
-            User priya = users.get("priya.kapoor");
-            if (priya != null && priya.getPerson() != null) {
-                Practitioner p = new Practitioner();
-                p.setPerson(priya.getPerson());
-                p.setIdentifier("MCI-2015-67890");
-                p.setPractitionerType("PHYSICIAN");
-                p.setPrimarySpecialty("Neurology");
-                p.setStatus("ACTIVE");
-                practitionerRepository.save(p);
+            User u = new User();
+            u.setUsername(username);
+            u.setEmail(email);
+            u.setPassword(passwordHash);
+            u.setPerson(p);
+            u.setStatus("ACTIVE");
+            u.setMfaEnabled(false);
+            u.setCreatedAt(OffsetDateTime.now());
+            u.setUpdatedAt(OffsetDateTime.now());
+            if (role != null) {
+                u.getRoles().add(role);
             }
+            return userRepository.save(u);
+        });
+    }
 
-            User sunita = users.get("sunita.verma");
-            if (sunita != null && sunita.getPerson() != null) {
-                Practitioner p = new Practitioner();
-                p.setPerson(sunita.getPerson());
-                p.setIdentifier("INC-2006-55555");
-                p.setPractitionerType("NURSE");
-                p.setPrimarySpecialty("Critical Care");
-                p.setStatus("ACTIVE");
-                practitionerRepository.save(p);
-            }
+    private void linkStaffToTenancy(User user, Organization org, Facility fac, Department dept, String empCode, String empType) {
+        if (org != null) {
+            userOrganizationRepository.findByUserIdAndOrganizationId(user.getId(), org.getId()).orElseGet(() -> {
+                UserOrganization uo = new UserOrganization();
+                uo.setUser(user);
+                uo.setOrganization(org);
+                uo.setEmployeeCode(empCode);
+                uo.setEmploymentType(empType);
+                uo.setStatus("ACTIVE");
+                uo.setJoinedAt(LocalDate.of(2021, 1, 15));
+                return userOrganizationRepository.save(uo);
+            });
+        }
+        if (fac != null) {
+            userFacilityRepository.findByUserIdAndFacilityId(user.getId(), fac.getId()).orElseGet(() -> {
+                UserFacility uf = new UserFacility(user, fac);
+                return userFacilityRepository.save(uf);
+            });
+        }
+        if (dept != null) {
+            userDepartmentRepository.findByUserIdAndDepartmentId(user.getId(), dept.getId()).orElseGet(() -> {
+                UserDepartment ud = new UserDepartment(user, dept);
+                return userDepartmentRepository.save(ud);
+            });
         }
     }
 
-    private List<Patient> initPatients(Organization org, Map<String, User> users) {
-        List<Patient> list = new ArrayList<>();
-        if (patientRepository.count() == 0) {
-            String[][] patientData = {
-                {"Ramesh", "Kumar", "MALE", "1960-04-10", "Retired Govt Officer", "B+", "AIIMS-2024-001001", "Meera Kumar", "SPOUSE", "+91-9820001001"},
-                {"Anita", "Sharma", "FEMALE", "1975-09-25", "Teacher", "O+", "AIIMS-2024-001002", "Ravi Sharma", "SPOUSE", "+91-9820002002"},
-                {"Mohammed", "Azhar", "MALE", "1988-12-03", "Software Engineer", "A+", "AIIMS-2024-001003", "Khalid Azhar", "PARENT", "+91-9820003003"},
-                {"Lakshmi", "Iyer", "FEMALE", "1950-07-18", "Homemaker", "AB-", "AIIMS-2024-001004", "Gita Iyer", "DAUGHTER", "+91-9820004004"},
-                {"Suresh", "Naidu", "MALE", "1995-02-28", "Student", "O-", "APL-2024-005001", "Lata Naidu", "PARENT", "+91-9820005005"}
-            };
+    private Practitioner createPractitioner(Person person, String identifier, String type, String primarySpecialty, String licenseNo, String authority, String subSpecialtyName, String subSpecialtyCode) {
+        return practitionerRepository.findByIdentifier(identifier).orElseGet(() -> {
+            Practitioner p = new Practitioner();
+            p.setPerson(person);
+            p.setIdentifier(identifier);
+            p.setPractitionerType(type);
+            p.setPrimarySpecialty(primarySpecialty);
+            p.setStatus("ACTIVE");
+            p.setCreatedAt(OffsetDateTime.now());
+            p.setUpdatedAt(OffsetDateTime.now());
+            p = practitionerRepository.save(p);
 
-            for (int i = 0; i < patientData.length; i++) {
-                String[] row = patientData[i];
-                Person person;
-                if (i == 0 && users.containsKey("ramesh.kumar") && users.get("ramesh.kumar").getPerson() != null) {
-                    person = users.get("ramesh.kumar").getPerson();
-                } else {
-                    person = new Person();
-                    person.setFirstName(row[0]);
-                    person.setLastName(row[1]);
-                    person.setSexAtBirth(row[2]);
-                    person.setDateOfBirth(LocalDate.parse(row[3]));
-                    person = personRepository.save(person);
-                }
+            // License
+            PractitionerLicense lic = new PractitionerLicense();
+            lic.setPractitioner(p);
+            lic.setLicenseNumber(licenseNo);
+            lic.setIssuingAuthority(authority);
+            lic.setState("Delhi");
+            lic.setValidFrom(LocalDate.of(2015, 1, 1));
+            lic.setValidTo(LocalDate.of(2030, 12, 31));
+            practitionerLicenseRepository.save(lic);
 
+            // Specialty
+            PractitionerSpecialty spec = new PractitionerSpecialty();
+            spec.setPractitioner(p);
+            spec.setSpecialtyCode(subSpecialtyCode);
+            spec.setSpecialtyName(subSpecialtyName);
+            spec.setIsPrimary(true);
+            practitionerSpecialtyRepository.save(spec);
+
+            return p;
+        });
+    }
+
+    // =========================================================================
+    // 5. PATIENTS & DEMOGRAPHICS
+    // =========================================================================
+    public static class PatientContext {
+        public Patient patient;
+        public String mrn;
+        public Person person;
+        public Organization organization;
+    }
+
+    private List<PatientContext> initPatients(TenancyContext tenancy, IdentityContext identity) {
+        List<PatientContext> list = new ArrayList<>();
+
+        Object[][] patientDefs = {
+            {
+                "Ramesh", "Kumar", "MALE", LocalDate.of(1960, 4, 10), "AIIMS-2024-001001", tenancy.aiims,
+                "B+", "POSITIVE", "Asian Indian", "Hindu", "Retired Govt Officer",
+                "B-42, Gulmohar Park", "Near Community Center", "New Delhi", "Delhi", "110049",
+                "+91-9810011001", "ramesh.kumar@gmail.com",
+                "Meera Kumar", "SPOUSE", "+91-9810011002", "meera.kumar@gmail.com",
+                "Severe Penicillin Anaphylaxis", "Penicillin G", "HIGH",
+                "Essential Hypertension (2010), Prior TIA (2018)", "Appendectomy (1995)", "Father had CAD / MI at age 55 (deceased)",
+                "Ex-smoker (15 pack-years, quit 2015)", "NO", "WHATSAPP", "Hindi, English"
+            },
+            {
+                "Anita", "Sharma", "FEMALE", LocalDate.of(1975, 9, 25), "AIIMS-2024-001002", tenancy.aiims,
+                "O+", "POSITIVE", "Asian Indian", "Hindu", "Senior High School Teacher",
+                "Flat 304, Green Valley Apts", "Pocket D, Mayur Vihar Phase 2", "New Delhi", "Delhi", "110091",
+                "+91-9820022002", "anita.sharma75@gmail.com",
+                "Ravi Sharma", "SPOUSE", "+91-9820022003", "ravi.sharma75@gmail.com",
+                "Peanut Allergy with Bronchospasm", "Peanuts", "MODERATE",
+                "Chronic Tension Headaches, Mild Cervical Spondylosis", "Cholecystectomy (2020)", "Mother had Hypertension",
+                "Non-smoker, Social Alcohol (<1 unit/month)", "YES", "EMAIL", "English, Hindi"
+            },
+            {
+                "Mohammed", "Azhar", "MALE", LocalDate.of(1988, 12, 3), "AIIMS-2024-001003", tenancy.aiims,
+                "A+", "POSITIVE", "Asian Indian", "Muslim", "Lead Software Architect",
+                "Tower 4, 1202, Cyber City Enclave", "Sector 62", "Noida", "Uttar Pradesh", "201301",
+                "+91-9830033003", "mohammed.azhar.dev@gmail.com",
+                "Fatima Azhar", "SPOUSE", "+91-9830033004", "fatima.azhar@gmail.com",
+                "Sulfa Drugs Rash", "Sulfamethoxazole", "LOW",
+                "Type 2 Diabetes Mellitus (2021), Dyslipidemia", "None", "Strong family history of Type 2 Diabetes in both parents",
+                "Non-smoker, Non-drinker", "NO", "SMS", "English, Urdu"
+            },
+            {
+                "Lakshmi", "Iyer", "FEMALE", LocalDate.of(1950, 7, 18), "AIIMS-2024-001004", tenancy.aiims,
+                "AB-", "NEGATIVE", "Asian Indian", "Hindu", "Retired Bank Officer",
+                "House 18, Block C, Chittaranjan Park", "Near Kali Mandir", "New Delhi", "Delhi", "110019",
+                "+91-9840044004", "lakshmi.iyer1950@gmail.com",
+                "Gita Iyer", "DAUGHTER", "+91-9840044005", "gita.iyer@gmail.com",
+                "Contrast Media Allergy (Iodinated)", "Omnipaque", "MODERATE",
+                "Osteoarthritis Bilateral Knees, Bronchial Asthma", "Total Knee Replacement Right (2019)", "Mother had Osteoporosis",
+                "Non-smoker, Vegetarian diet", "YES", "PHONE", "Tamil, English, Hindi"
+            },
+            {
+                "Suresh", "Naidu", "MALE", LocalDate.of(1995, 2, 28), "APL-2024-005001", tenancy.apollo,
+                "O-", "NEGATIVE", "Asian Indian", "Hindu", "Postgraduate Student",
+                "Room 402, PG Hostel, Sector 15", "CBD Belapur", "Navi Mumbai", "Maharashtra", "400614",
+                "+91-9850055005", "suresh.naidu95@gmail.com",
+                "Lata Naidu", "PARENT", "+91-9850055006", "lata.naidu@gmail.com",
+                "NSAID Induced Gastritis", "Ibuprofen", "LOW",
+                "Seasonal Allergic Rhinitis", "None", "No known chronic illnesses in first-degree relatives",
+                "Occasional tobacco use, gym enthusiast", "NO", "WHATSAPP", "English, Telugu, Marathi"
+            }
+        };
+
+        for (int i = 0; i < patientDefs.length; i++) {
+            Object[] pRow = patientDefs[i];
+            String firstName = (String) pRow[0];
+            String lastName = (String) pRow[1];
+            String sex = (String) pRow[2];
+            LocalDate dob = (LocalDate) pRow[3];
+            String mrn = (String) pRow[4];
+            Organization org = (Organization) pRow[5];
+
+            // Re-use Person from user if matched, otherwise create
+            Person pPerson;
+            if (i == 0 && identity.rameshUser != null && identity.rameshUser.getPerson() != null) {
+                pPerson = identity.rameshUser.getPerson();
+            } else if (i == 1 && identity.anitaUser != null && identity.anitaUser.getPerson() != null) {
+                pPerson = identity.anitaUser.getPerson();
+            } else {
+                Person newPerson = new Person(firstName, lastName, sex, dob);
+                newPerson.setNationality("Indian");
+                newPerson.setPreferredLanguage((String) pRow[31]);
+                pPerson = personRepository.save(newPerson);
+            }
+
+            Patient patient = patientRepository.findByPersonId(pPerson.getId()).orElseGet(() -> {
                 Patient p = new Patient();
-                p.setPerson(person);
+                p.setPerson(pPerson);
                 p.setStatus("ACTIVE");
-                p = patientRepository.save(p);
+                p.setCreatedAt(OffsetDateTime.now());
+                p.setUpdatedAt(OffsetDateTime.now());
+                return patientRepository.save(p);
+            });
 
+            // Patient Org (MRN)
+            patientOrganizationRepository.findByPatientIdAndOrganizationId(patient.getId(), org.getId()).orElseGet(() -> {
                 PatientOrganization po = new PatientOrganization();
-                po.setPatient(p);
+                po.setPatient(patient);
                 po.setOrganization(org);
-                po.setMrn(row[6]);
+                po.setMrn(mrn);
                 po.setPatientStatus("ACTIVE");
-                po.setRegisteredAt(OffsetDateTime.now());
-                patientOrganizationRepository.save(po);
+                po.setRegisteredAt(OffsetDateTime.now().minusMonths(6));
+                return patientOrganizationRepository.save(po);
+            });
 
-                // Demographics
+            // Demographics
+            if (patientDemographicsRepository.findByPatientId(patient.getId()).isEmpty()) {
                 PatientDemographics demo = new PatientDemographics();
-                demo.setPatient(p);
-                demo.setBloodGroup(row[5]);
-                demo.setEthnicity(row[4]);
+                demo.setPatient(patient);
+                demo.setBloodGroup((String) pRow[6]);
+                demo.setRhFactor((String) pRow[7]);
+                demo.setRace((String) pRow[8]);
+                demo.setEthnicity((String) pRow[8]);
+                demo.setReligion((String) pRow[9]);
                 patientDemographicsRepository.save(demo);
+            }
 
-                // Emergency Contact
-                EmergencyContact ec = new EmergencyContact(row[7], row[8], row[9]);
-                ec.setPatient(p);
+            // Address
+            if (patientAddressRepository.findByPatientId(patient.getId()).isEmpty()) {
+                PatientAddress addr = new PatientAddress();
+                addr.setPatient(patient);
+                addr.setAddressType("HOME");
+                addr.setAddressLine1((String) pRow[11]);
+                addr.setAddressLine2((String) pRow[12]);
+                addr.setCity((String) pRow[13]);
+                addr.setState((String) pRow[14]);
+                addr.setPostalCode((String) pRow[15]);
+                addr.setCountryCode("IN");
+                addr.setIsPrimary(true);
+                patientAddressRepository.save(addr);
+            }
+
+            // Phone
+            if (patientPhoneNumberRepository.findByPatientId(patient.getId()).isEmpty()) {
+                PatientPhoneNumber phone = new PatientPhoneNumber();
+                phone.setPatient(patient);
+                phone.setPhoneType("MOBILE");
+                phone.setPhoneNumber((String) pRow[16]);
+                phone.setIsPrimary(true);
+                patientPhoneNumberRepository.save(phone);
+            }
+
+            // Email
+            if (patientEmailAddressRepository.findByPatientId(patient.getId()).isEmpty()) {
+                PatientEmailAddress email = new PatientEmailAddress();
+                email.setPatient(patient);
+                email.setEmailType("PERSONAL");
+                email.setEmail((String) pRow[17]);
+                email.setIsPrimary(true);
+                patientEmailAddressRepository.save(email);
+            }
+
+            // Emergency Contact
+            if (emergencyContactRepository.findByPatientId(patient.getId()).isEmpty()) {
+                EmergencyContact ec = new EmergencyContact((String) pRow[18], (String) pRow[19], (String) pRow[20]);
+                ec.setPatient(patient);
+                ec.setEmail((String) pRow[21]);
+                ec.setAddress(pRow[11] + ", " + pRow[13]);
                 ec.setIsPrimary(true);
                 ec.setCanMakeMedicalDecisions(true);
                 emergencyContactRepository.save(ec);
-
-                list.add(p);
             }
-        } else {
-            list = patientRepository.findAll();
+
+            // Medical Alert
+            if (patientMedicalAlertRepository.findByPatientId(patient.getId()).isEmpty()) {
+                PatientMedicalAlert alert = new PatientMedicalAlert();
+                alert.setPatient(patient);
+                alert.setAlertType("ALLERGY");
+                alert.setAlertMessage((String) pRow[22]);
+                alert.setSeverity((String) pRow[24]);
+                alert.setActive(true);
+                patientMedicalAlertRepository.save(alert);
+            }
+
+            // Medical History
+            if (patientMedicalHistoryRepository.findByPatientId(patient.getId()).isEmpty()) {
+                PatientMedicalHistory medHist = new PatientMedicalHistory();
+                medHist.setPatient(patient);
+                medHist.setPastMedicalHistory((String) pRow[25]);
+                medHist.setPastSurgicalHistory((String) pRow[26]);
+                medHist.setFamilyHistory((String) pRow[27]);
+                medHist.setSocialHistory((String) pRow[28]);
+                medHist.setUpdatedAt(OffsetDateTime.now());
+                patientMedicalHistoryRepository.save(medHist);
+            }
+
+            // Surgical History item
+            if (patientSurgicalHistoryRepository.findByPatientId(patient.getId()).isEmpty()) {
+                PatientSurgicalHistory surg = new PatientSurgicalHistory();
+                surg.setPatient(patient);
+                surg.setProcedureName((String) pRow[26]);
+                surg.setProcedureCode("SURG-GEN-01");
+                surg.setPerformedAt(LocalDate.of(2020, 5, 10));
+                surg.setFacilityName(org.getName());
+                surg.setSurgeonName("Dr. Ashok Seth");
+                surg.setComplications("None noted. Uneventful post-operative recovery.");
+                surg.setNotes("Laparoscopic approach completed successfully.");
+                patientSurgicalHistoryRepository.save(surg);
+            }
+
+            // Family History item
+            if (patientFamilyHistoryRepository.findByPatientId(patient.getId()).isEmpty()) {
+                PatientFamilyHistory fam = new PatientFamilyHistory();
+                fam.setPatient(patient);
+                fam.setRelationship("FATHER");
+                fam.setConditionName("Coronary Artery Disease");
+                fam.setConditionCode("I25.1");
+                fam.setAgeAtOnset(55);
+                fam.setDeceased(true);
+                fam.setCauseOfDeath("Acute Myocardial Infarction");
+                fam.setNotes("First-degree relative with premature cardiovascular disease");
+                patientFamilyHistoryRepository.save(fam);
+            }
+
+            // Social History
+            if (patientSocialHistoryRepository.findByPatientId(patient.getId()).isEmpty()) {
+                PatientSocialHistory soc = new PatientSocialHistory();
+                soc.setPatient(patient);
+                soc.setSmokingStatus("FORMER_SMOKER");
+                soc.setSmokingQuantity("10 cigarettes/day");
+                soc.setSmokingStartDate(LocalDate.of(1985, 1, 1));
+                soc.setSmokingQuitDate(LocalDate.of(2015, 6, 1));
+                soc.setAlcoholStatus("NONE");
+                soc.setExerciseFrequency("3 times/week brisk walking");
+                soc.setOccupation((String) pRow[10]);
+                soc.setLivingSituation("Lives with spouse in independent apartment");
+                soc.setNotes("Good social support system");
+                soc.setRecordedAt(OffsetDateTime.now());
+                patientSocialHistoryRepository.save(soc);
+            }
+
+            // Substance Use
+            if (patientSubstanceUseRepository.findByPatientId(patient.getId()).isEmpty()) {
+                PatientSubstanceUse sub = new PatientSubstanceUse();
+                sub.setPatient(patient);
+                sub.setSubstanceName("Tobacco");
+                sub.setStatus("QUIT");
+                sub.setRoute("INHALATION");
+                sub.setFrequency("NONE");
+                sub.setQuantity("0");
+                sub.setStartDate(LocalDate.of(1985, 1, 1));
+                sub.setEndDate(LocalDate.of(2015, 6, 1));
+                sub.setNotes("Tobacco cessation counseling completed");
+                patientSubstanceUseRepository.save(sub);
+            }
+
+            // Dietary History
+            if (patientDietaryHistoryRepository.findByPatientId(patient.getId()).isEmpty()) {
+                PatientDietaryHistory diet = new PatientDietaryHistory();
+                diet.setPatient(patient);
+                diet.setDietType("CARDIAC_DIABETIC");
+                diet.setDietaryRestrictions("Low sodium (<2g/day), Low glycemic index, Low saturated fat");
+                diet.setFoodPreferences("Vegetarian with dairy and legumes");
+                diet.setNutritionalNotes("Advised balanced Mediterranean-style Indian diet");
+                diet.setRecordedAt(OffsetDateTime.now());
+                patientDietaryHistoryRepository.save(diet);
+            }
+
+            // Communication Preferences
+            if (patientCommunicationPreferencesRepository.findByPatientId(patient.getId()).isEmpty()) {
+                PatientCommunicationPreferences comm = new PatientCommunicationPreferences();
+                comm.setPatient(patient);
+                comm.setPreferredChannel((String) pRow[30]);
+                comm.setAllowSms(true);
+                comm.setAllowEmail(true);
+                comm.setAllowPhone(true);
+                comm.setAllowWhatsapp(true);
+                comm.setLanguage((String) pRow[31]);
+                patientCommunicationPreferencesRepository.save(comm);
+            }
+
+            // Patient Identifier (ABHA & Aadhaar Token)
+            if (patientIdentifierRepository.findByPatientId(patient.getId()).isEmpty()) {
+                PatientIdentifier abhaId = new PatientIdentifier();
+                abhaId.setPatient(patient);
+                abhaId.setIdentifierType("ABHA_NUMBER");
+                abhaId.setIdentifierValue("91-4920-1849-" + String.format("%04d", 1000 + i));
+                abhaId.setIssuingAuthority("National Health Authority (NHA)");
+                abhaId.setIsPrimary(true);
+                patientIdentifierRepository.save(abhaId);
+
+                PatientIdentifier abhaAddr = new PatientIdentifier();
+                abhaAddr.setPatient(patient);
+                abhaAddr.setIdentifierType("ABHA_ADDRESS");
+                abhaAddr.setIdentifierValue(firstName.toLowerCase() + "." + lastName.toLowerCase() + "@sbx");
+                abhaAddr.setIssuingAuthority("ABDM Sandbox Gateway");
+                abhaAddr.setIsPrimary(false);
+                patientIdentifierRepository.save(abhaAddr);
+            }
+
+            PatientContext pctx = new PatientContext();
+            pctx.patient = patient;
+            pctx.mrn = mrn;
+            pctx.person = pPerson;
+            pctx.organization = org;
+            list.add(pctx);
         }
+
         return list;
     }
 
-    private void initClinical(TenancyContext tenancy, Map<String, User> users, List<Patient> patients) {
-        if (patients.isEmpty() || encounterRepository.count() > 0) return;
-
-        Patient p1 = patients.get(0); // Ramesh Kumar
-        User arjun = users.get("arjun.sharma");
-
-        // 1. Encounter
-        Encounter enc = new Encounter();
-        enc.setOrganization(tenancy.aiims);
-        enc.setFacility(tenancy.aiimsMain);
-        enc.setDepartment(tenancy.cardio);
-        enc.setPatient(p1);
-        enc.setEncounterNumber("ENC-2024-001001");
-        enc.setEncounterType("INPATIENT");
-        enc.setStatus("IN_PROGRESS");
-        enc.setChiefComplaint("Acute chest pain and diaphoresis");
-        enc.setStartedAt(OffsetDateTime.now().minusDays(1));
-        enc.setCreatedBy(arjun);
-        enc = encounterRepository.save(enc);
-
-        // 2. Vitals
-        Vitals v = new Vitals();
-        v.setOrganization(tenancy.aiims);
-        v.setPatient(p1);
-        v.setEncounter(enc);
-        v.setSystolicBp(new BigDecimal("145"));
-        v.setDiastolicBp(new BigDecimal("92"));
-        v.setHeartRate(new BigDecimal("98"));
-        v.setRespiratoryRate(new BigDecimal("20"));
-        v.setTemperature(new BigDecimal("37.1"));
-        v.setOxygenSaturation(new BigDecimal("94.0"));
-        v.setRecordedBy(arjun);
-        vitalsRepository.save(v);
-
-        // 3. Allergy
-        Allergy a = new Allergy();
-        a.setPatient(p1);
-        a.setOrganization(tenancy.aiims);
-        a.setAllergenName("Penicillin");
-        a.setCategory("DRUG");
-        a.setReaction("Urticaria and facial angioedema");
-        a.setSeverity("SEVERE");
-        a.setStatus("ACTIVE");
-        a.setOnsetDate(LocalDate.of(2012, 4, 15));
-        a.setRecordedBy(arjun);
-        allergyRepository.save(a);
-
-        // 4. Diagnosis
-        Diagnosis d = new Diagnosis();
-        d.setPatient(p1);
-        d.setDoctor(arjun);
-        d.setConditionName("ST elevation myocardial infarction (STEMI) — anterior wall");
-        d.setIcdCode("I21.0");
-        d.setStatus("active");
-        d.setRecordedAt(OffsetDateTime.now());
-        diagnosisRepository.save(d);
-
-        // 5. Clinical Document
-        ClinicalDocument doc = new ClinicalDocument();
-        doc.setOrganization(tenancy.aiims);
-        doc.setPatient(p1);
-        doc.setEncounter(enc);
-        doc.setDocumentType("PROGRESS_NOTE");
-        doc.setTitle("Cardiology Inpatient Progress Note — Day 1");
-        doc.setAuthorUser(arjun);
-        doc.setStatus("FINAL");
-        clinicalDocumentRepository.save(doc);
+    // =========================================================================
+    // 6. CLINICAL ENCOUNTERS, DIAGNOSES, VITALS, NOTES & FLOWSHEETS
+    // =========================================================================
+    public static class ClinicalContext {
+        public Encounter encRamesh;
+        public Encounter encAnita;
+        public Encounter encAzhar;
+        public Encounter encLakshmi;
+        public Encounter encSuresh;
+        public CareTeam cardioTeam;
     }
 
-    private void initPharmacy(TenancyContext tenancy, Map<String, User> users, List<Patient> patients) {
+    private ClinicalContext initClinical(TenancyContext tenancy, IdentityContext identity, List<PatientContext> patients, TerminologyContext terminology) {
+        ClinicalContext ctx = new ClinicalContext();
+        if (patients.isEmpty() || encounterRepository.count() > 0) {
+            List<Encounter> existing = encounterRepository.findAll();
+            if (!existing.isEmpty()) {
+                ctx.encRamesh = existing.get(0);
+            }
+            return ctx;
+        }
+
+        PatientContext pRamesh = patients.get(0);
+        PatientContext pAnita = patients.get(1);
+        PatientContext pAzhar = patients.get(2);
+        PatientContext pLakshmi = patients.get(3);
+        PatientContext pSuresh = patients.get(4);
+
+        // 1. Encounter 1: Ramesh Kumar (Inpatient STEMI in CCU)
+        ctx.encRamesh = new Encounter();
+        ctx.encRamesh.setOrganization(tenancy.aiims);
+        ctx.encRamesh.setFacility(tenancy.aiimsMain);
+        ctx.encRamesh.setDepartment(tenancy.cardio);
+        ctx.encRamesh.setPatient(pRamesh.patient);
+        ctx.encRamesh.setCreatedBy(identity.arjun);
+        ctx.encRamesh.setEncounterNumber("ENC-2024-001001");
+        ctx.encRamesh.setEncounterType("INPATIENT");
+        ctx.encRamesh.setStatus("IN_PROGRESS");
+        ctx.encRamesh.setChiefComplaint("Severe retrosternal chest pain with left arm radiation, diaphoresis, and nausea x 3 hours");
+        ctx.encRamesh.setReasonForVisit("Acute Coronary Syndrome / ST Elevation Myocardial Infarction");
+        ctx.encRamesh.setAdmissionSource("EMERGENCY_DEPARTMENT");
+        ctx.encRamesh.setAdmissionType("EMERGENCY");
+        ctx.encRamesh.setAcuity("LEVEL_1_RESUSCITATION");
+        ctx.encRamesh.setStartedAt(OffsetDateTime.now().minusDays(1));
+        ctx.encRamesh = encounterRepository.save(ctx.encRamesh);
+
+        // Admission record for Ramesh
+        Admission admRamesh = new Admission();
+        admRamesh.setEncounter(ctx.encRamesh);
+        admRamesh.setPatient(pRamesh.patient);
+        admRamesh.setAdmissionSource("EMERGENCY_ROOM");
+        admRamesh.setAdmitReason("Anterior Wall STEMI with acute hemodynamic instability");
+        admRamesh.setAdmittedAt(OffsetDateTime.now().minusDays(1));
+        admissionRepository.save(admRamesh);
+
+        // Bed Location
+        EncounterLocation locRamesh = new EncounterLocation();
+        locRamesh.setEncounter(ctx.encRamesh);
+        locRamesh.setBed(tenancy.bedCcu1);
+        locRamesh.setStartTime(OffsetDateTime.now().minusDays(1));
+        locRamesh.setStatus("ACTIVE");
+        encounterLocationRepository.save(locRamesh);
+
+        // Vitals Set 1 (Emergency Arrival)
+        Vitals v1 = new Vitals();
+        v1.setOrganization(tenancy.aiims);
+        v1.setPatient(pRamesh.patient);
+        v1.setEncounter(ctx.encRamesh);
+        v1.setRecordedBy(identity.sunita);
+        v1.setRecordedAt(OffsetDateTime.now().minusDays(1));
+        v1.setSystolicBp(new BigDecimal("154"));
+        v1.setDiastolicBp(new BigDecimal("98"));
+        v1.setMeanArterialPressure(new BigDecimal("116.7"));
+        v1.setHeartRate(new BigDecimal("104"));
+        v1.setRespiratoryRate(new BigDecimal("22"));
+        v1.setTemperature(new BigDecimal("37.2"));
+        v1.setTemperatureUnit("C");
+        v1.setOxygenSaturation(new BigDecimal("93.5"));
+        v1.setHeightCm(new BigDecimal("172.0"));
+        v1.setWeightKg(new BigDecimal("78.5"));
+        v1.setBloodGlucose(new BigDecimal("165.0"));
+        v1.setGlucoseUnit("mg/dL");
+        v1.setPainScore(new BigDecimal("9"));
+        v1.setPosition("SUPINE");
+        v1.setOxygenDeliveryMethod("NASAL_CANNULA_4L");
+        v1.setNotes("Tachycardic, cool clammy extremities, continuous ECG monitoring started");
+        vitalsRepository.save(v1);
+
+        // Vitals Set 2 (Post-PCI Stabilization)
+        Vitals v2 = new Vitals();
+        v2.setOrganization(tenancy.aiims);
+        v2.setPatient(pRamesh.patient);
+        v2.setEncounter(ctx.encRamesh);
+        v2.setRecordedBy(identity.sunita);
+        v2.setRecordedAt(OffsetDateTime.now().minusHours(4));
+        v2.setSystolicBp(new BigDecimal("122"));
+        v2.setDiastolicBp(new BigDecimal("78"));
+        v2.setMeanArterialPressure(new BigDecimal("92.7"));
+        v2.setHeartRate(new BigDecimal("72"));
+        v2.setRespiratoryRate(new BigDecimal("16"));
+        v2.setTemperature(new BigDecimal("36.8"));
+        v2.setTemperatureUnit("C");
+        v2.setOxygenSaturation(new BigDecimal("98.5"));
+        v2.setPainScore(new BigDecimal("1"));
+        v2.setPosition("SEMI_FOWLER");
+        v2.setOxygenDeliveryMethod("ROOM_AIR");
+        v2.setNotes("Post-stenting hemodynamically stable. Pain reduced to 1/10.");
+        vitalsRepository.save(v2);
+
+        // Triage EWS Record
+        TriageEwsRecord triage = new TriageEwsRecord();
+        triage.setPatient(pRamesh.patient);
+        triage.setRecordedBy(identity.rahul);
+        triage.setChiefComplaint("Crushing chest pain radiating to left shoulder and jaw");
+        triage.setTriagePriority("EMERGENT");
+        triage.setVitalsSummary("BP 154/98, HR 104, RR 22, SpO2 93%, NEWS2 Score: 6 (HIGH RISK)");
+        triage.setNotes("Immediate ECG activated Cath Lab STEMI pathway. Dual antiplatelets loaded.");
+        triage.setRecordedAt(OffsetDateTime.now().minusDays(1));
+        triageEwsRecordRepository.save(triage);
+
+        // Allergies
+        Allergy al1 = new Allergy();
+        al1.setPatient(pRamesh.patient);
+        al1.setOrganization(tenancy.aiims);
+        al1.setAllergenName("Penicillin");
+        al1.setAllergenCode("70618");
+        al1.setCategory("DRUG");
+        al1.setReaction("Anaphylaxis, severe facial angioedema and bronchospasm");
+        al1.setSeverity("SEVERE");
+        al1.setStatus("ACTIVE");
+        al1.setVerificationStatus("CONFIRMED");
+        al1.setOnsetDate(LocalDate.of(2012, 4, 15));
+        al1.setRecordedBy(identity.arjun);
+        al1.setNotes("Documented severe hypersensitivity reaction. Avoid all beta-lactams without allergy testing.");
+        allergyRepository.save(al1);
+
+        // Diagnoses
+        Diagnosis d1 = new Diagnosis();
+        d1.setPatient(pRamesh.patient);
+        d1.setDoctor(identity.arjun);
+        d1.setConditionName("ST elevation myocardial infarction (STEMI) — anterior wall");
+        d1.setIcdCode("I21.0");
+        d1.setSnomedCode("22298006");
+        d1.setStatus("active");
+        d1.setOnsetDate(OffsetDateTime.now().minusDays(1));
+        d1.setNotes("Primary culprit lesion in proximal LAD artery, successfully treated with 3.0x18mm DES.");
+        diagnosisRepository.save(d1);
+
+        Diagnosis d2 = new Diagnosis();
+        d2.setPatient(pRamesh.patient);
+        d2.setDoctor(identity.arjun);
+        d2.setConditionName("Essential (primary) hypertension");
+        d2.setIcdCode("I10");
+        d2.setSnomedCode("38341003");
+        d2.setStatus("active");
+        d2.setOnsetDate(OffsetDateTime.now().minusYears(14));
+        d2.setNotes("Longstanding systemic hypertension on regular antihypertensive therapy.");
+        diagnosisRepository.save(d2);
+
+        // Problem List
+        ProblemList pl1 = new ProblemList();
+        pl1.setOrganization(tenancy.aiims);
+        pl1.setPatient(pRamesh.patient);
+        pl1.setRecordedBy(identity.arjun);
+        pl1.setProblemName("Acute Coronary Syndrome (STEMI)");
+        pl1.setCode("I21.0");
+        pl1.setCodeSystem("ICD-10");
+        pl1.setStatus("ACTIVE");
+        pl1.setOnsetDate(LocalDate.now().minusDays(1));
+        pl1.setNotes("Status post emergency primary PCI to proximal LAD");
+        problemListRepository.save(pl1);
+
+        // Clinical Observations
+        ClinicalObservation obs1 = new ClinicalObservation();
+        obs1.setPatient(pRamesh.patient);
+        obs1.setEncounter(ctx.encRamesh);
+        obs1.setRecordedBy(identity.sunita);
+        obs1.setObservationCode("GLASGOW_COMA_SCALE");
+        obs1.setObservationName("Glasgow Coma Scale Total Score");
+        obs1.setValueString("15");
+        obs1.setValueUnit("points");
+        obs1.setStatus("FINAL");
+        obs1.setObservedAt(OffsetDateTime.now().minusHours(8));
+        clinicalObservationRepository.save(obs1);
+
+        // Clinical Note (SOAP Note)
+        ClinicalDocument doc1 = new ClinicalDocument();
+        doc1.setOrganization(tenancy.aiims);
+        doc1.setPatient(pRamesh.patient);
+        doc1.setEncounter(ctx.encRamesh);
+        doc1.setAuthorUser(identity.arjun);
+        doc1.setDocumentType("PROGRESS_NOTE");
+        doc1.setTitle("Cardiology CCU Inpatient Progress Note — Day 1");
+        doc1.setStatus("FINAL");
+        doc1.setAuthoredAt(OffsetDateTime.now().minusHours(3));
+        doc1 = clinicalDocumentRepository.save(doc1);
+
+        ClinicalDocumentVersion doc1Ver = new ClinicalDocumentVersion();
+        doc1Ver.setDocument(doc1);
+        doc1Ver.setVersionNumber(1);
+        doc1Ver.setAuthoredBy(identity.arjun);
+        doc1Ver.setAuthoredAt(OffsetDateTime.now().minusHours(3));
+        doc1Ver.setContent("SUBJECTIVE: 64yo male s/p primary PCI to proximal LAD (3.0x18mm Xience DES). Patient reports complete resolution of chest pain. Tolerating oral fluids well.\n"
+                + "OBJECTIVE: BP 122/78, HR 72 NSR, SpO2 98% RA. Lungs clear bilaterally. Radial puncture site clean, intact, soft, no hematoma. Distal radial pulse 2+.\n"
+                + "ASSESSMENT: Anterior STEMI successfully revascularized with TIMI-3 distal flow. Hemodynamically stable. Peak Troponin-I: 450 pg/mL.\n"
+                + "PLAN: Continue DAPT (Aspirin 75mg + Ticagrelor 90mg BD), High-intensity statin (Atorvastatin 80mg), Metoprolol 50mg OD, Ramipril 2.5mg OD. Plan step-down transfer tomorrow.");
+        clinicalDocumentVersionRepository.save(doc1Ver);
+
+        // Nursing Flowsheet
+        NursingFlowsheet flowsheet = new NursingFlowsheet();
+        flowsheet.setPatient(pRamesh.patient);
+        flowsheet.setEncounter(ctx.encRamesh);
+        flowsheet.setRecordedBy(identity.sunita);
+        flowsheet.setFlowsheetType("ICU_INTAKE_OUTPUT");
+        flowsheet.setStatus("COMPLETED");
+        flowsheet.setRecordedAt(OffsetDateTime.now().minusHours(2));
+        flowsheet = nursingFlowsheetRepository.save(flowsheet);
+
+        saveFlowsheetEntry(flowsheet, "IV_FLUIDS_ML", "1000");
+        saveFlowsheetEntry(flowsheet, "ORAL_FLUIDS_ML", "600");
+        saveFlowsheetEntry(flowsheet, "URINE_OUTPUT_ML", "1250");
+        saveFlowsheetEntry(flowsheet, "NET_BALANCE_ML", "+350");
+        saveFlowsheetEntry(flowsheet, "RADIAL_DRESSING_STATUS", "DRY_AND_INTACT");
+
+        // Care Team
+        ctx.cardioTeam = new CareTeam();
+        ctx.cardioTeam.setOrganization(tenancy.aiims);
+        ctx.cardioTeam.setPatient(pRamesh.patient);
+        ctx.cardioTeam.setEncounter(ctx.encRamesh);
+        ctx.cardioTeam.setName("AIIMS Acute Coronary Care Team");
+        ctx.cardioTeam.setStatus("ACTIVE");
+        ctx.cardioTeam = careTeamRepository.save(ctx.cardioTeam);
+
+        CareTeamMember ctm1 = new CareTeamMember();
+        ctm1.setCareTeam(ctx.cardioTeam);
+        ctm1.setPractitioner(identity.arjunPrac);
+        ctm1.setUser(identity.arjun);
+        ctm1.setRole("ATTENDING_CARDIOLOGIST");
+        ctm1.setStartedAt(OffsetDateTime.now().minusDays(1));
+        careTeamMemberRepository.save(ctm1);
+
+        CareTeamMember ctm2 = new CareTeamMember();
+        ctm2.setCareTeam(ctx.cardioTeam);
+        ctm2.setPractitioner(identity.sunitaPrac);
+        ctm2.setUser(identity.sunita);
+        ctm2.setRole("PRIMARY_ICU_NURSE");
+        ctm2.setStartedAt(OffsetDateTime.now().minusDays(1));
+        careTeamMemberRepository.save(ctm2);
+
+        // Transfer Record (Emergency Bay to CCU)
+        Transfer tr = new Transfer();
+        tr.setEncounter(ctx.encRamesh);
+        tr.setOrganization(tenancy.aiims);
+        tr.setFromDepartment(tenancy.emer);
+        tr.setFromWard(tenancy.emerBay);
+        tr.setFromBed(tenancy.bedEr1);
+        tr.setToDepartment(tenancy.cardio);
+        tr.setToWard(tenancy.ccu);
+        tr.setToBed(tenancy.bedCcu1);
+        tr.setTransferredBy(identity.rahul);
+        tr.setTransferredAt(OffsetDateTime.now().minusDays(1).plusHours(2));
+        tr.setReason("Post-Cath Lab PCI transfer for continuous CCU hemodynamic monitoring");
+        transferRepository.save(tr);
+
+        // 2. Encounter 2: Anita Sharma (Completed Outpatient Neurology consult)
+        ctx.encAnita = new Encounter();
+        ctx.encAnita.setOrganization(tenancy.aiims);
+        ctx.encAnita.setFacility(tenancy.aiimsOpd);
+        ctx.encAnita.setDepartment(tenancy.neuro);
+        ctx.encAnita.setPatient(pAnita.patient);
+        ctx.encAnita.setCreatedBy(identity.priya);
+        ctx.encAnita.setEncounterNumber("ENC-2024-001002");
+        ctx.encAnita.setEncounterType("OUTPATIENT");
+        ctx.encAnita.setStatus("COMPLETED");
+        ctx.encAnita.setChiefComplaint("Chronic bilateral throbbing tension headaches increasing in frequency over 4 months");
+        ctx.encAnita.setReasonForVisit("Neurological evaluation for refractory headache disorder");
+        ctx.encAnita.setStartedAt(OffsetDateTime.now().minusDays(3).withHour(10).withMinute(0));
+        ctx.encAnita.setEndedAt(OffsetDateTime.now().minusDays(3).withHour(10).withMinute(45));
+        ctx.encAnita.setDisposition("DISCHARGED_HOME");
+        ctx.encAnita = encounterRepository.save(ctx.encAnita);
+
+        // Discharge summary for Anita
+        Discharge dschAnita = new Discharge();
+        dschAnita.setEncounter(ctx.encAnita);
+        dschAnita.setPatient(pAnita.patient);
+        dschAnita.setDischargeDisposition("HOME");
+        dschAnita.setDischargeSummary("Advised lifestyle modifications, adequate hydration, stress mitigation. Started Propranolol 40mg OD prophylaxis.");
+        dschAnita.setDischargedAt(OffsetDateTime.now().minusDays(3).withHour(10).withMinute(45));
+        dischargeRepository.save(dschAnita);
+
+        // 3. Encounter 3: Mohammed Azhar (General Medicine Outpatient)
+        ctx.encAzhar = new Encounter();
+        ctx.encAzhar.setOrganization(tenancy.aiims);
+        ctx.encAzhar.setFacility(tenancy.aiimsOpd);
+        ctx.encAzhar.setDepartment(tenancy.genmed);
+        ctx.encAzhar.setPatient(pAzhar.patient);
+        ctx.encAzhar.setCreatedBy(identity.rajesh);
+        ctx.encAzhar.setEncounterNumber("ENC-2024-001003");
+        ctx.encAzhar.setEncounterType("OUTPATIENT");
+        ctx.encAzhar.setStatus("IN_PROGRESS");
+        ctx.encAzhar.setChiefComplaint("Routine quarterly diabetic follow-up and glycemic optimization");
+        ctx.encAzhar.setStartedAt(OffsetDateTime.now().minusHours(2));
+        ctx.encAzhar = encounterRepository.save(ctx.encAzhar);
+
+        // 4. Encounter 4: Lakshmi Iyer
+        ctx.encLakshmi = new Encounter();
+        ctx.encLakshmi.setOrganization(tenancy.aiims);
+        ctx.encLakshmi.setFacility(tenancy.aiimsMain);
+        ctx.encLakshmi.setDepartment(tenancy.genmed);
+        ctx.encLakshmi.setPatient(pLakshmi.patient);
+        ctx.encLakshmi.setCreatedBy(identity.rajesh);
+        ctx.encLakshmi.setEncounterNumber("ENC-2024-001004");
+        ctx.encLakshmi.setEncounterType("INPATIENT");
+        ctx.encLakshmi.setStatus("COMPLETED");
+        ctx.encLakshmi.setChiefComplaint("Acute wheezing and productive cough in known asthma patient");
+        ctx.encLakshmi.setStartedAt(OffsetDateTime.now().minusDays(7));
+        ctx.encLakshmi.setEndedAt(OffsetDateTime.now().minusDays(5));
+        ctx.encLakshmi.setDisposition("DISCHARGED_HOME");
+        ctx.encLakshmi = encounterRepository.save(ctx.encLakshmi);
+
+        // 5. Encounter 5: Suresh Naidu (Apollo Emergency)
+        ctx.encSuresh = new Encounter();
+        ctx.encSuresh.setOrganization(tenancy.apollo);
+        ctx.encSuresh.setFacility(tenancy.apolloMumbai);
+        ctx.encSuresh.setDepartment(null);
+        ctx.encSuresh.setPatient(pSuresh.patient);
+        ctx.encSuresh.setCreatedBy(identity.orgAdminVikram);
+        ctx.encSuresh.setEncounterNumber("ENC-2024-005001");
+        ctx.encSuresh.setEncounterType("EMERGENCY");
+        ctx.encSuresh.setStatus("COMPLETED");
+        ctx.encSuresh.setChiefComplaint("Right lower quadrant abdominal pain with low grade fever");
+        ctx.encSuresh.setStartedAt(OffsetDateTime.now().minusDays(2));
+        ctx.encSuresh.setEndedAt(OffsetDateTime.now().minusDays(2).plusHours(4));
+        ctx.encSuresh = encounterRepository.save(ctx.encSuresh);
+
+        return ctx;
+    }
+
+    private void saveFlowsheetEntry(NursingFlowsheet flowsheet, String key, String value) {
+        NursingFlowsheetEntry entry = new NursingFlowsheetEntry();
+        entry.setFlowsheet(flowsheet);
+        entry.setItemKey(key);
+        entry.setItemValue(value);
+        nursingFlowsheetEntryRepository.save(entry);
+    }
+
+    // =========================================================================
+    // 7. LABORATORY
+    // =========================================================================
+    private void initLaboratory(TenancyContext tenancy, IdentityContext identity, List<PatientContext> patients, ClinicalContext clinical) {
+        if (patients.isEmpty() || labOrderRepository.count() > 0) return;
+
+        // Lab Catalog
+        LabTestCatalog catTrop = saveLabCatalog("TROP-I", "Troponin-I High Sensitivity", "49563-0", "CARDIAC", "0 - 14", "pg/mL");
+        LabTestCatalog catCbc = saveLabCatalog("CBC", "Complete Blood Count Panel", "58410-2", "HEMATOLOGY", "Standard", "Various");
+        LabTestCatalog catHba1c = saveLabCatalog("HBA1C", "Glycated Hemoglobin (HbA1c)", "4548-4", "BIOCHEMISTRY", "4.0 - 5.6", "%");
+        LabTestCatalog catLipid = saveLabCatalog("LIPID", "Comprehensive Lipid Profile", "24331-1", "BIOCHEMISTRY", "Standard", "mg/dL");
+
+        PatientContext pRamesh = patients.get(0);
+        PatientContext pAzhar = patients.get(2);
+
+        // Lab Order 1: STAT Cardiac Enzymes for Ramesh Kumar
+        LabOrder ordTrop = new LabOrder();
+        ordTrop.setPatient(pRamesh.patient);
+        ordTrop.setEncounter(clinical.encRamesh);
+        ordTrop.setOrderingProvider(identity.arjun);
+        ordTrop.setTestName("Troponin-I High Sensitivity (STAT)");
+        ordTrop.setLoincCode("49563-0");
+        ordTrop.setCategory("CARDIAC");
+        ordTrop.setStatus("COMPLETED");
+        ordTrop.setSpecimenBarcode("BAR-LAB-2024-88001");
+        ordTrop.setOrderedAt(LocalDateTime.now().minusDays(1));
+        ordTrop.setSpecimenCollectedAt(LocalDateTime.now().minusDays(1).plusMinutes(15));
+        ordTrop.setInProcessAt(LocalDateTime.now().minusDays(1).plusMinutes(30));
+        ordTrop.setResultedAt(LocalDateTime.now().minusDays(1).plusHours(1));
+        ordTrop.setReviewedAt(LocalDateTime.now().minusDays(1).plusHours(1).plusMinutes(10));
+        ordTrop.setReviewedBy(identity.arjun);
+        ordTrop.setClinicalNotes("STAT troponin in acute crushing chest pain suspicious for STEMI");
+        ordTrop = labOrderRepository.save(ordTrop);
+
+        LabOrderItem item1 = new LabOrderItem();
+        item1.setLabOrder(ordTrop);
+        item1.setTestCode("TROP-I");
+        item1.setTestName("High Sensitivity Troponin I");
+        item1.setStatus("COMPLETED");
+        labOrderItemRepository.save(item1);
+
+        // Specimen Record
+        Specimen sp1 = new Specimen();
+        sp1.setOrganization(tenancy.aiims);
+        sp1.setPatient(pRamesh.patient);
+        sp1.setSpecimenType("VENOUS_WHOLE_BLOOD");
+        sp1.setAccessionNumber("ACC-2024-88001");
+        sp1.setBarcode("BAR-LAB-2024-88001");
+        sp1.setStatus("PROCESSED");
+        sp1.setCollectedAt(OffsetDateTime.now().minusDays(1).plusMinutes(15));
+        sp1.setReceivedAt(OffsetDateTime.now().minusDays(1).plusMinutes(25));
+        sp1.setCollectedBy(identity.sunita);
+        sp1 = specimenRepository.save(sp1);
+
+        SpecimenCollection sc1 = new SpecimenCollection();
+        sc1.setSpecimen(sp1);
+        sc1.setCollectionMethod("VENIPUNCTURE");
+        sc1.setCollectionSite("Left Antecubital Fossa");
+        sc1.setContainer("EDTA_LAVENDER_TUBE_4ML");
+        sc1.setCollectedAt(OffsetDateTime.now().minusDays(1).plusMinutes(15));
+        sc1.setCollectedBy(identity.sunita);
+        specimenCollectionRepository.save(sc1);
+
+        // Result Record
+        LabResult resTrop = new LabResult();
+        resTrop.setLabOrder(ordTrop);
+        resTrop.setPatient(pRamesh.patient);
+        resTrop.setTestCode("TROP-I");
+        resTrop.setTestName("Troponin-I High Sensitivity");
+        resTrop.setResultValue("450.0");
+        resTrop.setUnit("pg/mL");
+        resTrop.setReferenceRange("0 - 14 pg/mL");
+        resTrop.setAbnormalFlag("HIGH");
+        resTrop.setIsCritical(true);
+        resTrop.setStatus("FINAL");
+        resTrop.setResultAt(OffsetDateTime.now().minusDays(1).plusHours(1));
+        resTrop = labResultRepository.save(resTrop);
+
+        LabResultComponent rc1 = new LabResultComponent();
+        rc1.setLabResult(resTrop);
+        rc1.setCode("49563-0");
+        rc1.setCodeSystem("LOINC");
+        rc1.setName("Troponin I.cardiac [Mass/volume] in Serum or Plasma by High sensitivity method");
+        rc1.setValueNumeric(new BigDecimal("450.0"));
+        rc1.setValueText("450.0");
+        rc1.setUnit("pg/mL");
+        rc1.setReferenceLow(new BigDecimal("0.0"));
+        rc1.setReferenceHigh(new BigDecimal("14.0"));
+        rc1.setAbnormalFlag("CRITICAL_HIGH");
+        rc1.setCritical(true);
+        rc1.setInterpretation("Severely elevated cardiac biomarker consistent with acute myocardial infarction");
+        labResultComponentRepository.save(rc1);
+
+        // Lab Order 2: HbA1c for Mohammed Azhar
+        LabOrder ordHba1c = new LabOrder();
+        ordHba1c.setPatient(pAzhar.patient);
+        ordHba1c.setEncounter(clinical.encAzhar);
+        ordHba1c.setOrderingProvider(identity.rajesh);
+        ordHba1c.setTestName("Glycated Hemoglobin (HbA1c)");
+        ordHba1c.setLoincCode("4548-4");
+        ordHba1c.setCategory("BIOCHEMISTRY");
+        ordHba1c.setStatus("COMPLETED");
+        ordHba1c.setSpecimenBarcode("BAR-LAB-2024-88002");
+        ordHba1c.setOrderedAt(LocalDateTime.now().minusHours(2));
+        ordHba1c.setResultedAt(LocalDateTime.now().minusHours(1));
+        ordHba1c.setReviewedAt(LocalDateTime.now().minusMinutes(30));
+        ordHba1c.setReviewedBy(identity.rajesh);
+        ordHba1c.setClinicalNotes("Routine quarterly monitoring for Type 2 Diabetes Mellitus");
+        ordHba1c = labOrderRepository.save(ordHba1c);
+
+        LabResult resHba1c = new LabResult();
+        resHba1c.setLabOrder(ordHba1c);
+        resHba1c.setPatient(pAzhar.patient);
+        resHba1c.setTestCode("HBA1C");
+        resHba1c.setTestName("Hemoglobin A1c / Total Hemoglobin");
+        resHba1c.setResultValue("7.6");
+        resHba1c.setUnit("%");
+        resHba1c.setReferenceRange("4.0 - 5.6 %");
+        resHba1c.setAbnormalFlag("HIGH");
+        resHba1c.setIsCritical(false);
+        resHba1c.setStatus("FINAL");
+        resHba1c.setResultAt(OffsetDateTime.now().minusHours(1));
+        labResultRepository.save(resHba1c);
+    }
+
+    private LabTestCatalog saveLabCatalog(String code, String name, String loinc, String category, String range, String unit) {
+        return labTestCatalogRepository.findByTestCode(code).orElseGet(() -> {
+            LabTestCatalog c = new LabTestCatalog();
+            c.setTestCode(code);
+            c.setTestName(name);
+            c.setLoincCode(loinc);
+            c.setCategory(category);
+            c.setReferenceRange(range);
+            c.setUnit(unit);
+            return labTestCatalogRepository.save(c);
+        });
+    }
+
+    // =========================================================================
+    // 8. PHARMACY & eMAR
+    // =========================================================================
+    private void initPharmacy(TenancyContext tenancy, IdentityContext identity, List<PatientContext> patients, ClinicalContext clinical) {
         if (medicationRepository.count() == 0) {
             String[][] meds = {
-                {"Aspirin", "Disprin", "TABLET", "75 mg"},
-                {"Atorvastatin", "Lipitor", "TABLET", "40 mg"},
-                {"Metoprolol succinate", "Betaloc ZOK", "TABLET", "50 mg"},
-                {"Enoxaparin", "Clexane", "INJECTION", "40 mg/0.4ml"},
-                {"Paracetamol", "Calpol", "TABLET", "500 mg"},
-                {"Clopidogrel", "Plavix", "TABLET", "75 mg"}
+                {"Aspirin", "Disprin", "TABLET", "75 mg", "Sun Pharma", "10 tablets in blister strip", "NDC-001"},
+                {"Atorvastatin", "Lipitor", "TABLET", "40 mg", "Pfizer Inc", "14 tablets in foil pack", "NDC-002"},
+                {"Metoprolol succinate", "Betaloc ZOK", "TABLET", "50 mg", "AstraZeneca", "30 extended release tablets", "NDC-003"},
+                {"Ticagrelor", "Brilinta", "TABLET", "90 mg", "AstraZeneca", "14 film-coated tablets", "NDC-004"},
+                {"Enoxaparin", "Clexane", "INJECTION", "40 mg/0.4ml", "Sanofi India", "Pre-filled syringe 0.4 mL", "NDC-005"},
+                {"Metformin", "Glucophage", "TABLET", "500 mg", "Merck KGaA", "20 sustained release tablets", "NDC-006"},
+                {"Pantoprazole", "Pantocid IV", "INJECTION", "40 mg", "Sun Pharma", "Vial with sterile water for injection", "NDC-007"},
+                {"Paracetamol", "Calpol", "TABLET", "500 mg", "GSK India", "15 tablets strip", "NDC-008"}
             };
             for (String[] m : meds) {
                 Medication med = new Medication();
@@ -809,57 +2167,837 @@ public class DataInitializer implements ApplicationRunner {
                 med.setGenericName(m[1]);
                 med.setForm(m[2]);
                 med.setStrength(m[3]);
-                medicationRepository.save(med);
+                med = medicationRepository.save(med);
+
+                MedicationProduct prod = new MedicationProduct();
+                prod.setMedication(med);
+                prod.setManufacturer(m[4]);
+                prod.setPackageDescription(m[5]);
+                prod.setProductCode(m[6]);
+                medicationProductRepository.save(prod);
             }
         }
 
-        if (!patients.isEmpty() && prescriptionRepository.count() == 0) {
-            Patient p1 = patients.get(0);
-            User arjun = users.get("arjun.sharma");
+        if (patients.isEmpty() || prescriptionRepository.count() > 0) return;
 
-            Prescription rx = new Prescription();
-            rx.setOrganization(tenancy.aiims);
-            rx.setPatient(p1);
-            rx.setDoctor(arjun);
-            rx.setStatus("ACTIVE");
-            rx.setIndication("Post-PCI STEMI secondary prevention");
-            rx.setInstructions("Aspirin 75mg OD + Atorvastatin 40mg HS");
-            rx.setPrescribedAt(OffsetDateTime.now());
-            prescriptionRepository.save(rx);
+        PatientContext pRamesh = patients.get(0);
+        PatientContext pAzhar = patients.get(2);
+
+        // Prescription 1: Aspirin 75mg OD
+        Prescription rx1 = new Prescription();
+        rx1.setOrganization(tenancy.aiims);
+        rx1.setPatient(pRamesh.patient);
+        rx1.setEncounter(clinical.encRamesh);
+        rx1.setDoctor(identity.arjun);
+        rx1.setStatus("ACTIVE");
+        rx1.setIndication("Post-PCI STEMI secondary prevention Dual Antiplatelet Therapy");
+        rx1.setInstructions("Take 1 tablet (75 mg) by mouth once daily with or after breakfast");
+        rx1.setMedicationName("Aspirin 75mg");
+        rx1.setRxNormCode("1191");
+        rx1.setDosage("75mg");
+        rx1.setRoute("Oral");
+        rx1.setFrequency("Once Daily (OD)");
+        rx1.setDurationDays(365);
+        rx1.setRefills(3);
+        rx1.setPrescribedAt(OffsetDateTime.now().minusDays(1));
+        rx1.setStartAt(OffsetDateTime.now().minusDays(1));
+        rx1 = prescriptionRepository.save(rx1);
+
+        MedicationOrderDose dose1 = new MedicationOrderDose();
+        dose1.setMedicationOrder(rx1);
+        dose1.setDose(new BigDecimal("75.0"));
+        dose1.setDoseUnit("mg");
+        dose1.setRoute("ORAL");
+        dose1.setFrequency("ONCE_DAILY");
+        dose1.setIsPrn(false);
+        medicationOrderDoseRepository.save(dose1);
+
+        // Prescription 2: Atorvastatin 40mg HS
+        Prescription rx2 = new Prescription();
+        rx2.setOrganization(tenancy.aiims);
+        rx2.setPatient(pRamesh.patient);
+        rx2.setEncounter(clinical.encRamesh);
+        rx2.setDoctor(identity.arjun);
+        rx2.setStatus("ACTIVE");
+        rx2.setIndication("High intensity statin lipid lowering therapy post ACS");
+        rx2.setInstructions("Take 1 tablet (40 mg) at bedtime");
+        rx2.setMedicationName("Atorvastatin 40mg");
+        rx2.setRxNormCode("314076");
+        rx2.setDosage("40mg");
+        rx2.setRoute("Oral");
+        rx2.setFrequency("Once Nightly (HS)");
+        rx2.setDurationDays(365);
+        rx2.setRefills(3);
+        rx2.setPrescribedAt(OffsetDateTime.now().minusDays(1));
+        rx2.setStartAt(OffsetDateTime.now().minusDays(1));
+        rx2 = prescriptionRepository.save(rx2);
+
+        MedicationOrderDose dose2 = new MedicationOrderDose();
+        dose2.setMedicationOrder(rx2);
+        dose2.setDose(new BigDecimal("40.0"));
+        dose2.setDoseUnit("mg");
+        dose2.setRoute("ORAL");
+        dose2.setFrequency("AT_BEDTIME");
+        dose2.setIsPrn(false);
+        medicationOrderDoseRepository.save(dose2);
+
+        // eMAR Administration by Nurse Sunita
+        MedicationAdministration admin1 = new MedicationAdministration();
+        admin1.setPatient(pRamesh.patient);
+        admin1.setPrescription(rx1);
+        admin1.setAdministeredBy(identity.sunita);
+        admin1.setMedicationName("Aspirin");
+        admin1.setDose("75 mg");
+        admin1.setRoute("ORAL");
+        admin1.setStatus("COMPLETED");
+        admin1.setAdministeredAt(OffsetDateTime.now().minusHours(6));
+        medicationAdministrationRepository.save(admin1);
+
+        // Medication Reconciliation record
+        MedicationReconciliation recon = new MedicationReconciliation();
+        recon.setPatient(pRamesh.patient);
+        recon.setEncounter(clinical.encRamesh);
+        recon.setMedicationName("Amlodipine");
+        recon.setDose("5 mg");
+        recon.setRoute("ORAL");
+        recon.setFrequency("OD");
+        recon.setStatus("CONTINUED");
+        recon.setSource("PATIENT_HOME_MEDICATION_LIST");
+        recon.setReconciledBy(identity.anitaPharm);
+        recon.setReconciledAt(OffsetDateTime.now().minusDays(1));
+        medicationReconciliationRepository.save(recon);
+    }
+
+    // =========================================================================
+    // 9. PROCEDURES
+    // =========================================================================
+    private void initProcedures(TenancyContext tenancy, IdentityContext identity, List<PatientContext> patients, ClinicalContext clinical) {
+        if (procedureCatalogRepository.count() == 0) {
+            saveProcCatalog("92928", "CPT", "Percutaneous transcatheter placement of intracoronary stent(s)", true);
+            saveProcCatalog("93000", "CPT", "Electrocardiogram, routine ECG with at least 12 leads", true);
+            saveProcCatalog("93306", "CPT", "Echocardiography, transthoracic, real-time with image documentation", true);
+            saveProcCatalog("43235", "CPT", "Upper gastrointestinal endoscopy, diagnostic", true);
+            saveProcCatalog("62270", "CPT", "Diagnostic lumbar puncture", true);
+        }
+
+        if (patients.isEmpty() || procedureOrderRepository.count() > 0) return;
+
+        PatientContext pRamesh = patients.get(0);
+
+        // Procedure Order: Urgent PCI for Ramesh Kumar
+        ProcedureOrder procOrder = new ProcedureOrder();
+        procOrder.setPatient(pRamesh.patient);
+        procOrder.setEncounter(clinical.encRamesh);
+        procOrder.setOrderingProvider(identity.arjun);
+        procOrder.setProcedureName("Percutaneous Coronary Intervention (PCI) with Drug-Eluting Stent (DES)");
+        procOrder.setSnomedCode("415070008");
+        procOrder.setCptCode("92928");
+        procOrder.setStatus("COMPLETED");
+        procOrder.setProceduralist(identity.arjun);
+        procOrder.setOrderedAt(LocalDateTime.now().minusDays(1));
+        procOrder.setScheduledAt(LocalDateTime.now().minusDays(1).plusMinutes(30));
+        procOrder.setPerformedAt(LocalDateTime.now().minusDays(1).plusHours(1));
+        procOrder.setDocumentedAt(LocalDateTime.now().minusDays(1).plusHours(2));
+        procOrder.setOperativeReport("Successful primary angioplasty to proximal LAD with 3.0x18mm DES. Pre-procedure 99% stenosis with TIMI-0 flow, post-stenting 0% residual stenosis with TIMI-3 distal run-off.");
+        procOrder = procedureOrderRepository.save(procOrder);
+
+        // Procedure Performance
+        ProcedurePerformance perf = new ProcedurePerformance();
+        perf.setOrganization(tenancy.aiims);
+        perf.setPatient(pRamesh.patient);
+        perf.setEncounter(clinical.encRamesh);
+        perf.setProcedureOrder(procOrder);
+        perf.setPerformedBy(identity.arjunPrac);
+        perf.setPerformedAt(OffsetDateTime.now().minusDays(1).plusHours(1));
+        perf.setStatus("COMPLETED");
+        perf.setFindings("Right radial access 6F sheath. Left coronary angiogram demonstrated dominant left system with acute thrombotic 99% occlusion of proximal LAD. LCx normal, RCA mild luminal irregularities.");
+        perf.setComplications("None. Zero dissection, zero thrombosis, radial artery patent.");
+        perf = procedurePerformanceRepository.save(perf);
+
+        // Procedure Participants
+        ProcedureParticipant part1 = new ProcedureParticipant();
+        part1.setPerformance(perf);
+        part1.setPractitioner(identity.arjunPrac);
+        part1.setRole("PRIMARY_SURGEON_INTERVENTIONALIST");
+        procedureParticipantRepository.save(part1);
+
+        ProcedureParticipant part2 = new ProcedureParticipant();
+        part2.setPerformance(perf);
+        part2.setPractitioner(identity.sunitaPrac);
+        part2.setRole("SCRUB_NURSE");
+        procedureParticipantRepository.save(part2);
+
+        // Procedure Operative Note
+        ProcedureNote pNote = new ProcedureNote();
+        pNote.setPerformance(perf);
+        pNote.setNoteType("OPERATIVE_REPORT");
+        pNote.setContent("INDICATION: Acute anterior STEMI within 3 hours of symptom onset.\n"
+                + "PROCEDURE: Right radial artery cannulated with 6F Glidesheath. 6F EBU 3.5 guide catheter engaged LMCA. Sion Blue wire crossed LAD lesion. Predilated with 2.5x12mm Sapphire balloon at 12 atm. 3.0x18mm Xience Sierra DES deployed at 14 atm. Post-dilated with 3.25x10mm NC balloon at 18 atm.\n"
+                + "RESULT: Excellent angiographic result with TIMI 3 distal flow and complete ST-segment resolution on surface ECG.");
+        pNote.setCreatedBy(identity.arjun);
+        pNote.setCreatedAt(OffsetDateTime.now().minusDays(1).plusHours(2));
+        procedureNoteRepository.save(pNote);
+    }
+
+    private void saveProcCatalog(String code, String codeSystem, String name, boolean active) {
+        ProcedureCatalog c = new ProcedureCatalog();
+        c.setCode(code);
+        c.setCodeSystem(codeSystem);
+        c.setName(name);
+        c.setActive(active);
+        procedureCatalogRepository.save(c);
+    }
+
+    // =========================================================================
+    // 10. IMAGING & DICOM
+    // =========================================================================
+    private void initImaging(TenancyContext tenancy, IdentityContext identity, List<PatientContext> patients, ClinicalContext clinical) {
+        if (patients.isEmpty() || imagingOrderRepository.count() > 0) return;
+
+        PatientContext pRamesh = patients.get(0);
+
+        // Imaging Order 1: Chest X-Ray PA
+        ImagingOrder imgOrd1 = new ImagingOrder();
+        imgOrd1.setPatient(pRamesh.patient);
+        imgOrd1.setEncounter(clinical.encRamesh);
+        imgOrd1.setOrderingProvider(identity.arjun);
+        imgOrd1.setModality("CR");
+        imgOrd1.setProcedureName("Chest Radiograph PA View (Bedside)");
+        imgOrd1.setCptCode("71045");
+        imgOrd1.setStatus("COMPLETED");
+        imgOrd1.setDicomStudyInstanceUid("1.2.840.113619.2.55.1.20240819.1001");
+        imgOrd1.setRadiologist(identity.vikramRad);
+        imgOrd1.setOrderedAt(LocalDateTime.now().minusDays(1));
+        imgOrd1.setScheduledAt(LocalDateTime.now().minusDays(1).plusMinutes(10));
+        imgOrd1.setPerformedAt(LocalDateTime.now().minusDays(1).plusMinutes(25));
+        imgOrd1.setReportGeneratedAt(LocalDateTime.now().minusDays(1).plusHours(1));
+        imgOrd1.setReviewedAt(LocalDateTime.now().minusDays(1).plusHours(1).plusMinutes(15));
+        imgOrd1.setRadiologistReport("FINDINGS: Heart size mildly enlarged. No pulmonary congestion or pleural effusion.");
+        imgOrd1 = imagingOrderRepository.save(imgOrd1);
+
+        // DICOM Study
+        ImagingStudy study1 = new ImagingStudy();
+        study1.setOrganization(tenancy.aiims);
+        study1.setPatient(pRamesh.patient);
+        study1.setImagingOrder(imgOrd1);
+        study1.setAccessionNumber("ACC-RAD-2024-001001");
+        study1.setStudyInstanceUid("1.2.840.113619.2.55.1.20240819.1001");
+        study1.setModality("CR");
+        study1.setPerformedAt(OffsetDateTime.now().minusDays(1).plusMinutes(25));
+        study1.setPacsReference("/pacs/studies/20240819_1001");
+        study1.setStatus("COMPLETED");
+        study1 = imagingStudyRepository.save(study1);
+
+        // DICOM Series
+        ImagingSeries series1 = new ImagingSeries();
+        series1.setStudy(study1);
+        series1.setSeriesInstanceUid("1.2.840.113619.2.55.1.20240819.1001.1");
+        series1.setModality("CR");
+        series1.setSeriesNumber(1);
+        series1.setDescription("Chest PA Bedside Exposure");
+        series1 = imagingSeriesRepository.save(series1);
+
+        // DICOM Instance
+        ImagingInstance inst1 = new ImagingInstance();
+        inst1.setSeries(series1);
+        inst1.setSopInstanceUid("1.2.840.113619.2.55.1.20240819.1001.1.1");
+        inst1.setInstanceNumber(1);
+        inst1.setObjectReference("/pacs/dicom/2024/08/19/study_1001_s1_i1.dcm");
+        imagingInstanceRepository.save(inst1);
+
+        // Diagnostic Report
+        ImagingReport rep1 = new ImagingReport();
+        rep1.setStudy(study1);
+        rep1.setRadiologist(identity.vikramPrac);
+        rep1.setReportStatus("FINAL");
+        rep1.setFindings("Cardiac silhouette demonstrates mild borderline cardiomegaly. Pulmonary vasculature is normal. Lung fields are clear of consolidation, pneumothorax, or acute vascular congestion. Costophrenic angles are sharp.");
+        rep1.setImpression("1. Mild borderline cardiomegaly.\n2. No acute pulmonary edema or focal parenchymal consolidation.");
+        rep1.setReportedAt(OffsetDateTime.now().minusDays(1).plusHours(1));
+        rep1 = imagingReportRepository.save(rep1);
+
+        ImagingReportVersion repVer1 = new ImagingReportVersion();
+        repVer1.setReport(rep1);
+        repVer1.setVersionNumber(1);
+        repVer1.setContent(rep1.getFindings() + "\n\nIMPRESSION:\n" + rep1.getImpression());
+        repVer1.setCreatedBy(identity.vikramRad);
+        repVer1.setCreatedAt(OffsetDateTime.now().minusDays(1).plusHours(1));
+        imagingReportVersionRepository.save(repVer1);
+    }
+
+    // =========================================================================
+    // 11. APPOINTMENTS & SCHEDULING
+    // =========================================================================
+    private void initScheduling(TenancyContext tenancy, IdentityContext identity, List<PatientContext> patients) {
+        if (appointmentTypeRepository.count() == 0) {
+            saveApptType("NEW_CONSULT", "New Patient Consultation", 30, "Comprehensive intake and clinical assessment");
+            saveApptType("FOLLOW_UP", "Follow-up Consultation", 15, "Review of test results and treatment response");
+            saveApptType("POST_OP", "Post-Procedure / Post-Op Review", 20, "Evaluation of wound healing and functional recovery");
+            saveApptType("EMERGENCY", "Emergency Triage Slot", 45, "Urgent emergency room evaluation");
+            saveApptType("TELEHEALTH", "Telehealth Video Consultation", 20, "Remote follow-up consultation");
+        }
+
+        // Schedule Slots for Dr. Arjun & Dr. Priya
+        if (scheduleSlotRepository.count() == 0) {
+            ScheduleSlot s1 = new ScheduleSlot();
+            s1.setPractitioner(identity.arjun);
+            s1.setStartTime(OffsetDateTime.now().plusDays(1).withHour(9).withMinute(0));
+            s1.setEndTime(OffsetDateTime.now().plusDays(1).withHour(9).withMinute(30));
+            s1.setStatus("BOOKED");
+            scheduleSlotRepository.save(s1);
+
+            ScheduleSlot s2 = new ScheduleSlot();
+            s2.setPractitioner(identity.arjun);
+            s2.setStartTime(OffsetDateTime.now().plusDays(1).withHour(9).withMinute(30));
+            s2.setEndTime(OffsetDateTime.now().plusDays(1).withHour(10).withMinute(0));
+            s2.setStatus("FREE");
+            scheduleSlotRepository.save(s2);
+
+            ScheduleSlot s3 = new ScheduleSlot();
+            s3.setPractitioner(identity.priya);
+            s3.setStartTime(OffsetDateTime.now().plusDays(2).withHour(10).withMinute(0));
+            s3.setEndTime(OffsetDateTime.now().plusDays(2).withHour(10).withMinute(30));
+            s3.setStatus("BOOKED");
+            scheduleSlotRepository.save(s3);
+        }
+
+        if (patients.size() < 2 || appointmentRepository.count() > 0) return;
+
+        PatientContext pRamesh = patients.get(0);
+        PatientContext pAnita = patients.get(1);
+        PatientContext pSuresh = patients.get(4);
+
+        // Appointment 1: Anita Sharma (Scheduled Neurology follow-up)
+        Appointment appt1 = new Appointment();
+        appt1.setOrganization(tenancy.aiims);
+        appt1.setFacility(tenancy.aiimsOpd);
+        appt1.setDepartment(tenancy.neuro);
+        appt1.setPatient(pAnita.patient);
+        appt1.setCreatedBy(identity.priya);
+        appt1.setStatus("SCHEDULED");
+        appt1.setReason("Follow-up evaluation for chronic tension headaches and response to Propranolol");
+        appt1.setNotes("Review headache diary and check sitting/standing BP");
+        appt1.setStartsAt(OffsetDateTime.now().plusDays(2).withHour(10).withMinute(0));
+        appt1.setEndsAt(OffsetDateTime.now().plusDays(2).withHour(10).withMinute(30));
+        appt1 = appointmentRepository.save(appt1);
+
+        AppointmentParticipant part1 = new AppointmentParticipant();
+        part1.setAppointment(appt1);
+        part1.setPractitioner(identity.priyaPrac);
+        part1.setUser(identity.priya);
+        part1.setParticipantType("ATTENDING_PHYSICIAN");
+        appointmentParticipantRepository.save(part1);
+
+        AppointmentStatusHistory ash1 = new AppointmentStatusHistory();
+        ash1.setAppointment(appt1);
+        ash1.setOldStatus(null);
+        ash1.setNewStatus("SCHEDULED");
+        ash1.setChangedBy(identity.sarita);
+        ash1.setChangedAt(OffsetDateTime.now().minusDays(1));
+        ash1.setReason("Patient booked routine appointment via front desk");
+        appointmentStatusHistoryRepository.save(ash1);
+
+        AppointmentNote aNote1 = new AppointmentNote();
+        aNote1.setAppointment(appt1);
+        aNote1.setAuthor(identity.sarita);
+        aNote1.setAuthorName("Sarita Gupta");
+        aNote1.setAuthorRole("ROLE_RECEPTIONIST");
+        aNote1.setNoteType("RECEPTIONIST_ADMIN");
+        aNote1.setContent("Patient confirmed SMS reminder. Advised to bring previous brain MRI film.");
+        appointmentNoteRepository.save(aNote1);
+
+        // Appointment 2: Ramesh Kumar (Post-PCI 2-week Cardiology Follow-up)
+        Appointment appt2 = new Appointment();
+        appt2.setOrganization(tenancy.aiims);
+        appt2.setFacility(tenancy.aiimsOpd);
+        appt2.setDepartment(tenancy.cardio);
+        appt2.setPatient(pRamesh.patient);
+        appt2.setCreatedBy(identity.arjun);
+        appt2.setStatus("CONFIRMED");
+        appt2.setReason("Post-PCI STEMI 2-week clinical review, ECG, and medication tolerance assessment");
+        appt2.setStartsAt(OffsetDateTime.now().plusDays(14).withHour(11).withMinute(0));
+        appt2.setEndsAt(OffsetDateTime.now().plusDays(14).withHour(11).withMinute(30));
+        appt2 = appointmentRepository.save(appt2);
+
+        // Appointment 3: Suresh Naidu (Cancelled Appointment with Audit)
+        Appointment appt3 = new Appointment();
+        appt3.setOrganization(tenancy.apollo);
+        appt3.setFacility(tenancy.apolloMumbai);
+        appt3.setPatient(pSuresh.patient);
+        appt3.setCreatedBy(identity.orgAdminVikram);
+        appt3.setStatus("CANCELLED");
+        appt3.setReason("Post-Emergency follow up consult");
+        appt3.setStartsAt(OffsetDateTime.now().minusDays(1).withHour(14).withMinute(0));
+        appt3.setEndsAt(OffsetDateTime.now().minusDays(1).withHour(14).withMinute(30));
+        appt3 = appointmentRepository.save(appt3);
+
+        AppointmentCancellation canc = new AppointmentCancellation();
+        canc.setAppointment(appt3);
+        canc.setCancelledByUser(identity.orgAdminVikram);
+        canc.setCancelledByRole("PATIENT");
+        canc.setCancellationReason("Patient traveling out of city, symptoms fully resolved");
+        canc.setAdditionalComment("Full consultation fee waiver applied");
+        canc.setRefundStatus("PROCESSED");
+        canc.setCancelledAt(LocalDateTime.now().minusDays(1));
+        appointmentCancellationRepository.save(canc);
+    }
+
+    private void saveApptType(String code, String name, int duration, String desc) {
+        AppointmentType at = new AppointmentType();
+        at.setCode(code);
+        at.setName(name);
+        at.setDurationMinutes(duration);
+        at.setDescription(desc);
+        appointmentTypeRepository.save(at);
+    }
+
+    // =========================================================================
+    // 12. BILLING & INVOICING
+    // =========================================================================
+    private void initBilling(TenancyContext tenancy, IdentityContext identity, List<PatientContext> patients, ClinicalContext clinical) {
+        // Price List
+        PriceList pl = priceListRepository.findByOrganizationId(tenancy.aiims.getId()).stream().findFirst().orElseGet(() -> {
+            PriceList p = new PriceList();
+            p.setOrganization(tenancy.aiims);
+            p.setName("AIIMS Standard Hospital Tariff 2024");
+            p.setCurrency("INR");
+            p.setActive(true);
+            return priceListRepository.save(p);
+        });
+
+        if (priceListItemRepository.findByPriceListId(pl.getId()).isEmpty()) {
+            savePriceItem(pl, "PROCEDURE", "PROC-PCI-01", "Primary Angioplasty with DES Stent", new BigDecimal("75000.00"));
+            savePriceItem(pl, "BED_DAILY", "BED-CCU-01", "CCU Bed Daily Intensive Care Tariff", new BigDecimal("12000.00"));
+            savePriceItem(pl, "CONSULTATION", "CONS-SPEC-01", "Cardiology Specialist Attending Consultation", new BigDecimal("2300.00"));
+            savePriceItem(pl, "LABORATORY", "LAB-TROP-01", "Troponin-I High Sensitivity Assay", new BigDecimal("1500.00"));
+            savePriceItem(pl, "DIAGNOSTIC", "DIAG-ECG-01", "12-Lead Electrocardiogram Diagnostic Strip", new BigDecimal("650.00"));
+            savePriceItem(pl, "RADIOLOGY", "RAD-CXR-01", "Chest Radiograph PA View", new BigDecimal("1200.00"));
+        }
+
+        if (patients.isEmpty() || invoiceRepository.count() > 0) return;
+
+        PatientContext pRamesh = patients.get(0);
+
+        // Billing Account for Ramesh
+        BillingAccount baRamesh = new BillingAccount();
+        baRamesh.setOrganization(tenancy.aiims);
+        baRamesh.setPatient(pRamesh.patient);
+        baRamesh.setAccountNumber("ACC-AIIMS-2024-001001");
+        baRamesh.setCurrentBalance(BigDecimal.ZERO);
+        baRamesh.setStatus("ACTIVE");
+        baRamesh.setCreatedAt(OffsetDateTime.now().minusDays(1));
+        billingAccountRepository.save(baRamesh);
+
+        // Charge Items for Ramesh
+        ChargeItem c1 = saveCharge(pRamesh.patient, clinical.encRamesh, "PROC-PCI-01", "Primary Angioplasty with DES Stent", new BigDecimal("75000.00"));
+        ChargeItem c2 = saveCharge(pRamesh.patient, clinical.encRamesh, "BED-CCU-01", "CCU Bed Daily Intensive Care Tariff", new BigDecimal("12000.00"));
+        ChargeItem c3 = saveCharge(pRamesh.patient, clinical.encRamesh, "CONS-SPEC-01", "Cardiology Specialist Consultation", new BigDecimal("2300.00"));
+        ChargeItem c4 = saveCharge(pRamesh.patient, clinical.encRamesh, "LAB-TROP-01", "Troponin-I High Sensitivity Assay", new BigDecimal("1500.00"));
+        ChargeItem c5 = saveCharge(pRamesh.patient, clinical.encRamesh, "DIAG-ECG-01", "12-Lead ECG Diagnostic Strip", new BigDecimal("650.00"));
+        ChargeItem c6 = saveCharge(pRamesh.patient, clinical.encRamesh, "RAD-CXR-01", "Chest Radiograph PA View", new BigDecimal("1200.00"));
+
+        BigDecimal total = new BigDecimal("92650.00");
+
+        // Invoice 1: Ramesh Kumar (Paid in full)
+        Invoice inv1 = new Invoice();
+        inv1.setPatient(pRamesh.patient);
+        inv1.setInvoiceNumber("INV-2024-001001");
+        inv1.setTotalAmount(total);
+        inv1.setPaidAmount(total);
+        inv1.setStatus("PAID");
+        inv1.setIssuedAt(OffsetDateTime.now().minusHours(12));
+        inv1 = invoiceRepository.save(inv1);
+
+        saveInvoiceItem(inv1, "Primary Angioplasty with DES Stent (LAD)", new BigDecimal("75000.00"));
+        saveInvoiceItem(inv1, "CCU Bed Charges (Day 1)", new BigDecimal("12000.00"));
+        saveInvoiceItem(inv1, "Cardiology Specialist Consultation", new BigDecimal("2300.00"));
+        saveInvoiceItem(inv1, "STAT High Sensitivity Troponin I Assay", new BigDecimal("1500.00"));
+        saveInvoiceItem(inv1, "12-Lead Electrocardiogram", new BigDecimal("650.00"));
+        saveInvoiceItem(inv1, "Chest Radiograph PA View", new BigDecimal("1200.00"));
+
+        // Payment for Invoice 1
+        Payment pay1 = new Payment();
+        pay1.setPatient(pRamesh.patient);
+        pay1.setInvoice(inv1);
+        pay1.setAmount(total);
+        pay1.setPaymentMethod("HDFC_CREDIT_CARD");
+        pay1.setTransactionReference("TXN-HDFC-991823-AIIMS");
+        pay1.setStatus("COMPLETED");
+        pay1.setPaidAt(OffsetDateTime.now().minusHours(11));
+        pay1 = paymentRepository.save(pay1);
+
+        PaymentAllocation alloc1 = new PaymentAllocation();
+        alloc1.setPayment(pay1);
+        alloc1.setInvoice(inv1);
+        alloc1.setAmount(total);
+        paymentAllocationRepository.save(alloc1);
+
+        // Refund Record (Audit Example)
+        Refund ref = new Refund();
+        ref.setPayment(pay1);
+        ref.setAmount(new BigDecimal("500.00"));
+        ref.setReason("Cashless pre-authorization concession adjustment");
+        ref.setStatus("PROCESSED");
+        ref.setRequestedAt(OffsetDateTime.now().minusHours(10));
+        ref.setProcessedAt(OffsetDateTime.now().minusHours(9));
+        ref.setProcessedBy(identity.vikas);
+        refundRepository.save(ref);
+    }
+
+    private void savePriceItem(PriceList pl, String type, String code, String desc, BigDecimal amount) {
+        PriceListItem item = new PriceListItem();
+        item.setPriceList(pl);
+        item.setServiceType(type);
+        item.setServiceCode(code);
+        item.setDescription(desc);
+        item.setAmount(amount);
+        priceListItemRepository.save(item);
+    }
+
+    private ChargeItem saveCharge(Patient p, Encounter enc, String code, String desc, BigDecimal amount) {
+        ChargeItem c = new ChargeItem();
+        c.setPatient(p);
+        c.setEncounter(enc);
+        c.setCode(code);
+        c.setDescription(desc);
+        c.setAmount(amount);
+        c.setStatus("BILLED");
+        c.setChargedAt(OffsetDateTime.now().minusHours(14));
+        return chargeItemRepository.save(c);
+    }
+
+    private void saveInvoiceItem(Invoice inv, String desc, BigDecimal amount) {
+        InvoiceItem item = new InvoiceItem();
+        item.setInvoice(inv);
+        item.setDescription(desc);
+        item.setAmount(amount);
+        invoiceItemRepository.save(item);
+    }
+
+    // =========================================================================
+    // 13. INSURANCE & CLAIMS
+    // =========================================================================
+    private void initInsurance(TenancyContext tenancy, IdentityContext identity, List<PatientContext> patients, ClinicalContext clinical) {
+        if (patients.isEmpty() || insurancePayerRepository.count() > 0) return;
+
+        // Payers
+        InsurancePayer starHealth = new InsurancePayer();
+        starHealth.setName("Star Health and Allied Insurance Co Ltd");
+        starHealth.setPayerCode("STAR-HLTH-01");
+        starHealth.setPhone("+91-1800-425-2255");
+        starHealth.setEmail("claims@starhealth.in");
+        starHealth.setActive(true);
+        starHealth = insurancePayerRepository.save(starHealth);
+
+        InsurancePayer hdfcErgo = new InsurancePayer();
+        hdfcErgo.setName("HDFC ERGO General Insurance Company Ltd");
+        hdfcErgo.setPayerCode("HDFC-ERGO-01");
+        hdfcErgo.setPhone("+91-1800-2666");
+        hdfcErgo.setEmail("care@hdfcergo.com");
+        hdfcErgo.setActive(true);
+        hdfcErgo = insurancePayerRepository.save(hdfcErgo);
+
+        InsurancePayer pmjay = new InsurancePayer();
+        pmjay.setName("Ayushman Bharat - Pradhan Mantri Jan Arogya Yojana (PM-JAY)");
+        pmjay.setPayerCode("AB-PMJAY-NHA");
+        pmjay.setPhone("+91-14555");
+        pmjay.setEmail("support.nha@gov.in");
+        pmjay.setActive(true);
+        pmjay = insurancePayerRepository.save(pmjay);
+
+        // Plans
+        InsurancePlan starComp = new InsurancePlan();
+        starComp.setPayer(starHealth);
+        starComp.setPlanName("Star Comprehensive Health Insurance Policy (Gold Tier)");
+        starComp.setPlanCode("STAR-COMP-GOLD-10L");
+        starComp.setActive(true);
+        starComp = insurancePlanRepository.save(starComp);
+
+        InsurancePlan hdfcOpt = new InsurancePlan();
+        hdfcOpt.setPayer(hdfcErgo);
+        hdfcOpt.setPlanName("HDFC ERGO Optima Secure Family Floater");
+        hdfcOpt.setPlanCode("HDFC-OPT-SEC-25L");
+        hdfcOpt.setActive(true);
+        hdfcOpt = insurancePlanRepository.save(hdfcOpt);
+
+        PatientContext pRamesh = patients.get(0);
+
+        // Patient Insurance: Ramesh Kumar
+        PatientInsurance piRamesh = new PatientInsurance();
+        piRamesh.setPatient(pRamesh.patient);
+        piRamesh.setOrganization(tenancy.aiims);
+        piRamesh.setPayer(starHealth);
+        piRamesh.setPlan(starComp);
+        piRamesh.setPolicyNumber("POL-STAR-881928374");
+        piRamesh.setMemberId("MEM-STAR-001001");
+        piRamesh.setGroupNumber("GRP-CORP-991");
+        piRamesh.setSubscriberName("Ramesh Kumar");
+        piRamesh.setSubscriberRelationship("SELF");
+        piRamesh.setEffectiveFrom(LocalDate.of(2023, 1, 1));
+        piRamesh.setEffectiveTo(LocalDate.of(2026, 12, 31));
+        piRamesh.setIsPrimary(true);
+        piRamesh.setStatus("ACTIVE");
+        piRamesh = patientInsuranceRepository.save(piRamesh);
+
+        // Verification
+        InsuranceVerification ver = new InsuranceVerification();
+        ver.setPatientInsurance(piRamesh);
+        ver.setVerifiedBy(identity.vikas);
+        ver.setVerifiedAt(OffsetDateTime.now().minusDays(1));
+        ver.setStatus("VERIFIED");
+        ver.setResponse("{\"eligibilityStatus\": \"ACTIVE\", \"sumInsured\": 1000000.0, \"cumulativeBonus\": 200000.0, \"copayPercentage\": 0.0}");
+        insuranceVerificationRepository.save(ver);
+
+        // Pre-Authorization
+        InsuranceAuthorization auth = new InsuranceAuthorization();
+        auth.setPatient(pRamesh.patient);
+        auth.setOrganization(tenancy.aiims);
+        auth.setPayer(starHealth);
+        auth.setAuthorizationNumber("AUTH-STAR-2024-99182");
+        auth.setServiceType("EMERGENCY_CORONARY_ANGIOPLASTY");
+        auth.setRequestedAmount(new BigDecimal("95000.00"));
+        auth.setApprovedAmount(new BigDecimal("90000.00"));
+        auth.setStatus("APPROVED");
+        auth.setRequestedAt(OffsetDateTime.now().minusDays(1).plusHours(1));
+        auth.setApprovedAt(OffsetDateTime.now().minusDays(1).plusHours(2));
+        auth.setExpiresAt(OffsetDateTime.now().plusDays(7));
+        auth.setResponse("{\"authStatus\": \"APPROVED\", \"approvedAmount\": 90000.0, \"deductible\": 2650.0}");
+        insuranceAuthorizationRepository.save(auth);
+
+        // Claim
+        InsuranceClaim claim = new InsuranceClaim();
+        claim.setOrganization(tenancy.aiims);
+        claim.setPatient(pRamesh.patient);
+        claim.setPayer(starHealth);
+        claim.setClaimNumber("CLM-STAR-2024-001001");
+        claim.setStatus("SETTLED");
+        claim.setSubmittedAt(OffsetDateTime.now().minusHours(8));
+        claim.setTotalAmount(new BigDecimal("92650.00"));
+        claim.setApprovedAmount(new BigDecimal("90000.00"));
+        claim.setRejectedAmount(new BigDecimal("2650.00"));
+        claim.setResponse("{\"settlementReference\": \"NEFT-STAR-7718299\", \"settlementDate\": \"2024-08-19\"}");
+        claim = insuranceClaimRepository.save(claim);
+
+        InsuranceClaimItem ci1 = new InsuranceClaimItem();
+        ci1.setClaim(claim);
+        ci1.setServiceCode("PROC-PCI-01");
+        ci1.setDescription("Primary Angioplasty with DES Stent (LAD)");
+        ci1.setQuantity(new BigDecimal("1.0"));
+        ci1.setBilledAmount(new BigDecimal("75000.00"));
+        ci1.setApprovedAmount(new BigDecimal("75000.00"));
+        ci1.setRejectedAmount(BigDecimal.ZERO);
+        insuranceClaimItemRepository.save(ci1);
+
+        InsuranceClaimItem ci2 = new InsuranceClaimItem();
+        ci2.setClaim(claim);
+        ci2.setServiceCode("NON-MED-01");
+        ci2.setDescription("Sanitization & Administrative Consumables");
+        ci2.setQuantity(new BigDecimal("1.0"));
+        ci2.setBilledAmount(new BigDecimal("2650.00"));
+        ci2.setApprovedAmount(BigDecimal.ZERO);
+        ci2.setRejectedAmount(new BigDecimal("2650.00"));
+        ci2.setRejectionReason("Non-payable item as per IRDAI master policy guidelines");
+        insuranceClaimItemRepository.save(ci2);
+    }
+
+    // =========================================================================
+    // 14. CONSENT & DOCUMENT MANAGEMENT
+    // =========================================================================
+    private void initConsentAndDocuments(TenancyContext tenancy, IdentityContext identity, List<PatientContext> patients, ClinicalContext clinical) {
+        if (consentTypeRepository.count() == 0) {
+            saveConsentType(tenancy.aiims, "GEN_TREATMENT", "General Consent for Medical Treatment", "Authorizes general clinical examination, vitals, nursing care, and routine non-invasive procedures");
+            saveConsentType(tenancy.aiims, "INVASIVE_PROCEDURE", "Informed Consent for Invasive Surgical & Interventional Procedures", "Authorizes catheterization, anesthesia, and stenting procedures");
+            saveConsentType(tenancy.aiims, "ABDM_DATA_SHARE", "ABDM Electronic Health Record Data Sharing Consent", "Authorizes sharing of health records across the Ayushman Bharat Digital Mission network");
+            saveConsentType(tenancy.aiims, "RESEARCH_BIOBANK", "Clinical Research & Biobank Specimen Retention Consent", "Authorizes anonymized specimen usage for biomedical research");
+        }
+
+        if (patients.isEmpty() || documentRepository.count() > 0) return;
+
+        PatientContext pRamesh = patients.get(0);
+        PatientContext pAnita = patients.get(1);
+
+        ConsentType ctInvasive = consentTypeRepository.findByCode("INVASIVE_PROCEDURE").orElse(null);
+        ConsentType ctAbdm = consentTypeRepository.findByCode("ABDM_DATA_SHARE").orElse(null);
+
+        // Document 1: Signed Invasive Consent PDF
+        Document docInvasive = new Document();
+        docInvasive.setOrganization(tenancy.aiims);
+        docInvasive.setPatient(pRamesh.patient);
+        docInvasive.setEncounter(clinical.encRamesh);
+        docInvasive.setDocumentType("CONSENT_FORM");
+        docInvasive.setTitle("Informed Consent for Primary Percutaneous Coronary Intervention");
+        docInvasive.setStorageProvider("MINIO_S3");
+        docInvasive.setStorageKey("/documents/consents/2024/08/consent_pci_ramesh.pdf");
+        docInvasive.setMimeType("application/pdf");
+        docInvasive.setFileSize(245760L);
+        docInvasive.setStatus("ACTIVE");
+        docInvasive.setUploadedBy(identity.arjun);
+        docInvasive.setUploadedAt(OffsetDateTime.now().minusDays(1));
+        docInvasive = documentRepository.save(docInvasive);
+
+        DocumentVersion dv1 = new DocumentVersion();
+        dv1.setDocument(docInvasive);
+        dv1.setVersionNumber(1);
+        dv1.setStorageKey(docInvasive.getStorageKey());
+        dv1.setChecksum("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855");
+        dv1.setFileSize(245760L);
+        dv1.setCreatedBy(identity.arjun);
+        dv1.setCreatedAt(OffsetDateTime.now().minusDays(1));
+        documentVersionRepository.save(dv1);
+
+        DocumentLink dl1 = new DocumentLink();
+        dl1.setDocument(docInvasive);
+        dl1.setEntityType("PATIENT");
+        dl1.setEntityId(pRamesh.patient.getId());
+        documentLinkRepository.save(dl1);
+
+        // Patient Consent Record
+        if (ctInvasive != null) {
+            PatientConsent pc1 = new PatientConsent();
+            pc1.setPatient(pRamesh.patient);
+            pc1.setOrganization(tenancy.aiims);
+            pc1.setConsentType(ctInvasive);
+            pc1.setStatus("GRANTED");
+            pc1.setGrantedAt(OffsetDateTime.now().minusDays(1));
+            pc1.setGrantedBy(identity.arjun);
+            pc1.setScope("{\"procedures\": [\"CORONARY_ANGIOGRAPHY\", \"PCI_STENT\"], \"riskAcknowledged\": true}");
+            pc1.setNotes("Patient and spouse fully counseled regarding PCI procedure, contrast risks, and alternatives.");
+            pc1 = patientConsentRepository.save(pc1);
+
+            ConsentVersion cv1 = new ConsentVersion();
+            cv1.setPatientConsent(pc1);
+            cv1.setVersionNumber(1);
+            cv1.setDocument(docInvasive);
+            cv1.setCreatedAt(OffsetDateTime.now().minusDays(1));
+            consentVersionRepository.save(cv1);
+        }
+
+        // ABDM Data Share Consent for Anita Sharma
+        if (ctAbdm != null) {
+            PatientConsent pc2 = new PatientConsent();
+            pc2.setPatient(pAnita.patient);
+            pc2.setOrganization(tenancy.aiims);
+            pc2.setConsentType(ctAbdm);
+            pc2.setStatus("GRANTED");
+            pc2.setGrantedAt(OffsetDateTime.now().minusDays(3));
+            pc2.setGrantedBy(identity.priya);
+            pc2.setScope("{\"hip\": \"AIIMS-DEL\", \"types\": [\"OPConsultation\", \"DiagnosticReport\", \"Prescription\"]}");
+            pc2.setNotes("ABDM OTP verified electronic health data sharing consent granted");
+            patientConsentRepository.save(pc2);
         }
     }
 
-    private void initAppointments(TenancyContext tenancy, Map<String, User> users, List<Patient> patients) {
-        if (patients.size() >= 2 && appointmentRepository.count() == 0) {
-            Patient p2 = patients.get(1); // Anita Sharma
-            User priya = users.get("priya.kapoor");
-
-            Appointment appt = new Appointment();
-            appt.setOrganization(tenancy.aiims);
-            appt.setFacility(tenancy.aiimsOpd);
-            appt.setDepartment(tenancy.neuro);
-            appt.setPatient(p2);
-            appt.setCreatedBy(priya);
-            appt.setStatus("SCHEDULED");
-            appt.setReason("Follow-up evaluation for chronic tension headaches");
-            appt.setStartsAt(OffsetDateTime.now().plusDays(2).withHour(10).withMinute(0));
-            appt.setEndsAt(OffsetDateTime.now().plusDays(2).withHour(10).withMinute(30));
-            appointmentRepository.save(appt);
-        }
+    private void saveConsentType(Organization org, String code, String name, String desc) {
+        ConsentType ct = new ConsentType();
+        ct.setOrganization(org);
+        ct.setCode(code);
+        ct.setName(name);
+        ct.setDescription(desc);
+        ct.setActive(true);
+        consentTypeRepository.save(ct);
     }
 
-    private void initBilling(TenancyContext tenancy, List<Patient> patients) {
-        if (!patients.isEmpty() && invoiceRepository.count() == 0) {
-            Patient p1 = patients.get(0);
+    // =========================================================================
+    // 15. SECURITY EVENTS & AUDIT LOGS
+    // =========================================================================
+    private void initSecurityAndAudit(TenancyContext tenancy, IdentityContext identity, List<PatientContext> patients, ClinicalContext clinical) {
+        if (securityEventRepository.count() == 0) {
+            SecurityEvent se1 = new SecurityEvent();
+            se1.setOrganization(tenancy.aiims);
+            se1.setUser(identity.arjun);
+            se1.setEventType("USER_LOGIN_SUCCESS");
+            se1.setIpAddress("192.168.10.45");
+            se1.setUserAgent("Mozilla/5.0 (X11; Linux x86_64) SentinelEHR/2.0");
+            se1.setMetadata("{\"authMethod\": \"PASSWORD_MFA\", \"sessionTimeout\": 3600}");
+            se1.setCreatedAt(OffsetDateTime.now().minusHours(5));
+            securityEventRepository.save(se1);
 
-            Invoice inv = new Invoice();
-            inv.setPatient(p1);
-            inv.setInvoiceNumber("INV-2024-001001");
-            inv.setTotalAmount(new BigDecimal("92650.00"));
-            inv.setPaidAmount(new BigDecimal("92650.00"));
-            inv.setStatus("PAID");
-            inv.setIssuedAt(OffsetDateTime.now().minusDays(1));
-            invoiceRepository.save(inv);
+            SecurityEvent se2 = new SecurityEvent();
+            se2.setOrganization(tenancy.aiims);
+            se2.setUser(identity.arjun);
+            se2.setEventType("BREAK_GLASS_ACCESS_TRIGGERED");
+            se2.setIpAddress("192.168.10.45");
+            se2.setUserAgent("Mozilla/5.0 (X11; Linux x86_64) SentinelEHR/2.0");
+            se2.setMetadata("{\"patientId\": \"" + patients.get(0).patient.getId() + "\", \"reason\": \"Acute STEMI Cath Lab Emergency\"}");
+            se2.setCreatedAt(OffsetDateTime.now().minusDays(1));
+            securityEventRepository.save(se2);
+        }
+
+        // Break Glass Record
+        if (breakGlassRepository.count() == 0 && !patients.isEmpty()) {
+            PatientContext pRamesh = patients.get(0);
+            BreakGlassRecord bg = new BreakGlassRecord();
+            bg.setPatient(pRamesh.patient);
+            bg.setUser(identity.arjun);
+            bg.setCategory("CARDIAC_ARREST");
+            bg.setJustification("Emergency Primary PCI catheterization protocol override for Acute STEMI resuscitation");
+            bg.setClientIp("192.168.10.45");
+            bg.setRequestedAt(LocalDateTime.now().minusDays(1));
+            bg.setExpiresAt(LocalDateTime.now().minusDays(1).plusHours(4));
+            bg.setStatus("EXPIRED");
+            breakGlassRepository.save(bg);
+        }
+
+        // Audit Logs
+        if (auditLogRepository.count() == 0 && !patients.isEmpty()) {
+            PatientContext pRamesh = patients.get(0);
+            PatientContext pAnita = patients.get(1);
+
+            AuditLog a1 = new AuditLog();
+            a1.setOrganizationId(tenancy.aiims.getId());
+            a1.setFacilityId(tenancy.aiimsMain.getId());
+            a1.setUserId(identity.arjun.getId());
+            a1.setPatientId(pRamesh.patient.getId());
+            a1.setEncounterId(clinical.encRamesh != null ? clinical.encRamesh.getId() : null);
+            a1.setAction("READ");
+            a1.setResourceType("PATIENT_CHART");
+            a1.setResourceId(pRamesh.patient.getId());
+            a1.setPurposeOfUse("TREATMENT");
+            a1.setResult("SUCCESS");
+            a1.setIpAddress("192.168.10.45");
+            a1.setUserAgent("Sentinel-EHR-Client/2.4");
+            a1.setOccurredAt(OffsetDateTime.now().minusDays(1));
+            a1.setUsername("arjun.sharma");
+            a1.setUserRole("PHYSICIAN");
+            a1.setEntityName("PATIENT_CHART");
+            a1.setDetails("Accessed complete clinical record and allergy history prior to emergency catheterization");
+            auditLogRepository.save(a1);
+
+            AuditLog a2 = new AuditLog();
+            a2.setOrganizationId(tenancy.aiims.getId());
+            a2.setFacilityId(tenancy.aiimsMain.getId());
+            a2.setUserId(identity.arjun.getId());
+            a2.setPatientId(pRamesh.patient.getId());
+            a2.setEncounterId(clinical.encRamesh != null ? clinical.encRamesh.getId() : null);
+            a2.setAction("CREATE");
+            a2.setResourceType("PRESCRIPTION");
+            a2.setPurposeOfUse("TREATMENT");
+            a2.setResult("SUCCESS");
+            a2.setIpAddress("192.168.10.45");
+            a2.setUserAgent("Sentinel-EHR-Client/2.4");
+            a2.setOccurredAt(OffsetDateTime.now().minusDays(1).plusHours(2));
+            a2.setUsername("arjun.sharma");
+            a2.setUserRole("PHYSICIAN");
+            a2.setEntityName("PRESCRIPTION");
+            a2.setDetails("Issued electronic prescription for Aspirin 75mg and Atorvastatin 40mg post PCI");
+            auditLogRepository.save(a2);
+
+            AuditLog a3 = new AuditLog();
+            a3.setOrganizationId(tenancy.aiims.getId());
+            a3.setFacilityId(tenancy.aiimsOpd.getId());
+            a3.setUserId(identity.priya.getId());
+            a3.setPatientId(pAnita.patient.getId());
+            a3.setAction("READ");
+            a3.setResourceType("PATIENT_DEMOGRAPHICS");
+            a3.setResourceId(pAnita.patient.getId());
+            a3.setPurposeOfUse("TREATMENT");
+            a3.setResult("SUCCESS");
+            a3.setIpAddress("192.168.10.50");
+            a3.setOccurredAt(OffsetDateTime.now().minusDays(3));
+            a3.setUsername("priya.kapoor");
+            a3.setUserRole("PHYSICIAN");
+            a3.setEntityName("PATIENT_DEMOGRAPHICS");
+            a3.setDetails("Outpatient consult chart open for chronic headache review");
+            auditLogRepository.save(a3);
         }
     }
 }

@@ -10,6 +10,7 @@ import java.util.UUID;
 
 @Repository
 public interface PatientSocialHistoryRepository extends JpaRepository<PatientSocialHistory, UUID> {
+    List<PatientSocialHistory> findByPatientId(UUID patientId);
     List<PatientSocialHistory> findByPatientIdOrderByRecordedAtDesc(UUID patientId);
     Optional<PatientSocialHistory> findTopByPatientIdOrderByRecordedAtDesc(UUID patientId);
 }

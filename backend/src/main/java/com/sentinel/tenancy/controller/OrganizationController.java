@@ -27,8 +27,8 @@ public class OrganizationController {
         this.organizationService = organizationService;
     }
 
-    @PostMapping
-    @Operation(summary = "Create an organization")
+    @PostMapping({"", "/register"})
+    @Operation(summary = "Create or register an organization")
     public ResponseEntity<ApiResponse<OrganizationResponseDTO>> createOrganization(
             @Valid @RequestBody CreateOrganizationRequest request) {
         OrganizationResponseDTO response = organizationService.createOrganization(request);

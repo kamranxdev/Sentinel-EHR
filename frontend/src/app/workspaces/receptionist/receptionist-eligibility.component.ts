@@ -5,6 +5,7 @@ import { ActivatedRoute, RouterModule } from '@angular/router';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
 import { Patient } from '../../core/models/patient.model';
+import { EligibilityResponseDTO, CopayCollectionDTO } from '../../core/models/billing-eligibility.model';
 
 import { HlmCardImports } from '@spartan-ng/helm/card';
 import { HlmBadgeImports } from '@spartan-ng/helm/badge';
@@ -300,12 +301,12 @@ export class ReceptionistEligibilityComponent implements OnInit, OnChanges {
 
   loading = signal(false);
   collecting = signal(false);
-  rteResult = signal<any>(null);
+  rteResult = signal<EligibilityResponseDTO | null>(null);
   showCopayModal = signal(false);
 
   copayAmount = 500.0;
   paymentMethod = 'UPI';
-  receiptResult = signal<any>(null);
+  receiptResult = signal<CopayCollectionDTO | null>(null);
 
   allPatients = signal<Patient[]>([]);
   selectedPatient = signal<Patient | null>(null);

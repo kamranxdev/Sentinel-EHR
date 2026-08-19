@@ -1500,7 +1500,7 @@ export class PhysicianChartComponent implements OnInit {
   searchMedicalCodes(): void {
     if (!this.termSearchQuery.trim()) return;
     this.apiService.searchTerminology(this.termSearchQuery).subscribe({
-      next: (res) => this.termResults.set(res || []),
+      next: (res: TerminologySearchResult[]) => this.termResults.set(res || []),
       error: () => this.termResults.set([]),
     });
   }

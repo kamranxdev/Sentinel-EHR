@@ -5,6 +5,7 @@ import { Router, RouterModule } from '@angular/router';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
 import { Patient } from '../../core/models/patient.model';
+import { User } from '../../core/models/auth-user.model';
 
 import { HlmCardImports } from '@spartan-ng/helm/card';
 import { HlmBadgeImports } from '@spartan-ng/helm/badge';
@@ -409,7 +410,7 @@ export class ReceptionistIntakeComponent implements OnInit {
 
   // Today's Appointment Scheduling for First Visit
   scheduleTodayAppointment = false;
-  doctors = signal<any[]>([]);
+  doctors = signal<User[]>([]);
   selectedDoctorId: string = '';
   appointmentTime: string = '10:30';
   consultationReason: string = 'First Visit General Consultation & Clinical Assessment';
@@ -433,10 +434,13 @@ export class ReceptionistIntakeComponent implements OnInit {
     this.apiService.getDoctors().subscribe({
       next: (docs) => {
         if (docs && docs.length > 0) {
-          const list = docs.map((d: any) => ({
-            id: d.id,
-            fullName: d.fullName || d.username,
-            specialty: d.specialization || d.specialty || 'General Physician',
+          const list: User[] = docs.map((d: any) => ({
+            id: String(d.id),
+            username: d.username || d.fullName?.toLowerCase() || 'doctor',
+            fullName: d.fullName || d.username || 'Doctor',
+            specialization: d.specialization || d.specialty || 'General Physician',
+            specialty: d.specialty || d.specialization || 'General Physician',
+            roles: ['PHYSICIAN'],
           }));
           this.doctors.set(list);
           this.selectedDoctorId = String(list[0].id);

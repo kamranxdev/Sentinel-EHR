@@ -18,6 +18,15 @@ import {
   lucideFileCheck,
 } from '@ng-icons/lucide';
 
+export interface DashboardInvoiceViewModel {
+  id: string;
+  appointmentId?: string;
+  patientName: string;
+  carrier: string;
+  amount: number;
+  status: 'PAID' | 'PENDING' | string;
+}
+
 @Component({
   selector: 'app-billing-staff-dashboard',
   standalone: true,
@@ -151,7 +160,7 @@ import {
   `,
 })
 export class BillingStaffDashboardComponent implements OnInit {
-  invoices = signal<any[]>([]);
+  invoices = signal<DashboardInvoiceViewModel[]>([]);
   loading = signal<boolean>(true);
   error = signal<string | null>(null);
 
@@ -169,18 +178,18 @@ export class BillingStaffDashboardComponent implements OnInit {
     this.error.set(null);
     this.apiService.getAppointments().subscribe({
       next: (apts) => {
-        const list = (Array.isArray(apts) ? apts : []).map((apt, idx) => ({
+        const list: DashboardInvoiceViewModel[] = (Array.isArray(apts) ? apts : []).map((apt, idx) => ({
           id: `INV-${apt.id ? String(apt.id).substring(0, 6).toUpperCase() : (1000 + idx)}`,
           appointmentId: apt.id,
           patientName: apt.patientName || apt.patient?.fullName || 'Patient',
-          carrier: apt.insuranceDetails || 'PM-JAY / State Health Assurance',
+          carrier: (apt as any).insuranceDetails || 'PM-JAY / State Health Assurance',
           amount: 1500.0,
           status: apt.status === 'COMPLETED' ? 'PAID' : 'PENDING',
         }));
         this.invoices.set(list);
         this.loading.set(false);
       },
-      error: (err) => {
+      error: (err: unknown) => {
         console.error('Failed to load billing records:', err);
         this.error.set('Failed to load billing records from ledger server.');
         this.loading.set(false);
@@ -188,7 +197,7 @@ export class BillingStaffDashboardComponent implements OnInit {
     });
   }
 
-  processClaim(invoice: any): void {
+  processClaim(invoice: DashboardInvoiceViewModel): void {
     invoice.status = 'PAID';
   }
 }

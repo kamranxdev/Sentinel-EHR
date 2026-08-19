@@ -158,7 +158,7 @@ export class FhirExplorerComponent implements OnInit {
           this.ingestLoading = false;
           this.ingestStatus = 'SUCCESS: Patient ingested into Sentinel! New FHIR ID: ' + res.id;
           this.selectedResource = 'Patient';
-          this.selectedResourceId = res.id;
+          this.selectedResourceId = res.id || '';
           this.activeTab = 'query';
           this.executeQuery();
         },

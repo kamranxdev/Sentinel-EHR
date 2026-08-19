@@ -11,6 +11,8 @@ Welcome to the comprehensive technical and operational documentation for **Senti
   - Multi-tenant cloud architecture, PostgreSQL Row-Level Security (RLS), RBAC/ABAC authorization engine, FHIR R4 & ABDM interoperability layer.
 - [**Database Schema & Entities Specification**](./architecture/database-schema-entities.md)
   - Full relational schema specifications covering Identity, Tenancy, Spatial ADT Beds, Encounters, Clinical Observations, Pharmacy & eMAR, Laboratory & Accessioning, Imaging, Billing, and WORM Auditing.
+- [**Backend Domain Packages & Architecture**](./architecture/backend-packages-architecture.md)
+  - Deep-dive into backend domain packages (`identity`, `security`, `patient`, `scheduling`, `clinical`, `pharmacy`, `laboratory`, `billing`, `consent`, `audit`, `abdm`), request lifecycles, and cross-package data flows.
 
 ### 2. API & Security
 - [**REST API Endpoint Specification**](./api/rest-api-specification.md)

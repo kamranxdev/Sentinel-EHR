@@ -1,7 +1,16 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Organization, OrganizationRegistrationRequest, OrganizationStatusUpdate } from '../models/organization.model';
+import { map } from 'rxjs/operators';
+import {
+  Organization,
+  OrganizationRegistrationRequest,
+  OrganizationStatusUpdate,
+  SysAdminStatsDTO,
+  OrgAdminDashboardStatsDTO,
+  StaffOnboardingRequestDTO,
+  StaffUpdateRequestDTO,
+} from '../models/organization.model';
 import { User } from '../models/auth-user.model';
 import { AuditLog } from '../models/audit.model';
 
@@ -9,14 +18,16 @@ import { AuditLog } from '../models/audit.model';
   providedIn: 'root'
 })
 export class OrganizationService {
-  private apiUrl = '/api/v1/organizations';
-  private sysAdminUrl = '/api/v1/sys-admin';
-  private orgAdminUrl = '/api/v1/org-admin';
+  private apiUrl = 'http://localhost:8080/api/v1/organizations';
+  private sysAdminUrl = 'http://localhost:8080/api/v1/sys-admin';
+  private orgAdminUrl = 'http://localhost:8080/api/v1/org-admin';
 
   constructor(private http: HttpClient) {}
 
   registerOrganization(request: OrganizationRegistrationRequest): Observable<Organization> {
-    return this.http.post<Organization>(`${this.apiUrl}/register`, request);
+    return this.http.post<any>(`${this.apiUrl}/register`, request).pipe(
+      map((res: any) => res?.data || res)
+    );
   }
 
   // --- SYS ADMIN (Platform-Wide Governance) ---
@@ -46,8 +57,8 @@ export class OrganizationService {
     return this.http.get<AuditLog[]>(`${this.sysAdminUrl}/audit-logs`, { params });
   }
 
-  getSysAdminStats(): Observable<any> {
-    return this.http.get<any>(`${this.sysAdminUrl}/system-stats`);
+  getSysAdminStats(): Observable<SysAdminStatsDTO> {
+    return this.http.get<SysAdminStatsDTO>(`${this.sysAdminUrl}/system-stats`);
   }
 
   // --- ORG ADMIN (Facility-Scoped Multi-Tenant Workspace) ---
@@ -63,24 +74,24 @@ export class OrganizationService {
     return this.http.get<User[]>(`${this.orgAdminUrl}/users`);
   }
 
-  onboardOrgAdminStaff(user: any): Observable<User> {
+  onboardOrgAdminStaff(user: StaffOnboardingRequestDTO): Observable<User> {
     return this.http.post<User>(`${this.orgAdminUrl}/users`, user);
   }
 
-  updateOrgAdminStaff(id: string, user: any): Observable<User> {
+  updateOrgAdminStaff(id: string, user: StaffUpdateRequestDTO): Observable<User> {
     return this.http.put<User>(`${this.orgAdminUrl}/users/${id}`, user);
   }
 
-  updateOrgAdminStaffStatus(id: string, status: string): Observable<any> {
-    return this.http.patch<any>(`${this.orgAdminUrl}/users/${id}/status`, { status });
+  updateOrgAdminStaffStatus(id: string, status: string): Observable<User> {
+    return this.http.patch<User>(`${this.orgAdminUrl}/users/${id}/status`, { status });
   }
 
-  resetOrgAdminStaffPassword(id: string, newPassword?: string): Observable<any> {
-    return this.http.post<any>(`${this.orgAdminUrl}/users/${id}/reset-password`, { newPassword });
+  resetOrgAdminStaffPassword(id: string, newPassword?: string): Observable<User> {
+    return this.http.post<User>(`${this.orgAdminUrl}/users/${id}/reset-password`, { newPassword });
   }
 
-  deleteOrgAdminStaff(id: string): Observable<any> {
-    return this.http.delete<any>(`${this.orgAdminUrl}/users/${id}`);
+  deleteOrgAdminStaff(id: string): Observable<User> {
+    return this.http.delete<User>(`${this.orgAdminUrl}/users/${id}`);
   }
 
   getOrgAdminAuditLogs(search?: string): Observable<AuditLog[]> {
@@ -89,7 +100,7 @@ export class OrganizationService {
     return this.http.get<AuditLog[]>(`${this.orgAdminUrl}/audit-logs`, { params });
   }
 
-  getOrgAdminDashboardStats(): Observable<any> {
-    return this.http.get<any>(`${this.orgAdminUrl}/dashboard-stats`);
+  getOrgAdminDashboardStats(): Observable<OrgAdminDashboardStatsDTO> {
+    return this.http.get<OrgAdminDashboardStatsDTO>(`${this.orgAdminUrl}/dashboard-stats`);
   }
 }

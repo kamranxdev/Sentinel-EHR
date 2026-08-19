@@ -1,7 +1,8 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map, tap } from 'rxjs';
-import { JwtAuthResponse } from '../models/auth-user.model';
+import { JwtAuthResponse, User } from '../models/auth-user.model';
+import { StaffOnboardingRequestDTO } from '../models/organization.model';
 import { Capability, ROLE_CAPABILITY_MAP, UserRole } from '../models/permissions.model';
 
 @Injectable({
@@ -72,8 +73,8 @@ export class AuthService {
     password: string;
     email: string;
     fullName: string;
-  }): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/register`, userData).pipe(
+  }): Observable<JwtAuthResponse | { message: string }> {
+    return this.http.post<JwtAuthResponse | { message: string }>(`${this.apiUrl}/register`, userData).pipe(
       map((res: any) => (res && res.data ? res.data : res)),
     );
   }
@@ -245,8 +246,8 @@ export class AuthService {
     return 'Patient';
   }
 
-  createStaffUser(payload: any): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/admin/create-user`, payload).pipe(
+  createStaffUser(payload: StaffOnboardingRequestDTO): Observable<User> {
+    return this.http.post<User>(`${this.apiUrl}/admin/create-user`, payload).pipe(
       map((res: any) => (res && res.data ? res.data : res)),
     );
   }

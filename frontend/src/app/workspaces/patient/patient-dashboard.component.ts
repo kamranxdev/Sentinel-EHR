@@ -7,6 +7,12 @@ import { PatientContextService } from '../../core/services/patient-context.servi
 import { Patient } from '../../core/models/patient.model';
 import { Vitals, Prescription, Allergy, Diagnosis, Encounter } from '../../core/models/clinical.model';
 import { Appointment } from '../../core/models/appointment.model';
+import { LabResult } from '../../core/models/lab.model';
+import { ImagingOrder, ImagingReport } from '../../core/models/imaging.model';
+import { ClinicalDocument } from '../../core/models/document.model';
+import { Invoice } from '../../core/models/billing.model';
+import { PatientConsent } from '../../core/models/consent.model';
+import { PatientInsurancePolicy } from '../../core/models/patient.model';
 
 import { HlmCardImports } from '@spartan-ng/helm/card';
 import { HlmBadgeImports } from '@spartan-ng/helm/badge';
@@ -627,12 +633,12 @@ export class PatientDashboardComponent implements OnInit {
     });
   }
 
-  labResults = signal<any[]>([]);
-  imagingReports = signal<any[]>([]);
-  clinicalDocuments = signal<any[]>([]);
-  invoices = signal<any[]>([]);
-  consents = signal<any[]>([]);
-  insurances = signal<any[]>([]);
+  labResults = signal<LabResult[]>([]);
+  imagingReports = signal<ImagingOrder[]>([]);
+  clinicalDocuments = signal<ClinicalDocument[]>([]);
+  invoices = signal<Invoice[]>([]);
+  consents = signal<PatientConsent[]>([]);
+  insurances = signal<PatientInsurancePolicy[]>([]);
 
   private loadPatientHealthData(patientId: string): void {
     this.apiService.getAppointmentsByPatient(patientId).subscribe({

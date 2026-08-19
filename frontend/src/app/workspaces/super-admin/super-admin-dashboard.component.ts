@@ -2,9 +2,10 @@ import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ApiService } from '../../core/services/api.service';
+import { OrganizationService } from '../../core/services/organization.service';
 import { User } from '../../core/models/auth-user.model';
-import { Patient } from '../../core/models/patient.model';
-import { Appointment } from '../../core/models/appointment.model';
+import { Organization } from '../../core/models/organization.model';
+import { SecurityEventLog } from '../../core/models/security-policy.model';
 
 import { HlmCardImports } from '@spartan-ng/helm/card';
 import { HlmBadgeImports } from '@spartan-ng/helm/badge';
@@ -13,18 +14,19 @@ import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   lucideSettings,
   lucideUsers,
-  lucideHeartPulse,
-  lucideCalendarClock,
-  lucideShieldCheck,
   lucideBuilding2,
+  lucideShieldCheck,
+  lucideActivity,
   lucideArrowUpRight,
   lucideChevronRight,
   lucideLock,
-  lucideFileText,
-  lucideSparkles,
   lucideRefreshCw,
   lucideAlertCircle,
   lucideCheck,
+  lucideDatabase,
+  lucideServer,
+  lucideKey,
+  lucideCpu,
 } from '@ng-icons/lucide';
 
 interface ToastAlert {
@@ -47,18 +49,19 @@ interface ToastAlert {
     provideIcons({
       lucideSettings,
       lucideUsers,
-      lucideHeartPulse,
-      lucideCalendarClock,
-      lucideShieldCheck,
       lucideBuilding2,
+      lucideShieldCheck,
+      lucideActivity,
       lucideArrowUpRight,
       lucideChevronRight,
       lucideLock,
-      lucideFileText,
-      lucideSparkles,
       lucideRefreshCw,
       lucideAlertCircle,
       lucideCheck,
+      lucideDatabase,
+      lucideServer,
+      lucideKey,
+      lucideCpu,
     }),
   ],
   template: `
@@ -78,19 +81,19 @@ interface ToastAlert {
         <button (click)="toastMessage.set(null)" class="text-xs opacity-70 hover:opacity-100 font-mono">Dismiss</button>
       </div>
 
-      <!-- Executive Header -->
+      <!-- Platform Operator Header -->
       <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-border">
         <div class="flex items-center gap-4">
-          <div class="size-12 rounded-xl bg-gradient-to-br from-primary/20 via-primary/10 to-primary/5 text-primary flex items-center justify-center shrink-0 border border-primary/20 shadow-xs">
+          <div class="size-12 rounded-xl bg-gradient-to-br from-purple-500/20 via-purple-500/10 to-purple-500/5 text-purple-600 flex items-center justify-center shrink-0 border border-purple-500/20 shadow-xs">
             <ng-icon name="lucideSettings" size="26" />
           </div>
           <div>
             <div class="flex items-center gap-2 flex-wrap">
               <h1 class="text-xl font-bold tracking-tight text-foreground">
-                Super Admin Command Center
+                Sentinel Platform Command Center
               </h1>
-              <span hlmBadge variant="secondary" class="text-[10px] uppercase font-mono tracking-wider">
-                Super Admin
+              <span hlmBadge variant="secondary" class="text-[10px] uppercase font-mono tracking-wider bg-purple-500/10 text-purple-600 border-purple-500/30">
+                PLATFORM SUPER ADMIN
               </span>
             </div>
             <p class="text-xs text-muted-foreground mt-0.5 flex items-center gap-2 flex-wrap">
@@ -99,10 +102,10 @@ interface ToastAlert {
                   <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                   <span class="relative inline-flex rounded-full size-2 bg-emerald-500"></span>
                 </span>
-                Enterprise Systems Active
+                Sentinel SaaS Infrastructure Online
               </span>
               <span>•</span>
-              <span>RBAC provisioning, MPI patient registry, ABDM & DPDP audit vault & capacity analytics</span>
+              <span>Multi-tenant governance, organization lifecycles, global RBAC, & immutable platform audit vault</span>
             </p>
           </div>
         </div>
@@ -112,115 +115,138 @@ interface ToastAlert {
             (click)="loadData()"
             class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold bg-secondary hover:bg-secondary/80 text-foreground transition-all">
             <ng-icon name="lucideRefreshCw" size="14" />
-            <span>Refresh</span>
+            <span>Refresh Telemetry</span>
           </button>
           <a
-            routerLink="/super-admin/users"
-            class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-xs">
-            <ng-icon name="lucideUsers" size="14" />
-            <span>Manage Users</span>
+            routerLink="/super-admin/organizations"
+            class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-purple-600 text-white hover:bg-purple-700 transition-all shadow-xs">
+            <ng-icon name="lucideBuilding2" size="14" />
+            <span>Manage Organizations</span>
           </a>
         </div>
       </div>
 
-      <!-- System KPI Overview (6 Cards) -->
+      <!-- SaaS KPI Overview (6 Cards) -->
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        <!-- Users Card -->
+        <!-- Active Tenants -->
+        <a routerLink="/super-admin/organizations" class="p-4 rounded-xl border border-border bg-card shadow-xs hover:border-purple-500/40 transition-all group">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Tenant Orgs</span>
+            <div class="size-9 rounded-lg bg-purple-500/10 text-purple-600 flex items-center justify-center group-hover:scale-105 transition-transform">
+              <ng-icon name="lucideBuilding2" size="18" />
+            </div>
+          </div>
+          <div class="mt-2 flex items-baseline justify-between">
+            <div class="text-2xl font-bold text-foreground font-mono">{{ organizations().length }}</div>
+            <span class="text-[11px] font-medium text-emerald-500 flex items-center gap-0.5">
+              <ng-icon name="lucideArrowUpRight" size="12" /> Active
+            </span>
+          </div>
+          <p class="text-[10px] text-muted-foreground mt-1">Hospitals & Clinics</p>
+        </a>
+
+        <!-- Platform Users -->
         <a routerLink="/super-admin/users" class="p-4 rounded-xl border border-border bg-card shadow-xs hover:border-primary/40 transition-all group">
           <div class="flex items-center justify-between">
-            <span class="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Active Users</span>
+            <span class="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Platform Users</span>
             <div class="size-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center group-hover:scale-105 transition-transform">
               <ng-icon name="lucideUsers" size="18" />
             </div>
           </div>
           <div class="mt-2 flex items-baseline justify-between">
             <div class="text-2xl font-bold text-foreground font-mono">{{ users().length }}</div>
-            <span class="text-[11px] font-medium text-emerald-500 flex items-center gap-0.5">
-              <ng-icon name="lucideArrowUpRight" size="12" /> Active
-            </span>
+            <span class="text-[11px] font-medium text-primary font-mono">Global RBAC</span>
           </div>
-          <p class="text-[10px] text-muted-foreground mt-1">Doctors, Nurses & Staff</p>
+          <p class="text-[10px] text-muted-foreground mt-1">Total provisioned accounts</p>
         </a>
 
-        <!-- MPI Card -->
-        <a routerLink="/super-admin/patients" class="p-4 rounded-xl border border-border bg-card shadow-xs hover:border-emerald-500/40 transition-all group">
+        <!-- System Health -->
+        <a routerLink="/super-admin/system-health" class="p-4 rounded-xl border border-border bg-card shadow-xs hover:border-emerald-500/40 transition-all group">
           <div class="flex items-center justify-between">
-            <span class="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">MPI Census</span>
+            <span class="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">System Health</span>
             <div class="size-9 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center group-hover:scale-105 transition-transform">
-              <ng-icon name="lucideHeartPulse" size="18" />
+              <ng-icon name="lucideServer" size="18" />
             </div>
           </div>
           <div class="mt-2 flex items-baseline justify-between">
-            <div class="text-2xl font-bold text-emerald-600 font-mono">{{ patients().length }}</div>
-            <span class="text-[11px] font-medium text-emerald-500 font-mono">FHIR R4</span>
+            <div class="text-2xl font-bold text-emerald-600 font-mono">99.98%</div>
+            <span class="text-[11px] font-medium text-emerald-500 font-mono">UP</span>
           </div>
-          <p class="text-[10px] text-muted-foreground mt-1">Demographics & MRN</p>
+          <p class="text-[10px] text-muted-foreground mt-1">PostgreSQL RLS & Redis</p>
         </a>
 
-        <!-- Schedule Analytics Card -->
-        <a routerLink="/super-admin/schedule-analytics" class="p-4 rounded-xl border border-border bg-card shadow-xs hover:border-sky-500/40 transition-all group">
+        <!-- Platform Audit -->
+        <a routerLink="/super-admin/audit" class="p-4 rounded-xl border border-border bg-card shadow-xs hover:border-indigo-500/40 transition-all group">
           <div class="flex items-center justify-between">
-            <span class="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Schedule Load</span>
-            <div class="size-9 rounded-lg bg-sky-500/10 text-sky-600 flex items-center justify-center group-hover:scale-105 transition-transform">
-              <ng-icon name="lucideCalendarClock" size="18" />
-            </div>
-          </div>
-          <div class="mt-2 flex items-baseline justify-between">
-            <div class="text-2xl font-bold text-foreground font-mono">{{ appointments().length }}</div>
-            <span class="text-[11px] font-medium text-sky-600 font-mono">{{ completionRate() }}% Rate</span>
-          </div>
-          <p class="text-[10px] text-muted-foreground mt-1">Capacity & provider load</p>
-        </a>
-
-        <!-- Organizations & Clinics Governance Card -->
-        <a routerLink="/super-admin/organizations" class="p-4 rounded-xl border border-border bg-card shadow-xs hover:border-amber-500/40 transition-all group">
-          <div class="flex items-center justify-between">
-            <span class="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Organizations</span>
-            <div class="size-9 rounded-lg bg-amber-500/10 text-amber-600 flex items-center justify-center group-hover:scale-105 transition-transform">
-              <ng-icon name="lucideBuilding2" size="18" />
-            </div>
-          </div>
-          <div class="mt-2 flex items-baseline justify-between">
-            <div class="text-2xl font-bold text-amber-600 font-mono">Multi-Tenant</div>
-            <span class="text-[11px] font-medium text-amber-600 font-mono">Hierarchy</span>
-          </div>
-          <p class="text-[10px] text-muted-foreground mt-1">Clinic licenses & onboarding</p>
-        </a>
-
-        <!-- System Governance Settings Card -->
-        <a routerLink="/super-admin/organizations" class="p-4 rounded-xl border border-border bg-card shadow-xs hover:border-indigo-500/40 transition-all group">
-          <div class="flex items-center justify-between">
-            <span class="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Governance</span>
+            <span class="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Audit Trail</span>
             <div class="size-9 rounded-lg bg-indigo-500/10 text-indigo-600 flex items-center justify-center group-hover:scale-105 transition-transform">
-              <ng-icon name="lucideSettings" size="18" />
-            </div>
-          </div>
-          <div class="mt-2 flex items-baseline justify-between">
-            <div class="text-2xl font-bold text-indigo-600 font-mono">Global</div>
-            <span class="text-[11px] font-medium text-indigo-600 font-mono">Policies</span>
-          </div>
-          <p class="text-[10px] text-muted-foreground mt-1">Platform RBAC & security</p>
-        </a>
-
-        <!-- Compliance Vault Card -->
-        <a routerLink="/auditor/ledger" class="p-4 rounded-xl border border-border bg-card shadow-xs hover:border-purple-500/40 transition-all group">
-          <div class="flex items-center justify-between">
-            <span class="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Audit Ledger</span>
-            <div class="size-9 rounded-lg bg-purple-500/10 text-purple-600 flex items-center justify-center group-hover:scale-105 transition-transform">
               <ng-icon name="lucideShieldCheck" size="18" />
             </div>
           </div>
           <div class="mt-2 flex items-baseline justify-between">
-            <div class="text-2xl font-bold text-purple-600 font-mono">WORM</div>
-            <span class="text-[11px] font-medium text-purple-600 font-mono">ABDM</span>
+            <div class="text-2xl font-bold text-indigo-600 font-mono">WORM</div>
+            <span class="text-[11px] font-medium text-indigo-600 font-mono">Immutable</span>
           </div>
-          <p class="text-[10px] text-muted-foreground mt-1">Immutable security log</p>
+          <p class="text-[10px] text-muted-foreground mt-1">Forensic security ledger</p>
         </a>
+
+        <!-- Security Events -->
+        <a routerLink="/super-admin/audit" class="p-4 rounded-xl border border-border bg-card shadow-xs hover:border-amber-500/40 transition-all group">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Security Logs</span>
+            <div class="size-9 rounded-lg bg-amber-500/10 text-amber-600 flex items-center justify-center group-hover:scale-105 transition-transform">
+              <ng-icon name="lucideLock" size="18" />
+            </div>
+          </div>
+          <div class="mt-2 flex items-baseline justify-between">
+            <div class="text-2xl font-bold text-amber-600 font-mono">{{ securityEvents().length }}</div>
+            <span class="text-[11px] font-medium text-amber-600 font-mono">Events</span>
+          </div>
+          <p class="text-[10px] text-muted-foreground mt-1">Authentication & ABAC guard</p>
+        </a>
+
+        <!-- Architecture Boundary Indicator -->
+        <div class="p-4 rounded-xl border border-border bg-muted/20 shadow-xs">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Clinical Isolation</span>
+            <div class="size-9 rounded-lg bg-muted text-muted-foreground flex items-center justify-center">
+              <ng-icon name="lucideKey" size="18" />
+            </div>
+          </div>
+          <div class="mt-2 flex items-baseline justify-between">
+            <div class="text-xl font-bold text-muted-foreground font-mono">DENY DEFAULT</div>
+          </div>
+          <p class="text-[10px] text-muted-foreground mt-1">Zero clinical data exposure</p>
+        </div>
       </div>
 
-      <!-- Core Workspaces & System Governance Modules -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        <!-- User RBAC Management Card -->
+      <!-- Core Platform Governance Workspaces -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <!-- Organizations Lifecycle Card -->
+        <a
+          routerLink="/super-admin/organizations"
+          class="p-5 rounded-xl border border-border bg-card hover:border-purple-500/50 transition-all duration-300 space-y-4 flex flex-col justify-between group shadow-xs">
+          <div class="flex items-center justify-between">
+            <div class="size-10 rounded-lg bg-purple-500/10 text-purple-600 flex items-center justify-center group-hover:bg-purple-600 group-hover:text-white transition-colors">
+              <ng-icon name="lucideBuilding2" size="20" />
+            </div>
+            <span class="inline-flex items-center gap-1 text-xs font-semibold text-purple-600 group-hover:translate-x-0.5 transition-transform">
+              Manage Tenants <ng-icon name="lucideChevronRight" size="14" />
+            </span>
+          </div>
+          <div>
+            <h3 class="text-base font-semibold text-foreground group-hover:text-purple-600 transition-colors">Healthcare Organizations</h3>
+            <p class="text-xs text-muted-foreground mt-1 leading-relaxed">
+              Onboard new hospitals, manage tenant lifecycle (Active / Suspended), inspect medical licenses, and manage organization metadata across the platform.
+            </p>
+          </div>
+          <div class="pt-3 border-t border-border/60 flex items-center justify-between text-[11px] font-mono text-muted-foreground">
+            <span>Tenants: {{ organizations().length }}</span>
+            <span class="text-purple-600 font-semibold">Platform Multi-Tenant</span>
+          </div>
+        </a>
+
+        <!-- Platform User Management Card -->
         <a
           routerLink="/super-admin/users"
           class="p-5 rounded-xl border border-border bg-card hover:border-primary/50 transition-all duration-300 space-y-4 flex flex-col justify-between group shadow-xs">
@@ -229,118 +255,84 @@ interface ToastAlert {
               <ng-icon name="lucideUsers" size="20" />
             </div>
             <span class="inline-flex items-center gap-1 text-xs font-semibold text-primary group-hover:translate-x-0.5 transition-transform">
-              Manage Accounts <ng-icon name="lucideChevronRight" size="14" />
+              Manage Users <ng-icon name="lucideChevronRight" size="14" />
             </span>
           </div>
           <div>
-            <h3 class="text-base font-semibold text-foreground group-hover:text-primary transition-colors">User RBAC Management</h3>
+            <h3 class="text-base font-semibold text-foreground group-hover:text-primary transition-colors">Platform User Lifecycle</h3>
             <p class="text-xs text-muted-foreground mt-1 leading-relaxed">
-              Provision clinical & staff accounts, assign granular role permissions (Doctor, Nurse, Receptionist, Admin), manage credentials, and lock suspicious activity.
+              Global user search, activate/deactivate accounts, trigger forced password resets, and assign platform and tenant administrative roles.
             </p>
           </div>
           <div class="pt-3 border-t border-border/60 flex items-center justify-between text-[11px] font-mono text-muted-foreground">
-            <span>Provisioned Staff: {{ staffCount() }}</span>
-            <span class="text-primary font-semibold">SUPER_ADMIN Authorized</span>
+            <span>Users: {{ users().length }}</span>
+            <span class="text-primary font-semibold">SUPER_ADMIN Scope</span>
           </div>
         </a>
 
-        <!-- Master Patient Index (MPI) Card -->
+        <!-- Platform Audit & Security Card -->
         <a
-          routerLink="/super-admin/patients"
-          class="p-5 rounded-xl border border-border bg-card hover:border-emerald-500/50 transition-all duration-300 space-y-4 flex flex-col justify-between group shadow-xs">
+          routerLink="/super-admin/audit"
+          class="p-5 rounded-xl border border-border bg-card hover:border-indigo-500/50 transition-all duration-300 space-y-4 flex flex-col justify-between group shadow-xs">
           <div class="flex items-center justify-between">
-            <div class="size-10 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-colors">
-              <ng-icon name="lucideHeartPulse" size="20" />
+            <div class="size-10 rounded-lg bg-indigo-500/10 text-indigo-600 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+              <ng-icon name="lucideShieldCheck" size="20" />
             </div>
-            <span class="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600 group-hover:translate-x-0.5 transition-transform">
-              MPI Directory <ng-icon name="lucideChevronRight" size="14" />
+            <span class="inline-flex items-center gap-1 text-xs font-semibold text-indigo-600 group-hover:translate-x-0.5 transition-transform">
+              Audit Logs <ng-icon name="lucideChevronRight" size="14" />
             </span>
           </div>
           <div>
-            <h3 class="text-base font-semibold text-foreground group-hover:text-emerald-600 transition-colors">Master Patient Index (MPI)</h3>
+            <h3 class="text-base font-semibold text-foreground group-hover:text-indigo-600 transition-colors">Platform Security & Audit</h3>
             <p class="text-xs text-muted-foreground mt-1 leading-relaxed">
-              Enterprise identity registry, FHIR patient intake, duplicate record resolution, MRN generation, and standalone patient data generator CLI.
+              Full platform audit trail across all tenants, ABAC authorization violations, break-glass security logs, and statutory ABDM/DPDP compliance vault.
             </p>
           </div>
           <div class="pt-3 border-t border-border/60 flex items-center justify-between text-[11px] font-mono text-muted-foreground">
-            <span>Patients Registered: {{ patients().length }}</span>
-            <span class="text-emerald-600 font-semibold">FHIR R4 Standard</span>
-          </div>
-        </a>
-
-        <!-- Facility Schedule Analytics Card -->
-        <a
-          routerLink="/super-admin/schedule-analytics"
-          class="p-5 rounded-xl border border-border bg-card hover:border-sky-500/50 transition-all duration-300 space-y-4 flex flex-col justify-between group shadow-xs">
-          <div class="flex items-center justify-between">
-            <div class="size-10 rounded-lg bg-sky-500/10 text-sky-600 flex items-center justify-center group-hover:bg-sky-600 group-hover:text-white transition-colors">
-              <ng-icon name="lucideCalendarClock" size="20" />
-            </div>
-            <span class="inline-flex items-center gap-1 text-xs font-semibold text-sky-600 group-hover:translate-x-0.5 transition-transform">
-              View Analytics <ng-icon name="lucideChevronRight" size="14" />
-            </span>
-          </div>
-          <div>
-            <h3 class="text-base font-semibold text-foreground group-hover:text-sky-600 transition-colors">Facility Schedule Analytics</h3>
-            <p class="text-xs text-muted-foreground mt-1 leading-relaxed">
-              System-wide appointment loading dashboard, provider shift capacity metrics, fulfillment percentages, and cancellation risk monitoring.
-            </p>
-          </div>
-          <div class="pt-3 border-t border-border/60 flex items-center justify-between text-[11px] font-mono text-muted-foreground">
-            <span>Fulfillment Rate: {{ completionRate() }}%</span>
-            <span class="text-sky-600 font-semibold">Read-Only Audit</span>
+            <span>Security Logs: {{ securityEvents().length }}</span>
+            <span class="text-indigo-600 font-semibold">WORM Compliant</span>
           </div>
         </a>
       </div>
 
-      <!-- System Governance & Safeguards Panel -->
+      <!-- Architectural Security Principle Notice -->
       <div class="p-5 rounded-xl border border-border bg-card shadow-xs space-y-4">
         <div class="flex items-center justify-between border-b border-border pb-3">
           <h2 class="text-sm font-semibold text-foreground flex items-center gap-2">
             <ng-icon name="lucideShieldCheck" size="16" class="text-purple-600" />
-            Enterprise Security & Governance Overview
+            Sentinel Platform Security & Data Protection Guarantees
           </h2>
-          <span hlmBadge variant="secondary" class="text-[10px]">ABDM & DPDP Compliant</span>
+          <span hlmBadge variant="secondary" class="text-[10px]">Zero-Trust Architecture</span>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div class="p-3.5 rounded-lg border border-border/80 bg-muted/20 space-y-2">
             <div class="flex items-center gap-2 text-xs font-semibold text-foreground">
-              <ng-icon name="lucideLock" size="15" class="text-primary" />
-              ABAC Care Team Scoping
+              <ng-icon name="lucideLock" size="15" class="text-purple-600" />
+              Clinical Data Denial by Default
             </div>
             <p class="text-[11px] text-muted-foreground leading-relaxed">
-              Patient PHI charts are isolated by Attribute-Based Access Control. Clinicians can only view assigned patient rosters.
+              Super Admins administer the platform infrastructure, not clinical care. Patient medical records are strictly protected and denied by default.
             </p>
           </div>
 
           <div class="p-3.5 rounded-lg border border-border/80 bg-muted/20 space-y-2">
             <div class="flex items-center gap-2 text-xs font-semibold text-foreground">
-              <ng-icon name="lucideFileText" size="15" class="text-emerald-600" />
-              FHIR R4 Interoperability
+              <ng-icon name="lucideDatabase" size="15" class="text-emerald-600" />
+              PostgreSQL Row-Level Security
             </div>
             <p class="text-[11px] text-muted-foreground leading-relaxed">
-              Standardized REST endpoints for Patient, Observation, DiagnosticReport, and MedicationRequest resources.
+              Tenant isolation is enforced cryptographically and via PostgreSQL RLS policies ensuring tenant boundary integrity across hospitals.
             </p>
           </div>
 
           <div class="p-3.5 rounded-lg border border-border/80 bg-muted/20 space-y-2">
             <div class="flex items-center gap-2 text-xs font-semibold text-foreground">
-              <ng-icon name="lucideShieldCheck" size="15" class="text-purple-600" />
-              WORM Audit Trail
+              <ng-icon name="lucideActivity" size="15" class="text-sky-600" />
+              Immutable WORM Forensics
             </div>
             <p class="text-[11px] text-muted-foreground leading-relaxed">
-              Write-Once-Read-Many cryptographic access logging preventing modification or deletion of forensic entries.
-            </p>
-          </div>
-
-          <div class="p-3.5 rounded-lg border border-border/80 bg-muted/20 space-y-2">
-            <div class="flex items-center gap-2 text-xs font-semibold text-foreground">
-              <ng-icon name="lucideSparkles" size="15" class="text-amber-500" />
-              Standalone Patient Data Generator
-            </div>
-            <p class="text-[11px] text-muted-foreground leading-relaxed">
-              CLI data generation script for populating realistic patient records, clinical encounters, diagnoses, and vitals.
+              Every platform configuration change, tenant lifecycle action, and security check is logged to an immutable Write-Once-Read-Many audit trail.
             </p>
           </div>
         </div>
@@ -350,50 +342,32 @@ interface ToastAlert {
 })
 export class SuperAdminDashboardComponent implements OnInit {
   users = signal<User[]>([]);
-  patients = signal<Patient[]>([]);
-  appointments = signal<Appointment[]>([]);
+  organizations = signal<Organization[]>([]);
+  securityEvents = signal<SecurityEventLog[]>([]);
   toastMessage = signal<ToastAlert | null>(null);
 
-  staffCount = computed(() => {
-    return this.users().filter((u) => {
-      const roles = Array.isArray(u.roles) ? u.roles.join(',') : '';
-      return (
-        roles.includes('ADMIN') ||
-        roles.includes('DOCTOR') ||
-        roles.includes('NURSE') ||
-        roles.includes('RECEPTIONIST')
-      );
-    }).length;
-  });
-
-  completionRate = computed(() => {
-    const total = this.appointments().length;
-    if (!total) return 0;
-    const completed = this.appointments().filter(
-      (a) => a.status === 'COMPLETED' || a.status === 'CHECKED_IN'
-    ).length;
-    return Math.round((completed / total) * 100);
-  });
-
-  constructor(private apiService: ApiService) {}
+  constructor(
+    private apiService: ApiService,
+    private orgService: OrganizationService,
+  ) {}
 
   ngOnInit(): void {
     this.loadData();
   }
 
   loadData(): void {
-    this.apiService.getUsers().subscribe({
+    this.apiService.getPlatformUsers().subscribe({
       next: (u) => this.users.set(u),
       error: () => {},
     });
 
-    this.apiService.getPatients().subscribe({
-      next: (p) => this.patients.set(p),
+    this.apiService.getPlatformOrganizations().subscribe({
+      next: (orgs) => this.organizations.set(orgs),
       error: () => {},
     });
 
-    this.apiService.getAppointments().subscribe({
-      next: (a) => this.appointments.set(a),
+    this.apiService.getPlatformSecurityEvents().subscribe({
+      next: (events) => this.securityEvents.set(events),
       error: () => {},
     });
   }

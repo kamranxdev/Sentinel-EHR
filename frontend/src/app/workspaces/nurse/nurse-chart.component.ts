@@ -632,11 +632,8 @@ export class NurseChartComponent implements OnInit {
   showVitalsModal = signal<boolean>(false);
   showIoModal = signal<boolean>(false);
 
-  // I/O sample data
-  ioRecords = signal<IntakeOutputRecord[]>([
-    { id: '1', time: '08:00 AM', oralMl: 250, ivMl: 500, urineMl: 350, drainMl: 50, emesisMl: 0, recordedBy: 'Nurse Fatima' },
-    { id: '2', time: '12:00 PM', oralMl: 300, ivMl: 250, urineMl: 400, drainMl: 20, emesisMl: 0, recordedBy: 'Nurse Fatima' },
-  ]);
+  // I/O data
+  ioRecords = signal<IntakeOutputRecord[]>([]);
 
   constructor(
     private route: ActivatedRoute,

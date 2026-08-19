@@ -21,7 +21,24 @@ Clinical Access Scope:
 
 ---
 
-## 2. Physician Workflow Architecture
+## 2. Related Database Entities & Access Privileges
+
+| Entity / Table | Backend Package | Read Privileges | Write / Mutation Privileges | Relationships & Foreign Keys |
+| :--- | :--- | :---: | :---: | :--- |
+| **`practitioners`** | `identity` | Full (Self) | None (Admin managed) | `user_id` $\rightarrow$ `users.id`, `organization_id` $\rightarrow$ `organizations.id` |
+| **`encounters`** | `clinical` | Assigned / Ward | Create & Close (`DISCHARGED`) | `patient_id` $\rightarrow$ `patients.id`, `primary_practitioner_id` $\rightarrow$ `practitioners.id` |
+| **`appointments`** | `scheduling` | Self / Specialty | Update Stage (`IN_CONSULTATION`, `COMPLETED`) | `patient_id` $\rightarrow$ `patients.id`, `doctorId` $\rightarrow$ `users.id` |
+| **`diagnoses`** | `clinical` | Assigned Patients | Full Create, Update, Resolve (ICD-10) | `encounter_id` $\rightarrow$ `encounters.id`, `diagnosed_by` $\rightarrow$ `practitioners.id` |
+| **`vitals`** | `clinical` | Assigned Patients | Full Create (Record vitals during consultation) | `encounter_id` $\rightarrow$ `encounters.id`, `recorded_by` $\rightarrow$ `users.id` |
+| **`prescriptions`** | `pharmacy` | Assigned Patients | Full Authoring (eRx), Discontinue | `encounter_id` $\rightarrow$ `encounters.id`, `prescribing_doctor_id` $\rightarrow$ `practitioners.id` |
+| **`lab_orders`** | `laboratory` | Assigned Patients | Create Test Requisitions (`ORDERED`) | `encounter_id` $\rightarrow$ `encounters.id`, `ordering_physician_id` $\rightarrow$ `practitioners.id` |
+| **`clinical_documents`** | `clinical` | Assigned Patients | Full Create & Sign (SOAP Notes) | `encounter_id` $\rightarrow$ `encounters.id`, `author_id` $\rightarrow$ `users.id` |
+| **`break_glass_records`**| `consent` | Self (History) | Full Create (Request 4h Emergency Lease) | `patient_id` $\rightarrow$ `patients.id`, `user_id` $\rightarrow$ `users.id` |
+| **`audit_logs`** | `audit` | None | Auto-Appended by Interceptor | `user_id` $\rightarrow$ `users.id`, `organization_id` $\rightarrow$ `organizations.id` |
+
+---
+
+## 3. Physician Practice Workflows & Lifecycle
 
 ```text
                                 PHYSICIAN
@@ -42,31 +59,37 @@ Clinical Access Scope:
 
 ---
 
-## 3. Dedicated Workspace Subpages
+## 4. Dashboard Mechanics & Step-by-Step Flow
 
 ### A. Physician Command Desk (`/physician/dashboard`)
-- **Executive Header**: Displays Practitioner Name, Specialty, License Number, Active Shift, and Facility.
-- **High-Impact KPI Metric Tiles**:
-  - *Today's Outpatient Appointments* (with checked-in count).
-  - *My Inpatient Census* (admitted ward patients under attending/consultant care).
-  - *Active Patient EHR Chart* (quick resume of current patient context).
-  - *Action Tasks Inbox* (pending sign-offs and critical alerts).
-- **Split Workstation Layout**:
-  - **Left (8 Cols)**: Today's In-Clinic Outpatient Queue snapshot (top 5) and Inpatient Ward Census snapshot (top 3) with deep links to their dedicated subpages.
-  - **Right (4 Cols)**: Clinical Action Tasks Inbox (abnormal labs, unsigned progress notes with 1-click sign-off) and Quick Clinical Workspace links.
+1. **Initial Rendering & Data Queries**:
+   - On load, executes parallel API requests:
+     - `GET /api/v1/appointments?doctorId={id}&date=today` $\rightarrow$ Populates Today's Outpatient Appointments KPI & Snapshot.
+     - `GET /api/v1/encounters?practitionerId={id}&type=INPATIENT&status=IN_PROGRESS` $\rightarrow$ Populates My Inpatient Census KPI.
+     - `GET /api/v1/tasks/physician?status=PENDING` $\rightarrow$ Populates Action Tasks Inbox (abnormal labs, unsigned SOAP notes).
+2. **Real-Time Data Ingestion & Alerts**:
+   - WebSockets listener subscribes to `/topic/physician.{id}.alerts`.
+   - When a Lab Technician finalizes a critical lab result (e.g. Potassium > 6.0 mEq/L), an instant banner alert is rendered in the Command Desk.
+3. **Action Execution & Downstream Updates**:
+   - Clicking **Consultation** on an arrived patient opens `/physician/chart?patientId={id}`, updating appointment stage to `IN_CONSULTATION`.
+   - Clicking **Sign Note** on an inbox task updates `clinical_documents.status` to `SIGNED`, removing the task from the inbox.
 
-### B. Outpatient Appointments & Queue (`/physician/appointments`)
+---
+
+## 5. Dedicated Subpages & Clinical Subsystems
+
+### A. Outpatient Appointments & Queue (`/physician/appointments`)
 - Real-time consultation queue of booked and checked-in patients.
-- Pre-consultation nurse triage vitals review (BP, Pulse, Temp, SpO2, Pain Scale 0-10, BMI).
-- 1-Click **Open Consultation** initiates an active outpatient encounter and loads the patient's EHR Chart.
+- Displays patient arrival status, triage state (`Awaiting Check-in`, `Ready for Triage`, `Triaged for Doctor`), and vital signs recorded by the nurse.
+- 1-Click **Open Consultation** initiates the clinical consultation chart.
 
-### C. Inpatient Ward Census & Rounds (`/physician/inpatients`)
+### B. Inpatient Ward Census & Rounds (`/physician/inpatients`)
 - Ward census roster for patients admitted under the physician's care (as **Attending** or **Consultant**).
 - Displays Bed Location (`301A`, `301B`), Demographics, Admission Diagnosis (ICD-10), Length of Stay, and NEWS2 Acuity Score.
 - 1-Click **Inpatient Rounds** launches the bedside chart.
 
-### D. Active Clinical EHR Chart (`/physician/chart`)
-- **Responsive 10-Subsystem Multi-Row Grid**:
+### C. Active Clinical EHR Chart (`/physician/chart`)
+- **10 Responsive Clinical Subsystems**:
   1. `Vitals & Flowsheet`: Physiological vitals trends and historical readings.
   2. `Diagnoses & Problems`: ICD-10 problem list management (Primary, Secondary, Differential).
   3. `Diagnostic & Lab Orders`: Lab test and imaging study requisitions.
@@ -78,7 +101,7 @@ Clinical Access Scope:
   9. `Procedures`: Surgical & minor procedure documentation.
   10. `Discharge & Transfer`: Discharge summary generation and ward-to-ward transfers.
 
-### E. Emergency Break-Glass Override (`/physician/break-glass`)
+### D. Emergency Break-Glass Override (`/physician/break-glass`)
 - Search portal for unassigned emergency arrivals.
-- Mandatory selection of emergency category and written clinical justification.
+- Mandatory selection of emergency category (`LIFE_THREATENING_EMERGENCY`, `TRAUMA_RESUSCITATION`) and written clinical justification.
 - Grants a **4-Hour Time-Bounded Access Lease** with immutable WORM audit logging.

@@ -2,8 +2,8 @@ import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ApiService } from '../../core/services/api.service';
+import { OrganizationService } from '../../core/services/organization.service';
 import { User } from '../../core/models/auth-user.model';
-import { Patient } from '../../core/models/patient.model';
 import { Appointment } from '../../core/models/appointment.model';
 
 import { HlmCardImports } from '@spartan-ng/helm/card';
@@ -13,15 +13,14 @@ import { NgIcon, provideIcons } from '@ng-icons/core';
 import {
   lucideBuilding2,
   lucideUsers,
-  lucideHeartPulse,
   lucideCalendarClock,
   lucideBed,
   lucideShieldCheck,
   lucideArrowUpRight,
   lucideChevronRight,
   lucideSettings,
-  lucideClock,
-  lucideCheckCircle2,
+  lucideReceipt,
+  lucidePill,
   lucideActivity,
   lucideRefreshCw,
   lucideAlertCircle,
@@ -48,15 +47,14 @@ interface ToastAlert {
     provideIcons({
       lucideBuilding2,
       lucideUsers,
-      lucideHeartPulse,
       lucideCalendarClock,
       lucideBed,
       lucideShieldCheck,
       lucideArrowUpRight,
       lucideChevronRight,
       lucideSettings,
-      lucideClock,
-      lucideCheckCircle2,
+      lucideReceipt,
+      lucidePill,
       lucideActivity,
       lucideRefreshCw,
       lucideAlertCircle,
@@ -65,22 +63,7 @@ interface ToastAlert {
   ],
   template: `
     <div class="space-y-6 font-sans">
-      <!-- Toast Alert Banner -->
-      <div
-        *ngIf="toastMessage()"
-        [ngClass]="{
-          'bg-emerald-500/15 border-emerald-500/40 text-emerald-700 dark:text-emerald-300': toastMessage()?.type === 'success',
-          'bg-destructive/15 border-destructive/40 text-destructive': toastMessage()?.type === 'error'
-        }"
-        class="flex items-center justify-between p-3.5 rounded-xl border text-xs font-medium transition-all shadow-xs">
-        <div class="flex items-center gap-2">
-          <ng-icon [name]="toastMessage()?.type === 'success' ? 'lucideCheck' : 'lucideAlertCircle'" size="16" />
-          <span>{{ toastMessage()?.message }}</span>
-        </div>
-        <button (click)="toastMessage.set(null)" class="text-xs opacity-70 hover:opacity-100 font-mono">Dismiss</button>
-      </div>
-
-      <!-- Executive Header -->
+      <!-- Header -->
       <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-border">
         <div class="flex items-center gap-4">
           <div class="size-12 rounded-xl bg-gradient-to-br from-emerald-500/20 via-emerald-500/10 to-emerald-500/5 text-emerald-600 flex items-center justify-center shrink-0 border border-emerald-500/20 shadow-xs">
@@ -89,10 +72,10 @@ interface ToastAlert {
           <div>
             <div class="flex items-center gap-2 flex-wrap">
               <h1 class="text-xl font-bold tracking-tight text-foreground">
-                Organization Operations Center
+                Healthcare Organization Operations Center
               </h1>
-              <span hlmBadge variant="secondary" class="text-[10px] uppercase font-mono tracking-wider">
-                Organization Admin
+              <span hlmBadge variant="secondary" class="text-[10px] uppercase font-mono tracking-wider bg-emerald-500/10 text-emerald-600 border-emerald-500/30">
+                ORGANIZATION ADMIN
               </span>
             </div>
             <p class="text-xs text-muted-foreground mt-0.5 flex items-center gap-2 flex-wrap">
@@ -101,10 +84,10 @@ interface ToastAlert {
                   <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
                   <span class="relative inline-flex rounded-full size-2 bg-emerald-500"></span>
                 </span>
-                Facility Operations Active
+                Hospital Operations Active
               </span>
               <span>•</span>
-              <span>Clinical staff roster, MPI census, facility bed management & schedule loading</span>
+              <span>Staff roster, spatial hierarchy (Departments, Wards, Beds), appointment capacity, & administrative policies</span>
             </p>
           </div>
         </div>
@@ -120,11 +103,11 @@ interface ToastAlert {
             routerLink="/organization-admin/facility-settings"
             class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-secondary text-foreground hover:bg-secondary/80 border border-border transition-all">
             <ng-icon name="lucideSettings" size="14" />
-            <span>Facility Settings</span>
+            <span>Facility Spatial Layout</span>
           </a>
           <a
             routerLink="/organization-admin/users"
-            class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary/90 transition-all shadow-xs">
+            class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition-all shadow-xs">
             <ng-icon name="lucideUsers" size="14" />
             <span>Staff Roster</span>
           </a>
@@ -134,53 +117,53 @@ interface ToastAlert {
       <!-- Facility Operational KPI Summary (4 Cards) -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <!-- Staff Roster Card -->
-        <a routerLink="/organization-admin/users" class="p-4 rounded-xl border border-border bg-card shadow-xs hover:border-primary/40 transition-all group">
+        <a routerLink="/organization-admin/users" class="p-4 rounded-xl border border-border bg-card shadow-xs hover:border-emerald-500/40 transition-all group">
           <div class="flex items-center justify-between">
-            <span class="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Clinical Staff</span>
-            <div class="size-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center group-hover:scale-105 transition-transform">
+            <span class="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Staff Roster</span>
+            <div class="size-9 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center group-hover:scale-105 transition-transform">
               <ng-icon name="lucideUsers" size="18" />
             </div>
           </div>
           <div class="mt-2 flex items-baseline justify-between">
             <div class="text-2xl font-bold text-foreground font-mono">{{ staffCount() }}</div>
             <span class="text-[11px] font-medium text-emerald-500 flex items-center gap-0.5">
-              <ng-icon name="lucideArrowUpRight" size="12" /> Active
+              <ng-icon name="lucideArrowUpRight" size="12" /> Provisioned
             </span>
           </div>
-          <p class="text-[10px] text-muted-foreground mt-1">Physicians, Nurses & Support</p>
+          <p class="text-[10px] text-muted-foreground mt-1">Doctors, Nurses, Pharmacists, Staff</p>
         </a>
 
-        <!-- Facility Settings Card -->
-        <a routerLink="/organization-admin/facility-settings" class="p-4 rounded-xl border border-border bg-card shadow-xs hover:border-emerald-500/40 transition-all group">
+        <!-- Facility Spatial Layout Card -->
+        <a routerLink="/organization-admin/facility-settings" class="p-4 rounded-xl border border-border bg-card shadow-xs hover:border-blue-500/40 transition-all group">
           <div class="flex items-center justify-between">
-            <span class="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Facility Profile</span>
-            <div class="size-9 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center group-hover:scale-105 transition-transform">
-              <ng-icon name="lucideBuilding2" size="18" />
+            <span class="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Spatial Layout</span>
+            <div class="size-9 rounded-lg bg-blue-500/10 text-blue-600 flex items-center justify-center group-hover:scale-105 transition-transform">
+              <ng-icon name="lucideBed" size="18" />
             </div>
           </div>
           <div class="mt-2 flex items-baseline justify-between">
-            <div class="text-2xl font-bold text-emerald-600 font-mono">VERIFIED</div>
-            <span class="text-[11px] font-medium text-emerald-500 font-mono">Active</span>
+            <div class="text-2xl font-bold text-blue-600 font-mono">Hierarchy</div>
+            <span class="text-[11px] font-medium text-blue-500 font-mono">Active</span>
           </div>
-          <p class="text-[10px] text-muted-foreground mt-1">Clinic demographics & license</p>
+          <p class="text-[10px] text-muted-foreground mt-1">Depts, Wards, Rooms & Beds</p>
         </a>
 
-        <!-- Master Patient Index Card -->
+        <!-- Patient Census Policy Card -->
         <a routerLink="/organization-admin/patients" class="p-4 rounded-xl border border-border bg-card shadow-xs hover:border-sky-500/40 transition-all group">
           <div class="flex items-center justify-between">
-            <span class="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">MPI Census</span>
+            <span class="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Patient Census</span>
             <div class="size-9 rounded-lg bg-sky-500/10 text-sky-600 flex items-center justify-center group-hover:scale-105 transition-transform">
-              <ng-icon name="lucideHeartPulse" size="18" />
+              <ng-icon name="lucideActivity" size="18" />
             </div>
           </div>
           <div class="mt-2 flex items-baseline justify-between">
-            <div class="text-2xl font-bold text-foreground font-mono">{{ patients().length }}</div>
-            <span class="text-[11px] font-medium text-sky-600 font-mono">FHIR R4</span>
+            <div class="text-2xl font-bold text-foreground font-mono">Demographics</div>
+            <span class="text-[11px] font-medium text-sky-600 font-mono">Admin Only</span>
           </div>
-          <p class="text-[10px] text-muted-foreground mt-1">Patient identity roster</p>
+          <p class="text-[10px] text-muted-foreground mt-1">Registration & Insurance Metrics</p>
         </a>
 
-        <!-- Schedule Capacity Card -->
+        <!-- Consultation Capacity Card -->
         <a routerLink="/organization-admin/schedule-analytics" class="p-4 rounded-xl border border-border bg-card shadow-xs hover:border-amber-500/40 transition-all group">
           <div class="flex items-center justify-between">
             <span class="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Consultation Load</span>
@@ -196,57 +179,57 @@ interface ToastAlert {
         </a>
       </div>
 
-      <!-- Core Facility Management Workspaces -->
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-        <!-- Staff Roster & Provisioning -->
+      <!-- Core Hospital Operational Workspaces -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <!-- Staff & Role Management -->
         <div class="p-5 rounded-xl border border-border bg-card space-y-4 flex flex-col justify-between shadow-xs">
           <div class="space-y-3">
             <div class="flex items-center justify-between">
-              <div class="size-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center">
+              <div class="size-10 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
                 <ng-icon name="lucideUsers" size="20" />
               </div>
               <span hlmBadge variant="outline" class="text-[10px]">Staff Management</span>
             </div>
             <div>
-              <h3 class="text-base font-semibold text-foreground">Facility Staff Roster</h3>
+              <h3 class="text-base font-semibold text-foreground">Facility Staff & Role Matrix</h3>
               <p class="text-xs text-muted-foreground mt-1 leading-relaxed">
-                View on-duty physicians, nurses, receptionists, and laboratory technicians. Provision credentials & assign clinical roles.
+                Onboard clinical practitioners and administrative staff. Assign and revoke scoped organization roles (Physician, Nurse, Pharmacist, Receptionist, Billing).
               </p>
             </div>
           </div>
           <div class="pt-3 border-t border-border flex items-center justify-between text-xs">
             <span class="text-muted-foreground">Active Staff: {{ staffCount() }}</span>
-            <a routerLink="/organization-admin/users" hlmBtn variant="link" size="sm" class="text-xs text-primary gap-1 p-0 h-auto">
-              View Roster <ng-icon name="lucideChevronRight" size="14" />
+            <a routerLink="/organization-admin/users" class="text-xs font-semibold text-emerald-600 hover:underline flex items-center gap-1">
+              Manage Staff <ng-icon name="lucideChevronRight" size="14" />
             </a>
           </div>
         </div>
 
-        <!-- Facility Demographics & Settings -->
+        <!-- Facility Spatial Layout -->
         <div class="p-5 rounded-xl border border-border bg-card space-y-4 flex flex-col justify-between shadow-xs">
           <div class="space-y-3">
             <div class="flex items-center justify-between">
-              <div class="size-10 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center">
-                <ng-icon name="lucideBuilding2" size="20" />
+              <div class="size-10 rounded-lg bg-blue-500/10 text-blue-600 flex items-center justify-center">
+                <ng-icon name="lucideBed" size="20" />
               </div>
-              <span hlmBadge variant="outline" class="text-[10px]">Facility Profile</span>
+              <span hlmBadge variant="outline" class="text-[10px]">Spatial Layout</span>
             </div>
             <div>
-              <h3 class="text-base font-semibold text-foreground">Facility Profile & Settings</h3>
+              <h3 class="text-base font-semibold text-foreground">Departments, Wards & Beds</h3>
               <p class="text-xs text-muted-foreground mt-1 leading-relaxed">
-                Update hospital demographics, contact numbers, official address, operating hours, and medical board licenses.
+                Configure organizational tree: Departments (ICU, Cardiology, Surgery) $\rightarrow$ Wards $\rightarrow$ Rooms $\rightarrow$ Physical Beds with operational statuses.
               </p>
             </div>
           </div>
           <div class="pt-3 border-t border-border flex items-center justify-between text-xs">
             <span class="text-muted-foreground">Status: VERIFIED</span>
-            <a routerLink="/organization-admin/facility-settings" hlmBtn variant="link" size="sm" class="text-xs text-emerald-600 gap-1 p-0 h-auto">
-              Edit Settings <ng-icon name="lucideChevronRight" size="14" />
+            <a routerLink="/organization-admin/facility-settings" class="text-xs font-semibold text-blue-600 hover:underline flex items-center gap-1">
+              Configure Layout <ng-icon name="lucideChevronRight" size="14" />
             </a>
           </div>
         </div>
 
-        <!-- Schedule Analytics -->
+        <!-- Operational Schedule Analytics -->
         <div class="p-5 rounded-xl border border-border bg-card space-y-4 flex flex-col justify-between shadow-xs">
           <div class="space-y-3">
             <div class="flex items-center justify-between">
@@ -256,55 +239,18 @@ interface ToastAlert {
               <span hlmBadge variant="outline" class="text-[10px]">Capacity Load</span>
             </div>
             <div>
-              <h3 class="text-base font-semibold text-foreground">Facility Schedule Analytics</h3>
+              <h3 class="text-base font-semibold text-foreground">Capacity & Consultation Analytics</h3>
               <p class="text-xs text-muted-foreground mt-1 leading-relaxed">
-                Monitor appointment queue volume, provider shift capacity utilization, fulfillment metrics, and cancellation trends.
+                Monitor clinic load volumes, practitioner scheduling capacity, consultation fulfillment percentages, and cancellation risk patterns.
               </p>
             </div>
           </div>
           <div class="pt-3 border-t border-border flex items-center justify-between text-xs">
             <span class="text-muted-foreground">Fulfillment: {{ completionRate() }}%</span>
-            <a routerLink="/organization-admin/schedule-analytics" hlmBtn variant="link" size="sm" class="text-xs text-amber-600 gap-1 p-0 h-auto">
-              Open Analytics <ng-icon name="lucideChevronRight" size="14" />
+            <a routerLink="/organization-admin/schedule-analytics" class="text-xs font-semibold text-amber-600 hover:underline flex items-center gap-1">
+              View Analytics <ng-icon name="lucideChevronRight" size="14" />
             </a>
           </div>
-        </div>
-      </div>
-
-      <!-- Quick Access Links & Security Governance -->
-      <div class="p-5 rounded-xl border border-border bg-card shadow-xs space-y-4">
-        <div class="flex items-center justify-between border-b border-border pb-3">
-          <h2 class="text-sm font-semibold text-foreground flex items-center gap-2">
-            <ng-icon name="lucideShieldCheck" size="16" class="text-purple-600" />
-            Facility Compliance & Quick Navigation
-          </h2>
-          <span hlmBadge variant="secondary" class="text-[10px]">ORGANIZATION_ADMIN Authorized</span>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <a routerLink="/organization-admin/patients" class="p-3.5 rounded-lg border border-border/80 bg-muted/20 hover:bg-muted/40 transition-all space-y-1 block">
-            <div class="flex items-center gap-2 text-xs font-semibold text-foreground">
-              <ng-icon name="lucideHeartPulse" size="15" class="text-sky-600" />
-              Master Patient Index (MPI)
-            </div>
-            <p class="text-[11px] text-muted-foreground">Search patient MRN census, demographics, and clinical alerts.</p>
-          </a>
-
-          <a routerLink="/nurse/beds" class="p-3.5 rounded-lg border border-border/80 bg-muted/20 hover:bg-muted/40 transition-all space-y-1 block">
-            <div class="flex items-center gap-2 text-xs font-semibold text-foreground">
-              <ng-icon name="lucideBed" size="15" class="text-emerald-600" />
-              Inpatient Bed Management
-            </div>
-            <p class="text-[11px] text-muted-foreground">Check ward bed occupancy, admissions, and availability roster.</p>
-          </a>
-
-          <a routerLink="/auditor/ledger" class="p-3.5 rounded-lg border border-border/80 bg-muted/20 hover:bg-muted/40 transition-all space-y-1 block">
-            <div class="flex items-center gap-2 text-xs font-semibold text-foreground">
-              <ng-icon name="lucideShieldCheck" size="15" class="text-purple-600" />
-              ABDM & DPDP Audit Ledger
-            </div>
-            <p class="text-[11px] text-muted-foreground">Inspect immutable WORM access logs for statutory compliance.</p>
-          </a>
         </div>
       </div>
     </div>
@@ -312,9 +258,7 @@ interface ToastAlert {
 })
 export class OrganizationAdminDashboardComponent implements OnInit {
   users = signal<User[]>([]);
-  patients = signal<Patient[]>([]);
   appointments = signal<Appointment[]>([]);
-  toastMessage = signal<ToastAlert | null>(null);
 
   staffCount = computed(() => {
     return this.users().filter((u) => {
@@ -322,8 +266,11 @@ export class OrganizationAdminDashboardComponent implements OnInit {
       return (
         roles.includes('ADMIN') ||
         roles.includes('DOCTOR') ||
+        roles.includes('PHYSICIAN') ||
         roles.includes('NURSE') ||
-        roles.includes('RECEPTIONIST')
+        roles.includes('PHARMACIST') ||
+        roles.includes('RECEPTIONIST') ||
+        roles.includes('BILLING')
       );
     }).length;
   });
@@ -346,11 +293,6 @@ export class OrganizationAdminDashboardComponent implements OnInit {
   loadData(): void {
     this.apiService.getUsers().subscribe({
       next: (u) => this.users.set(u),
-      error: () => {},
-    });
-
-    this.apiService.getPatients().subscribe({
-      next: (p) => this.patients.set(p),
       error: () => {},
     });
 

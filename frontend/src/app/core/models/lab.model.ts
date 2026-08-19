@@ -45,6 +45,8 @@ export interface LabResult {
   recordedBy?: string;
   recordedAt?: string;
   resultAt?: string;
+  orderedAt?: string;
+  loincCode?: string;
   createdAt?: string;
   status?: string;
   components?: LabResultComponent[];

@@ -1,4 +1,4 @@
-# Billing & Financial Management Workspace Specification
+# Billing & Revenue Cycle Workspace Specification
 
 ## 1. Identity & Financial Scope
 
@@ -20,7 +20,20 @@ Financial Scope:
 
 ---
 
-## 2. Revenue Cycle Management (RCM) Lifecycle
+## 2. Related Database Entities & Access Privileges
+
+| Entity / Table | Backend Package | Read Privileges | Write / Mutation Privileges | Relationships & Foreign Keys |
+| :--- | :--- | :---: | :---: | :--- |
+| **`billing_accounts`** | `billing` | All Org Accounts | Full Create & Balance Adjustments | `patient_id` $\rightarrow$ `patients.id`, `encounter_id` $\rightarrow$ `encounters.id` |
+| **`charge_items`** | `billing` | All Posted Charges| Full Create, Void, Discount | `encounter_id` $\rightarrow$ `encounters.id`, `billing_account_id` $\rightarrow$ `billing_accounts.id` |
+| **`invoices`** | `billing` | All Org Invoices | Full Generate, Finalize, Void | `billing_account_id` $\rightarrow$ `billing_accounts.id` |
+| **`payments`** | `billing` | All Transactions | Full Record Payment, Process Refund | `invoice_id` $\rightarrow$ `invoices.id`, `recorded_by` $\rightarrow$ `users.id` |
+| **`insurance_claims`** | `insurance` | All Claims | Full Submit, Track Adjudication | `invoice_id` $\rightarrow$ `invoices.id`, `payer_id` $\rightarrow$ `insurance_payers.id` |
+| **`clinical_documents`**| `clinical` | **DENIED** | **DENIED** | Clinical confidentiality protection |
+
+---
+
+## 3. Revenue Cycle Management (RCM) Lifecycle
 
 ```text
 Clinical Encounter Occurs (Consultation, Lab, Bed, Procedure, Medication)
@@ -41,19 +54,29 @@ Charge Items Captured Automatically (`POSTED`)
 
 ---
 
-## 3. Dedicated Workspace Subpages
+## 4. Dashboard Mechanics & Step-by-Step Flow
 
 ### A. Billing Command Desk (`/billing/dashboard`)
-- Financial KPIs: Total Today's Revenue, Outstanding Invoices, Pending Claims, and Unbilled Charges.
-- Payer mix breakdown (Cash, Private Insurance, Government / ABDM Schemes).
+1. **Initial Rendering & Data Queries**:
+   - `GET /api/v1/billing/summary/today` $\rightarrow$ Calculates Today's Total Collections, Pending Invoices, Unbilled Clinical Encounters, and Insurance Claim Approval Rate.
+   - `GET /api/v1/billing/payer-mix` $\rightarrow$ Visualizes cash vs. private insurance vs. government scheme breakdowns.
+2. **Invoicing & Checkout Flow**:
+   - Patient arrives at billing desk upon discharge $\rightarrow$ Billing staff reviews auto-posted charges (bed stay, medications, lab tests, doctor fees).
+   - Clicking **Generate Invoice** executes `POST /api/v1/invoices` and applies insurance policy coverage.
+   - Recording payment via `POST /api/v1/payments` updates `invoice.status = PAID` and clears the discharge financial hold.
 
-### B. Invoices & Charge Capture (`/billing/invoices`)
+---
+
+## 5. Dedicated Subpages & Financial Operations
+
+### A. Invoices & Charge Capture (`/billing/invoices`)
 - Generate itemized invoices combining room/bed charges, doctor consultation fees, diagnostic lab tests, and medications.
 - Apply organization price lists and contractual insurance discounts.
 
-### C. Payment Processing (`/billing/payments`)
-- Record split payments, deposit advance payments for inpatient admissions, and process refunds.
+### B. Payment Processing (`/billing/payments`)
+- Record split payments, deposit advance payments for inpatient admissions, and process authorized refunds.
+- Generate and print official receipts with tax breakdown.
 
-### D. Insurance Claims & Authorizations (`/billing/claims`)
-- Submit electronic insurance claims to third-party payers.
+### C. Insurance Claims & Authorizations (`/billing/claims`)
+- Submit electronic insurance claims to third-party payers and government schemes (e.g. PM-JAY).
 - Track claim status: `SUBMITTED`, `IN_REVIEW`, `APPROVED`, `REJECTED`, `PAID`.
