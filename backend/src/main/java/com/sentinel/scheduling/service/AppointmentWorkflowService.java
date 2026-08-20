@@ -20,8 +20,8 @@ public class AppointmentWorkflowService {
     private final AuditTrailService auditService;
 
     public AppointmentWorkflowService(AppointmentRepository appointmentRepository,
-                                       UserRepository userRepository,
-                                       AuditTrailService auditService) {
+            UserRepository userRepository,
+            AuditTrailService auditService) {
         this.appointmentRepository = appointmentRepository;
         this.userRepository = userRepository;
         this.auditService = auditService;
@@ -33,7 +33,6 @@ public class AppointmentWorkflowService {
                 .orElseThrow(() -> new ResourceNotFoundException("Appointment #" + appointmentId + " not found"));
 
         apt.setStatus("CHECKED_IN");
-        apt.setStage("CHECKED_IN");
         if (note != null) {
             apt.setNotes(note);
         }

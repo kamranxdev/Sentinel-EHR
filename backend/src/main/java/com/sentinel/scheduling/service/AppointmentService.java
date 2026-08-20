@@ -41,13 +41,13 @@ public class AppointmentService {
     private final AuditService auditService;
 
     public AppointmentService(AppointmentRepository appointmentRepository,
-                              PatientRepository patientRepository,
-                              UserRepository userRepository,
-                              PractitionerRepository practitionerRepository,
-                              UserOrganizationRepository userOrganizationRepository,
-                              OrganizationRepository organizationRepository,
-                              DepartmentRepository departmentRepository,
-                              AuditService auditService) {
+            PatientRepository patientRepository,
+            UserRepository userRepository,
+            PractitionerRepository practitionerRepository,
+            UserOrganizationRepository userOrganizationRepository,
+            OrganizationRepository organizationRepository,
+            DepartmentRepository departmentRepository,
+            AuditService auditService) {
         this.appointmentRepository = appointmentRepository;
         this.patientRepository = patientRepository;
         this.userRepository = userRepository;
@@ -60,7 +60,8 @@ public class AppointmentService {
 
     public AppointmentResponseDTO createAppointment(CreateAppointmentRequest request) {
         Patient patient = patientRepository.findById(request.getPatientId())
-                .orElseThrow(() -> new ResourceNotFoundException("Patient not found with id: " + request.getPatientId()));
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("Patient not found with id: " + request.getPatientId()));
 
         Appointment appt = new Appointment();
         appt.setPatient(patient);
@@ -69,7 +70,6 @@ public class AppointmentService {
         appt.setReason(request.getReason());
         appt.setNotes(request.getNotes());
         appt.setStatus("SCHEDULED");
-        appt.setStage("SCHEDULED");
         appt.setCreatedAt(OffsetDateTime.now());
         appt.setUpdatedAt(OffsetDateTime.now());
 
@@ -111,7 +111,8 @@ public class AppointmentService {
         Appointment saved = appointmentRepository.save(appt);
 
         if (auditService != null) {
-            auditService.logEvent(saved.getId(), "APPOINTMENT_SCHEDULED", "Appointment scheduled for patient " + patient.getId());
+            auditService.logEvent(saved.getId(), "APPOINTMENT_SCHEDULED",
+                    "Appointment scheduled for patient " + patient.getId());
         }
 
         return mapToDTO(saved);
@@ -144,12 +145,15 @@ public class AppointmentService {
 
         if (request.getStatus() != null) {
             appt.setStatus(request.getStatus());
-            appt.setStage(request.getStatus());
         }
-        if (request.getReason() != null) appt.setReason(request.getReason());
-        if (request.getNotes() != null) appt.setNotes(request.getNotes());
-        if (request.getStartsAt() != null) appt.setStartsAt(request.getStartsAt());
-        if (request.getEndsAt() != null) appt.setEndsAt(request.getEndsAt());
+        if (request.getReason() != null)
+            appt.setReason(request.getReason());
+        if (request.getNotes() != null)
+            appt.setNotes(request.getNotes());
+        if (request.getStartsAt() != null)
+            appt.setStartsAt(request.getStartsAt());
+        if (request.getEndsAt() != null)
+            appt.setEndsAt(request.getEndsAt());
         if (request.getPractitionerId() != null) {
             userRepository.findById(request.getPractitionerId()).ifPresent(appt::setCreatedBy);
         }
@@ -162,8 +166,10 @@ public class AppointmentService {
     public AppointmentResponseDTO mapToDTO(Appointment a) {
         AppointmentResponseDTO dto = new AppointmentResponseDTO();
         dto.setId(a.getId());
-        if (a.getOrganization() != null) dto.setOrganizationId(a.getOrganization().getId());
-        if (a.getDepartment() != null) dto.setDepartmentId(a.getDepartment().getId());
+        if (a.getOrganization() != null)
+            dto.setOrganizationId(a.getOrganization().getId());
+        if (a.getDepartment() != null)
+            dto.setDepartmentId(a.getDepartment().getId());
         if (a.getPatient() != null) {
             dto.setPatientId(a.getPatient().getId());
             dto.setPatientName(a.getPatient().getFullName());
@@ -175,7 +181,6 @@ public class AppointmentService {
         dto.setStartsAt(a.getStartsAt());
         dto.setEndsAt(a.getEndsAt());
         dto.setStatus(a.getStatus());
-        dto.setStage(a.getStage());
         dto.setReason(a.getReason());
         dto.setNotes(a.getNotes());
         dto.setCheckedInAt(a.getCheckedInAt());

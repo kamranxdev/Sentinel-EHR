@@ -11,7 +11,8 @@ public class AppointmentMapper {
     }
 
     public Appointment toEntity(AppointmentRequestDTO dto) {
-        if (dto == null) return null;
+        if (dto == null)
+            return null;
 
         Appointment appt = new Appointment();
         if (dto.getAppointmentDate() != null) {
@@ -24,14 +25,14 @@ public class AppointmentMapper {
     }
 
     public AppointmentResponseDTO toResponseDTO(Appointment entity) {
-        if (entity == null) return null;
+        if (entity == null)
+            return null;
 
         AppointmentResponseDTO dto = new AppointmentResponseDTO();
         dto.setId(entity.getId());
         dto.setStartsAt(entity.getStartsAt());
         dto.setEndsAt(entity.getEndsAt());
         dto.setStatus(entity.getStatus());
-        dto.setStage(entity.getStage());
         dto.setReason(entity.getReason());
         dto.setNotes(entity.getNotes());
         dto.setCreatedAt(entity.getCreatedAt());
