@@ -121,14 +121,24 @@ export interface FastTriageForm {
             (click)="loadAppointments()"
             class="gap-1.5 text-xs"
           >
-            <ng-icon name="lucideRefreshCw" [class.animate-spin]="loading()" size="14" />
+            <ng-icon name="lucideRefreshCw" [class.animate-spin]="isLoading" size="14" />
             <span>Refresh Queue</span>
           </button>
         </div>
       </div>
 
+      <!-- Loading & Error States -->
+      <div *ngIf="isLoading" class="p-4 rounded-2xl border border-border bg-muted/20 text-center text-muted-foreground text-xs font-semibold">
+        <ng-icon name="lucideRefreshCw" class="animate-spin mr-2" size="14"></ng-icon>
+        Loading appointments...
+      </div>
+      <div *ngIf="errorMessage" class="p-4 rounded-2xl border border-rose-500/30 bg-rose-500/10 text-rose-600 text-xs font-semibold flex items-center gap-2">
+        <ng-icon name="lucideAlertTriangle" size="16"></ng-icon>
+        <span>{{ errorMessage }}</span>
+      </div>
+
       <!-- 2. Queue Stages Stat Counters (4 High-Impact Visual Stages) -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div *ngIf="!isLoading && !errorMessage" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <!-- Stage 1: All Scheduled -->
         <div
           (click)="setViewMode('ALL')"
@@ -470,24 +480,28 @@ export interface FastTriageForm {
             <div
               class="p-3.5 rounded-xl border flex items-center justify-between gap-3 text-xs"
               [ngClass]="
-                computedNews2() >= 5
-                  ? 'bg-rose-500/10 border-rose-500/30 text-rose-800 dark:text-rose-300'
-                  : computedNews2() >= 3
-                    ? 'bg-amber-500/10 border-amber-500/30 text-amber-800 dark:text-amber-300'
-                    : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-800 dark:text-emerald-300'
+                computedNews2() === null
+                  ? 'bg-muted/50 border-border text-muted-foreground'
+                  : computedNews2()! >= 5
+                    ? 'bg-rose-500/10 border-rose-500/30 text-rose-800 dark:text-rose-300'
+                    : computedNews2()! >= 3
+                      ? 'bg-amber-500/10 border-amber-500/30 text-amber-800 dark:text-amber-300'
+                      : 'bg-emerald-500/10 border-emerald-500/30 text-emerald-800 dark:text-emerald-300'
               "
             >
               <div class="flex items-center gap-2 font-bold">
                 <ng-icon name="lucideShieldAlert" size="16" />
-                <span>Calculated NEWS2 Acuity Score: {{ computedNews2() }}</span>
+                <span>Calculated NEWS2 Acuity Score: {{ computedNews2() !== null ? computedNews2() : '--' }}</span>
               </div>
               <span hlmBadge variant="outline" class="text-[10px] font-bold">
                 {{
-                  computedNews2() >= 5
-                    ? 'MEDIUM-HIGH RISK'
-                    : computedNews2() >= 3
-                      ? 'OBSERVED RISK'
-                      : 'STABLE'
+                  computedNews2() === null
+                    ? 'PENDING VITALS'
+                    : computedNews2()! >= 5
+                      ? 'MEDIUM-HIGH RISK'
+                      : computedNews2()! >= 3
+                        ? 'OBSERVED RISK'
+                        : 'STABLE'
                 }}
               </span>
             </div>
@@ -724,7 +738,8 @@ export interface FastTriageForm {
   `,
 })
 export class NurseAppointmentsComponent implements OnInit {
-  loading = signal<boolean>(false);
+  isLoading = false;
+  errorMessage = '';
   appointments = signal<Appointment[]>([]);
   viewMode = signal<'ALL' | 'SCHEDULED' | 'CHECKED_IN' | 'TRIAGED'>('ALL');
   searchQuery = signal<string>('');
@@ -734,18 +749,18 @@ export class NurseAppointmentsComponent implements OnInit {
   selectedAppointment: Appointment | null = null;
 
   triageForm: FastTriageForm = {
-    systolicBp: 120,
-    diastolicBp: 80,
-    heartRate: 72,
-    respiratoryRate: 16,
-    temperature: 36.8,
-    oxygenSaturation: 98,
-    bloodGlucose: 100,
+    systolicBp: null,
+    diastolicBp: null,
+    heartRate: null,
+    respiratoryRate: null,
+    temperature: null,
+    oxygenSaturation: null,
+    bloodGlucose: null,
     painScore: 0,
-    heightCm: 170,
-    weightKg: 70,
-    nursingNotes: 'Patient alert and oriented x3. Vital signs stable within normal limits.',
-    allergiesVerified: true,
+    heightCm: null,
+    weightKg: null,
+    nursingNotes: '',
+    allergiesVerified: false,
     requiresImmediateAttention: false,
   };
 
@@ -760,14 +775,18 @@ export class NurseAppointmentsComponent implements OnInit {
   }
 
   loadAppointments(): void {
-    this.loading.set(true);
+    this.isLoading = true;
+    this.errorMessage = '';
     this.apiService.getAppointments().subscribe({
       next: (apps) => {
         const list = Array.isArray(apps) ? apps : [];
         this.appointments.set(list);
-        this.loading.set(false);
+        this.isLoading = false;
       },
-      error: () => this.loading.set(false),
+      error: (err) => {
+        this.errorMessage = err.message || 'Failed to load appointments';
+        this.isLoading = false;
+      },
     });
   }
 
@@ -815,27 +834,30 @@ export class NurseAppointmentsComponent implements OnInit {
     return bmi.toFixed(1);
   }
 
-  computedNews2(): number {
-    let score = 0;
+  computedNews2(): number | null {
     const hr = this.triageForm.heartRate;
+    const spo2 = this.triageForm.oxygenSaturation;
+    const sbp = this.triageForm.systolicBp;
+    const temp = this.triageForm.temperature;
+
+    if (!hr && !spo2 && !sbp && !temp) return null;
+
+    let score = 0;
     if (hr) {
       if (hr <= 40 || hr >= 131) score += 3;
       else if (hr >= 111 && hr <= 130) score += 2;
       else if (hr <= 50 || (hr >= 91 && hr <= 110)) score += 1;
     }
-    const spo2 = this.triageForm.oxygenSaturation;
     if (spo2) {
       if (spo2 <= 91) score += 3;
       else if (spo2 <= 93) score += 2;
       else if (spo2 <= 95) score += 1;
     }
-    const sbp = this.triageForm.systolicBp;
     if (sbp) {
       if (sbp <= 90 || sbp >= 220) score += 3;
       else if (sbp <= 100) score += 2;
       else if (sbp <= 110) score += 1;
     }
-    const temp = this.triageForm.temperature;
     if (temp) {
       if (temp <= 35.0) score += 3;
       else if (temp >= 39.1) score += 2;
@@ -851,19 +873,18 @@ export class NurseAppointmentsComponent implements OnInit {
   openTriageModal(apt: Appointment): void {
     this.selectedAppointment = apt;
     this.triageForm = {
-      systolicBp: 120,
-      diastolicBp: 80,
-      heartRate: 74,
-      respiratoryRate: 16,
-      temperature: 36.8,
-      oxygenSaturation: 98,
-      bloodGlucose: 102,
+      systolicBp: null,
+      diastolicBp: null,
+      heartRate: null,
+      respiratoryRate: null,
+      temperature: null,
+      oxygenSaturation: null,
+      bloodGlucose: null,
       painScore: 0,
-      heightCm: 172,
-      weightKg: 68,
-      nursingNotes:
-        'Patient present for outpatient evaluation. Vitals recorded within normal limits.',
-      allergiesVerified: true,
+      heightCm: null,
+      weightKg: null,
+      nursingNotes: '',
+      allergiesVerified: false,
       requiresImmediateAttention: false,
     };
     this.isTriageModalOpen = true;
@@ -884,7 +905,7 @@ export class NurseAppointmentsComponent implements OnInit {
           oxygenSaturation: this.triageForm.oxygenSaturation || 98,
           bloodGlucose: this.triageForm.bloodGlucose || undefined,
           notes: this.triageForm.nursingNotes,
-          triageLevel: this.computedNews2() >= 5 ? 'CRITICAL' : 'ROUTINE',
+          triageLevel: (this.computedNews2() || 0) >= 5 ? 'CRITICAL' : 'ROUTINE',
         })
         .subscribe({
           next: () => {

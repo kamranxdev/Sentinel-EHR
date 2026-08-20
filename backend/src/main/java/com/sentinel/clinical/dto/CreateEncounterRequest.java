@@ -12,6 +12,7 @@ public class CreateEncounterRequest {
     private String admissionSource;
     private String admissionType;
     private String acuity;
+    private UUID appointmentId;
 
     public CreateEncounterRequest() {}
 
@@ -33,4 +34,6 @@ public class CreateEncounterRequest {
     public void setAdmissionType(String admissionType) { this.admissionType = admissionType; }
     public String getAcuity() { return acuity; }
     public void setAcuity(String acuity) { this.acuity = acuity; }
+    public UUID getAppointmentId() { return appointmentId; }
+    public void setAppointmentId(UUID appointmentId) { this.appointmentId = appointmentId; }
 }

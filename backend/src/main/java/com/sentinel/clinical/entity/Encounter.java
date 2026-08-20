@@ -42,6 +42,13 @@ public class Encounter {
     @JoinColumn(name = "created_by")
     private User createdBy;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "attending_practitioner_id")
+    private User attendingPractitioner;
+
+    @Column(name = "appointment_id")
+    private UUID appointmentId;
+
     @Column(columnDefinition = "TEXT")
     private String chiefComplaint;
 
@@ -90,6 +97,12 @@ public class Encounter {
     public User getCreatedBy() { return createdBy; }
     public void setCreatedBy(User createdBy) { this.createdBy = createdBy; }
 
+    public User getAttendingPractitioner() { return attendingPractitioner; }
+    public void setAttendingPractitioner(User attendingPractitioner) { this.attendingPractitioner = attendingPractitioner; }
+
+    public UUID getAppointmentId() { return appointmentId; }
+    public void setAppointmentId(UUID appointmentId) { this.appointmentId = appointmentId; }
+
     public String getChiefComplaint() { return chiefComplaint; }
     public void setChiefComplaint(String chiefComplaint) { this.chiefComplaint = chiefComplaint; }
 
@@ -122,10 +135,13 @@ public class Encounter {
 
     // Legacy getter helper
     public User getAttendingProvider() {
-        return createdBy;
+        return attendingPractitioner != null ? attendingPractitioner : createdBy;
     }
 
     public void setAttendingProvider(User attendingProvider) {
-        this.createdBy = attendingProvider;
+        this.attendingPractitioner = attendingProvider;
+        if (this.createdBy == null) {
+            this.createdBy = attendingProvider;
+        }
     }
 }

@@ -135,7 +135,16 @@ import {
 
       <!-- Inventory Catalog Table -->
       <div class="bg-card rounded-2xl border border-border shadow-xs overflow-hidden">
-        <div class="overflow-x-auto">
+        
+        <div *ngIf="loading()" class="p-8 text-center text-muted-foreground flex flex-col items-center justify-center gap-2">
+          <ng-icon name="lucideRefreshCw" size="24" class="animate-spin text-indigo-500"></ng-icon>
+          <p>Loading data...</p>
+        </div>
+        <div *ngIf="errorMessage()" class="p-4 m-4 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-sm flex items-center gap-2">
+          <ng-icon name="lucideAlertTriangle" size="16"></ng-icon>
+          {{ errorMessage() }}
+        </div>
+        <div class="overflow-x-auto" *ngIf="!loading() && !errorMessage()">
           <table class="w-full text-left text-xs">
             <thead
               class="bg-muted/50 border-b border-border text-muted-foreground font-semibold uppercase tracking-wider"
@@ -216,7 +225,7 @@ import {
                 </td>
               </tr>
 
-              <tr *ngIf="filteredInventory().length === 0">
+              <tr *ngIf="filteredInventory().length === 0 && !loading() && !errorMessage()">
                 <td colspan="6" class="py-8 text-center text-muted-foreground text-xs">
                   No medications found matching search criteria.
                 </td>
@@ -344,6 +353,7 @@ import {
 export class PharmacistInventoryComponent implements OnInit {
   inventory = signal<InventoryItem[]>([]);
   loading = signal(false);
+  errorMessage = signal<string | null>(null);
   searchQuery = signal('');
   selectedFilter = signal<'ALL' | 'LOW_STOCK'>('ALL');
   showReceiveModal = signal(false);
@@ -396,7 +406,7 @@ export class PharmacistInventoryComponent implements OnInit {
         this.inventory.set(inv);
         this.loading.set(false);
       },
-      error: () => this.loading.set(false),
+      error: (err) => { this.errorMessage.set(err.message || 'Failed'); this.loading.set(false); },
     });
   }
 
@@ -409,58 +419,9 @@ export class PharmacistInventoryComponent implements OnInit {
         this.showReceiveModal.set(false);
         this.loadInventory();
       },
-      error: () => {
-        let item = this.inventory().find((i) =>
-          i.medicationName.toLowerCase().includes(this.receiveForm.medicationName.toLowerCase()),
-        );
-        if (item) {
-          item.totalQuantityOnHand += Number(this.receiveForm.quantity);
-          item.batches = item.batches || [];
-          item.batches.push({
-            id: 'BAT-' + Date.now(),
-            medicationName: this.receiveForm.medicationName,
-            batchNumber: this.receiveForm.batchNumber,
-            manufacturer: this.receiveForm.manufacturer,
-            expiryDate: this.receiveForm.expiryDate,
-            quantityOnHand: Number(this.receiveForm.quantity),
-            reorderLevel: 50,
-            unitPrice: Number(this.receiveForm.unitPrice),
-            location: this.receiveForm.location,
-            status: 'ACTIVE',
-          });
-        } else {
-          const newItem: InventoryItem = {
-            id: 'INV-' + Date.now(),
-            medicationName: this.receiveForm.medicationName,
-            genericName: this.receiveForm.medicationName.split(' ')[0],
-            dosageForm: 'Tablet',
-            strength: 'Standard',
-            category: 'THERAPEUTIC',
-            totalQuantityOnHand: Number(this.receiveForm.quantity),
-            reorderLevel: 50,
-            unitOfMeasure: 'Units',
-            unitPrice: Number(this.receiveForm.unitPrice),
-            batches: [
-              {
-                id: 'BAT-' + Date.now(),
-                medicationName: this.receiveForm.medicationName,
-                batchNumber: this.receiveForm.batchNumber,
-                manufacturer: this.receiveForm.manufacturer,
-                expiryDate: this.receiveForm.expiryDate,
-                quantityOnHand: Number(this.receiveForm.quantity),
-                reorderLevel: 50,
-                unitPrice: Number(this.receiveForm.unitPrice),
-                location: this.receiveForm.location,
-                status: 'ACTIVE',
-              },
-            ],
-          };
-          this.inventory.update((list) => [newItem, ...list]);
-        }
-        toast.success(
-          `Received ${this.receiveForm.quantity} units of ${this.receiveForm.medicationName}.`,
-        );
-        this.showReceiveModal.set(false);
+      error: (err) => {
+        this.errorMessage.set(err.message || 'Failed');
+        this.loading.set(false);
       },
     });
   }

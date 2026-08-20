@@ -145,6 +145,15 @@ interface ToastAlert {
         </div>
       </div>
 
+      <!-- State Indicators -->
+      <div *ngIf="isLoading()" class="p-4 text-center text-sm text-muted-foreground">
+        Loading platform data...
+      </div>
+      <div *ngIf="errorMessage()" class="p-4 mb-4 text-sm text-destructive rounded-lg bg-destructive/10 border border-destructive/20">
+        {{ errorMessage() }}
+      </div>
+
+      <ng-container *ngIf="!isLoading() && !errorMessage()">
       <!-- SaaS KPI Overview (6 Cards) -->
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
         <!-- Active Tenants -->
@@ -438,6 +447,7 @@ interface ToastAlert {
           </div>
         </div>
       </div>
+      </ng-container>
     </div>
   `,
 })
@@ -447,6 +457,8 @@ export class SuperAdminDashboardComponent implements OnInit {
   securityEvents = signal<SecurityEventLog[]>([]);
   healthData = signal<any>(null);
   toastMessage = signal<ToastAlert | null>(null);
+  isLoading = signal<boolean>(false);
+  errorMessage = signal<string>('');
 
   constructor(
     private apiService: ApiService,
@@ -458,24 +470,57 @@ export class SuperAdminDashboardComponent implements OnInit {
   }
 
   loadData(): void {
+    this.isLoading.set(true);
+    this.errorMessage.set('');
+
+    let pending = 4;
+    const checkDone = () => {
+      pending--;
+      if (pending === 0) this.isLoading.set(false);
+    };
+
     this.apiService.getPlatformUsers().subscribe({
-      next: (u) => this.users.set(u),
-      error: () => {},
+      next: (u) => {
+        this.users.set(u);
+        checkDone();
+      },
+      error: (err) => {
+        this.errorMessage.set(err.message || 'Failed to load users');
+        checkDone();
+      },
     });
 
     this.apiService.getPlatformOrganizations().subscribe({
-      next: (orgs) => this.organizations.set(orgs),
-      error: () => {},
+      next: (orgs) => {
+        this.organizations.set(orgs);
+        checkDone();
+      },
+      error: (err) => {
+        this.errorMessage.set(err.message || 'Failed to load organizations');
+        checkDone();
+      },
     });
 
     this.apiService.getPlatformSecurityEvents().subscribe({
-      next: (events) => this.securityEvents.set(events),
-      error: () => {},
+      next: (events) => {
+        this.securityEvents.set(events);
+        checkDone();
+      },
+      error: (err) => {
+        this.errorMessage.set(err.message || 'Failed to load security events');
+        checkDone();
+      },
     });
 
     this.apiService.getPlatformHealth().subscribe({
-      next: (h) => this.healthData.set(h),
-      error: () => {},
+      next: (h) => {
+        this.healthData.set(h);
+        checkDone();
+      },
+      error: (err) => {
+        this.errorMessage.set(err.message || 'Failed to load health data');
+        checkDone();
+      },
     });
   }
 }

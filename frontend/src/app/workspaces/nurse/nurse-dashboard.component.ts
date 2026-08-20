@@ -167,7 +167,7 @@ export interface NursingShiftTask {
             (click)="loadStationData()"
             class="gap-1.5 text-xs flex-1 sm:flex-initial"
           >
-            <ng-icon name="lucideRefreshCw" [class.animate-spin]="loading()" size="14" />
+            <ng-icon name="lucideRefreshCw" [class.animate-spin]="isLoading" size="14" />
             <span>Refresh</span>
           </button>
           <a
@@ -193,9 +193,19 @@ export interface NursingShiftTask {
         </div>
       </div>
 
+      <!-- Loading & Error States -->
+      <div *ngIf="isLoading" class="p-4 rounded-2xl border border-border bg-muted/20 text-center text-muted-foreground text-xs font-semibold">
+        <ng-icon name="lucideRefreshCw" class="animate-spin mr-2" size="14"></ng-icon>
+        Loading dashboard data...
+      </div>
+      <div *ngIf="errorMessage" class="p-4 rounded-2xl border border-rose-500/30 bg-rose-500/10 text-rose-600 text-xs font-semibold flex items-center gap-2">
+        <ng-icon name="lucideAlertTriangle" size="16"></ng-icon>
+        <span>{{ errorMessage }}</span>
+      </div>
+
       <!-- High-Acuity Patient Alerts (if any NEWS2 >= 4) -->
       <div
-        *ngIf="criticalPatientsCount() > 0"
+        *ngIf="!isLoading && !errorMessage && criticalPatientsCount() > 0"
         class="p-4 rounded-2xl border border-amber-500/30 bg-amber-500/10 text-amber-900 dark:text-amber-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs"
       >
         <div class="flex items-center gap-3">
@@ -795,7 +805,8 @@ export interface NursingShiftTask {
   `,
 })
 export class NurseDashboardComponent implements OnInit {
-  loading = signal<boolean>(false);
+  isLoading = false;
+  errorMessage = '';
   inpatientSearchQuery = '';
   filterMode = signal<'ALL' | 'CRITICAL' | 'FALL_RISK' | 'MEDS_DUE'>('ALL');
 
@@ -819,7 +830,8 @@ export class NurseDashboardComponent implements OnInit {
   }
 
   loadStationData(): void {
-    this.loading.set(true);
+    this.isLoading = true;
+    this.errorMessage = '';
 
     // 1. Load Inpatients from occupied hospital beds in assigned ward
     this.apiService.getBeds().subscribe({
@@ -827,63 +839,28 @@ export class NurseDashboardComponent implements OnInit {
         const occupied = Array.isArray(beds)
           ? beds.filter((b) => b.status === 'OCCUPIED' && b.currentEncounter?.patient)
           : [];
-        if (occupied.length > 0) {
-          const items: NurseAssignedInpatient[] = occupied.map((b, idx) => ({
-            patient: b.currentEncounter!.patient!,
-            bedCode: b.bedNumber || b.bedCode || `301${String.fromCharCode(65 + idx)}`,
-            wardName: b.wardName || b.departmentName || 'Ward 3A',
-            roomNumber: b.roomNumber || `30${idx + 1}`,
-            admissionDiagnosis:
-              idx === 0
-                ? 'Acute Coronary Syndrome'
-                : idx === 1
-                  ? 'Community-Acquired Pneumonia'
-                  : 'Post-Op Observation',
-            ewsScore: idx === 0 ? 4 : idx === 1 ? 2 : 1,
-            acuityLevel: idx === 0 ? 'OBSERVED' : 'STABLE',
-            fallRisk: idx === 0 ? 'HIGH' : 'LOW',
-            codeStatus: idx === 0 ? 'FULL_CODE' : 'FULL_CODE',
-            isolation: idx === 1 ? 'CONTACT' : 'NONE',
-            attendingPhysician: 'Dr. S. Sharma',
-            nextMedicationTime: '10:00 AM',
-            medsDueCount: idx === 0 ? 2 : 1,
-            dietOrder: 'Low Sodium / Diabetic',
-            ivLineActive: idx === 0 || idx === 1,
-          }));
-          this.assignedInpatients.set(items);
-        } else {
-          // Fallback to active patients
-          this.apiService.getPatients().subscribe({
-            next: (pts) => {
-              const fallbackItems: NurseAssignedInpatient[] = pts.slice(0, 4).map((p, idx) => ({
-                patient: p,
-                bedCode: `30${idx + 1}A`,
-                wardName: 'Ward 3A - Acute Care',
-                roomNumber: `30${idx + 1}`,
-                admissionDiagnosis:
-                  idx === 0
-                    ? 'Acute Coronary Syndrome'
-                    : idx === 1
-                      ? 'Exacerbation of COPD'
-                      : 'Post-Op Laparoscopy',
-                ewsScore: idx === 0 ? 4 : idx === 1 ? 2 : 1,
-                acuityLevel: idx === 0 ? 'OBSERVED' : 'STABLE',
-                fallRisk: idx === 0 ? 'HIGH' : 'LOW',
-                codeStatus: 'FULL_CODE',
-                isolation: idx === 1 ? 'CONTACT' : 'NONE',
-                attendingPhysician: 'Dr. S. Sharma',
-                nextMedicationTime: '10:00 AM',
-                medsDueCount: idx === 0 ? 2 : 1,
-                dietOrder: 'Regular / Diabetic',
-                ivLineActive: idx === 0 || idx === 1,
-              }));
-              this.assignedInpatients.set(fallbackItems);
-            },
-          });
-        }
-        this.loading.set(false);
+        const items: NurseAssignedInpatient[] = occupied.map((b) => ({
+          patient: b.currentEncounter!.patient!,
+          bedCode: b.bedNumber || b.bedCode || '',
+          wardName: b.wardName || b.departmentName || '',
+          roomNumber: b.roomNumber || '',
+          admissionDiagnosis: b.currentEncounter?.chiefComplaint || '',
+          ewsScore: 0,
+          acuityLevel: 'STABLE',
+          fallRisk: 'LOW',
+          codeStatus: 'FULL_CODE',
+          isolation: 'NONE',
+          attendingPhysician: b.currentEncounter?.attendingPractitionerId || '',
+          medsDueCount: 0,
+          ivLineActive: false,
+        }));
+        this.assignedInpatients.set(items);
+        this.isLoading = false;
       },
-      error: () => this.loading.set(false),
+      error: (err) => {
+        this.errorMessage = err.message || 'Failed to load inpatients';
+        this.isLoading = false;
+      },
     });
 
     // 2. Load Triage Outpatient Queue
@@ -891,41 +868,14 @@ export class NurseDashboardComponent implements OnInit {
       next: (apps) => {
         this.triageQueue.set(Array.isArray(apps) ? apps : []);
       },
+      error: (err) => {
+        this.errorMessage = err.message || 'Failed to load triage queue';
+        this.isLoading = false;
+      }
     });
 
     // 3. Shift Tasks
-    this.shiftTasks.set([
-      {
-        id: 'st-1',
-        patientName: 'Sarah Jenkins',
-        bedCode: '301A',
-        taskType: 'EMAR_DUE',
-        title: 'Administer IV Ceftriaxone 1g & Metformin 500mg',
-        dueTime: '09:00 AM',
-        priority: 'HIGH',
-        status: 'PENDING',
-      },
-      {
-        id: 'st-2',
-        patientName: 'Robert Vance',
-        bedCode: '302A',
-        taskType: 'IO_RECORDING',
-        title: 'Record Morning Intake & Output Fluid Balance',
-        dueTime: '10:00 AM',
-        priority: 'NORMAL',
-        status: 'PENDING',
-      },
-      {
-        id: 'st-3',
-        patientName: 'Sarah Jenkins',
-        bedCode: '301A',
-        taskType: 'VITALS_RECHECK',
-        title: 'Recheck BP & SpO2 for elevated NEWS2 Score',
-        dueTime: '11:00 AM',
-        priority: 'HIGH',
-        status: 'PENDING',
-      },
-    ]);
+    this.shiftTasks.set([]);
   }
 
   filteredInpatients = computed(() => {

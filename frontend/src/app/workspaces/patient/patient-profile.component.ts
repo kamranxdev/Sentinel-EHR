@@ -1354,6 +1354,9 @@ type ProfileTab = 'demographics' | 'contact' | 'insurance' | 'allergies' | 'hist
   `,
 })
 export class PatientProfileComponent implements OnInit {
+  isLoading = false;
+  errorMessage = "";
+
   patient = signal<Patient | null>(null);
   profileForm: Partial<Patient> = {};
   saving = signal(false);
@@ -1373,7 +1376,7 @@ export class PatientProfileComponent implements OnInit {
     private apiService: ApiService,
     public authService: AuthService,
     public patientContext: PatientContextService,
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.apiService.getMyPatientProfile().subscribe({
@@ -1384,10 +1387,7 @@ export class PatientProfileComponent implements OnInit {
           this.loadEmergencyContact(p.emergencyContact);
         }
       },
-      error: (err) => {
-        console.error('Could not load profile', err);
-        toast.error('Failed to load profile: ' + (err.error?.message || 'Unknown network error'));
-      },
+      error: (err) => { this.errorMessage = err.message || 'Failed'; this.isLoading = false; },
     });
   }
 
@@ -1520,12 +1520,7 @@ export class PatientProfileComponent implements OnInit {
         });
         setTimeout(() => this.saveSuccess.set(false), 3500);
       },
-      error: (err) => {
-        this.saving.set(false);
-        toast.error('Failed to Save Health Profile', {
-          description: err?.error?.message || 'Server error occurred while updating patient chart.',
-        });
-      },
+      error: (err) => { this.errorMessage = err.message || 'Failed'; this.isLoading = false; }
     });
   }
 }

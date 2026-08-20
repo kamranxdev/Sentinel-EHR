@@ -56,4 +56,11 @@ public class ChargeItemController {
         chargeItemService.deleteChargeItem(chargeItemId);
         return ResponseEntity.ok(ApiResponse.success("Charge item deleted successfully", null));
     }
+
+    @GetMapping("/api/v1/billing/charges")
+    @Operation(summary = "Get all charge items globally")
+    public ResponseEntity<ApiResponse<List<ChargeItemResponseDTO>>> getAllChargeItems() {
+        List<ChargeItemResponseDTO> response = chargeItemService.getAllChargeItems();
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
 }

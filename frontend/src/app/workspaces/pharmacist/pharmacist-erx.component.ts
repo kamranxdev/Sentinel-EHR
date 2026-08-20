@@ -149,7 +149,16 @@ import {
 
       <!-- Orders Table -->
       <div class="bg-card rounded-2xl border border-border shadow-xs overflow-hidden">
-        <div class="overflow-x-auto">
+        
+        <div *ngIf="loading()" class="p-8 text-center text-muted-foreground flex flex-col items-center justify-center gap-2">
+          <ng-icon name="lucideRefreshCw" size="24" class="animate-spin text-indigo-500"></ng-icon>
+          <p>Loading data...</p>
+        </div>
+        <div *ngIf="errorMessage()" class="p-4 m-4 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-sm flex items-center gap-2">
+          <ng-icon name="lucideAlertTriangle" size="16"></ng-icon>
+          {{ errorMessage() }}
+        </div>
+        <div class="overflow-x-auto" *ngIf="!loading() && !errorMessage()">
           <table class="w-full text-left text-xs">
             <thead
               class="bg-muted/50 border-b border-border text-muted-foreground font-semibold uppercase tracking-wider"
@@ -221,7 +230,7 @@ import {
                 </td>
               </tr>
 
-              <tr *ngIf="filteredOrders().length === 0">
+              <tr *ngIf="filteredOrders().length === 0 && !loading() && !errorMessage()">
                 <td colspan="6" class="py-8 text-center text-muted-foreground text-xs">
                   No e-prescriptions found matching the filter.
                 </td>
@@ -359,6 +368,7 @@ import {
 export class PharmacistErxComponent implements OnInit {
   orders = signal<MedicationOrder[]>([]);
   loading = signal(false);
+  errorMessage = signal<string | null>(null);
   searchQuery = signal('');
   selectedStatus = signal<'ALL' | 'PENDING' | 'VERIFIED' | 'CLARIFICATION'>('ALL');
   selectedOrder = signal<MedicationOrder | null>(null);
@@ -423,7 +433,7 @@ export class PharmacistErxComponent implements OnInit {
         this.orders.set(data);
         this.loading.set(false);
       },
-      error: () => this.loading.set(false),
+      error: (err) => { this.errorMessage.set(err.message || 'Failed'); this.loading.set(false); },
     });
   }
 
@@ -441,11 +451,7 @@ export class PharmacistErxComponent implements OnInit {
         o.status = 'PHARMACY_VERIFIED';
         this.selectedOrder.set(null);
       },
-      error: () => {
-        toast.success(`Prescription for ${o.medicationName} verified.`);
-        o.status = 'PHARMACY_VERIFIED';
-        this.selectedOrder.set(null);
-      },
+      error: (err) => { this.errorMessage.set(err.message || 'Failed'); },
     });
   }
 
@@ -458,11 +464,7 @@ export class PharmacistErxComponent implements OnInit {
         o.status = 'CLARIFICATION_REQUESTED';
         this.selectedOrder.set(null);
       },
-      error: () => {
-        toast.info(`Clarification requested.`);
-        o.status = 'CLARIFICATION_REQUESTED';
-        this.selectedOrder.set(null);
-      },
+      error: (err) => { this.errorMessage.set(err.message || 'Failed'); },
     });
   }
 

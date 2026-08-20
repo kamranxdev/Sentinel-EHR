@@ -108,7 +108,7 @@ export interface InpatientCareItem {
             (click)="loadInpatients()"
             class="gap-1.5 text-xs flex-1 sm:flex-initial"
           >
-            <ng-icon name="lucideRefreshCw" [class.animate-spin]="loading()" size="14" />
+            <ng-icon name="lucideRefreshCw" [class.animate-spin]="isLoading" size="14" />
             <span>Refresh Census</span>
           </button>
           <a
@@ -180,7 +180,13 @@ export interface InpatientCareItem {
       </div>
 
       <!-- Inpatient Table -->
-      <div class="rounded-2xl border border-border bg-card overflow-hidden shadow-xs space-y-0">
+      <div *ngIf="isLoading" class="p-8 text-center text-muted-foreground">
+        Loading inpatients...
+      </div>
+      <div *ngIf="errorMessage" class="p-4 mb-4 rounded-lg bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border border-red-200 dark:border-red-800">
+        {{ errorMessage }}
+      </div>
+      <div *ngIf="!isLoading && !errorMessage" class="rounded-2xl border border-border bg-card overflow-hidden shadow-xs space-y-0">
         <div
           class="p-4 border-b border-border bg-muted/20 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3"
         >
@@ -315,7 +321,8 @@ export interface InpatientCareItem {
 })
 export class PhysicianInpatientsComponent implements OnInit {
   inpatientsList = signal<InpatientCareItem[]>([]);
-  loading = signal<boolean>(false);
+  isLoading: boolean = false;
+  errorMessage: string = '';
   searchQuery = '';
 
   constructor(
@@ -329,62 +336,30 @@ export class PhysicianInpatientsComponent implements OnInit {
   }
 
   loadInpatients(): void {
-    this.loading.set(true);
+    this.isLoading = true;
+    this.errorMessage = '';
     this.apiService.getBeds().subscribe({
       next: (beds) => {
         const occupied = Array.isArray(beds)
           ? beds.filter((b) => b.status === 'OCCUPIED' && b.currentEncounter?.patient)
           : [];
-        if (occupied.length > 0) {
-          const items: InpatientCareItem[] = occupied.map((b, idx) => ({
-            patient: b.currentEncounter!.patient!,
-            bedCode: b.bedNumber || b.bedCode || `Bed-${b.id?.substring(0, 4)}`,
-            wardName: b.wardName || b.departmentName || 'General Medicine Ward',
-            admissionDate: new Date(Date.now() - (idx + 1) * 86400000).toISOString(),
-            admissionDiagnosis:
-              idx === 0
-                ? 'Acute Coronary Syndrome'
-                : idx === 1
-                  ? 'Community-Acquired Pneumonia'
-                  : 'Post-Op Observation',
-            careRole: idx % 2 === 0 ? 'ATTENDING' : 'CONSULTANT',
-            ewsScore: idx === 0 ? 4 : 1,
-            acuityLevel: idx === 0 ? 'OBSERVED' : 'STABLE',
-          }));
-          this.inpatientsList.set(items);
-          this.loading.set(false);
-        } else {
-          // Fallback to active patients for clinical presentation
-          this.apiService.getPatients().subscribe({
-            next: (pts) => {
-              const fallbackItems: InpatientCareItem[] = pts.slice(0, 4).map((p, idx) => ({
-                patient: p,
-                bedCode: `Ward-${idx + 1}-Bed-${10 + idx}`,
-                wardName:
-                  idx === 0
-                    ? 'Cardiology ICU'
-                    : idx === 1
-                      ? 'Internal Medicine Ward'
-                      : 'Surgical Step-Down',
-                admissionDate: new Date(Date.now() - (idx + 2) * 86400000).toISOString(),
-                admissionDiagnosis:
-                  idx === 0
-                    ? 'Acute Coronary Syndrome'
-                    : idx === 1
-                      ? 'Type 2 Diabetes with Ketoacidosis'
-                      : 'Post-Op Laparoscopy',
-                careRole: idx === 0 ? 'ATTENDING' : 'CONSULTANT',
-                ewsScore: idx === 0 ? 4 : idx === 1 ? 2 : 1,
-                acuityLevel: idx === 0 ? 'OBSERVED' : 'STABLE',
-              }));
-              this.inpatientsList.set(fallbackItems);
-              this.loading.set(false);
-            },
-            error: () => this.loading.set(false),
-          });
-        }
+        const items: InpatientCareItem[] = occupied.map((b, idx) => ({
+          patient: b.currentEncounter!.patient!,
+          bedCode: b.bedNumber || b.bedCode || `Bed-${b.id?.substring(0, 4)}`,
+          wardName: b.wardName || b.departmentName || 'General Medicine Ward',
+          admissionDate: new Date(Date.now() - (idx + 1) * 86400000).toISOString(),
+          admissionDiagnosis: b.currentEncounter?.chiefComplaint || 'Unknown Diagnosis',
+          careRole: idx % 2 === 0 ? 'ATTENDING' : 'CONSULTANT',
+          ewsScore: idx === 0 ? 4 : 1,
+          acuityLevel: idx === 0 ? 'OBSERVED' : 'STABLE',
+        }));
+        this.inpatientsList.set(items);
+        this.isLoading = false;
       },
-      error: () => this.loading.set(false),
+      error: (err) => {
+        this.errorMessage = err.message || 'Failed to load inpatients';
+        this.isLoading = false;
+      },
     });
   }
 

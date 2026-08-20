@@ -66,6 +66,18 @@ import {
   ],
   template: `
     <div class="space-y-6">
+
+      <!-- Error Message -->
+      <div *ngIf="errorMessage()" class="p-3 mb-4 rounded-lg bg-red-500/10 text-red-700 dark:text-red-300 border border-red-500/20 text-xs flex items-center justify-between shadow-sm">
+        <div class="flex items-center gap-2 font-medium">
+          <ng-icon name="lucideAlertTriangle" size="16" class="text-red-600" />
+          <span>{{ errorMessage() }}</span>
+        </div>
+        <button type="button" class="text-red-600 hover:text-red-800 text-xs font-bold" (click)="errorMessage.set(null)">
+          &times;
+        </button>
+      </div>
+
       <!-- Receptionist Header -->
       <div
         class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-border"
@@ -435,7 +447,7 @@ import {
                   </div>
                 </td>
               </tr>
-              <tr *ngIf="displayAppointments().length === 0" hlmTableRow>
+              <tr *ngIf="!isLoading() && displayAppointments().length === 0" hlmTableRow>
                 <td
                   hlmTableCell
                   colspan="6"
@@ -468,6 +480,9 @@ import {
   `,
 })
 export class ReceptionistDashboardComponent implements OnInit {
+  isLoading = signal(false);
+  errorMessage = signal<string | null>(null);
+
   appointments = signal<Appointment[]>([]);
   patientCount = signal(0);
 
@@ -517,8 +532,26 @@ export class ReceptionistDashboardComponent implements OnInit {
   }
 
   loadData(): void {
-    this.apiService.getAppointments().subscribe((apts) => this.appointments.set(apts));
-    this.apiService.getPatients().subscribe((pts) => this.patientCount.set(pts.length));
+    this.isLoading.set(true);
+    this.errorMessage.set(null);
+    this.apiService.getAppointments().subscribe({
+      next: (apts) => {
+        this.appointments.set(apts);
+        this.isLoading.set(false);
+      },
+      error: (err) => {
+        this.errorMessage.set(err.message || 'Failed to load appointments.');
+        this.isLoading.set(false);
+      }
+    });
+    this.apiService.getPatients().subscribe({
+      next: (pts) => {
+        this.patientCount.set(pts.length);
+      },
+      error: (err) => {
+        this.errorMessage.set(err.message || 'Failed to load patients.');
+      }
+    });
   }
 
   openIntakeModal(): void {
@@ -555,6 +588,10 @@ export class ReceptionistDashboardComponent implements OnInit {
     if (!apt.id) return;
     this.apiService.updateAppointmentStage(apt.id, stage).subscribe({
       next: () => this.loadData(),
+      error: (err) => {
+        this.errorMessage.set(err.message || 'Operation failed.');
+        this.isLoading.set(false);
+      }
     });
   }
 

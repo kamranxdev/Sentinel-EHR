@@ -923,6 +923,9 @@ import {
   `,
 })
 export class PatientAppointmentsComponent implements OnInit {
+  isLoading = false;
+  errorMessage = "";
+
   patientProfile = signal<Patient | null>(null);
   appointments = signal<Appointment[]>([]);
   allOrganizations = signal<Organization[]>([]);
@@ -1076,7 +1079,7 @@ export class PatientAppointmentsComponent implements OnInit {
   constructor(
     private apiService: ApiService,
     public authService: AuthService,
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadOrganizations();
@@ -1118,7 +1121,7 @@ export class PatientAppointmentsComponent implements OnInit {
           }
         }
       },
-      error: (err: unknown) => console.warn('Could not load organizations list', err),
+      error: (err) => { this.errorMessage = err.message || 'Failed'; this.isLoading = false; },
     });
   }
 
@@ -1147,19 +1150,14 @@ export class PatientAppointmentsComponent implements OnInit {
           this.fetchAppointments(profile.id);
         }
       },
-      error: (err: any) => {
-        console.error('Could not load patient profile for appointments', err);
-        toast.error(
-          'Failed to load appointments: ' + (err.error?.message || 'Unknown network error'),
-        );
-      },
+      error: (err) => { this.errorMessage = err.message || 'Failed'; this.isLoading = false; },
     });
   }
 
   fetchAppointments(patientId: string): void {
     this.apiService.getAppointmentsByPatient(patientId).subscribe({
       next: (apts: Appointment[]) => this.appointments.set(Array.isArray(apts) ? apts : []),
-      error: (err: unknown) => console.warn('Error fetching patient appointments', err),
+      error: (err) => { this.errorMessage = err.message || 'Failed'; this.isLoading = false; },
     });
   }
 
@@ -1167,7 +1165,7 @@ export class PatientAppointmentsComponent implements OnInit {
     const orgId = this.selectedHospital()?.id;
     this.apiService.getDoctors(orgId).subscribe({
       next: (docs: User[]) => this.allDoctors.set(Array.isArray(docs) ? docs : []),
-      error: (err: unknown) => console.warn('Error fetching doctors list', err),
+      error: (err) => { this.errorMessage = err.message || 'Failed'; this.isLoading = false; },
     });
   }
 
@@ -1274,10 +1272,7 @@ export class PatientAppointmentsComponent implements OnInit {
             this.selectedSlot = '';
           }
         },
-        error: (err: unknown) => {
-          console.warn('Recommendation engine warning', err);
-          this.loadingRecommendations.set(false);
-        },
+        error: (err) => { this.errorMessage = err.message || 'Failed'; this.isLoading = false; },
       });
   }
 
@@ -1394,13 +1389,7 @@ export class PatientAppointmentsComponent implements OnInit {
         // Refresh list
         this.fetchAppointments(patient.id);
       },
-      error: (err: { error?: { message?: string } }) => {
-        this.bookingInProgress.set(false);
-        console.error('Failed to schedule appointment', err);
-        toast.error('Booking Failed', {
-          description: err.error?.message || 'Could not schedule appointment. Please try again.',
-        });
-      },
+      error: (err) => { this.errorMessage = err.message || 'Failed'; this.isLoading = false; },
     });
   }
 
@@ -1501,13 +1490,7 @@ export class PatientAppointmentsComponent implements OnInit {
         const p = this.patientProfile();
         if (p) this.fetchAppointments(p.id);
       },
-      error: (err: { error?: { message?: string } }) => {
-        this.cancellingInProgress.set(false);
-        console.error('Failed to cancel appointment', err);
-        toast.error('Cancellation Failed', {
-          description: err.error?.message || 'Could not cancel appointment.',
-        });
-      },
+      error: (err) => { this.errorMessage = err.message || 'Failed'; this.isLoading = false; }
     });
   }
-}
+} 

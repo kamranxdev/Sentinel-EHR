@@ -1,11 +1,9 @@
 package com.sentinel.clinical.service;
 
 import com.sentinel.audit.service.AuditService;
-import com.sentinel.clinical.dto.CreateEncounterRequest;
-import com.sentinel.clinical.dto.EncounterResponseDTO;
-import com.sentinel.clinical.dto.EncounterSearchCriteria;
-import com.sentinel.clinical.dto.UpdateEncounterRequest;
+import com.sentinel.clinical.dto.*;
 import com.sentinel.clinical.entity.Encounter;
+import com.sentinel.clinical.repository.AdmissionRepository;
 import com.sentinel.clinical.repository.EncounterLocationRepository;
 import com.sentinel.clinical.repository.EncounterRepository;
 import com.sentinel.common.exception.ResourceNotFoundException;
@@ -13,10 +11,12 @@ import com.sentinel.patient.entity.Patient;
 import com.sentinel.patient.entity.PatientOrganization;
 import com.sentinel.patient.repository.PatientOrganizationRepository;
 import com.sentinel.patient.repository.PatientRepository;
+import com.sentinel.scheduling.entity.Appointment;
 import com.sentinel.tenancy.entity.Department;
 import com.sentinel.tenancy.entity.Organization;
 import com.sentinel.tenancy.repository.DepartmentRepository;
 import com.sentinel.tenancy.repository.OrganizationRepository;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -31,14 +31,21 @@ public class EncounterService {
 
     private final EncounterRepository encounterRepository;
     private final EncounterLocationRepository encounterLocationRepository;
+    private final AdmissionRepository admissionRepository;
+    private final AdmissionService admissionService;
     private final PatientRepository patientRepository;
     private final PatientOrganizationRepository patientOrganizationRepository;
     private final OrganizationRepository organizationRepository;
     private final DepartmentRepository departmentRepository;
     private final AuditService auditService;
 
+    
+
+    @org.springframework.beans.factory.annotation.Autowired
     public EncounterService(EncounterRepository encounterRepository,
                             EncounterLocationRepository encounterLocationRepository,
+                            AdmissionRepository admissionRepository,
+                            @Lazy AdmissionService admissionService,
                             PatientRepository patientRepository,
                             PatientOrganizationRepository patientOrganizationRepository,
                             OrganizationRepository organizationRepository,
@@ -46,6 +53,8 @@ public class EncounterService {
                             AuditService auditService) {
         this.encounterRepository = encounterRepository;
         this.encounterLocationRepository = encounterLocationRepository;
+        this.admissionRepository = admissionRepository;
+        this.admissionService = admissionService;
         this.patientRepository = patientRepository;
         this.patientOrganizationRepository = patientOrganizationRepository;
         this.organizationRepository = organizationRepository;
@@ -85,6 +94,7 @@ public class EncounterService {
         encounter.setAdmissionSource(request.getAdmissionSource());
         encounter.setAdmissionType(request.getAdmissionType());
         encounter.setAcuity(request.getAcuity());
+        encounter.setAppointmentId(request.getAppointmentId());
         encounter.setStartedAt(OffsetDateTime.now());
         encounter.setCreatedAt(OffsetDateTime.now());
         encounter.setUpdatedAt(OffsetDateTime.now());
@@ -95,6 +105,66 @@ public class EncounterService {
         }
 
         return mapToDTO(saved);
+    }
+
+    /**
+     * Auto-creates an encounter when a patient checks in for an appointment.
+     * The encounter type, reason, and patient are derived from the appointment.
+     */
+    public EncounterResponseDTO openEncounterFromAppointment(Appointment appointment) {
+        Encounter encounter = new Encounter();
+        encounter.setOrganization(appointment.getOrganization());
+        encounter.setPatient(appointment.getPatient());
+        encounter.setDepartment(appointment.getDepartment());
+        encounter.setEncounterNumber("ENC-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
+        String type = appointment.getEncounterType() != null ? appointment.getEncounterType() : "OUTPATIENT";
+        encounter.setEncounterType(type);
+        encounter.setStatus("IN_PROGRESS");
+        encounter.setReasonForVisit(appointment.getReason());
+        encounter.setAppointmentId(appointment.getId());
+
+        if (appointment.getPractitioner() != null) {
+            encounter.setAttendingPractitioner(appointment.getPractitioner());
+            encounter.setCreatedBy(appointment.getPractitioner());
+        } else if (appointment.getCreatedBy() != null) {
+            encounter.setCreatedBy(appointment.getCreatedBy());
+        }
+
+        encounter.setStartedAt(OffsetDateTime.now());
+        encounter.setCreatedAt(OffsetDateTime.now());
+        encounter.setUpdatedAt(OffsetDateTime.now());
+
+        Encounter saved = encounterRepository.save(encounter);
+
+        if (auditService != null) {
+            auditService.logEvent(saved.getId(), "ENCOUNTER_OPENED_FROM_APPOINTMENT",
+                    "Encounter " + saved.getEncounterNumber() + " auto-created from appointment " + appointment.getId());
+        }
+
+        return mapToDTO(saved);
+    }
+
+    @Transactional(readOnly = true)
+    public EncounterResponseDTO getEncounterByAppointmentId(UUID appointmentId) {
+        return encounterRepository.findByAppointmentId(appointmentId)
+                .map(this::mapToDTO)
+                .orElseThrow(() -> new ResourceNotFoundException("No encounter found for appointment: " + appointmentId));
+    }
+
+    @Transactional
+    public EncounterResponseDTO promoteToAdmission(UUID encounterId, AdmissionRequest request) {
+        Encounter encounter = encounterRepository.findById(encounterId)
+                .orElseThrow(() -> new ResourceNotFoundException("Encounter not found: " + encounterId));
+
+        AdmitPatientRequest admitRequest = new AdmitPatientRequest();
+        admitRequest.setAdmissionSource(request.getAdmissionSource() != null ? request.getAdmissionSource() : "EMERGENCY");
+        admitRequest.setAdmitReason(request.getAdmitReason() != null ? request.getAdmitReason() : encounter.getReasonForVisit());
+        admitRequest.setBedId(request.getBedId());
+
+        admissionService.admitPatient(encounterId, admitRequest);
+
+        Encounter updated = encounterRepository.findById(encounterId).orElseThrow();
+        return mapToDTO(updated);
     }
 
     @Transactional(readOnly = true)
@@ -177,10 +247,25 @@ public class EncounterService {
         dto.setAdmissionSource(e.getAdmissionSource());
         dto.setAdmissionType(e.getAdmissionType());
         dto.setAcuity(e.getAcuity());
+        dto.setAppointmentId(e.getAppointmentId());
         dto.setStartedAt(e.getStartedAt());
         dto.setEndedAt(e.getEndedAt());
         dto.setDisposition(e.getDisposition());
+
+        if (e.getAttendingPractitioner() != null) {
+            dto.setAttendingPractitionerId(e.getAttendingPractitioner().getId());
+            dto.setAttendingPractitionerName(e.getAttendingPractitioner().getFullName());
+        } else if (e.getCreatedBy() != null) {
+            dto.setAttendingPractitionerId(e.getCreatedBy().getId());
+            dto.setAttendingPractitionerName(e.getCreatedBy().getFullName());
+        }
+
         if (e.getCreatedBy() != null) dto.setCreatedByEmail(e.getCreatedBy().getEmail());
+
+        if (admissionRepository != null) {
+            admissionRepository.findByEncounterId(e.getId()).ifPresent(a -> dto.setAdmissionId(a.getId()));
+        }
+
         dto.setCreatedAt(e.getCreatedAt());
         dto.setUpdatedAt(e.getUpdatedAt());
         return dto;

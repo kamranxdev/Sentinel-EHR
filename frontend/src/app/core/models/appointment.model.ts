@@ -72,6 +72,10 @@ export interface Appointment {
   startTime?: string;
   endTime?: string;
   appointmentType?: string;
+  schedulingMode?: 'SPECIFIC_DOCTOR' | 'SPECIALTY_ONLY' | 'WALK_IN' | string;
+  specialtyCode?: string;
+  encounterType?: 'OUTPATIENT' | 'EMERGENCY' | 'OBSERVATION' | string;
+  encounterId?: string;
   status: string;
   reason?: string;
   priority?: string;
@@ -83,6 +87,7 @@ export interface Appointment {
   checkedInAt?: string;
   arrivedAt?: string;
   completedAt?: string;
+  noShowAt?: string;
   vitals?: Vitals;
   createdAt?: string;
   updatedAt?: string;
@@ -98,11 +103,19 @@ export interface AppointmentRequestDTO {
   organizationId?: string;
   departmentId?: string;
   appointmentType?: string;
+  schedulingMode?: 'SPECIFIC_DOCTOR' | 'SPECIALTY_ONLY' | 'WALK_IN' | string;
+  specialtyCode?: string;
+  encounterType?: 'OUTPATIENT' | 'EMERGENCY' | 'OBSERVATION' | string;
   status?: string;
   stage?: string;
   reason?: string;
   priority?: string;
   notes?: string;
+}
+
+export interface AppointmentNoShowRequestDTO {
+  notes?: string;
+  reportedBy?: string;
 }
 
 export interface AppointmentCheckInRequestDTO {

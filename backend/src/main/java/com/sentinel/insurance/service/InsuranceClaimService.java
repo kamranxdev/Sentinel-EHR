@@ -161,4 +161,11 @@ public class InsuranceClaimService {
 
         return dto;
     }
+
+    @Transactional(readOnly = true)
+    public List<InsuranceClaimResponseDTO> getAllClaims() {
+        return claimRepository.findAll().stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+    }
 }

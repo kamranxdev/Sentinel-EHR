@@ -2,6 +2,7 @@ package com.sentinel.scheduling.controller;
 
 import com.sentinel.common.response.ApiResponse;
 import com.sentinel.scheduling.dto.CreateScheduleSlotRequest;
+import com.sentinel.scheduling.dto.PractitionerDTO;
 import com.sentinel.scheduling.dto.ScheduleSlotResponseDTO;
 import com.sentinel.scheduling.service.ProviderScheduleService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,6 +25,15 @@ public class ProviderScheduleController {
 
     public ProviderScheduleController(ProviderScheduleService providerScheduleService) {
         this.providerScheduleService = providerScheduleService;
+    }
+
+    @GetMapping("/api/v1/practitioners/by-specialty")
+    @Operation(summary = "Get practitioners available for a given specialty")
+    public ResponseEntity<ApiResponse<List<PractitionerDTO>>> getPractitionersBySpecialty(
+            @RequestParam String specialtyCode,
+            @RequestParam(required = false) UUID organizationId) {
+        List<PractitionerDTO> response = providerScheduleService.getPractitionersBySpecialty(specialtyCode, organizationId);
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     @PostMapping("/api/v1/practitioners/{practitionerId}/slots")

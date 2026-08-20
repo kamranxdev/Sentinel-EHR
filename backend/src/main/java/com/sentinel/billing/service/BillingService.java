@@ -46,4 +46,9 @@ public class BillingService {
     public Payment recordPayment(Payment payment) {
         return paymentRepository.save(payment);
     }
+
+    @Transactional(readOnly = true)
+    public List<Invoice> getAllInvoices() {
+        return invoiceRepository.findAll();
+    }
 }

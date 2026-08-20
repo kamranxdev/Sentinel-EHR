@@ -113,14 +113,24 @@ export interface WardBedCard {
             (click)="loadWardBeds()"
             class="gap-1.5 text-xs"
           >
-            <ng-icon name="lucideRefreshCw" [class.animate-spin]="loading()" size="14" />
+            <ng-icon name="lucideRefreshCw" [class.animate-spin]="isLoading" size="14" />
             <span>Refresh Ward</span>
           </button>
         </div>
       </div>
 
+      <!-- Loading & Error States -->
+      <div *ngIf="isLoading" class="p-4 rounded-2xl border border-border bg-muted/20 text-center text-muted-foreground text-xs font-semibold">
+        <ng-icon name="lucideRefreshCw" class="animate-spin mr-2" size="14"></ng-icon>
+        Loading bed data...
+      </div>
+      <div *ngIf="errorMessage" class="p-4 rounded-2xl border border-rose-500/30 bg-rose-500/10 text-rose-600 text-xs font-semibold flex items-center gap-2">
+        <ng-icon name="lucideAlertTriangle" size="16"></ng-icon>
+        <span>{{ errorMessage }}</span>
+      </div>
+
       <!-- 2. Ward Capacity Metric Cards (4 High-Impact Counters) -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div *ngIf="!isLoading && !errorMessage" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <!-- Card 1: Total Ward Beds -->
         <div class="p-4 rounded-2xl border border-border bg-card shadow-2xs space-y-2">
           <div class="flex items-center justify-between">
@@ -483,7 +493,8 @@ export interface WardBedCard {
   `,
 })
 export class NurseBedsComponent implements OnInit {
-  loading = signal<boolean>(false);
+  isLoading = false;
+  errorMessage = '';
   wardBeds = signal<WardBedCard[]>([]);
   statusFilter = signal<'ALL' | 'OCCUPIED' | 'AVAILABLE' | 'CLEANING'>('ALL');
   searchQuery = signal<string>('');
@@ -499,121 +510,35 @@ export class NurseBedsComponent implements OnInit {
   }
 
   loadWardBeds(): void {
-    this.loading.set(true);
+    this.isLoading = true;
+    this.errorMessage = '';
 
     this.apiService.getBeds().subscribe({
       next: (beds) => {
         const rawBeds = Array.isArray(beds) ? beds : [];
-        if (rawBeds.length > 0) {
-          const cards: WardBedCard[] = rawBeds.map((b, idx) => ({
-            id: b.id || `b-${idx}`,
-            bedCode:
-              b.bedNumber ||
-              b.bedCode ||
-              `30${Math.floor(idx / 2) + 1}${idx % 2 === 0 ? 'A' : 'B'}`,
-            roomNumber: b.roomNumber || `30${Math.floor(idx / 2) + 1}`,
-            wardName: b.wardName || 'Ward 3A - Acute Care',
-            status: ((b.status as any) ||
-              (idx % 3 === 0 ? 'AVAILABLE' : idx % 4 === 0 ? 'CLEANING' : 'OCCUPIED')) as
-              'OCCUPIED' | 'AVAILABLE' | 'CLEANING' | 'MAINTENANCE',
-            patient: b.currentEncounter?.patient,
-            admissionDiagnosis:
-              idx === 0
-                ? 'Acute Coronary Syndrome'
-                : idx === 1
-                  ? 'Community-Acquired Pneumonia'
-                  : 'Post-Op Laparoscopy',
-            attendingPhysician: 'Dr. S. Sharma',
-            ewsScore: idx === 0 ? 4 : idx === 1 ? 2 : 1,
-            acuityLevel: idx === 0 ? 'OBSERVED' : 'STABLE',
-            fallRisk: idx === 0 ? 'HIGH' : 'LOW',
-            isolation: idx === 1 ? 'CONTACT' : 'NONE',
-            codeStatus: 'FULL_CODE',
-            admittedDays: idx + 1,
-          }));
-          this.wardBeds.set(cards);
-        } else {
-          // Fallback sample ward layout for Ward 3A
-          this.apiService.getPatients().subscribe({
-            next: (pts) => {
-              const sampleCards: WardBedCard[] = [
-                {
-                  id: 'bed-1',
-                  bedCode: '301A',
-                  roomNumber: '301',
-                  wardName: 'Ward 3A - Acute Care',
-                  status: 'OCCUPIED',
-                  patient: pts[0] || undefined,
-                  admissionDiagnosis: 'Acute Coronary Syndrome',
-                  attendingPhysician: 'Dr. S. Sharma',
-                  ewsScore: 4,
-                  acuityLevel: 'OBSERVED',
-                  fallRisk: 'HIGH',
-                  isolation: 'NONE',
-                  codeStatus: 'FULL_CODE',
-                  admittedDays: 2,
-                },
-                {
-                  id: 'bed-2',
-                  bedCode: '301B',
-                  roomNumber: '301',
-                  wardName: 'Ward 3A - Acute Care',
-                  status: 'OCCUPIED',
-                  patient: pts.length > 1 ? pts[1] : undefined,
-                  admissionDiagnosis: 'Community-Acquired Pneumonia',
-                  attendingPhysician: 'Dr. M. Patel',
-                  ewsScore: 2,
-                  acuityLevel: 'STABLE',
-                  fallRisk: 'LOW',
-                  isolation: 'CONTACT',
-                  codeStatus: 'FULL_CODE',
-                  admittedDays: 1,
-                },
-                {
-                  id: 'bed-3',
-                  bedCode: '302A',
-                  roomNumber: '302',
-                  wardName: 'Ward 3A - Acute Care',
-                  status: 'AVAILABLE',
-                },
-                {
-                  id: 'bed-4',
-                  bedCode: '302B',
-                  roomNumber: '302',
-                  wardName: 'Ward 3A - Acute Care',
-                  status: 'CLEANING',
-                },
-                {
-                  id: 'bed-5',
-                  bedCode: '303A',
-                  roomNumber: '303',
-                  wardName: 'Ward 3A - Acute Care',
-                  status: 'OCCUPIED',
-                  patient: pts.length > 2 ? pts[2] : undefined,
-                  admissionDiagnosis: 'Type 2 Diabetes / Ketoacidosis',
-                  attendingPhysician: 'Dr. S. Sharma',
-                  ewsScore: 1,
-                  acuityLevel: 'STABLE',
-                  fallRisk: 'LOW',
-                  isolation: 'NONE',
-                  codeStatus: 'FULL_CODE',
-                  admittedDays: 3,
-                },
-                {
-                  id: 'bed-6',
-                  bedCode: '303B',
-                  roomNumber: '303',
-                  wardName: 'Ward 3A - Acute Care',
-                  status: 'AVAILABLE',
-                },
-              ];
-              this.wardBeds.set(sampleCards);
-            },
-          });
-        }
-        this.loading.set(false);
+        const cards: WardBedCard[] = rawBeds.map((b) => ({
+          id: b.id || '',
+          bedCode: b.bedNumber || b.bedCode || '',
+          roomNumber: b.roomNumber || '',
+          wardName: b.wardName || 'Ward 3A - Acute Care',
+          status: b.status as any || 'AVAILABLE',
+          patient: b.currentEncounter?.patient,
+          admissionDiagnosis: b.currentEncounter?.chiefComplaint || '',
+          attendingPhysician: b.currentEncounter?.attendingPractitionerId || '',
+          ewsScore: undefined,
+          acuityLevel: 'STABLE',
+          fallRisk: 'LOW',
+          isolation: 'NONE',
+          codeStatus: 'FULL_CODE',
+          admittedDays: 1,
+        }));
+        this.wardBeds.set(cards);
+        this.isLoading = false;
       },
-      error: () => this.loading.set(false),
+      error: (err) => {
+        this.errorMessage = err.message || 'Failed to load beds';
+        this.isLoading = false;
+      },
     });
   }
 

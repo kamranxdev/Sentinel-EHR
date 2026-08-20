@@ -408,8 +408,13 @@ type RoleCategoryTab =
         </div>
       </div>
 
+      <!-- State Indicators -->
+      <div *ngIf="errorMessage()" class="p-4 mb-4 text-sm text-destructive rounded-lg bg-destructive/10 border border-destructive/20">
+        {{ errorMessage() }}
+      </div>
+
       <!-- Users Table -->
-      <div class="rounded-xl border border-border bg-card overflow-hidden shadow-xs">
+      <div *ngIf="!errorMessage()" class="rounded-xl border border-border bg-card overflow-hidden shadow-xs">
         <div class="overflow-x-auto">
           <table hlmTable class="w-full text-xs">
             <thead hlmTableHeader>
@@ -600,6 +605,7 @@ type RoleCategoryTab =
 export class OrganizationAdminUsersComponent implements OnInit {
   users = signal<User[]>([]);
   loading = signal<boolean>(false);
+  errorMessage = signal<string>('');
   saving = signal<boolean>(false);
   toastMessage = signal<{ text: string; type: 'success' | 'error' } | null>(null);
 
@@ -744,12 +750,16 @@ export class OrganizationAdminUsersComponent implements OnInit {
 
   loadUsers(): void {
     this.loading.set(true);
+    this.errorMessage.set('');
     this.apiService.getUsers().subscribe({
       next: (res) => {
         this.users.set(res);
         this.loading.set(false);
       },
-      error: () => this.loading.set(false),
+      error: (err) => {
+        this.errorMessage.set(err.message || 'Failed to load users');
+        this.loading.set(false);
+      },
     });
   }
 

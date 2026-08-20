@@ -216,6 +216,15 @@ import {
         </div>
       </div>
 
+      <!-- State Indicators -->
+      <div *ngIf="loading()" class="p-4 text-center text-sm text-muted-foreground">
+        Loading schedule data...
+      </div>
+      <div *ngIf="errorMessage()" class="p-4 mb-4 text-sm text-destructive rounded-lg bg-destructive/10 border border-destructive/20">
+        {{ errorMessage() }}
+      </div>
+
+      <ng-container *ngIf="!loading() && !errorMessage()">
       <!-- Analytics Visual Matrix & Utilization Breakdown -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <!-- Schedule Status Distribution -->
@@ -587,12 +596,14 @@ import {
           </table>
         </div>
       </div>
+      </ng-container>
     </div>
   `,
 })
 export class OrganizationAdminScheduleAnalyticsComponent implements OnInit {
   appointments = signal<Appointment[]>([]);
   loading = signal<boolean>(false);
+  errorMessage = signal<string>('');
   searchQuery = signal<string>('');
   selectedStatusFilter = signal<string>('ALL');
 
@@ -728,12 +739,14 @@ export class OrganizationAdminScheduleAnalyticsComponent implements OnInit {
 
   refreshData(): void {
     this.loading.set(true);
+    this.errorMessage.set('');
     this.apiService.getAppointments().subscribe({
       next: (res) => {
         this.appointments.set(res);
         this.loading.set(false);
       },
-      error: () => {
+      error: (err) => {
+        this.errorMessage.set(err.message || 'Failed to load schedule analytics');
         this.loading.set(false);
       },
     });

@@ -96,6 +96,9 @@ import {
   ],
   template: `
     <div class="w-full space-y-6">
+      <div *ngIf="isLoading" class="p-4 text-center text-muted-foreground">Loading...</div>
+      <div *ngIf="errorMessage" class="p-4 bg-red-100 text-red-700 rounded mb-4">{{ errorMessage }}</div>
+
       <!-- 1. Open Header: Patient Welcome & Quick Actions (Full Width, No Card Wrapper) -->
       <div
         class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 pb-5 border-b border-border"
@@ -764,6 +767,8 @@ import {
   `,
 })
 export class PatientDashboardComponent implements OnInit {
+  isLoading: boolean = false;
+  errorMessage: string = "";
   patient = signal<Patient | null>(null);
   appointments = signal<Appointment[]>([]);
   prescriptions = signal<Prescription[]>([]);
@@ -827,12 +832,7 @@ export class PatientDashboardComponent implements OnInit {
           this.loadPatientHealthData(p.id);
         }
       },
-      error: (err) => {
-        console.error('Could not load patient record for dashboard', err);
-        toast.error(
-          'Failed to load dashboard profile: ' + (err.error?.message || 'Unknown network error'),
-        );
-      },
+      error: (err) => { this.errorMessage = err.message || 'Failed'; this.isLoading = false; },
     });
   }
 
@@ -846,62 +846,62 @@ export class PatientDashboardComponent implements OnInit {
   private loadPatientHealthData(patientId: string): void {
     this.apiService.getAppointmentsByPatient(patientId).subscribe({
       next: (apps) => this.appointments.set(Array.isArray(apps) ? apps : []),
-      error: (err) => console.warn('Error loading appointments', err),
+      error: (err) => { this.errorMessage = err.message || 'Failed'; this.isLoading = false; }
     });
 
     this.apiService.getPrescriptionsByPatient(patientId).subscribe({
       next: (rx) => this.prescriptions.set(Array.isArray(rx) ? rx : []),
-      error: (err) => console.warn('Error loading prescriptions', err),
+      error: (err) => { this.errorMessage = err.message || 'Failed'; this.isLoading = false; },
     });
 
     this.apiService.getVitalsByPatient(patientId).subscribe({
       next: (v) => this.vitalsList.set(Array.isArray(v) ? v : []),
-      error: (err) => console.warn('Error loading vitals', err),
+      error: (err) => { this.errorMessage = err.message || 'Failed'; this.isLoading = false; },
     });
 
     this.apiService.getAllergiesByPatient(patientId).subscribe({
       next: (a) => this.allergies.set(Array.isArray(a) ? a : []),
-      error: (err) => console.warn('Error loading allergies', err),
+      error: (err) => { this.errorMessage = err.message || 'Failed'; this.isLoading = false; },
     });
 
     this.apiService.getDiagnosesByPatient(patientId).subscribe({
       next: (d) => this.diagnoses.set(Array.isArray(d) ? d : []),
-      error: (err) => console.warn('Error loading diagnoses', err),
+      error: (err) => { this.errorMessage = err.message || 'Failed'; this.isLoading = false; },
     });
 
     this.apiService.getEncountersByPatient(patientId).subscribe({
       next: (e) => this.encounters.set(Array.isArray(e) ? e : []),
-      error: (err) => console.warn('Error loading encounters', err),
+      error: (err) => { this.errorMessage = err.message || 'Failed'; this.isLoading = false; },
     });
 
     this.apiService.getPatientLabResults(patientId).subscribe({
-      next: (res) => this.labResults.set(res || []),
-      error: () => this.labResults.set([]),
+      next: (res) => this.labResults.set(res),
+      error: (err) => { this.errorMessage = err.message || 'Failed'; this.isLoading = false; },
     });
 
     this.apiService.getImagingOrdersByPatient(patientId).subscribe({
-      next: (orders) => this.imagingReports.set(orders || []),
-      error: () => this.imagingReports.set([]),
+      next: (orders) => this.imagingReports.set(orders),
+      error: (err) => { this.errorMessage = err.message || 'Failed'; this.isLoading = false; },
     });
 
     this.apiService.getPatientDocuments(patientId).subscribe({
-      next: (docs) => this.clinicalDocuments.set(docs || []),
-      error: () => this.clinicalDocuments.set([]),
+      next: (docs) => this.clinicalDocuments.set(docs),
+      error: (err) => { this.errorMessage = err.message || 'Failed'; this.isLoading = false; },
     });
 
     this.apiService.getPatientInvoices(patientId).subscribe({
-      next: (invs) => this.invoices.set(invs || []),
-      error: () => this.invoices.set([]),
+      next: (invs) => this.invoices.set(invs),
+      error: (err) => { this.errorMessage = err.message || 'Failed'; this.isLoading = false; },
     });
 
     this.apiService.getPatientConsents(patientId).subscribe({
-      next: (c) => this.consents.set(c || []),
-      error: () => this.consents.set([]),
+      next: (c) => this.consents.set(c),
+      error: (err) => { this.errorMessage = err.message || 'Failed'; this.isLoading = false; },
     });
 
     this.apiService.getPatientInsurances(patientId).subscribe({
-      next: (ins) => this.insurances.set(ins || []),
-      error: () => this.insurances.set([]),
+      next: (ins) => this.insurances.set(ins),
+      error: (err) => { this.errorMessage = err.message || 'Failed'; this.isLoading = false; },
     });
   }
 
@@ -1006,9 +1006,7 @@ export class PatientDashboardComponent implements OnInit {
         downloadAnchor.click();
         downloadAnchor.remove();
       },
-      error: (err) => {
-        console.warn('Could not fetch FHIR patient record', err);
-      },
+      error: (err) => { this.errorMessage = err.message || 'Failed'; this.isLoading = false; },
     });
   }
 }

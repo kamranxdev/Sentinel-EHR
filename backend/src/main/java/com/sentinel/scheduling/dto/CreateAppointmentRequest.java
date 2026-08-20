@@ -15,6 +15,9 @@ public class CreateAppointmentRequest {
     private OffsetDateTime endsAt;
     private String reason;
     private String notes;
+    private String schedulingMode;
+    private String specialtyCode;
+    private String encounterType;
 
     public CreateAppointmentRequest() {}
 
@@ -34,4 +37,10 @@ public class CreateAppointmentRequest {
     public void setReason(String reason) { this.reason = reason; }
     public String getNotes() { return notes; }
     public void setNotes(String notes) { this.notes = notes; }
+    public String getSchedulingMode() { return schedulingMode; }
+    public void setSchedulingMode(String schedulingMode) { this.schedulingMode = schedulingMode; }
+    public String getSpecialtyCode() { return specialtyCode; }
+    public void setSpecialtyCode(String specialtyCode) { this.specialtyCode = specialtyCode; }
+    public String getEncounterType() { return encounterType; }
+    public void setEncounterType(String encounterType) { this.encounterType = encounterType; }
 }

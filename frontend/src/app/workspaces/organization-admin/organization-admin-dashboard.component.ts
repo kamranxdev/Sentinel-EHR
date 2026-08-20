@@ -123,8 +123,17 @@ interface ToastAlert {
         </div>
       </div>
 
-      <!-- Hospital Operational KPI Summary (4 Cards) -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <!-- State Indicators -->
+      <div *ngIf="isLoading()" class="p-4 text-center text-sm text-muted-foreground">
+        Loading dashboard data...
+      </div>
+      <div *ngIf="errorMessage()" class="p-4 mb-4 text-sm text-destructive rounded-lg bg-destructive/10 border border-destructive/20">
+        {{ errorMessage() }}
+      </div>
+
+      <ng-container *ngIf="!isLoading() && !errorMessage()">
+        <!-- Hospital Operational KPI Summary (4 Cards) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <!-- Staff Roster Card -->
         <a
           routerLink="/organization-admin/users"
@@ -320,12 +329,15 @@ interface ToastAlert {
           </div>
         </div>
       </div>
+      </ng-container>
     </div>
   `,
 })
 export class OrganizationAdminDashboardComponent implements OnInit {
   users = signal<User[]>([]);
   appointments = signal<Appointment[]>([]);
+  isLoading = signal<boolean>(false);
+  errorMessage = signal<string>('');
 
   staffCount = computed(() => {
     return this.users().filter((u) => {
@@ -358,14 +370,35 @@ export class OrganizationAdminDashboardComponent implements OnInit {
   }
 
   loadData(): void {
+    this.isLoading.set(true);
+    this.errorMessage.set('');
+    
+    let pending = 2;
+    const checkDone = () => {
+      pending--;
+      if (pending === 0) this.isLoading.set(false);
+    };
+
     this.apiService.getUsers().subscribe({
-      next: (u) => this.users.set(u),
-      error: () => {},
+      next: (u) => {
+        this.users.set(u);
+        checkDone();
+      },
+      error: (err) => {
+        this.errorMessage.set(err.message || 'Failed to load users');
+        checkDone();
+      },
     });
 
     this.apiService.getAppointments().subscribe({
-      next: (a) => this.appointments.set(a),
-      error: () => {},
+      next: (a) => {
+        this.appointments.set(a);
+        checkDone();
+      },
+      error: (err) => {
+        this.errorMessage.set(err.message || 'Failed to load appointments');
+        checkDone();
+      },
     });
   }
 }

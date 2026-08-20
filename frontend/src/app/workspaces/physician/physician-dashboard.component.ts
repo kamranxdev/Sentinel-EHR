@@ -2,6 +2,7 @@ import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterModule } from '@angular/router';
+import { Observable } from 'rxjs';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
 import { PatientContextService } from '../../core/services/patient-context.service';
@@ -184,7 +185,7 @@ export interface ClinicalTaskItem {
             (click)="loadPhysicianData()"
             class="gap-1.5 text-xs flex-1 sm:flex-initial"
           >
-            <ng-icon name="lucideRefreshCw" [class.animate-spin]="loading()" size="14" />
+            <ng-icon name="lucideRefreshCw" [class.animate-spin]="isLoading" size="14" />
             <span>Refresh Census</span>
           </button>
           <a
@@ -210,8 +211,16 @@ export interface ClinicalTaskItem {
         </div>
       </div>
 
+      <!-- Loading and Error States -->
+      <div *ngIf="isLoading" class="p-8 text-center text-muted-foreground">
+        Loading dashboard data...
+      </div>
+      <div *ngIf="errorMessage" class="p-4 mb-4 rounded-lg bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border border-red-200 dark:border-red-800">
+        {{ errorMessage }}
+      </div>
+      
       <!-- 2. Clinical Care Overview Summary Bar (4 High-Impact Metric Cards Linking to Subpages) -->
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div *ngIf="!isLoading && !errorMessage" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <!-- Metric 1: Today's Outpatient Queue -->
         <a
           routerLink="/physician/appointments"
@@ -359,7 +368,7 @@ export interface ClinicalTaskItem {
       </div>
 
       <!-- 3. Primary Command Center Layout (2 Columns: 8 Cols Outpatient Queue + Inpatients, 4 Cols Tasks & Quick Workflows) -->
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      <div *ngIf="!isLoading && !errorMessage" class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         <!-- Left Column (8 Cols): In-Clinic Queue & Inpatient Snapshot -->
         <div class="lg:col-span-8 space-y-6">
           <!-- Section A: Today's In-Clinic Outpatient Queue -->
@@ -667,7 +676,8 @@ export interface ClinicalTaskItem {
   `,
 })
 export class PhysicianDashboardComponent implements OnInit {
-  loading = signal<boolean>(false);
+  isLoading: boolean = false;
+  errorMessage: string = '';
 
   // Data signals
   outpatientAppointments = signal<Appointment[]>([]);
@@ -695,127 +705,82 @@ export class PhysicianDashboardComponent implements OnInit {
   }
 
   loadPhysicianData(): void {
-    this.loading.set(true);
+    this.isLoading = true;
+    this.errorMessage = '';
+
+    const user = this.authService.currentUser();
+    const practitionerId = user?.userId || user?.id;
+    const activeContext = this.authService.activeContext();
+    const organizationId =
+      activeContext?.organizationId ||
+      (user?.organizations && user.organizations.length > 0 ? user.organizations[0].id : undefined);
+
+    let appointments$: Observable<Appointment[]>;
+    if (practitionerId && organizationId) {
+      appointments$ = this.apiService.getPractitionerOrganizationAppointments(
+        practitionerId,
+        organizationId,
+      );
+    } else if (practitionerId) {
+      appointments$ = this.apiService.getAppointmentsByPractitioner(practitionerId);
+    } else if (organizationId) {
+      appointments$ = this.apiService.getAppointmentsByOrganization(organizationId);
+    } else {
+      appointments$ = this.apiService.getAppointments();
+    }
 
     // 1. Load Outpatient appointments under this physician / facility
-    this.apiService.getAppointments().subscribe({
+    appointments$.subscribe({
       next: (apps) => {
         this.outpatientAppointments.set(Array.isArray(apps) ? apps : []);
-        this.loading.set(false);
+        // Continue loading inpatients
+        this.loadInpatients();
       },
-      error: () => this.loading.set(false),
+      error: (err) => {
+        this.errorMessage = err.message || 'Failed to load outpatient appointments';
+        this.isLoading = false;
+      }
     });
+  }
 
-    // 2. Load Inpatients from occupied hospital beds
+  private loadInpatients(): void {
     this.apiService.getBeds().subscribe({
       next: (beds) => {
         const occupied = Array.isArray(beds)
           ? beds.filter((b) => b.status === 'OCCUPIED' && b.currentEncounter?.patient)
           : [];
-        if (occupied.length > 0) {
-          const items: InpatientCareItem[] = occupied.map((b, idx) => ({
-            patient: b.currentEncounter!.patient!,
-            bedCode: b.bedNumber || b.bedCode || `Bed-${b.id?.substring(0, 4)}`,
-            wardName: b.wardName || b.departmentName || 'General Medicine Ward',
-            admissionDate: new Date(Date.now() - (idx + 1) * 86400000).toISOString(),
-            admissionDiagnosis:
-              idx === 0
-                ? 'Acute Coronary Syndrome'
-                : idx === 1
-                  ? 'Community-Acquired Pneumonia'
-                  : 'Post-Op Observation',
-            careRole: idx % 2 === 0 ? 'ATTENDING' : 'CONSULTANT',
-            ewsScore: idx === 0 ? 4 : 1,
-            acuityLevel: idx === 0 ? 'OBSERVED' : 'STABLE',
-          }));
-          this.inpatientsList.set(items);
-        } else {
-          // Fallback to active patients
-          this.apiService.getPatients().subscribe({
-            next: (pts) => {
-              const fallbackItems: InpatientCareItem[] = pts.slice(0, 3).map((p, idx) => ({
-                patient: p,
-                bedCode: `Ward-${idx + 1}-Bed-${10 + idx}`,
-                wardName:
-                  idx === 0
-                    ? 'Cardiology ICU'
-                    : idx === 1
-                      ? 'Internal Medicine Ward'
-                      : 'Surgical Step-Down',
-                admissionDate: new Date(Date.now() - (idx + 2) * 86400000).toISOString(),
-                admissionDiagnosis:
-                  idx === 0
-                    ? 'Acute Coronary Syndrome'
-                    : idx === 1
-                      ? 'Type 2 Diabetes with Ketoacidosis'
-                      : 'Post-Op Laparoscopy',
-                careRole: idx === 0 ? 'ATTENDING' : 'CONSULTANT',
-                ewsScore: idx === 0 ? 4 : idx === 1 ? 2 : 1,
-                acuityLevel: idx === 0 ? 'OBSERVED' : 'STABLE',
-              }));
-              this.inpatientsList.set(fallbackItems);
-            },
-          });
-        }
+        const items: InpatientCareItem[] = occupied.map((b, idx) => ({
+          patient: b.currentEncounter!.patient!,
+          bedCode: b.bedNumber || b.bedCode || `Bed-${b.id?.substring(0, 4)}`,
+          wardName: b.wardName || b.departmentName || 'General Medicine Ward',
+          admissionDate: new Date(Date.now() - (idx + 1) * 86400000).toISOString(),
+          admissionDiagnosis: b.currentEncounter?.chiefComplaint || 'Unknown Diagnosis',
+          careRole: idx % 2 === 0 ? 'ATTENDING' : 'CONSULTANT',
+          ewsScore: idx === 0 ? 4 : 1,
+          acuityLevel: idx === 0 ? 'OBSERVED' : 'STABLE',
+        }));
+        this.inpatientsList.set(items);
+        this.loadConsultsAndTasks();
       },
-      error: () => this.inpatientsList.set([]),
+      error: (err) => {
+        this.errorMessage = err.message || 'Failed to load inpatient census';
+        this.isLoading = false;
+      }
     });
+  }
 
-    // 3. Populate Consultation Requests & Clinical Tasks
+  private loadConsultsAndTasks(): void {
     this.apiService.getPatients().subscribe({
       next: (pts) => {
-        if (pts && pts.length > 0) {
-          const sampleConsults: ConsultRequestItem[] = [
-            {
-              id: 'c-1',
-              patient: pts[0],
-              requestingDoctor: 'Dr. S. Sharma (Surgery)',
-              specialty: 'Cardiology',
-              reason: 'Pre-operative cardiac clearance for elective cholecystectomy.',
-              urgency: 'URGENT',
-              status: 'PENDING',
-              requestedAt: new Date(Date.now() - 3600000).toISOString(),
-            },
-          ];
-          if (pts.length > 1) {
-            sampleConsults.push({
-              id: 'c-2',
-              patient: pts[1],
-              requestingDoctor: 'Dr. M. Patel (ICU)',
-              specialty: 'Internal Medicine',
-              reason: 'Uncontrolled glycemic spike post-intubation.',
-              urgency: 'STAT',
-              status: 'PENDING',
-              requestedAt: new Date(Date.now() - 7200000).toISOString(),
-            });
-          }
-          this.consultRequests.set(sampleConsults);
-
-          const sampleTasks: ClinicalTaskItem[] = [
-            {
-              id: 't-1',
-              patient: pts[0],
-              type: 'ABNORMAL_LAB',
-              title: 'Critical Lab: Serum Potassium 6.2 mEq/L (HIGH)',
-              detail:
-                'Lab accession LAB-9082 reported critical hyperkalemia. Immediate ECG & treatment required.',
-              priority: 'HIGH',
-              createdAt: new Date().toISOString(),
-            },
-            {
-              id: 't-2',
-              patient: pts.length > 1 ? pts[1] : pts[0],
-              type: 'UNSIGNED_NOTE',
-              title: 'Unsigned SOAP Progress Note',
-              detail:
-                'Consultation note from morning clinical shift pending physician final electronic sign-off.',
-              priority: 'NORMAL',
-              createdAt: new Date(Date.now() - 10800000).toISOString(),
-            },
-          ];
-          this.clinicalTasks.set(sampleTasks);
-        }
+        // Assume empty without mock data for now.
+        this.consultRequests.set([]);
+        this.clinicalTasks.set([]);
+        this.isLoading = false;
       },
+      error: (err) => {
+        this.errorMessage = err.message || 'Failed to load tasks and consults';
+        this.isLoading = false;
+      }
     });
   }
 

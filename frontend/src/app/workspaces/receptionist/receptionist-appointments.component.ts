@@ -4,7 +4,12 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
-import { Appointment, AppointmentRequestDTO } from '../../core/models/appointment.model';
+import {
+  Appointment,
+  AppointmentRequestDTO,
+  AppointmentNoShowRequestDTO,
+  PractitionerDTO,
+} from '../../core/models/appointment.model';
 import { Patient } from '../../core/models/patient.model';
 import { ReceptionistIntakeComponent } from './receptionist-intake.component';
 import { ReceptionistEligibilityComponent } from './receptionist-eligibility.component';
@@ -228,6 +233,18 @@ import { StatCardComponent } from '../../shared/ui/stat-card.component';
           </div>
         </div>
 
+      <!-- Error Message -->
+      <div *ngIf="errorMessage()" class="p-3 mb-4 rounded-lg bg-red-500/10 text-red-700 dark:text-red-300 border border-red-500/20 text-xs flex items-center justify-between shadow-sm">
+        <div class="flex items-center gap-2 font-medium">
+          <ng-icon name="lucideAlertTriangle" size="16" class="text-red-600" />
+          <span>{{ errorMessage() }}</span>
+        </div>
+        <button type="button" class="text-red-600 hover:text-red-800 text-xs font-bold" (click)="errorMessage.set(null)">
+          &times;
+        </button>
+      </div>
+
+
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
           <!-- Filter Doctor / Physician -->
           <div class="space-y-1">
@@ -447,9 +464,22 @@ import { StatCardComponent } from '../../shared/ui/stat-card.component';
                     >
                       Ready for Doctor
                     </span>
+                    <!-- No-Show button -->
+                    <button
+                      *ngIf="apt.status === 'SCHEDULED' || apt.status === 'ARRIVED'"
+                      hlmBtn
+                      size="sm"
+                      variant="ghost"
+                      class="text-xs gap-1 text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/30 h-8"
+                      (click)="markNoShow(apt)"
+                      title="Mark as No-Show"
+                    >
+                      <ng-icon name="lucideAlertTriangle" size="14" />
+                      <span>No-Show</span>
+                    </button>
                     <!-- Cancellation button -->
                     <button
-                      *ngIf="apt.status !== 'CANCELLED'"
+                      *ngIf="apt.status !== 'CANCELLED' && apt.status !== 'NO_SHOW'"
                       hlmBtn
                       size="sm"
                       variant="ghost"
@@ -458,6 +488,19 @@ import { StatCardComponent } from '../../shared/ui/stat-card.component';
                     >
                       <ng-icon name="lucideXCircle" size="14" />
                       <span>Cancel</span>
+                    </button>
+                    <!-- Link to Encounter -->
+                    <button
+                      *ngIf="apt.encounterId || apt.status === 'CHECKED_IN' || apt.status === 'TRIAGED' || apt.status === 'IN_CONSULTATION' || apt.status === 'COMPLETED'"
+                      (click)="viewEncounter(apt)"
+                      hlmBtn
+                      size="sm"
+                      variant="ghost"
+                      class="text-xs gap-1 text-violet-600 hover:text-violet-700 h-8"
+                      title="View linked clinical encounter"
+                    >
+                      <ng-icon name="lucideStethoscope" size="14" />
+                      <span>Encounter</span>
                     </button>
                     <!-- Link to RTE verification Modal -->
                     <button
@@ -473,7 +516,7 @@ import { StatCardComponent } from '../../shared/ui/stat-card.component';
                   </div>
                 </td>
               </tr>
-              <tr *ngIf="filteredAppointments().length === 0" hlmTableRow>
+              <tr *ngIf="!isLoading() && filteredAppointments().length === 0" hlmTableRow>
                 <td
                   hlmTableCell
                   colspan="6"
@@ -564,7 +607,7 @@ import { StatCardComponent } from '../../shared/ui/stat-card.component';
       class="fixed inset-0 z-50 bg-background/80 backdrop-blur-xs flex items-center justify-center p-4"
     >
       <div
-        class="w-full max-w-lg rounded-2xl border border-border bg-card p-6 shadow-2xl space-y-4"
+        class="w-full max-w-xl rounded-2xl border border-border bg-card p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto"
       >
         <div class="flex justify-between items-center border-b border-border pb-3">
           <h3 class="text-base font-bold text-foreground flex items-center gap-2">
@@ -579,7 +622,42 @@ import { StatCardComponent } from '../../shared/ui/stat-card.component';
           </button>
         </div>
 
+        <!-- Scheduling Mode Tabs -->
+        <div class="space-y-1.5">
+          <label class="text-xs font-semibold text-foreground">Scheduling Mode</label>
+          <div class="flex items-center bg-muted/60 p-1 rounded-lg border border-border text-xs gap-1">
+            <button
+              type="button"
+              class="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all"
+              [ngClass]="bookingMode() === 'SPECIFIC_DOCTOR' ? 'bg-background text-sky-600 shadow-sm font-semibold' : 'text-muted-foreground hover:text-foreground'"
+              (click)="bookingMode.set('SPECIFIC_DOCTOR'); loadPractitioners()"
+            >
+              <ng-icon name="lucideStethoscope" size="13" /> Specific Doctor
+            </button>
+            <button
+              type="button"
+              class="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all"
+              [ngClass]="bookingMode() === 'SPECIALTY_ONLY' ? 'bg-background text-purple-600 shadow-sm font-semibold' : 'text-muted-foreground hover:text-foreground'"
+              (click)="bookingMode.set('SPECIALTY_ONLY')"
+            >
+              <ng-icon name="lucideUsers" size="13" /> By Specialty
+            </button>
+            <button
+              type="button"
+              class="flex-1 flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-md text-xs font-medium transition-all"
+              [ngClass]="bookingMode() === 'WALK_IN' ? 'bg-background text-emerald-600 shadow-sm font-semibold' : 'text-muted-foreground hover:text-foreground'"
+              (click)="bookingMode.set('WALK_IN')"
+            >
+              <ng-icon name="lucideUserCheck" size="13" /> Walk-in
+            </button>
+          </div>
+          <p class="text-[11px] text-muted-foreground">
+            {{ bookingMode() === 'SPECIFIC_DOCTOR' ? 'Select a specific attending physician for this appointment.' : bookingMode() === 'SPECIALTY_ONLY' ? 'Choose a specialty — the system will assign the next available physician.' : 'Walk-in visit — immediate desk intake, physician assigned during triage.' }}
+          </p>
+        </div>
+
         <div class="space-y-3 text-xs">
+          <!-- Select Patient -->
           <div>
             <label class="font-medium text-foreground block mb-1">Select Patient *</label>
             <select
@@ -593,17 +671,66 @@ import { StatCardComponent } from '../../shared/ui/stat-card.component';
             </select>
           </div>
 
-          <div class="grid grid-cols-2 gap-3">
+          <!-- Specific Doctor Select -->
+          <div *ngIf="bookingMode() === 'SPECIFIC_DOCTOR'">
+            <label class="font-medium text-foreground block mb-1">Attending Physician *</label>
+            <select
+              [(ngModel)]="newAppointment.doctorId"
+              class="w-full p-2.5 rounded-lg border border-input bg-background text-xs"
+            >
+              <option value="">-- Auto-assign next available --</option>
+              <option *ngFor="let p of practitionerOptions()" [value]="p.id">
+                {{ p.fullName || ((p.firstName || '') + ' ' + (p.lastName || '')) }}
+                {{ p.primarySpecialty ? '(' + p.primarySpecialty + ')' : '' }}
+              </option>
+            </select>
+          </div>
+
+          <!-- Specialty Only Mode -->
+          <div *ngIf="bookingMode() === 'SPECIALTY_ONLY'" class="grid grid-cols-2 gap-3">
             <div>
-              <label class="font-medium text-foreground block mb-1">Attending Physician *</label>
+              <label class="font-medium text-foreground block mb-1">Specialty *</label>
               <select
-                [(ngModel)]="newAppointment.doctorId"
+                [(ngModel)]="newAppointment.specialtyCode"
+                (ngModelChange)="loadPractitionersBySpecialty($event)"
                 class="w-full p-2.5 rounded-lg border border-input bg-background text-xs"
               >
-                <option value="1">Dr. John Smith (Cardiology)</option>
-                <option value="2">Dr. Sarah Wilson (Internal Medicine)</option>
-                <option value="3">Dr. Ananya Patel (Endocrinology)</option>
-                <option value="4">Dr. Robert Chen (Pulmonology)</option>
+                <option value="">-- Select Specialty --</option>
+                <option *ngFor="let sp of specialtyOptions" [value]="sp">{{ sp.replace('_', ' ') }}</option>
+              </select>
+            </div>
+            <div>
+              <label class="font-medium text-foreground block mb-1">Available Physician</label>
+              <select
+                [(ngModel)]="newAppointment.doctorId"
+                [disabled]="practitionersLoading()"
+                class="w-full p-2.5 rounded-lg border border-input bg-background text-xs disabled:opacity-60"
+              >
+                <option value="">{{ practitionersLoading() ? 'Loading...' : '-- System assigns --' }}</option>
+                <option *ngFor="let p of practitionerOptions()" [value]="p.id">
+                  {{ p.fullName || ((p.firstName || '') + ' ' + (p.lastName || '')) }}
+                </option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Walk-in Notification Banner -->
+          <div *ngIf="bookingMode() === 'WALK_IN'" class="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-[11px]">
+            <ng-icon name="lucideUserCheck" size="14" class="inline mr-1" />
+            Walk-in appointment — desk intake will initiate and triage nurse will assign an available physician.
+          </div>
+
+          <!-- Encounter Type & Visit Type -->
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="font-medium text-foreground block mb-1">Encounter Type</label>
+              <select
+                [(ngModel)]="newAppointment.encounterType"
+                class="w-full p-2.5 rounded-lg border border-input bg-background text-xs"
+              >
+                <option value="OUTPATIENT">Outpatient</option>
+                <option value="EMERGENCY">Emergency</option>
+                <option value="OBSERVATION">Observation</option>
               </select>
             </div>
             <div>
@@ -620,6 +747,7 @@ import { StatCardComponent } from '../../shared/ui/stat-card.component';
             </div>
           </div>
 
+          <!-- Date & Time -->
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="font-medium text-foreground block mb-1">Appointment Date *</label>
@@ -694,6 +822,9 @@ import { StatCardComponent } from '../../shared/ui/stat-card.component';
   `,
 })
 export class ReceptionistAppointmentsComponent implements OnInit {
+  isLoading = signal(false);
+  errorMessage = signal<string | null>(null);
+
   appointments = signal<Appointment[]>([]);
 
   showIntakeModal = signal(false);
@@ -774,10 +905,27 @@ export class ReceptionistAppointmentsComponent implements OnInit {
   );
 
   showBookModal = signal(false);
+  bookingMode = signal<'SPECIFIC_DOCTOR' | 'SPECIALTY_ONLY' | 'WALK_IN'>('SPECIFIC_DOCTOR');
+  specialtyOptions = [
+    'CARDIOLOGY',
+    'INTERNAL_MEDICINE',
+    'ENDOCRINOLOGY',
+    'PULMONOLOGY',
+    'NEUROLOGY',
+    'ORTHOPEDICS',
+    'DERMATOLOGY',
+    'GASTROENTEROLOGY',
+    'ONCOLOGY',
+    'GENERAL_PRACTICE',
+  ];
+  practitionerOptions = signal<PractitionerDTO[]>([]);
+  practitionersLoading = signal(false);
   patientOptions = signal<Patient[]>([]);
   newAppointment = {
     patientId: '',
     doctorId: '',
+    specialtyCode: '',
+    encounterType: 'OUTPATIENT',
     type: 'GENERAL_CONSULTATION',
     date: this.getLocalDateString(new Date()),
     time: '10:00',
@@ -791,27 +939,78 @@ export class ReceptionistAppointmentsComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadData();
-    this.apiService.getPatients().subscribe((pts: Patient[]) => {
-      this.patientOptions.set(pts || []);
+    this.apiService.getPatients().subscribe({
+      next: (pts: Patient[]) => {
+        this.patientOptions.set(pts || []);
+      },
+      error: (err) => {
+        this.errorMessage.set(err.message || 'Failed to load patients.');
+      }
     });
+    this.loadPractitioners();
   }
 
   loadData(): void {
+    this.isLoading.set(true);
+    this.errorMessage.set(null);
     this.apiService.getAppointments().subscribe({
       next: (apts: Appointment[]) => this.appointments.set(apts),
       error: () => this.appointments.set([]),
     });
   }
 
+  loadPractitioners(): void {
+    const orgId = this.authService.activeContext()?.organizationId || '';
+    this.apiService.getDoctors(orgId).subscribe({
+      next: (docs: any[]) => {
+        const list: PractitionerDTO[] = (docs || []).map((d) => ({
+          id: d.id,
+          fullName: d.fullName || d.name,
+          firstName: d.firstName,
+          lastName: d.lastName,
+          primarySpecialty: d.specialization || d.primarySpecialty,
+        }));
+        this.practitionerOptions.set(list);
+      },
+      error: () => this.practitionerOptions.set([]),
+    });
+  }
+
+  loadPractitionersBySpecialty(specialtyCode: string): void {
+    if (!specialtyCode) {
+      this.loadPractitioners();
+      return;
+    }
+    this.practitionersLoading.set(true);
+    const orgId = this.authService.activeContext()?.organizationId || '';
+    this.apiService.getPractitionersBySpecialty(specialtyCode, orgId || undefined).subscribe({
+      next: (list: PractitionerDTO[]) => {
+        this.practitionerOptions.set(list || []);
+        if (list && list.length > 0) {
+          this.newAppointment.doctorId = list[0].id;
+        }
+        this.practitionersLoading.set(false);
+      },
+      error: (err) => {
+        this.errorMessage.set(err.message || 'Operation failed.');
+        this.isLoading.set(false);
+      },
+    });
+  }
+
   openBookModal(): void {
+    this.bookingMode.set('SPECIFIC_DOCTOR');
     this.newAppointment = {
       patientId: this.patientOptions()[0]?.id || '',
-      doctorId: '1',
+      doctorId: '',
+      specialtyCode: '',
+      encounterType: 'OUTPATIENT',
       type: 'GENERAL_CONSULTATION',
       date: this.getLocalDateString(new Date()),
       time: '10:00',
       reason: '',
     };
+    this.loadPractitioners();
     this.showBookModal.set(true);
   }
 
@@ -821,11 +1020,20 @@ export class ReceptionistAppointmentsComponent implements OnInit {
     const chosenPat = this.patientOptions().find(
       (p) => String(p.id) === String(this.newAppointment.patientId),
     );
+    const chosenDoc = this.practitionerOptions().find(
+      (p) => String(p.id) === String(this.newAppointment.doctorId),
+    );
+
     const aptPayload: AppointmentRequestDTO = {
       patientId: this.newAppointment.patientId,
-      doctorId: this.newAppointment.doctorId,
+      practitionerId: this.newAppointment.doctorId || undefined,
+      doctorId: this.newAppointment.doctorId || undefined,
       appointmentDate: `${this.newAppointment.date}T${this.newAppointment.time}:00`,
+      startsAt: `${this.newAppointment.date}T${this.newAppointment.time}:00`,
       appointmentType: this.newAppointment.type,
+      schedulingMode: this.bookingMode(),
+      specialtyCode: this.newAppointment.specialtyCode || undefined,
+      encounterType: this.newAppointment.encounterType,
       reason: this.newAppointment.reason,
       status: 'SCHEDULED',
     };
@@ -835,28 +1043,41 @@ export class ReceptionistAppointmentsComponent implements OnInit {
         this.showBookModal.set(false);
         this.loadData();
       },
-      error: () => {
-        const localApt: Appointment = {
-          id: String(Date.now()),
-          patientId: this.newAppointment.patientId,
-          patientName: chosenPat?.fullName || 'Registered Patient',
-          patientCode: chosenPat?.patientCode || 'PAT-' + Date.now().toString().slice(-4),
-          patient: chosenPat,
-          doctorName:
-            this.newAppointment.doctorId === '1'
-              ? 'Dr. John Smith'
-              : this.newAppointment.doctorId === '2'
-                ? 'Dr. Sarah Wilson'
-                : 'Dr. Attending Physician',
-          appointmentDate: `${this.newAppointment.date}T${this.newAppointment.time}:00`,
-          status: 'SCHEDULED',
-          reason: this.newAppointment.reason,
-          appointmentType: this.newAppointment.type,
-        };
-        this.appointments.update((list) => [localApt, ...list]);
-        this.showBookModal.set(false);
-      },
+      error: (err) => {
+        this.errorMessage.set(err.message || 'Failed to execute operation.');
+        this.isLoading.set(false);
+      }
     });
+  }
+
+  markNoShow(apt: Appointment): void {
+    if (!apt.id) return;
+    this.apiService
+      .markAppointmentNoShow(apt.id, { notes: 'Patient no-show recorded at front desk.' })
+      .subscribe({
+        next: () => this.loadData(),
+        error: (err) => {
+          this.errorMessage.set(err.message || 'Failed to execute operation.');
+          this.isLoading.set(false);
+        }
+      });
+  }
+
+  viewEncounter(apt: Appointment): void {
+    if (apt.encounterId) {
+      window.open(`/physician/chart?encounterId=${apt.encounterId}`, '_blank');
+    } else if (apt.id) {
+      this.apiService.getEncounterByAppointment(apt.id).subscribe({
+        next: (enc: any) => {
+          if (enc && enc.id) {
+            window.open(`/physician/chart?encounterId=${enc.id}`, '_blank');
+          }
+        },
+        error: (err) => {
+          this.errorMessage.set(err.message || 'Failed to open encounter.');
+        }
+      });
+    }
   }
 
   openIntakeModal(): void {
@@ -905,12 +1126,20 @@ export class ReceptionistAppointmentsComponent implements OnInit {
     if (stage === 'CHECKED_IN') {
       this.apiService.checkInPatient(apt.id).subscribe({
         next: () => this.loadData(),
-        error: () => this.loadData(),
+        error: (err) => {
+        this.errorMessage.set(err.message || 'Request failed.');
+        this.isLoading.set(false);
+        this.loadData()
+      },
       });
     } else {
       this.apiService.updateAppointmentStatus(apt.id, stage).subscribe({
         next: () => this.loadData(),
-        error: () => this.loadData(),
+        error: (err) => {
+        this.errorMessage.set(err.message || 'Request failed.');
+        this.isLoading.set(false);
+        this.loadData()
+      },
       });
     }
   }
@@ -930,7 +1159,7 @@ export class ReceptionistAppointmentsComponent implements OnInit {
         this.selectedCancelApt.set(null);
         this.loadData();
       },
-      error: () => this.cancelling.set(false),
+      error: (err) => { this.errorMessage.set(err.message || 'Request failed.'); this.isLoading.set(false); },
     });
   }
 

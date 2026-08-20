@@ -30,7 +30,8 @@ public class AppointmentController {
     public ResponseEntity<ApiResponse<AppointmentResponseDTO>> createAppointment(
             @Valid @RequestBody CreateAppointmentRequest request) {
         AppointmentResponseDTO response = appointmentService.createAppointment(request);
-        return new ResponseEntity<>(ApiResponse.success("Appointment booked successfully", response), HttpStatus.CREATED);
+        return new ResponseEntity<>(ApiResponse.success("Appointment booked successfully", response),
+                HttpStatus.CREATED);
     }
 
     @GetMapping("/api/v1/appointments/{appointmentId}")
@@ -49,11 +50,52 @@ public class AppointmentController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    @GetMapping({"/api/v1/organizations/{organizationId}/appointments", "/api/v1/facilities/{organizationId}/appointments"})
+    @GetMapping("/api/v1/organizations/{organizationId}/appointments")
     @Operation(summary = "Get all appointments for an organization")
     public ResponseEntity<ApiResponse<List<AppointmentResponseDTO>>> getOrganizationAppointments(
             @PathVariable UUID organizationId) {
         List<AppointmentResponseDTO> response = appointmentService.getOrganizationAppointments(organizationId);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @GetMapping("/api/v1/organizations/{organizationId}/practitioners/{practitionerId}/appointments")
+    @Operation(summary = "Get all appointments for a practitioner in an organization")
+    public ResponseEntity<ApiResponse<List<AppointmentResponseDTO>>> getPhysicianOrganizationAppointments(
+            @PathVariable UUID organizationId,
+            @PathVariable UUID practitionerId) {
+        List<AppointmentResponseDTO> response = appointmentService.getPhysicianOrganizationAppointments(practitionerId, organizationId);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @GetMapping("/api/v1/practitioners/{practitionerId}/appointments")
+    @Operation(summary = "Get all appointments for a practitioner optionally filtered by organization")
+    public ResponseEntity<ApiResponse<List<AppointmentResponseDTO>>> getPractitionerAppointments(
+            @PathVariable UUID practitionerId,
+            @RequestParam(required = false) UUID organizationId) {
+        List<AppointmentResponseDTO> response = organizationId != null
+                ? appointmentService.getPhysicianOrganizationAppointments(practitionerId, organizationId)
+                : appointmentService.getPractitionerAppointments(practitionerId);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @GetMapping("/api/v1/appointments")
+    @Operation(summary = "Get appointments filtered by query parameters (practitioner, organization, patient)")
+    public ResponseEntity<ApiResponse<List<AppointmentResponseDTO>>> getAppointments(
+            @RequestParam(required = false) UUID practitionerId,
+            @RequestParam(required = false) UUID organizationId,
+            @RequestParam(required = false) UUID patientId) {
+        List<AppointmentResponseDTO> response;
+        if (practitionerId != null && organizationId != null) {
+            response = appointmentService.getPhysicianOrganizationAppointments(practitionerId, organizationId);
+        } else if (practitionerId != null) {
+            response = appointmentService.getPractitionerAppointments(practitionerId);
+        } else if (patientId != null) {
+            response = appointmentService.getPatientAppointments(patientId);
+        } else if (organizationId != null) {
+            response = appointmentService.getOrganizationAppointments(organizationId);
+        } else {
+            response = appointmentService.getAllAppointments();
+        }
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 

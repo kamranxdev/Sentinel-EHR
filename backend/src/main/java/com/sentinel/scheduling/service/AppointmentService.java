@@ -70,6 +70,9 @@ public class AppointmentService {
         appt.setReason(request.getReason());
         appt.setNotes(request.getNotes());
         appt.setStatus("SCHEDULED");
+        appt.setSchedulingMode(request.getSchedulingMode() != null ? request.getSchedulingMode() : "SPECIFIC_DOCTOR");
+        appt.setSpecialtyCode(request.getSpecialtyCode());
+        appt.setEncounterType(request.getEncounterType() != null ? request.getEncounterType() : "OUTPATIENT");
         appt.setCreatedAt(OffsetDateTime.now());
         appt.setUpdatedAt(OffsetDateTime.now());
 
@@ -81,7 +84,10 @@ public class AppointmentService {
                         .filter(p -> p.getPerson() != null)
                         .flatMap(p -> userRepository.findByPersonId(p.getPerson().getId()));
             }
-            doctorUser.ifPresent(appt::setCreatedBy);
+            doctorUser.ifPresent(u -> {
+                appt.setPractitioner(u);
+                appt.setCreatedBy(u);
+            });
         }
 
         if (request.getOrganizationId() != null) {
@@ -133,10 +139,47 @@ public class AppointmentService {
     }
 
     @Transactional(readOnly = true)
+    public List<AppointmentResponseDTO> getAllAppointments() {
+        return appointmentRepository.findAll().stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
     public List<AppointmentResponseDTO> getOrganizationAppointments(UUID organizationId) {
         return appointmentRepository.findByOrganizationIdOrderByStartsAtDesc(organizationId).stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<AppointmentResponseDTO> getPhysicianOrganizationAppointments(UUID practitionerId, UUID organizationId) {
+        UUID physicianUserId = resolvePhysicianUserId(practitionerId);
+        return appointmentRepository.findByPractitionerIdAndOrganizationIdOrderByStartsAtDesc(physicianUserId, organizationId).stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<AppointmentResponseDTO> getPractitionerAppointments(UUID practitionerId) {
+        UUID physicianUserId = resolvePhysicianUserId(practitionerId);
+        return appointmentRepository.findByPractitionerIdOrderByStartsAtDesc(physicianUserId).stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+    }
+
+    public UUID resolvePhysicianUserId(UUID practitionerId) {
+        if (practitionerId == null) {
+            return null;
+        }
+        if (userRepository.existsById(practitionerId)) {
+            return practitionerId;
+        }
+        return practitionerRepository.findById(practitionerId)
+                .filter(p -> p.getPerson() != null)
+                .flatMap(p -> userRepository.findByPersonId(p.getPerson().getId()))
+                .map(User::getId)
+                .orElse(practitionerId);
     }
 
     public AppointmentResponseDTO updateAppointment(UUID appointmentId, UpdateAppointmentRequest request) {
@@ -155,7 +198,10 @@ public class AppointmentService {
         if (request.getEndsAt() != null)
             appt.setEndsAt(request.getEndsAt());
         if (request.getPractitionerId() != null) {
-            userRepository.findById(request.getPractitionerId()).ifPresent(appt::setCreatedBy);
+            userRepository.findById(request.getPractitionerId()).ifPresent(u -> {
+                appt.setPractitioner(u);
+                appt.setCreatedBy(u);
+            });
         }
         appt.setUpdatedAt(OffsetDateTime.now());
 
@@ -174,10 +220,19 @@ public class AppointmentService {
             dto.setPatientId(a.getPatient().getId());
             dto.setPatientName(a.getPatient().getFullName());
         }
-        if (a.getCreatedBy() != null) {
+        if (a.getPractitioner() != null) {
+            dto.setPractitionerId(a.getPractitioner().getId());
+            dto.setPractitionerName(a.getPractitioner().getFullName());
+            dto.setDoctorId(a.getPractitioner().getId());
+            dto.setDoctorName(a.getPractitioner().getFullName());
+        } else if (a.getCreatedBy() != null) {
             dto.setDoctorId(a.getCreatedBy().getId());
             dto.setDoctorName(a.getCreatedBy().getFullName());
         }
+        dto.setSchedulingMode(a.getSchedulingMode());
+        dto.setSpecialtyCode(a.getSpecialtyCode());
+        dto.setEncounterType(a.getEncounterType());
+        dto.setEncounterId(a.getEncounterId());
         dto.setStartsAt(a.getStartsAt());
         dto.setEndsAt(a.getEndsAt());
         dto.setStatus(a.getStatus());
@@ -186,6 +241,7 @@ public class AppointmentService {
         dto.setCheckedInAt(a.getCheckedInAt());
         dto.setArrivedAt(a.getArrivedAt());
         dto.setCompletedAt(a.getCompletedAt());
+        dto.setNoShowAt(a.getNoShowAt());
         dto.setCreatedAt(a.getCreatedAt());
         dto.setUpdatedAt(a.getUpdatedAt());
         return dto;

@@ -43,4 +43,10 @@ public class BillingController {
     public ResponseEntity<Payment> recordPayment(@RequestBody Payment payment) {
         return ResponseEntity.ok(billingService.recordPayment(payment));
     }
+
+    @GetMapping("/invoices")
+    @PreAuthorize("hasAnyAuthority('INVOICE_READ', 'BILLING_READ', 'BILLING_STAFF', 'SUPER_ADMIN', 'ORGANIZATION_ADMIN')")
+    public ResponseEntity<List<Invoice>> getAllInvoices() {
+        return ResponseEntity.ok(billingService.getAllInvoices());
+    }
 }

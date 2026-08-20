@@ -124,7 +124,7 @@ export interface DashboardInvoiceViewModel {
               </tr>
             </thead>
             <tbody hlmTableBody>
-              <tr *ngIf="loading()" hlmTableRow>
+              <tr *ngIf="isLoading" hlmTableRow>
                 <td colspan="6" class="py-8 text-center text-xs text-muted-foreground">
                   <div class="flex items-center justify-center gap-2">
                     <ng-icon name="lucideReceipt" class="animate-spin text-emerald-600" size="16" />
@@ -132,15 +132,15 @@ export interface DashboardInvoiceViewModel {
                   </div>
                 </td>
               </tr>
-              <tr *ngIf="!loading() && error()" hlmTableRow>
+              <tr *ngIf="!isLoading && errorMessage" hlmTableRow>
                 <td colspan="6" class="py-6 text-center text-xs text-destructive">
-                  <p>{{ error() }}</p>
+                  <p>{{ errorMessage }}</p>
                   <button (click)="loadInvoices()" class="mt-2 text-xs text-emerald-600 underline">
                     Retry
                   </button>
                 </td>
               </tr>
-              <tr *ngIf="!loading() && !error() && invoices().length === 0" hlmTableRow>
+              <tr *ngIf="!isLoading && !errorMessage && invoices().length === 0" hlmTableRow>
                 <td colspan="6" class="py-8 text-center text-xs text-muted-foreground">
                   No billing invoices or insurance claims pending reconciliation.
                 </td>
@@ -185,8 +185,8 @@ export interface DashboardInvoiceViewModel {
 })
 export class BillingStaffDashboardComponent implements OnInit {
   invoices = signal<DashboardInvoiceViewModel[]>([]);
-  loading = signal<boolean>(true);
-  error = signal<string | null>(null);
+  isLoading: boolean = false;
+  errorMessage: string = '';
 
   constructor(
     public authService: AuthService,
@@ -198,27 +198,27 @@ export class BillingStaffDashboardComponent implements OnInit {
   }
 
   loadInvoices(): void {
-    this.loading.set(true);
-    this.error.set(null);
-    this.apiService.getAppointments().subscribe({
-      next: (apts) => {
-        const list: DashboardInvoiceViewModel[] = (Array.isArray(apts) ? apts : []).map(
-          (apt, idx) => ({
-            id: `INV-${apt.id ? String(apt.id).substring(0, 6).toUpperCase() : 1000 + idx}`,
-            appointmentId: apt.id,
-            patientName: apt.patientName || apt.patient?.fullName || 'Patient',
-            carrier: (apt as any).insuranceDetails || 'PM-JAY / State Health Assurance',
-            amount: 1500.0,
-            status: apt.status === 'COMPLETED' ? 'PAID' : 'PENDING',
+    this.isLoading = true;
+    this.errorMessage = '';
+    this.apiService.getAllInvoices().subscribe({
+      next: (invs) => {
+        const list: DashboardInvoiceViewModel[] = (Array.isArray(invs) ? invs : []).map(
+          (inv: any, idx) => ({
+            id: inv.invoiceNumber || inv.id || `INV-${1000 + idx}`,
+            appointmentId: inv.encounterId,
+            patientName: inv.patientName || 'Patient',
+            carrier: inv.insuranceCarrier || 'PM-JAY / State Health Assurance',
+            amount: inv.totalAmount || 0,
+            status: inv.status || 'PENDING',
           }),
         );
         this.invoices.set(list);
-        this.loading.set(false);
+        this.isLoading = false;
       },
-      error: (err: unknown) => {
+      error: (err: any) => {
         console.error('Failed to load billing records:', err);
-        this.error.set('Failed to load billing records from ledger server.');
-        this.loading.set(false);
+        this.errorMessage = err.message || 'Failed to load billing records from ledger server.';
+        this.isLoading = false;
       },
     });
   }

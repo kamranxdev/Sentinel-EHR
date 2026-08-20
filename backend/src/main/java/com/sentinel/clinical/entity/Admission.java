@@ -29,6 +29,13 @@ public class Admission {
     @Column(nullable = false)
     private OffsetDateTime admittedAt = OffsetDateTime.now();
 
+    private OffsetDateTime dischargedAt;
+
+    @Column(length = 100)
+    private String dischargeDisposition;
+
+    private Integer lengthOfStayDays;
+
     public Admission() {}
 
     public UUID getId() { return id; }
@@ -48,4 +55,13 @@ public class Admission {
 
     public OffsetDateTime getAdmittedAt() { return admittedAt; }
     public void setAdmittedAt(OffsetDateTime admittedAt) { this.admittedAt = admittedAt; }
+
+    public OffsetDateTime getDischargedAt() { return dischargedAt; }
+    public void setDischargedAt(OffsetDateTime dischargedAt) { this.dischargedAt = dischargedAt; }
+
+    public String getDischargeDisposition() { return dischargeDisposition; }
+    public void setDischargeDisposition(String dischargeDisposition) { this.dischargeDisposition = dischargeDisposition; }
+
+    public Integer getLengthOfStayDays() { return lengthOfStayDays; }
+    public void setLengthOfStayDays(Integer lengthOfStayDays) { this.lengthOfStayDays = lengthOfStayDays; }
 }

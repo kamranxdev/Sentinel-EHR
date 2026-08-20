@@ -264,6 +264,18 @@ import {
                       [style.width.%]="candidate.matchScore"
                     ></div>
                   </div>
+
+      <!-- Error Message -->
+      <div *ngIf="errorMessage()" class="p-3 mb-4 rounded-lg bg-red-500/10 text-red-700 dark:text-red-300 border border-red-500/20 text-xs flex items-center justify-between shadow-sm">
+        <div class="flex items-center gap-2 font-medium">
+          <ng-icon name="lucideAlertTriangle" size="16" class="text-red-600" />
+          <span>{{ errorMessage() }}</span>
+        </div>
+        <button type="button" class="text-red-600 hover:text-red-800 text-xs font-bold" (click)="errorMessage.set(null)">
+          &times;
+        </button>
+      </div>
+
                 </td>
                 <td hlmTableCell>
                   <span
@@ -321,7 +333,7 @@ import {
                   </button>
                 </td>
               </tr>
-              <tr *ngIf="candidates().length === 0" hlmTableRow>
+              <tr *ngIf="!isLoading() && candidates().length === 0" hlmTableRow>
                 <td
                   hlmTableCell
                   colspan="6"
@@ -425,6 +437,9 @@ import {
   `,
 })
 export class ReceptionistMPIComponent implements OnInit {
+  isLoading = signal(false);
+  errorMessage = signal<string | null>(null);
+
   fullName = 'Kamran Khan';
   dateOfBirth = '';
   abhaId = '';
@@ -482,7 +497,7 @@ export class ReceptionistMPIComponent implements OnInit {
           this.candidates.set(results);
           this.searching.set(false);
         },
-        error: () => this.searching.set(false),
+        error: (err) => { this.errorMessage.set(err.message || 'Request failed.'); this.isLoading.set(false); },
       });
   }
 
@@ -493,7 +508,7 @@ export class ReceptionistMPIComponent implements OnInit {
         this.candidates.set(results);
         this.searching.set(false);
       },
-      error: () => this.searching.set(false),
+      error: (err) => { this.errorMessage.set(err.message || 'Request failed.'); this.isLoading.set(false); },
     });
   }
 
@@ -526,10 +541,9 @@ export class ReceptionistMPIComponent implements OnInit {
         },
         error: (err) => {
           this.merging.set(false);
-          this.mergeNotice.set(
-            `Error merging charts: ${err?.error || err?.message || 'Merge failed.'}`,
-          );
-        },
+          this.errorMessage.set(err.message || 'Operation failed.');
+          this.isLoading.set(false);
+        }
       });
   }
 

@@ -128,6 +128,15 @@ import {
         </button>
       </div>
 
+      <!-- State Indicators -->
+      <div *ngIf="loading()" class="p-4 text-center text-sm text-muted-foreground">
+        Loading vault data...
+      </div>
+      <div *ngIf="errorMessage()" class="p-4 mb-4 text-sm text-destructive rounded-lg bg-destructive/10 border border-destructive/20">
+        {{ errorMessage() }}
+      </div>
+
+      <ng-container *ngIf="!loading() && !errorMessage()">
       <!-- TAB 1: General Audit Trail -->
       <div *ngIf="activeTab() === 'audit'" class="space-y-4">
         <!-- Controls: Search & Quick Action Filters -->
@@ -330,12 +339,14 @@ import {
           </div>
         </div>
       </div>
+      </ng-container>
     </div>
   `,
 })
 export class SuperAdminAuditComponent implements OnInit {
   activeTab = signal<'audit' | 'security' | 'break-glass'>('audit');
   loading = signal(false);
+  errorMessage = signal<string>('');
   logs = signal<AuditLog[]>([]);
   securityEvents = signal<SecurityEventLog[]>([]);
   breakGlassLogs = signal<BreakGlassRecord[]>([]);
@@ -380,22 +391,47 @@ export class SuperAdminAuditComponent implements OnInit {
 
   loadAllData(): void {
     this.loading.set(true);
+    this.errorMessage.set('');
+
+    let pending = 3;
+    const checkDone = () => {
+      pending--;
+      if (pending === 0) this.loading.set(false);
+    };
+
     this.apiService.getPlatformAuditEvents().subscribe({
       next: (logs) => {
         this.logs.set(logs || []);
-        this.loading.set(false);
+        checkDone();
       },
-      error: () => this.loading.set(false),
+      error: (err) => {
+        this.errorMessage.set(err.message || 'Failed to load audit events');
+        checkDone();
+      },
     });
 
     this.apiService.getPlatformSecurityEvents().subscribe({
-      next: (events) => this.securityEvents.set(events || []),
-      error: () => this.securityEvents.set([]),
+      next: (events) => {
+        this.securityEvents.set(events || []);
+        checkDone();
+      },
+      error: (err) => {
+        this.errorMessage.set(err.message || 'Failed to load security events');
+        this.securityEvents.set([]);
+        checkDone();
+      },
     });
 
     this.apiService.getBreakGlassByUser('all').subscribe({
-      next: (bgs) => this.breakGlassLogs.set(bgs || []),
-      error: () => this.breakGlassLogs.set([]),
+      next: (bgs) => {
+        this.breakGlassLogs.set(bgs || []);
+        checkDone();
+      },
+      error: (err) => {
+        this.errorMessage.set(err.message || 'Failed to load break glass logs');
+        this.breakGlassLogs.set([]);
+        checkDone();
+      },
     });
   }
 

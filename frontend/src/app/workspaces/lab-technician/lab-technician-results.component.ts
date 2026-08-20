@@ -625,6 +625,8 @@ interface TestPanelPreset {
   `,
 })
 export class LabTechnicianResultsComponent implements OnInit {
+  isLoading: boolean = false;
+  errorMessage: string = "";
   Math = Math;
 
   selectedOrderId = '1';
@@ -882,7 +884,7 @@ export class LabTechnicianResultsComponent implements OnInit {
           }
         });
       },
-      error: () => {},
+      error: (err) => { this.errorMessage = err.message || 'Failed'; this.isLoading = false; },
     });
   }
 
@@ -1052,12 +1054,12 @@ export class LabTechnicianResultsComponent implements OnInit {
       next: (res) => {
         // Also verify the result if an ID returned
         if (res && res.id) {
-          this.apiService.verifyLabResult(String(res.id)).subscribe({ error: () => {} });
+          this.apiService.verifyLabResult(String(res.id)).subscribe({ error: (err) => { this.errorMessage = err.message || 'Failed'; this.isLoading = false; } });
         }
         // Update order status to VERIFIED
         this.apiService
           .updateLabOrderStatus(this.selectedOrderId, 'VERIFIED')
-          .subscribe({ error: () => {} });
+          .subscribe({ error: (err) => { this.errorMessage = err.message || 'Failed'; this.isLoading = false; } });
 
         this.submitting.set(false);
         toast.success(
@@ -1065,15 +1067,7 @@ export class LabTechnicianResultsComponent implements OnInit {
         );
         this.router.navigate(['/lab-technician/worklist'], { queryParams: { stage: 'RESULTED' } });
       },
-      error: () => {
-        // Fallback update order status
-        this.apiService
-          .updateLabOrderStatus(this.selectedOrderId, 'RESULTED')
-          .subscribe({ error: () => {} });
-        this.submitting.set(false);
-        toast.success(`Lab result recorded and published to patient chart.`);
-        this.router.navigate(['/lab-technician/worklist']);
-      },
+      error: (err) => { this.errorMessage = err.message || 'Failed'; this.submitting.set(false); },
     });
   }
 }

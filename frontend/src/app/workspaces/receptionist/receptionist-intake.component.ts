@@ -674,6 +674,9 @@ import {
   `,
 })
 export class ReceptionistIntakeComponent implements OnInit {
+  isLoading = signal(false);
+  errorMessage = signal<string | null>(null);
+
   @Input() isModal: boolean = false;
   @Output() close = new EventEmitter<void>();
   @Output() success = new EventEmitter<Patient>();
@@ -751,9 +754,8 @@ export class ReceptionistIntakeComponent implements OnInit {
         }
       },
       error: (err) => {
-        console.warn('Could not load practitioners for intake', err);
-        this.doctors.set([]);
-        this.selectedDoctorId = '';
+        this.errorMessage.set(err.message || 'Operation failed.');
+        this.isLoading.set(false);
       },
     });
   }
@@ -826,15 +828,20 @@ export class ReceptionistIntakeComponent implements OnInit {
                 next: () => {
                   this.finishSave(savedPatient, true);
                 },
-                error: () => {
-                  this.finishSave(savedPatient, false);
-                },
+                error: (err) => {
+        this.errorMessage.set(err.message || 'Operation failed.');
+        this.isLoading.set(false);
+      },
               });
           } else {
             this.finishSave(savedPatient, false);
           }
         },
-        error: () => this.saving.set(false),
+        error: (err) => {
+          this.errorMessage.set(err.message || 'Request failed.');
+          this.saving.set(false);
+          this.isLoading.set(false);
+        }
       });
   }
 

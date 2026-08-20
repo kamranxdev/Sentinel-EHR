@@ -339,7 +339,16 @@ import {
           </a>
         </div>
 
-        <div class="overflow-x-auto">
+        
+        <div *ngIf="loading()" class="p-8 text-center text-muted-foreground flex flex-col items-center justify-center gap-2">
+          <ng-icon name="lucideRefreshCw" size="24" class="animate-spin text-indigo-500"></ng-icon>
+          <p>Loading data...</p>
+        </div>
+        <div *ngIf="errorMessage()" class="p-4 m-4 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-sm flex items-center gap-2">
+          <ng-icon name="lucideAlertTriangle" size="16"></ng-icon>
+          {{ errorMessage() }}
+        </div>
+        <div class="overflow-x-auto" *ngIf="!loading() && !errorMessage()">
           <table class="w-full text-xs text-left">
             <thead
               class="bg-muted/50 border-b border-border text-muted-foreground font-semibold uppercase tracking-wider"
@@ -403,7 +412,7 @@ import {
                 </td>
               </tr>
 
-              <tr *ngIf="pendingOrders().length === 0">
+              <tr *ngIf="pendingOrders().length === 0 && !loading() && !errorMessage()">
                 <td colspan="6" class="py-6 text-center text-muted-foreground text-xs">
                   No pending prescription orders. All queues clear!
                 </td>
@@ -419,6 +428,7 @@ export class PharmacistDashboardComponent implements OnInit {
   orders = signal<MedicationOrder[]>([]);
   inventory = signal<InventoryItem[]>([]);
   loading = signal(false);
+  errorMessage = signal<string | null>(null);
 
   pendingOrders = computed(() =>
     this.orders().filter(
@@ -453,12 +463,12 @@ export class PharmacistDashboardComponent implements OnInit {
         this.orders.set(data);
         this.loading.set(false);
       },
-      error: () => this.loading.set(false),
+      error: (err) => { this.errorMessage.set(err.message || 'Failed'); this.loading.set(false); },
     });
 
     this.apiService.getPharmacyInventory().subscribe({
       next: (inv: InventoryItem[]) => this.inventory.set(inv),
-      error: () => {},
+      error: (err) => { this.errorMessage.set(err.message || 'Failed'); },
     });
   }
 }

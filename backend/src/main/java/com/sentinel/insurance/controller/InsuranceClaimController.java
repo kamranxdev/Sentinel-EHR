@@ -66,4 +66,11 @@ public class InsuranceClaimController {
         InsuranceClaimResponseDTO response = claimService.submitClaim(claimId);
         return ResponseEntity.ok(ApiResponse.success("Insurance claim submitted successfully", response));
     }
+
+    @GetMapping("/api/v1/insurance-claims")
+    @Operation(summary = "Get all insurance claims")
+    public ResponseEntity<ApiResponse<List<InsuranceClaimResponseDTO>>> getAllClaims() {
+        List<InsuranceClaimResponseDTO> response = claimService.getAllClaims();
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
 }

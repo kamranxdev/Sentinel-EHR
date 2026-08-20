@@ -22,6 +22,10 @@ public class EncounterResponseDTO {
     private OffsetDateTime endedAt;
     private String disposition;
     private String createdByEmail;
+    private UUID appointmentId;
+    private UUID admissionId;
+    private UUID attendingPractitionerId;
+    private String attendingPractitionerName;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
 
@@ -63,6 +67,14 @@ public class EncounterResponseDTO {
     public void setDisposition(String disposition) { this.disposition = disposition; }
     public String getCreatedByEmail() { return createdByEmail; }
     public void setCreatedByEmail(String createdByEmail) { this.createdByEmail = createdByEmail; }
+    public UUID getAppointmentId() { return appointmentId; }
+    public void setAppointmentId(UUID appointmentId) { this.appointmentId = appointmentId; }
+    public UUID getAdmissionId() { return admissionId; }
+    public void setAdmissionId(UUID admissionId) { this.admissionId = admissionId; }
+    public UUID getAttendingPractitionerId() { return attendingPractitionerId; }
+    public void setAttendingPractitionerId(UUID attendingPractitionerId) { this.attendingPractitionerId = attendingPractitionerId; }
+    public String getAttendingPractitionerName() { return attendingPractitionerName; }
+    public void setAttendingPractitionerName(String attendingPractitionerName) { this.attendingPractitionerName = attendingPractitionerName; }
     public OffsetDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(OffsetDateTime createdAt) { this.createdAt = createdAt; }
     public OffsetDateTime getUpdatedAt() { return updatedAt; }

@@ -97,7 +97,7 @@ import {
 
         <div class="flex items-center gap-2">
           <button hlmBtn variant="outline" size="sm" (click)="loadOrders()" class="gap-2 text-xs">
-            <ng-icon name="lucideRefreshCw" [class.animate-spin]="loading()" size="14" />
+            <ng-icon name="lucideRefreshCw" [class.animate-spin]="isLoading" size="14" />
             <span>Refresh Board</span>
           </button>
           <a
@@ -205,7 +205,7 @@ import {
               </tr>
             </thead>
             <tbody hlmTableBody class="divide-y divide-border">
-              <tr *ngIf="loading()" hlmTableRow>
+              <tr *ngIf="isLoading" hlmTableRow>
                 <td colspan="6" class="py-12 text-center text-xs text-muted-foreground">
                   <div class="flex items-center justify-center gap-2">
                     <ng-icon
@@ -218,7 +218,7 @@ import {
                 </td>
               </tr>
 
-              <tr *ngIf="!loading() && filteredOrders().length === 0" hlmTableRow>
+              <tr *ngIf="!isLoading && filteredOrders().length === 0" hlmTableRow>
                 <td colspan="6" class="py-12 text-center text-muted-foreground text-xs">
                   <div class="space-y-1">
                     <ng-icon
@@ -883,8 +883,10 @@ import {
   `,
 })
 export class LabTechnicianWorklistComponent implements OnInit {
+  isLoading: boolean = false;
+  errorMessage: string = '';
   labOrders = signal<LabOrder[]>([]);
-  loading = signal<boolean>(true);
+  
   activeTab = signal<string>('ALL');
 
   searchQuery = '';
@@ -998,18 +1000,13 @@ export class LabTechnicianWorklistComponent implements OnInit {
   }
 
   loadOrders(): void {
-    this.loading.set(true);
+    this.isLoading = true;
     this.apiService.getLabOrdersList().subscribe({
       next: (data) => {
         this.labOrders.set(Array.isArray(data) ? data : []);
-        this.loading.set(false);
+        this.isLoading = false;
       },
-      error: (err) => {
-        console.error('Failed to load lab orders:', err);
-        this.labOrders.set([]);
-        this.loading.set(false);
-        toast.error('Failed to connect to LIS server.');
-      },
+      error: (err) => { this.errorMessage = err.message || 'Failed'; this.isLoading = false; },
     });
   }
 
@@ -1135,7 +1132,7 @@ export class LabTechnicianWorklistComponent implements OnInit {
         collectionSite: this.collectionSite,
         fastingStatus: this.fastingStatus,
       })
-      .subscribe({ error: () => {} });
+      .subscribe({ error: (err) => { this.errorMessage = err.message || 'Failed'; this.isLoading = false; } });
 
     this.apiService.updateLabOrderStatus(orderId, 'SPECIMEN_COLLECTED', barcode).subscribe({
       next: () => {

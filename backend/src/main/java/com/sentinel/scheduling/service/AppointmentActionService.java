@@ -1,6 +1,8 @@
 package com.sentinel.scheduling.service;
 
 import com.sentinel.audit.service.AuditService;
+import com.sentinel.clinical.dto.EncounterResponseDTO;
+import com.sentinel.clinical.service.EncounterService;
 import com.sentinel.common.exception.ResourceNotFoundException;
 import com.sentinel.identity.entity.User;
 import com.sentinel.identity.repository.UserRepository;
@@ -13,6 +15,9 @@ import com.sentinel.scheduling.repository.AppointmentCancellationRepository;
 import com.sentinel.scheduling.repository.AppointmentRepository;
 import com.sentinel.scheduling.repository.AppointmentRescheduleRepository;
 import com.sentinel.scheduling.repository.AppointmentStatusHistoryRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,11 +29,14 @@ import java.util.UUID;
 @Transactional
 public class AppointmentActionService {
 
+    private static final Logger log = LoggerFactory.getLogger(AppointmentActionService.class);
+
     private final AppointmentRepository appointmentRepository;
     private final AppointmentCancellationRepository cancellationRepository;
     private final AppointmentRescheduleRepository rescheduleRepository;
     private final AppointmentStatusHistoryRepository statusHistoryRepository;
     private final UserRepository userRepository;
+    private final EncounterService encounterService;
     private final AuditService auditService;
 
     public AppointmentActionService(AppointmentRepository appointmentRepository,
@@ -36,12 +44,14 @@ public class AppointmentActionService {
                                     AppointmentRescheduleRepository rescheduleRepository,
                                     AppointmentStatusHistoryRepository statusHistoryRepository,
                                     UserRepository userRepository,
+                                    @Lazy EncounterService encounterService,
                                     AuditService auditService) {
         this.appointmentRepository = appointmentRepository;
         this.cancellationRepository = cancellationRepository;
         this.rescheduleRepository = rescheduleRepository;
         this.statusHistoryRepository = statusHistoryRepository;
         this.userRepository = userRepository;
+        this.encounterService = encounterService;
         this.auditService = auditService;
     }
 
@@ -49,18 +59,48 @@ public class AppointmentActionService {
         Appointment appt = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Appointment not found with id: " + appointmentId));
 
-        recordStatusHistory(appt, "CHECKED_IN", request.getNotes());
+        recordStatusHistory(appt, "CHECKED_IN", request != null ? request.getNotes() : null);
 
         appt.setStatus("CHECKED_IN");
         appt.setCheckedInAt(OffsetDateTime.now());
         appt.setArrivedAt(OffsetDateTime.now());
-        if (request.getNotes() != null) appt.setNotes(request.getNotes());
+        if (request != null && request.getNotes() != null) appt.setNotes(request.getNotes());
         appt.setUpdatedAt(OffsetDateTime.now());
+
+        // Auto-create encounter on check-in
+        if (encounterService != null && appt.getEncounterId() == null) {
+            try {
+                EncounterResponseDTO encounterDTO = encounterService.openEncounterFromAppointment(appt);
+                appt.setEncounterId(encounterDTO.getId());
+            } catch (Exception e) {
+                log.warn("Failed to auto-create encounter for appointment {}: {}", appointmentId, e.getMessage());
+            }
+        }
 
         Appointment saved = appointmentRepository.save(appt);
 
         if (auditService != null) {
             auditService.logEvent(saved.getId(), "APPOINTMENT_CHECKED_IN", "Patient checked in for appointment " + appointmentId);
+        }
+
+        return mapToDTO(saved);
+    }
+
+    public AppointmentResponseDTO markNoShow(UUID appointmentId, AppointmentNoShowRequest request) {
+        Appointment appt = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Appointment not found with id: " + appointmentId));
+
+        recordStatusHistory(appt, "NO_SHOW", request != null ? request.getNotes() : null);
+
+        appt.setStatus("NO_SHOW");
+        appt.setNoShowAt(OffsetDateTime.now());
+        if (request != null && request.getNotes() != null) appt.setNotes(request.getNotes());
+        appt.setUpdatedAt(OffsetDateTime.now());
+
+        Appointment saved = appointmentRepository.save(appt);
+
+        if (auditService != null) {
+            auditService.logEvent(saved.getId(), "APPOINTMENT_NO_SHOW", "Patient no-show recorded for appointment " + appointmentId);
         }
 
         return mapToDTO(saved);
@@ -184,10 +224,19 @@ public class AppointmentActionService {
             dto.setPatientId(a.getPatient().getId());
             dto.setPatientName(a.getPatient().getFullName());
         }
-        if (a.getCreatedBy() != null) {
+        if (a.getPractitioner() != null) {
+            dto.setPractitionerId(a.getPractitioner().getId());
+            dto.setPractitionerName(a.getPractitioner().getFullName());
+            dto.setDoctorId(a.getPractitioner().getId());
+            dto.setDoctorName(a.getPractitioner().getFullName());
+        } else if (a.getCreatedBy() != null) {
             dto.setDoctorId(a.getCreatedBy().getId());
             dto.setDoctorName(a.getCreatedBy().getFullName());
         }
+        dto.setSchedulingMode(a.getSchedulingMode());
+        dto.setSpecialtyCode(a.getSpecialtyCode());
+        dto.setEncounterType(a.getEncounterType());
+        dto.setEncounterId(a.getEncounterId());
         dto.setStartsAt(a.getStartsAt());
         dto.setEndsAt(a.getEndsAt());
         dto.setStatus(a.getStatus());
@@ -196,6 +245,7 @@ public class AppointmentActionService {
         dto.setCheckedInAt(a.getCheckedInAt());
         dto.setArrivedAt(a.getArrivedAt());
         dto.setCompletedAt(a.getCompletedAt());
+        dto.setNoShowAt(a.getNoShowAt());
         dto.setCreatedAt(a.getCreatedAt());
         dto.setUpdatedAt(a.getUpdatedAt());
         return dto;

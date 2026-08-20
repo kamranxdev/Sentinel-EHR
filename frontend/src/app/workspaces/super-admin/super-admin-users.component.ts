@@ -314,8 +314,13 @@ type RoleCategoryTab =
         </span>
       </div>
 
+      <!-- State Indicators -->
+      <div *ngIf="errorMessage()" class="p-4 mb-4 text-sm text-destructive rounded-lg bg-destructive/10 border border-destructive/20">
+        {{ errorMessage() }}
+      </div>
+
       <!-- Users Table -->
-      <div class="rounded-xl border border-border bg-card overflow-hidden shadow-xs">
+      <div *ngIf="!errorMessage()" class="rounded-xl border border-border bg-card overflow-hidden shadow-xs">
         <div class="overflow-x-auto">
           <table class="w-full text-xs text-left">
             <thead
@@ -539,6 +544,7 @@ type RoleCategoryTab =
 export class SuperAdminUsersComponent implements OnInit {
   users = signal<User[]>([]);
   loading = signal(false);
+  errorMessage = signal<string>('');
   searchQuery = signal('');
   selectedRoleTab = signal<RoleCategoryTab>('ALL');
   showCreateModal = signal(false);
@@ -614,12 +620,16 @@ export class SuperAdminUsersComponent implements OnInit {
 
   loadUsers(): void {
     this.loading.set(true);
+    this.errorMessage.set('');
     this.apiService.getPlatformUsers().subscribe({
       next: (res) => {
         this.users.set(res);
         this.loading.set(false);
       },
-      error: () => this.loading.set(false),
+      error: (err) => {
+        this.errorMessage.set(err.message || 'Failed to load users');
+        this.loading.set(false);
+      },
     });
   }
 
@@ -642,8 +652,8 @@ export class SuperAdminUsersComponent implements OnInit {
           `Forced password reset triggered for @${u.email}. User will be prompted on next login.`,
         );
       },
-      error: () => {
-        toast.success(`Password reset flagged for @${u.email}.`);
+      error: (err) => {
+        toast.error(err.message || 'Failed to force password reset');
       },
     });
   }
@@ -654,9 +664,8 @@ export class SuperAdminUsersComponent implements OnInit {
         u.verificationStatus = 'VERIFIED';
         toast.success(`Account @${u.email} activated.`);
       },
-      error: () => {
-        u.verificationStatus = 'VERIFIED';
-        toast.success(`Account @${u.email} activated.`);
+      error: (err) => {
+        toast.error(err.message || 'Failed to activate account');
       },
     });
   }
@@ -667,9 +676,8 @@ export class SuperAdminUsersComponent implements OnInit {
         u.verificationStatus = 'SUSPENDED';
         toast.error(`Account @${u.email} suspended.`);
       },
-      error: () => {
-        u.verificationStatus = 'SUSPENDED';
-        toast.error(`Account @${u.email} suspended.`);
+      error: (err) => {
+        toast.error(err.message || 'Failed to suspend account');
       },
     });
   }
@@ -695,17 +703,8 @@ export class SuperAdminUsersComponent implements OnInit {
         this.showCreateModal.set(false);
         this.loadUsers();
       },
-      error: () => {
-        const created: User = {
-          id: String(Date.now()),
-          fullName: this.newUserForm.fullName,
-          email: this.newUserForm.email,
-          roles: [this.newUserForm.role],
-          verificationStatus: 'VERIFIED',
-        };
-        this.users.update((list) => [created, ...list]);
-        this.showCreateModal.set(false);
-        toast.success(`User @${this.newUserForm.email} created.`);
+      error: (err) => {
+        toast.error(err.message || 'Failed to create user');
       },
     });
   }

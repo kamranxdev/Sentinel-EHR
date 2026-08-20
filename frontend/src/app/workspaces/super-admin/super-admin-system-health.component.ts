@@ -70,6 +70,15 @@ import {
         </button>
       </div>
 
+      <!-- State Indicators -->
+      <div *ngIf="loading()" class="p-4 text-center text-sm text-muted-foreground">
+        Loading system telemetry...
+      </div>
+      <div *ngIf="errorMessage()" class="p-4 mb-4 text-sm text-destructive rounded-lg bg-destructive/10 border border-destructive/20">
+        {{ errorMessage() }}
+      </div>
+
+      <ng-container *ngIf="!loading() && !errorMessage()">
       <!-- Health Status Cards -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div class="p-4 rounded-xl border border-emerald-500/30 bg-emerald-500/5 shadow-xs">
@@ -164,11 +173,13 @@ import {
           </div>
         </div>
       </div>
+      </ng-container>
     </div>
   `,
 })
 export class SuperAdminSystemHealthComponent implements OnInit {
   loading = signal(false);
+  errorMessage = signal<string>('');
   codeSystems = signal<CodeSystem[]>([]);
   healthData = signal<any>(null);
 
@@ -180,19 +191,34 @@ export class SuperAdminSystemHealthComponent implements OnInit {
 
   loadTelemetry(): void {
     this.loading.set(true);
+    this.errorMessage.set('');
+    
+    let pending = 2;
+    const checkDone = () => {
+      pending--;
+      if (pending === 0) this.loading.set(false);
+    };
+
     this.apiService.getCodeSystems().subscribe({
       next: (systems: CodeSystem[]) => {
         this.codeSystems.set(systems);
+        checkDone();
       },
-      error: () => {},
+      error: (err) => {
+        this.errorMessage.set(err.message || 'Failed to load terminology systems');
+        checkDone();
+      },
     });
 
     this.apiService.getPlatformHealth().subscribe({
       next: (h) => {
         this.healthData.set(h);
-        this.loading.set(false);
+        checkDone();
       },
-      error: () => this.loading.set(false),
+      error: (err) => {
+        this.errorMessage.set(err.message || 'Failed to load health telemetry');
+        checkDone();
+      },
     });
   }
 }

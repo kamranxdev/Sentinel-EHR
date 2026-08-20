@@ -1,9 +1,6 @@
 package com.sentinel.clinical.controller;
 
-import com.sentinel.clinical.dto.CreateEncounterRequest;
-import com.sentinel.clinical.dto.EncounterResponseDTO;
-import com.sentinel.clinical.dto.EncounterSearchCriteria;
-import com.sentinel.clinical.dto.UpdateEncounterRequest;
+import com.sentinel.clinical.dto.*;
 import com.sentinel.clinical.service.EncounterService;
 import com.sentinel.common.response.ApiResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -32,6 +29,23 @@ public class EncounterController {
             @Valid @RequestBody CreateEncounterRequest request) {
         EncounterResponseDTO response = encounterService.createEncounter(request);
         return new ResponseEntity<>(ApiResponse.success("Encounter created successfully", response), HttpStatus.CREATED);
+    }
+
+    @GetMapping("/api/v1/appointments/{appointmentId}/encounter")
+    @Operation(summary = "Get encounter linked to an appointment")
+    public ResponseEntity<ApiResponse<EncounterResponseDTO>> getEncounterByAppointment(
+            @PathVariable UUID appointmentId) {
+        EncounterResponseDTO response = encounterService.getEncounterByAppointmentId(appointmentId);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @PostMapping("/api/v1/encounters/{encounterId}/admit")
+    @Operation(summary = "Admit patient — promotes encounter to INPATIENT and creates admission record")
+    public ResponseEntity<ApiResponse<EncounterResponseDTO>> admitPatient(
+            @PathVariable UUID encounterId,
+            @Valid @RequestBody AdmissionRequest request) {
+        EncounterResponseDTO response = encounterService.promoteToAdmission(encounterId, request);
+        return ResponseEntity.ok(ApiResponse.success("Patient admitted successfully", response));
     }
 
     @GetMapping("/api/v1/encounters/{encounterId}")

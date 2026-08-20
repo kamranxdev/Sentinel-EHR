@@ -46,15 +46,7 @@ public class EncounterServiceTest {
         com.sentinel.tenancy.repository.DepartmentRepository departmentRepository = mock(com.sentinel.tenancy.repository.DepartmentRepository.class);
         com.sentinel.audit.service.AuditService auditService = mock(com.sentinel.audit.service.AuditService.class);
 
-        encounterService = new EncounterService(
-            encounterRepository, 
-            encounterLocationRepository, 
-            patientRepository, 
-            patientOrganizationRepository, 
-            organizationRepository, 
-            departmentRepository, 
-            auditService
-        );
+        encounterService = new EncounterService(encounterRepository, encounterLocationRepository, null, null, patientRepository, patientOrganizationRepository, organizationRepository, departmentRepository, auditService);
 
         Person p = new Person();
         p.setFirstName("Kamran");

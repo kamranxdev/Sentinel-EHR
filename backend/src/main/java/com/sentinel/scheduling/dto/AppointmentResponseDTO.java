@@ -16,9 +16,16 @@ public class AppointmentResponseDTO {
     private String notes;
     private UUID doctorId;
     private String doctorName;
+    private UUID practitionerId;
+    private String practitionerName;
+    private String schedulingMode;
+    private String specialtyCode;
+    private String encounterType;
+    private UUID encounterId;
     private OffsetDateTime checkedInAt;
     private OffsetDateTime arrivedAt;
     private OffsetDateTime completedAt;
+    private OffsetDateTime noShowAt;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
 
@@ -38,6 +45,18 @@ public class AppointmentResponseDTO {
     public void setDoctorId(UUID doctorId) { this.doctorId = doctorId; }
     public String getDoctorName() { return doctorName; }
     public void setDoctorName(String doctorName) { this.doctorName = doctorName; }
+    public UUID getPractitionerId() { return practitionerId; }
+    public void setPractitionerId(UUID practitionerId) { this.practitionerId = practitionerId; }
+    public String getPractitionerName() { return practitionerName; }
+    public void setPractitionerName(String practitionerName) { this.practitionerName = practitionerName; }
+    public String getSchedulingMode() { return schedulingMode; }
+    public void setSchedulingMode(String schedulingMode) { this.schedulingMode = schedulingMode; }
+    public String getSpecialtyCode() { return specialtyCode; }
+    public void setSpecialtyCode(String specialtyCode) { this.specialtyCode = specialtyCode; }
+    public String getEncounterType() { return encounterType; }
+    public void setEncounterType(String encounterType) { this.encounterType = encounterType; }
+    public UUID getEncounterId() { return encounterId; }
+    public void setEncounterId(UUID encounterId) { this.encounterId = encounterId; }
     public OffsetDateTime getStartsAt() { return startsAt; }
     public void setStartsAt(OffsetDateTime startsAt) { this.startsAt = startsAt; }
     public OffsetDateTime getEndsAt() { return endsAt; }
@@ -54,6 +73,8 @@ public class AppointmentResponseDTO {
     public void setArrivedAt(OffsetDateTime arrivedAt) { this.arrivedAt = arrivedAt; }
     public OffsetDateTime getCompletedAt() { return completedAt; }
     public void setCompletedAt(OffsetDateTime completedAt) { this.completedAt = completedAt; }
+    public OffsetDateTime getNoShowAt() { return noShowAt; }
+    public void setNoShowAt(OffsetDateTime noShowAt) { this.noShowAt = noShowAt; }
     public OffsetDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(OffsetDateTime createdAt) { this.createdAt = createdAt; }
     public OffsetDateTime getUpdatedAt() { return updatedAt; }

@@ -161,8 +161,16 @@ import {
         </div>
       </div>
 
+      <!-- State Indicators -->
+      <div *ngIf="errorMessage()" class="p-4 mb-4 text-sm text-destructive rounded-lg bg-destructive/10 border border-destructive/20">
+        {{ errorMessage() }}
+      </div>
+      <div *ngIf="isLoading()" class="p-4 text-center text-sm text-muted-foreground">
+        Loading organizations...
+      </div>
+
       <!-- Organizations Table -->
-      <div class="bg-card rounded-2xl border border-border shadow-xs overflow-hidden">
+      <div *ngIf="!errorMessage() && !isLoading()" class="bg-card rounded-2xl border border-border shadow-xs overflow-hidden">
         <div class="overflow-x-auto">
           <table class="w-full text-left text-xs">
             <thead
@@ -371,6 +379,7 @@ import {
 export class SuperAdminOrganizationsComponent implements OnInit {
   organizations = signal<Organization[]>([]);
   isLoading = signal(false);
+  errorMessage = signal<string>('');
   searchQuery = signal('');
   selectedStatus = signal<'ALL' | 'PENDING_VERIFICATION' | 'VERIFIED' | 'SUSPENDED'>('ALL');
   showCreateModal = signal(false);
@@ -431,12 +440,16 @@ export class SuperAdminOrganizationsComponent implements OnInit {
 
   loadOrganizations(): void {
     this.isLoading.set(true);
+    this.errorMessage.set('');
     this.apiService.getPlatformOrganizations().subscribe({
       next: (data) => {
         this.organizations.set(data);
         this.isLoading.set(false);
       },
-      error: () => this.isLoading.set(false),
+      error: (err) => {
+        this.errorMessage.set(err.message || 'Failed to load organizations');
+        this.isLoading.set(false);
+      },
     });
   }
 
@@ -446,9 +459,8 @@ export class SuperAdminOrganizationsComponent implements OnInit {
         toast.success(`Organization '${org.name}' has been activated.`);
         this.loadOrganizations();
       },
-      error: () => {
-        org.status = 'VERIFIED';
-        toast.success(`Organization '${org.name}' status updated to ACTIVE.`);
+      error: (err) => {
+        toast.error(err.message || 'Failed to activate organization');
       },
     });
   }
@@ -459,9 +471,8 @@ export class SuperAdminOrganizationsComponent implements OnInit {
         toast.error(`Organization '${org.name}' has been suspended.`);
         this.loadOrganizations();
       },
-      error: () => {
-        org.status = 'SUSPENDED';
-        toast.error(`Organization '${org.name}' status updated to SUSPENDED.`);
+      error: (err) => {
+        toast.error(err.message || 'Failed to suspend organization');
       },
     });
   }
@@ -482,21 +493,8 @@ export class SuperAdminOrganizationsComponent implements OnInit {
         };
         this.loadOrganizations();
       },
-      error: () => {
-        const created: Organization = {
-          id: String(Date.now()),
-          name: this.newOrgForm.name,
-          orgCode: this.newOrgForm.orgCode,
-          licenseNumber: this.newOrgForm.licenseNumber || 'NABH-2026',
-          email: this.newOrgForm.email,
-          phone: this.newOrgForm.phone,
-          address: this.newOrgForm.address,
-          status: 'VERIFIED',
-          createdAt: new Date().toISOString(),
-        };
-        this.organizations.update((list) => [created, ...list]);
-        this.showCreateModal.set(false);
-        toast.success(`Organization '${this.newOrgForm.name}' provisioned successfully.`);
+      error: (err) => {
+        toast.error(err.message || 'Failed to provision organization');
       },
     });
   }

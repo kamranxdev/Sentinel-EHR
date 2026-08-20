@@ -2,9 +2,12 @@ package com.sentinel.scheduling.service;
 
 import com.sentinel.audit.service.AuditService;
 import com.sentinel.common.exception.ResourceNotFoundException;
+import com.sentinel.identity.entity.Practitioner;
 import com.sentinel.identity.entity.User;
+import com.sentinel.identity.repository.PractitionerRepository;
 import com.sentinel.identity.repository.UserRepository;
 import com.sentinel.scheduling.dto.CreateScheduleSlotRequest;
+import com.sentinel.scheduling.dto.PractitionerDTO;
 import com.sentinel.scheduling.dto.ScheduleSlotResponseDTO;
 import com.sentinel.scheduling.entity.ScheduleSlot;
 import com.sentinel.scheduling.repository.ScheduleSlotRepository;
@@ -22,13 +25,16 @@ public class ProviderScheduleService {
 
     private final ScheduleSlotRepository scheduleSlotRepository;
     private final UserRepository userRepository;
+    private final PractitionerRepository practitionerRepository;
     private final AuditService auditService;
 
     public ProviderScheduleService(ScheduleSlotRepository scheduleSlotRepository,
                                    UserRepository userRepository,
+                                   PractitionerRepository practitionerRepository,
                                    AuditService auditService) {
         this.scheduleSlotRepository = scheduleSlotRepository;
         this.userRepository = userRepository;
+        this.practitionerRepository = practitionerRepository;
         this.auditService = auditService;
     }
 
@@ -60,6 +66,25 @@ public class ProviderScheduleService {
             slots = scheduleSlotRepository.findByPractitionerId(practitionerId);
         }
         return slots.stream().map(this::mapToDTO).collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<PractitionerDTO> getPractitionersBySpecialty(String specialtyCode, UUID organizationId) {
+        List<Practitioner> practitioners = practitionerRepository.search(null, specialtyCode, "ACTIVE", organizationId);
+        return practitioners.stream().map(this::mapPractitionerToDTO).collect(Collectors.toList());
+    }
+
+    private PractitionerDTO mapPractitionerToDTO(Practitioner p) {
+        PractitionerDTO dto = new PractitionerDTO();
+        dto.setId(p.getId());
+        dto.setIdentifier(p.getIdentifier());
+        if (p.getPerson() != null) {
+            dto.setFirstName(p.getPerson().getFirstName());
+            dto.setLastName(p.getPerson().getLastName());
+        }
+        dto.setPrimarySpecialty(p.getPrimarySpecialty());
+        dto.setStatus(p.getStatus());
+        return dto;
     }
 
     public ScheduleSlotResponseDTO mapToDTO(ScheduleSlot s) {

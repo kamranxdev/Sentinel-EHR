@@ -32,8 +32,24 @@ public class Appointment {
     private User createdBy;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "practitioner_id")
+    private User practitioner;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "department_id")
     private Department department;
+
+    @Column(nullable = false, length = 30)
+    private String schedulingMode = "SPECIFIC_DOCTOR";
+
+    @Column(length = 100)
+    private String specialtyCode;
+
+    @Column(length = 30)
+    private String encounterType = "OUTPATIENT";
+
+    @Column(name = "encounter_id")
+    private UUID encounterId;
 
     @Column(nullable = false)
     private OffsetDateTime startsAt = OffsetDateTime.now();
@@ -53,6 +69,7 @@ public class Appointment {
     private OffsetDateTime checkedInAt;
     private OffsetDateTime arrivedAt;
     private OffsetDateTime completedAt;
+    private OffsetDateTime noShowAt;
 
     @Column(nullable = false)
     private OffsetDateTime createdAt = OffsetDateTime.now();
@@ -77,8 +94,23 @@ public class Appointment {
     public User getCreatedBy() { return createdBy; }
     public void setCreatedBy(User createdBy) { this.createdBy = createdBy; }
 
+    public User getPractitioner() { return practitioner; }
+    public void setPractitioner(User practitioner) { this.practitioner = practitioner; }
+
     public Department getDepartment() { return department; }
     public void setDepartment(Department department) { this.department = department; }
+
+    public String getSchedulingMode() { return schedulingMode; }
+    public void setSchedulingMode(String schedulingMode) { this.schedulingMode = schedulingMode; }
+
+    public String getSpecialtyCode() { return specialtyCode; }
+    public void setSpecialtyCode(String specialtyCode) { this.specialtyCode = specialtyCode; }
+
+    public String getEncounterType() { return encounterType; }
+    public void setEncounterType(String encounterType) { this.encounterType = encounterType; }
+
+    public UUID getEncounterId() { return encounterId; }
+    public void setEncounterId(UUID encounterId) { this.encounterId = encounterId; }
 
     public OffsetDateTime getStartsAt() { return startsAt; }
     public void setStartsAt(OffsetDateTime startsAt) { this.startsAt = startsAt; }
@@ -106,6 +138,9 @@ public class Appointment {
     public OffsetDateTime getCompletedAt() { return completedAt; }
     public void setCompletedAt(OffsetDateTime completedAt) { this.completedAt = completedAt; }
 
+    public OffsetDateTime getNoShowAt() { return noShowAt; }
+    public void setNoShowAt(OffsetDateTime noShowAt) { this.noShowAt = noShowAt; }
+
     public OffsetDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(OffsetDateTime createdAt) { this.createdAt = createdAt; }
 
@@ -116,6 +151,11 @@ public class Appointment {
     public void setVitals(Vitals vitals) { this.vitals = vitals; }
 
     // Legacy getter helpers
-    public User getDoctor() { return createdBy; }
-    public void setDoctor(User doctor) { this.createdBy = doctor; }
+    public User getDoctor() { return practitioner != null ? practitioner : createdBy; }
+    public void setDoctor(User doctor) {
+        this.practitioner = doctor;
+        if (this.createdBy == null) {
+            this.createdBy = doctor;
+        }
+    }
 }

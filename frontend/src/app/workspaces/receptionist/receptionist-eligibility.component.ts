@@ -463,6 +463,9 @@ import {
   `,
 })
 export class ReceptionistEligibilityComponent implements OnInit, OnChanges {
+  isLoading = signal(false);
+  errorMessage = signal<string | null>(null);
+
   @Input() isModal: boolean = false;
   @Input() patientIdInput: string | null = null;
   @Output() close = new EventEmitter<void>();
@@ -535,7 +538,10 @@ export class ReceptionistEligibilityComponent implements OnInit, OnChanges {
           if (match) this.selectedPatient.set(match);
         }
       },
-      error: () => {},
+      error: (err) => {
+        this.errorMessage.set(err.message || 'Operation failed.');
+        this.isLoading.set(false);
+      },
     });
   }
 
@@ -571,7 +577,11 @@ export class ReceptionistEligibilityComponent implements OnInit, OnChanges {
         if (patient.insuranceGroupNumber) this.groupNumber = patient.insuranceGroupNumber;
         this.onRunRTE();
       },
-      error: () => this.onRunRTE(),
+      error: (err) => {
+        this.errorMessage.set(err.message || 'Request failed.');
+        this.isLoading.set(false);
+        this.onRunRTE()
+      },
     });
   }
 
@@ -589,7 +599,7 @@ export class ReceptionistEligibilityComponent implements OnInit, OnChanges {
           this.rteResult.set(res);
           this.loading.set(false);
         },
-        error: () => this.loading.set(false),
+        error: (err) => { this.errorMessage.set(err.message || 'Request failed.'); this.isLoading.set(false); },
       });
   }
 
@@ -610,7 +620,7 @@ export class ReceptionistEligibilityComponent implements OnInit, OnChanges {
           this.receiptResult.set(receipt);
           this.collecting.set(false);
         },
-        error: () => this.collecting.set(false),
+        error: (err) => { this.errorMessage.set(err.message || 'Request failed.'); this.isLoading.set(false); },
       });
   }
 

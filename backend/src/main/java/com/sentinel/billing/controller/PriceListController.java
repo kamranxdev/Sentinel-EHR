@@ -26,16 +26,17 @@ public class PriceListController {
         this.priceListService = priceListService;
     }
 
-    @PostMapping({"/api/v1/organizations/{organizationId}/price-lists", "/api/v1/facilities/{organizationId}/price-lists"})
+    @PostMapping({ "/api/v1/organizations/{organizationId}/price-lists" })
     @Operation(summary = "Create a price list for an organization")
     public ResponseEntity<ApiResponse<PriceListResponseDTO>> createPriceList(
             @PathVariable UUID organizationId,
             @Valid @RequestBody CreatePriceListRequest request) {
         PriceListResponseDTO response = priceListService.createPriceList(organizationId, request);
-        return new ResponseEntity<>(ApiResponse.success("Price list created successfully", response), HttpStatus.CREATED);
+        return new ResponseEntity<>(ApiResponse.success("Price list created successfully", response),
+                HttpStatus.CREATED);
     }
 
-    @GetMapping({"/api/v1/organizations/{organizationId}/price-lists", "/api/v1/facilities/{organizationId}/price-lists"})
+    @GetMapping({ "/api/v1/organizations/{organizationId}/price-lists" })
     @Operation(summary = "Get price lists for an organization")
     public ResponseEntity<ApiResponse<List<PriceListResponseDTO>>> getOrganizationPriceLists(
             @PathVariable UUID organizationId) {
@@ -49,7 +50,8 @@ public class PriceListController {
             @PathVariable UUID priceListId,
             @Valid @RequestBody CreatePriceListItemRequest request) {
         PriceListItemResponseDTO response = priceListService.addItem(priceListId, request);
-        return new ResponseEntity<>(ApiResponse.success("Price list item added successfully", response), HttpStatus.CREATED);
+        return new ResponseEntity<>(ApiResponse.success("Price list item added successfully", response),
+                HttpStatus.CREATED);
     }
 
     @GetMapping("/api/v1/price-lists/{priceListId}/items")

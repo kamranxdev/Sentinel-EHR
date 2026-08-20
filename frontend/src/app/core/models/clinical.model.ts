@@ -11,7 +11,11 @@ export interface Encounter {
   encounterNumber?: string;
   attendingProvider?: User;
   attendingProviderId?: string;
-  encounterType: 'INPATIENT' | 'OUTPATIENT' | 'EMERGENCY' | 'TELEHEALTH' | string;
+  attendingPractitionerId?: string;
+  attendingPractitionerName?: string;
+  appointmentId?: string;
+  admissionId?: string;
+  encounterType: 'INPATIENT' | 'OUTPATIENT' | 'EMERGENCY' | 'OBSERVATION' | 'TELEHEALTH' | string;
   classCode?: string;
   location?: string;
   acuityScore?: string;
@@ -176,4 +180,26 @@ export interface DiagnosisStatusUpdateDTO {
 
 export interface PrescriptionStatusUpdateDTO {
   status: string;
+}
+
+export interface AdmissionRequest {
+  admissionSource?: string;
+  admitReason?: string;
+  bedId?: string;
+  wardId?: string;
+  notes?: string;
+}
+
+export interface AdmissionResponseDTO {
+  id?: string;
+  encounterId?: string;
+  patientId?: string;
+  admissionSource?: string;
+  admitReason?: string;
+  admittedAt?: string;
+  dischargedAt?: string;
+  dischargeDisposition?: string;
+  lengthOfStayDays?: number;
+  bedId?: string;
+  bedNumber?: string;
 }

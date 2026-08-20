@@ -9,6 +9,7 @@ import java.util.UUID;
 
 @Repository
 public interface ChargeItemRepository extends JpaRepository<ChargeItem, UUID> {
+    List<ChargeItem> findByEncounterId(UUID encounterId);
     List<ChargeItem> findByEncounterIdOrderByChargedAtDesc(UUID encounterId);
     List<ChargeItem> findByPatientIdOrderByChargedAtDesc(UUID patientId);
 }

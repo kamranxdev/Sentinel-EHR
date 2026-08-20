@@ -135,7 +135,13 @@ import {
       </div>
 
       <!-- Administrative Census Table -->
-      <div class="bg-card rounded-2xl border border-border shadow-xs overflow-hidden space-y-0">
+      <div *ngIf="errorMessage()" class="p-4 mb-4 text-sm text-destructive rounded-lg bg-destructive/10 border border-destructive/20">
+        {{ errorMessage() }}
+      </div>
+      <div *ngIf="loading()" class="p-4 text-center text-sm text-muted-foreground">
+        Loading census data...
+      </div>
+      <div class="bg-card rounded-2xl border border-border shadow-xs overflow-hidden space-y-0" *ngIf="!loading() && !errorMessage()">
         <div
           class="p-4 border-b border-border bg-muted/20 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3"
         >
@@ -245,6 +251,7 @@ import {
 export class OrganizationAdminPatientsComponent implements OnInit {
   patients = signal<Patient[]>([]);
   loading = signal(false);
+  errorMessage = signal<string>('');
   searchQuery = signal('');
 
   abhaCount = computed(
@@ -300,12 +307,16 @@ export class OrganizationAdminPatientsComponent implements OnInit {
 
   loadCensus(): void {
     this.loading.set(true);
+    this.errorMessage.set('');
     this.apiService.getPatients().subscribe({
       next: (pts) => {
         this.patients.set(pts);
         this.loading.set(false);
       },
-      error: () => this.loading.set(false),
+      error: (err) => {
+        this.errorMessage.set(err.message || 'Failed to load patients');
+        this.loading.set(false);
+      },
     });
   }
 }

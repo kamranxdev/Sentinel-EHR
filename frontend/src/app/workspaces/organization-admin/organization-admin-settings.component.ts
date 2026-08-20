@@ -101,6 +101,15 @@ import {
         </div>
       </div>
 
+      <!-- State Indicators -->
+      <div *ngIf="isLoading()" class="p-4 text-center text-sm text-muted-foreground">
+        Loading settings...
+      </div>
+      <div *ngIf="errorMessage()" class="p-4 mb-4 text-sm text-destructive rounded-lg bg-destructive/10 border border-destructive/20">
+        {{ errorMessage() }}
+      </div>
+
+      <ng-container *ngIf="!isLoading() && !errorMessage()">
       <!-- TAB 1: Hospital Profile Form -->
       <div
         *ngIf="activeTab() === 'profile'"
@@ -337,12 +346,15 @@ import {
           </div>
         </div>
       </div>
+      </ng-container>
     </div>
   `,
 })
 export class OrganizationAdminSettingsComponent implements OnInit {
   activeTab = signal<'profile' | 'hierarchy'>('profile');
   saving = signal(false);
+  isLoading = signal<boolean>(false);
+  errorMessage = signal<string>('');
 
   facility = {
     name: '',
@@ -365,6 +377,15 @@ export class OrganizationAdminSettingsComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
+    this.isLoading.set(true);
+    this.errorMessage.set('');
+
+    let pending = 2;
+    const checkDone = () => {
+      pending--;
+      if (pending === 0) this.isLoading.set(false);
+    };
+
     this.organizationService.getOrgAdminFacility().subscribe({
       next: (org: Organization | null) => {
         if (org) {
@@ -375,13 +396,24 @@ export class OrganizationAdminSettingsComponent implements OnInit {
           this.facility.phone = org.phone || '';
           this.facility.address = org.address || '';
         }
+        checkDone();
       },
-      error: () => {},
+      error: (err) => {
+        this.errorMessage.set(err.message || 'Failed to load facility settings');
+        checkDone();
+      },
     });
 
     this.apiService.getDepartments(this.authService.getActiveOrganizationId() || '1').subscribe({
-      next: (depts: Department[]) => this.departments.set(depts || []),
-      error: () => this.departments.set([]),
+      next: (depts: Department[]) => {
+        this.departments.set(depts || []);
+        checkDone();
+      },
+      error: (err) => {
+        this.errorMessage.set(err.message || 'Failed to load departments');
+        this.departments.set([]);
+        checkDone();
+      },
     });
   }
 

@@ -1,7 +1,10 @@
 import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { Observable } from 'rxjs';
 import { ApiService } from '../../core/services/api.service';
+import { AuthService } from '../../core/services/auth.service';
 import { PatientContextService } from '../../core/services/patient-context.service';
 import { Appointment } from '../../core/models/appointment.model';
 import { toast } from '@spartan-ng/brain/sonner';
@@ -28,6 +31,9 @@ import {
   lucideCalendar,
   lucideClipboardList,
   lucideAlertCircle,
+  lucideRefreshCw,
+  lucideBuilding2,
+  lucideUser,
 } from '@ng-icons/lucide';
 
 interface DiagnosisItem {
@@ -75,6 +81,9 @@ interface LabOrderItem {
       lucideCalendar,
       lucideClipboardList,
       lucideAlertCircle,
+      lucideRefreshCw,
+      lucideBuilding2,
+      lucideUser,
     }),
   ],
   template: `
@@ -84,19 +93,58 @@ interface LabOrderItem {
         class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-border"
       >
         <div>
-          <h1 class="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
-            Physician Consultation Workstation
+          <div class="flex items-center flex-wrap gap-2">
+            <h1 class="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
+              Physician Consultation Workstation
+            </h1>
             <span hlmBadge variant="outline" class="text-[10px]">Clinical Care</span>
-          </h1>
-          <p class="text-xs text-muted-foreground mt-0.5">
-            Manage patient consultations: Triaged $\\rightarrow$ Start Consultation $\\rightarrow$
-            Finalize Clinical Notes, eRx & Lab Orders.
+            <span
+              *ngIf="authService.currentUser()?.fullName"
+              hlmBadge
+              variant="secondary"
+              class="text-[11px] font-semibold bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-500/20"
+            >
+              Dr. {{ authService.currentUser()?.fullName }}
+            </span>
+            <span
+              *ngIf="authService.activeContext()?.organizationName || (authService.currentUser()?.organizations?.[0]?.name)"
+              hlmBadge
+              variant="outline"
+              class="text-[11px] border-border text-muted-foreground"
+            >
+              {{ authService.activeContext()?.organizationName || (authService.currentUser()?.organizations?.[0]?.name) }}
+            </span>
+          </div>
+          <p class="text-xs text-muted-foreground mt-1">
+            Manage patient consultations for this physician &amp; organization: Triaged &rarr; Start Consultation &rarr;
+            Finalize Clinical Notes, eRx &amp; Lab Orders.
           </p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button
+            hlmBtn
+            variant="outline"
+            size="sm"
+            (click)="loadAppointments()"
+            [disabled]="isLoading"
+            class="h-8 gap-1.5 text-xs font-medium"
+          >
+            <ng-icon name="lucideRefreshCw" [class.animate-spin]="isLoading" size="14" />
+            <span>Refresh Queue</span>
+          </button>
         </div>
       </div>
 
+      <!-- Loading and Error States -->
+      <div *ngIf="isLoading" class="p-8 text-center text-muted-foreground">
+        Loading appointments...
+      </div>
+      <div *ngIf="errorMessage" class="p-4 mb-4 rounded-lg bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border border-red-200 dark:border-red-800">
+        {{ errorMessage }}
+      </div>
+      
       <!-- Consultation Queue Table -->
-      <div class="rounded-xl border border-border bg-card overflow-hidden shadow-xs">
+      <div *ngIf="!isLoading && !errorMessage" class="rounded-xl border border-border bg-card overflow-hidden shadow-xs">
         <div class="overflow-x-auto">
           <table hlmTable class="w-full text-xs">
             <thead hlmTableHeader>
@@ -227,14 +275,24 @@ interface LabOrderItem {
                   >Appt #{{ activeApt()?.id }}</span
                 >
               </h2>
-              <p class="text-xs text-muted-foreground">
-                Patient:
-                <strong class="text-foreground">{{
-                  activeApt()?.patientName || activeApt()?.patient?.fullName
-                }}</strong>
-                <span *ngIf="activeApt()?.patient?.patientCode" class="font-mono text-[11px] ml-2"
-                  >({{ activeApt()?.patient?.patientCode }})</span
+              <p class="text-xs text-muted-foreground mt-1 flex items-center gap-2">
+                <span>Patient:
+                  <strong class="text-foreground">{{
+                    activeApt()?.patientName || activeApt()?.patient?.fullName
+                  }}</strong>
+                  <span *ngIf="activeApt()?.patient?.patientCode" class="font-mono text-[11px] ml-1"
+                    >({{ activeApt()?.patient?.patientCode }})</span
+                  >
+                </span>
+                <button
+                  hlmBtn
+                  size="sm"
+                  variant="outline"
+                  (click)="goToPatientChart(activeApt())"
+                  class="h-6 text-[10px] px-2 border-purple-500/30 text-purple-600 hover:bg-purple-500/10 ml-2"
                 >
+                  View Patient Clinical Chart
+                </button>
               </p>
             </div>
           </div>
@@ -602,33 +660,19 @@ export class PhysicianAppointmentsComponent implements OnInit {
   activeApt = signal<Appointment | null>(null);
   nursingTriageNotes = signal<string>('');
 
-  doctorNotes: string =
-    'Patient evaluated. Vital signs reviewed. Heart sounds S1 S2 normal, lungs clear to auscultation bilaterally. Good dietary control reported.';
-
-  diagnoses: DiagnosisItem[] = [
-    { conditionName: 'Essential Hypertension', icdCode: 'I10' },
-    { conditionName: 'Type 2 Diabetes Mellitus without complications', icdCode: 'E11.9' },
-  ];
-
-  prescriptions: PrescriptionItem[] = [
-    {
-      medicationName: 'Lisinopril',
-      dosage: '10mg',
-      frequency: '1 tablet once daily in the morning',
-    },
-    { medicationName: 'Metformin', dosage: '500mg', frequency: '1 tablet twice daily with meals' },
-  ];
-
-  labOrders: LabOrderItem[] = [
-    { testName: 'Hemoglobin A1c (HbA1c)' },
-    { testName: 'Comprehensive Metabolic Panel (CMP)' },
-  ];
-
+  isLoading: boolean = false;
+  errorMessage: string = '';
+  doctorNotes: string = '';
+  diagnoses: DiagnosisItem[] = [];
+  prescriptions: PrescriptionItem[] = [];
+  labOrders: LabOrderItem[] = [];
   submitting = signal(false);
 
   constructor(
+    public authService: AuthService,
     private apiService: ApiService,
     public patientContext: PatientContextService,
+    private router: Router
   ) { }
 
   ngOnInit(): void {
@@ -636,7 +680,40 @@ export class PhysicianAppointmentsComponent implements OnInit {
   }
 
   loadAppointments(): void {
-    this.apiService.getAppointments().subscribe((res) => this.appointments.set(res));
+    this.isLoading = true;
+    this.errorMessage = '';
+
+    const user = this.authService.currentUser();
+    const practitionerId = user?.userId || user?.id;
+    const activeContext = this.authService.activeContext();
+    const organizationId =
+      activeContext?.organizationId ||
+      (user?.organizations && user.organizations.length > 0 ? user.organizations[0].id : undefined);
+
+    let appointments$: Observable<Appointment[]>;
+    if (practitionerId && organizationId) {
+      appointments$ = this.apiService.getPractitionerOrganizationAppointments(
+        practitionerId,
+        organizationId,
+      );
+    } else if (practitionerId) {
+      appointments$ = this.apiService.getAppointmentsByPractitioner(practitionerId);
+    } else if (organizationId) {
+      appointments$ = this.apiService.getAppointmentsByOrganization(organizationId);
+    } else {
+      appointments$ = this.apiService.getAppointments();
+    }
+
+    appointments$.subscribe({
+      next: (res) => {
+        this.appointments.set(res);
+        this.isLoading = false;
+      },
+      error: (err) => {
+        this.errorMessage = err.message || 'Failed to load appointments';
+        this.isLoading = false;
+      }
+    });
   }
 
   getStageBadgeLabel(stage?: string): string {
@@ -702,6 +779,16 @@ export class PhysicianAppointmentsComponent implements OnInit {
 
   closeModal(): void {
     this.activeApt.set(null);
+  }
+
+  goToPatientChart(apt: Appointment | null): void {
+    if (!apt) return;
+    const patientId = apt.patientId || apt.patient?.id;
+    if (patientId) {
+      this.patientContext.selectPatientById(patientId);
+      this.router.navigate(['/physician/chart']);
+      this.closeModal();
+    }
   }
 
   // Dynamic Array Handlers

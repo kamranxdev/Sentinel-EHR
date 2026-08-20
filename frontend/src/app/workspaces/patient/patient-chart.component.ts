@@ -1845,6 +1845,9 @@ export type PatientChartTab =
   `,
 })
 export class PatientChartComponent implements OnInit {
+  isLoading = false;
+  errorMessage = "";
+
   patient = signal<Patient | null>(null);
   loading = signal<boolean>(true);
   activeTab = signal<PatientChartTab>('overview');
@@ -1965,11 +1968,7 @@ export class PatientChartComponent implements OnInit {
           toast.error('Could not verify patient profile identity.');
         }
       },
-      error: (err) => {
-        this.loading.set(false);
-        console.error('Failed to load patient chart data', err);
-        toast.error('Failed to load chart: ' + (err.error?.message || 'Unknown network error'));
-      },
+      error: (err) => { this.errorMessage = err.message || 'Failed'; this.isLoading = false; },
     });
   }
 
@@ -1977,19 +1976,19 @@ export class PatientChartComponent implements OnInit {
     // 1. Lab Orders
     this.apiService.getLabOrdersList(patientId).subscribe({
       next: (res) => this.labOrders.set(Array.isArray(res) ? res : []),
-      error: () => this.labOrders.set([]),
+      error: (err) => { this.errorMessage = err.message || 'Failed'; this.isLoading = false; },
     });
 
     // 2. Imaging Orders
     this.apiService.getImagingOrdersByPatient(patientId).subscribe({
       next: (res) => this.imagingOrders.set(Array.isArray(res) ? res : []),
-      error: () => this.imagingOrders.set([]),
+      error: (err) => { this.errorMessage = err.message || 'Failed'; this.isLoading = false; },
     });
 
     // 3. Diagnoses
     this.apiService.getDiagnosesByPatient(patientId).subscribe({
       next: (res) => this.diagnoses.set(Array.isArray(res) ? res : []),
-      error: () => this.diagnoses.set([]),
+      error: (err) => { this.errorMessage = err.message || 'Failed'; this.isLoading = false; },
     });
 
     // 4. Encounters
@@ -2005,47 +2004,47 @@ export class PatientChartComponent implements OnInit {
                 this.careTeamMembers.set(team.members);
               }
             },
-            error: () => {},
+            error: (err) => { this.errorMessage = err.message || 'Failed'; this.isLoading = false; },
           });
         }
       },
-      error: () => this.encounters.set([]),
+      error: (err) => { this.errorMessage = err.message || 'Failed'; this.isLoading = false; },
     });
 
     // 5. Prescriptions
     this.apiService.getPrescriptionsByPatient(patientId).subscribe({
       next: (res) => this.prescriptions.set(Array.isArray(res) ? res : []),
-      error: () => this.prescriptions.set([]),
+      error: (err) => { this.errorMessage = err.message || 'Failed'; this.isLoading = false; },
     });
 
     // 6. Allergies
     this.apiService.getAllergiesByPatient(patientId).subscribe({
       next: (res) => this.allergies.set(Array.isArray(res) ? res : []),
-      error: () => this.allergies.set([]),
+      error: (err) => { this.errorMessage = err.message || 'Failed'; this.isLoading = false; },
     });
 
     // 7. Vitals
     this.apiService.getVitalsByPatient(patientId).subscribe({
       next: (res) => this.vitals.set(Array.isArray(res) ? res : []),
-      error: () => this.vitals.set([]),
+      error: (err) => { this.errorMessage = err.message || 'Failed'; this.isLoading = false; },
     });
 
     // 8. Procedures
     this.apiService.getProcedureOrdersByPatient(patientId).subscribe({
       next: (res) => this.procedureOrders.set(Array.isArray(res) ? res : []),
-      error: () => this.procedureOrders.set([]),
+      error: (err) => { this.errorMessage = err.message || 'Failed'; this.isLoading = false; },
     });
 
     // 9. Clinical Documents
     this.apiService.getPatientDocuments(patientId).subscribe({
       next: (res) => this.clinicalDocuments.set(Array.isArray(res) ? res : []),
-      error: () => this.clinicalDocuments.set([]),
+      error: (err) => { this.errorMessage = err.message || 'Failed'; this.isLoading = false; },
     });
 
     // 10. Consents
     this.apiService.getPatientConsents(patientId).subscribe({
       next: (res) => this.patientConsents.set(Array.isArray(res) ? res : []),
-      error: () => this.patientConsents.set([]),
+      error: (err) => { this.errorMessage = err.message || 'Failed'; this.isLoading = false; },
     });
 
     setTimeout(() => {
@@ -2150,9 +2149,7 @@ export class PatientChartComponent implements OnInit {
         window.URL.revokeObjectURL(url);
         toast.success('FHIR Health Record Package downloaded successfully.');
       },
-      error: () => {
-        toast.success('FHIR Record Export initialized.');
-      },
+      error: (err) => { this.errorMessage = err.message || 'Failed'; this.isLoading = false; },
     });
   }
 

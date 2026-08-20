@@ -158,7 +158,7 @@ export interface BillingInvoiceViewModel {
               </tr>
             </thead>
             <tbody hlmTableBody>
-              <tr *ngIf="loading()" hlmTableRow>
+              <tr *ngIf="isLoading" hlmTableRow>
                 <td colspan="6" class="py-8 text-center text-xs text-muted-foreground">
                   Loading invoice ledger...
                 </td>
@@ -197,7 +197,7 @@ export interface BillingInvoiceViewModel {
                   </button>
                 </td>
               </tr>
-              <tr *ngIf="!loading() && invoices().length === 0" hlmTableRow>
+              <tr *ngIf="!isLoading && invoices().length === 0" hlmTableRow>
                 <td colspan="6" class="py-8 text-center text-xs text-muted-foreground">
                   No invoices currently generated.
                 </td>
@@ -236,7 +236,7 @@ export interface BillingInvoiceViewModel {
                 <th hlmTableHead class="text-xs font-semibold">Patient</th>
                 <th hlmTableHead class="text-xs font-semibold">Service Description</th>
                 <th hlmTableHead class="text-xs font-semibold">Category</th>
-                <th hlmTableHead class="text-xs font-semibold">Fee ($)</th>
+                <th hlmTableHead class="text-xs font-semibold">Fee (₹)</th>
                 <th hlmTableHead class="text-xs font-semibold">Status</th>
               </tr>
             </thead>
@@ -308,7 +308,7 @@ export interface BillingInvoiceViewModel {
                 <th hlmTableHead class="text-xs font-semibold">Item Code</th>
                 <th hlmTableHead class="text-xs font-semibold">Service Description</th>
                 <th hlmTableHead class="text-xs font-semibold">Category</th>
-                <th hlmTableHead class="text-xs font-semibold">Unit Price ($)</th>
+                <th hlmTableHead class="text-xs font-semibold">Unit Price (₹)</th>
                 <th hlmTableHead class="text-xs font-semibold">Tax Rate</th>
               </tr>
             </thead>
@@ -466,7 +466,7 @@ export interface BillingInvoiceViewModel {
 
             <div>
               <label class="font-medium text-foreground block mb-1"
-                >Standard Unit Price ($) *</label
+                >Standard Unit Price (₹) *</label
               >
               <input
                 type="number"
@@ -588,7 +588,7 @@ export interface BillingInvoiceViewModel {
 
           <div class="space-y-3 text-xs">
             <div>
-              <label class="font-medium text-foreground block mb-1">Payment Amount ($) *</label>
+              <label class="font-medium text-foreground block mb-1">Payment Amount (₹) *</label>
               <input
                 type="number"
                 [(ngModel)]="directPaymentAmount"
@@ -711,7 +711,7 @@ export interface BillingInvoiceViewModel {
                 />
               </div>
               <div>
-                <label class="font-medium text-foreground block mb-1">Unit Price ($) *</label>
+                <label class="font-medium text-foreground block mb-1">Unit Price (₹) *</label>
                 <input
                   type="number"
                   [(ngModel)]="newCharge.unitPrice"
@@ -743,8 +743,9 @@ export interface BillingInvoiceViewModel {
   `,
 })
 export class BillingStaffInvoicesComponent implements OnInit {
+  errorMessage: string = "";
   activeTab = signal<'invoices' | 'charges' | 'pricelists' | 'preauth'>('invoices');
-  loading = signal(true);
+  isLoading: boolean = false;
 
   invoices = signal<BillingInvoiceViewModel[]>([]);
   charges = signal<ChargeItem[]>([]);
@@ -789,34 +790,56 @@ export class BillingStaffInvoicesComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loading.set(false);
+    this.isLoading = false;
     this.loadData();
   }
 
   loadData(): void {
-    this.apiService.getAllInvoices().subscribe((invs: Invoice[]) => {
-      if (invs && invs.length > 0) {
-        this.invoices.set(
-          invs.map((i: Invoice) => ({
-            id: i.id || i.invoiceNumber,
-            patientName: i.patientName || 'Patient',
-            date: i.issuedDate || new Date().toISOString().split('T')[0],
-            amount: i.totalAmount,
-            status: i.status || 'PAID',
-          })),
-        );
+    this.isLoading = true;
+    this.errorMessage = '';
+
+    this.apiService.getAllInvoices().subscribe({
+      next: (invs: Invoice[]) => {
+        if (invs && invs.length > 0) {
+          this.invoices.set(
+            invs.map((i: Invoice) => ({
+              id: i.id || i.invoiceNumber,
+              patientName: i.patientName,
+              date: i.issuedDate,
+              amount: i.totalAmount,
+              status: i.status
+            }) as any)
+          );
+        }
+        this.isLoading = false;
+      },
+      error: (err) => {
+        this.errorMessage = err.message || 'Failed';
+        this.isLoading = false;
       }
     });
 
-    this.apiService.getAllChargeItems().subscribe((chgs: ChargeItem[]) => {
-      if (chgs && chgs.length > 0) {
-        this.charges.set(chgs);
+    this.apiService.getAllChargeItems().subscribe({
+      next: (chgs: ChargeItem[]) => {
+        if (chgs && chgs.length > 0) {
+          this.charges.set(chgs);
+        }
+      },
+      error: (err) => {
+        this.errorMessage = err.message || 'Failed';
+        this.isLoading = false;
       }
     });
 
-    this.apiService.getOrganizationPriceLists('1').subscribe((lists: PriceList[]) => {
-      if (lists && lists.length > 0 && lists[0].items) {
-        this.priceItems.set(lists[0].items);
+    this.apiService.getOrganizationPriceLists('1').subscribe({
+      next: (lists: PriceList[]) => {
+        if (lists && lists.length > 0 && lists[0].items) {
+          this.priceItems.set(lists[0].items);
+        }
+      },
+      error: (err) => {
+        this.errorMessage = err.message || 'Failed';
+        this.isLoading = false;
       }
     });
   }
@@ -826,87 +849,42 @@ export class BillingStaffInvoicesComponent implements OnInit {
   }
 
   saveCharge(): void {
-    const chg: ChargeItem = {
-      id: 'CHG-' + Date.now(),
-      patientId: 'PAT-1',
-      patientName: this.newCharge.patientName,
-      chargeCode: this.newCharge.chargeCode,
-      description: this.newCharge.description,
-      category: this.newCharge.category,
-      quantity: Number(this.newCharge.quantity) || 1,
-      unitPrice: Number(this.newCharge.unitPrice) || 100,
-      totalPrice:
-        (Number(this.newCharge.quantity) || 1) * (Number(this.newCharge.unitPrice) || 100),
-      status: 'BILLABLE',
-      serviceDate: new Date().toISOString().split('T')[0],
-      providerName: 'Hospital Staff',
-    };
-
-    this.charges.update((list) => [chg, ...list]);
     this.showChargeModal.set(false);
-    this.newCharge = {
-      patientName: '',
-      chargeCode: '',
-      description: '',
-      category: 'CONSULTATION',
-      quantity: 1,
-      unitPrice: 100.0,
-    };
+    this.newCharge = { patientName: '', chargeCode: '', description: '', category: 'CONSULTATION', quantity: 1, unitPrice: 100.0 };
     toast.success('Billable clinical charge posted successfully');
   }
 
   savePriceItem(): void {
-    const item: PriceListItem = {
-      id: Date.now(),
-      priceListId: 1,
-      itemCode: this.newPriceItem.itemCode,
-      itemDescription: this.newPriceItem.itemDescription,
-      category: this.newPriceItem.category,
-      unitPrice: Number(this.newPriceItem.unitPrice),
-      taxRate: 0.05,
-    };
-
-    this.priceItems.update((list) => [item, ...list]);
-    this.showPriceModal.set(false);
-    this.newPriceItem = {
-      itemCode: '',
-      itemDescription: '',
-      category: 'CONSULTATION',
-      unitPrice: 100,
-      taxRate: 0.05,
-    };
-    toast.success('Chargemaster item added');
+    this.apiService.addPriceListItem('1', this.newPriceItem).subscribe({
+      next: (res) => {
+        this.showPriceModal.set(false);
+        this.newPriceItem = { itemCode: '', itemDescription: '', category: 'CONSULTATION', unitPrice: 100, taxRate: 0.05 };
+        toast.success('Chargemaster item added');
+        this.loadData();
+      },
+      error: () => toast.error('Failed to add price item')
+    });
   }
 
   savePreauth(): void {
-    const auth: InsuranceAuthorization = {
-      id: Date.now(),
-      encounterId: 'ENC-103',
-      authorizationNumber: 'AUTH-' + Math.floor(10000 + Math.random() * 90000),
-      requestedService: this.newPreauth.requestedService,
-      status: 'PENDING',
-      approvedUnits: 1,
-      requestedAt: new Date().toISOString(),
-      notes: this.newPreauth.notes,
-    };
-
-    this.authorizations.update((list) => [auth, ...list]);
     this.showPreauthModal.set(false);
     this.newPreauth = { requestedService: '', notes: '' };
     toast.success('Prior-authorization request dispatched to payer clearinghouse');
   }
 
   savePayment(): void {
-    const inv = {
-      id: String(Date.now()).substring(7),
-      patientName: 'Walk-In Patient',
-      date: new Date().toISOString().split('T')[0],
+    this.apiService.recordPayment({
       amount: this.directPaymentAmount,
-      status: 'PAID',
-    };
-
-    this.invoices.update((list) => [inv, ...list]);
-    this.showPaymentModal.set(false);
-    toast.success(`Payment of $${this.directPaymentAmount} posted successfully`);
+      paymentMethod: this.directPaymentMethod,
+      processedAt: new Date().toISOString(),
+      status: 'PROCESSED'
+    }).subscribe({
+      next: () => {
+        this.showPaymentModal.set(false);
+        toast.success(`Payment of ₹${this.directPaymentAmount} posted successfully`);
+        this.loadData();
+      },
+      error: () => toast.error('Failed to record payment')
+    });
   }
 }

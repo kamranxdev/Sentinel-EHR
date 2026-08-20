@@ -115,7 +115,7 @@ interface AnalyzerStatus {
 
         <div class="flex items-center gap-2">
           <button hlmBtn variant="outline" size="sm" (click)="loadOrders()" class="gap-2 text-xs">
-            <ng-icon name="lucideRefreshCw" [class.animate-spin]="loading()" size="14" />
+            <ng-icon name="lucideRefreshCw" [class.animate-spin]="isLoading" size="14" />
             <span>Refresh LIS</span>
           </button>
           <a
@@ -596,7 +596,7 @@ interface AnalyzerStatus {
               </tr>
             </thead>
             <tbody hlmTableBody class="divide-y divide-border">
-              <tr *ngIf="loading()" hlmTableRow>
+              <tr *ngIf="isLoading" hlmTableRow>
                 <td colspan="6" class="py-8 text-center text-xs text-muted-foreground">
                   <div class="flex items-center justify-center gap-2">
                     <ng-icon
@@ -608,15 +608,15 @@ interface AnalyzerStatus {
                   </div>
                 </td>
               </tr>
-              <tr *ngIf="!loading() && error()" hlmTableRow>
+              <tr *ngIf="!isLoading && errorMessage" hlmTableRow>
                 <td colspan="6" class="py-6 text-center text-xs text-destructive">
-                  <p>{{ error() }}</p>
+                  <p>{{ errorMessage }}</p>
                   <button (click)="loadOrders()" class="mt-2 text-xs text-teal-600 underline">
                     Retry Connection
                   </button>
                 </td>
               </tr>
-              <tr *ngIf="!loading() && !error() && filteredOrders().length === 0" hlmTableRow>
+              <tr *ngIf="!isLoading && !errorMessage && filteredOrders().length === 0" hlmTableRow>
                 <td colspan="6" class="py-8 text-center text-xs text-muted-foreground">
                   No laboratory orders matching the current filter criteria.
                 </td>
@@ -741,50 +741,15 @@ interface AnalyzerStatus {
   `,
 })
 export class LabTechnicianDashboardComponent implements OnInit {
+  isLoading: boolean = false;
+  errorMessage: string = '';
   labOrders = signal<LabOrder[]>([]);
-  loading = signal<boolean>(true);
-  error = signal<string | null>(null);
+  
+  
   selectedFilter = signal<string>('ALL');
   searchQuery = '';
 
-  analyzers: AnalyzerStatus[] = [
-    {
-      id: 'HEM-01',
-      name: 'Sysmex XN-1000',
-      discipline: 'Automated Hematology Analyzer',
-      status: 'ONLINE',
-      reagentLevel: 88,
-      queuedSamples: 6,
-      lastQc: 'Passed 07:30',
-    },
-    {
-      id: 'CHEM-02',
-      name: 'Roche Cobas 6000',
-      discipline: 'Clinical Chemistry & Electrolytes',
-      status: 'RUNNING',
-      reagentLevel: 94,
-      queuedSamples: 8,
-      lastQc: 'Passed 06:45',
-    },
-    {
-      id: 'IMM-03',
-      name: 'Abbott Architect i2000SR',
-      discipline: 'High-Sensitivity Immunoassay',
-      status: 'ONLINE',
-      reagentLevel: 62,
-      queuedSamples: 3,
-      lastQc: 'Passed 08:15',
-    },
-    {
-      id: 'HPLC-04',
-      name: 'Bio-Rad D-10 HPLC',
-      discipline: 'Glycated Hemoglobin HbA1c System',
-      status: 'ONLINE',
-      reagentLevel: 75,
-      queuedSamples: 2,
-      lastQc: 'Passed 08:00',
-    },
-  ];
+  analyzers: AnalyzerStatus[] = [];
 
   statOrders = computed(() =>
     this.labOrders().filter(
@@ -841,18 +806,14 @@ export class LabTechnicianDashboardComponent implements OnInit {
   }
 
   loadOrders(): void {
-    this.loading.set(true);
-    this.error.set(null);
+    this.isLoading = true;
+    this.errorMessage = '';
     this.apiService.getLabOrdersList().subscribe({
       next: (orders) => {
         this.labOrders.set(Array.isArray(orders) ? orders : []);
-        this.loading.set(false);
+        this.isLoading = false;
       },
-      error: (err) => {
-        console.error('Failed to load lab orders:', err);
-        this.error.set('Failed to connect to LIS server. Please retry.');
-        this.loading.set(false);
-      },
+      error: (err) => { this.errorMessage = err.message || 'Failed'; this.isLoading = false; },
     });
   }
 

@@ -32,6 +32,16 @@ public class AppointmentActionController {
         return ResponseEntity.ok(ApiResponse.success("Patient checked in successfully", response));
     }
 
+    @PostMapping("/no-show")
+    @Operation(summary = "Record a patient no-show for an appointment")
+    public ResponseEntity<ApiResponse<AppointmentResponseDTO>> noShow(
+            @PathVariable UUID appointmentId,
+            @RequestBody(required = false) AppointmentNoShowRequest request) {
+        AppointmentNoShowRequest req = request != null ? request : new AppointmentNoShowRequest();
+        AppointmentResponseDTO response = actionService.markNoShow(appointmentId, req);
+        return ResponseEntity.ok(ApiResponse.success("Patient no-show recorded", response));
+    }
+
     @PostMapping("/triage")
     @Operation(summary = "Record triage vitals for an appointment")
     public ResponseEntity<ApiResponse<AppointmentResponseDTO>> triage(

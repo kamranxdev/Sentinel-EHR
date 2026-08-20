@@ -369,10 +369,20 @@ export interface NursingAssessmentRecord {
         </div>
       </div>
 
+      <!-- Loading & Error States -->
+      <div *ngIf="isLoading" class="p-4 rounded-2xl border border-border bg-muted/20 text-center text-muted-foreground text-xs font-semibold">
+        <ng-icon name="lucideRefreshCw" class="animate-spin mr-2" size="14"></ng-icon>
+        Loading chart data...
+      </div>
+      <div *ngIf="errorMessage" class="p-4 rounded-2xl border border-rose-500/30 bg-rose-500/10 text-rose-600 text-xs font-semibold flex items-center gap-2">
+        <ng-icon name="lucideAlertTriangle" size="16"></ng-icon>
+        <span>{{ errorMessage }}</span>
+      </div>
+
       <!-- ========================================== -->
       <!-- TAB 1: Bedside Physiological Vitals Flowsheet -->
       <!-- ========================================== -->
-      <div *ngIf="activeTab() === 'vitals'" class="space-y-6">
+      <div *ngIf="!isLoading && !errorMessage && activeTab() === 'vitals'" class="space-y-6">
         <div
           class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-border"
         >
@@ -458,7 +468,7 @@ export interface NursingAssessmentRecord {
       <!-- ========================================== -->
       <!-- TAB 2: eMAR & Medication Administration -->
       <!-- ========================================== -->
-      <div *ngIf="activeTab() === 'mar'" class="space-y-6">
+      <div *ngIf="!isLoading && !errorMessage && activeTab() === 'mar'" class="space-y-6">
         <div
           class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-border"
         >
@@ -557,7 +567,7 @@ export interface NursingAssessmentRecord {
       <!-- ========================================== -->
       <!-- TAB 3: Intake & Output (I/O) Fluid Balance -->
       <!-- ========================================== -->
-      <div *ngIf="activeTab() === 'io'" class="space-y-6">
+      <div *ngIf="!isLoading && !errorMessage && activeTab() === 'io'" class="space-y-6">
         <div
           class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-border"
         >
@@ -654,7 +664,7 @@ export interface NursingAssessmentRecord {
       <!-- ========================================== -->
       <!-- TAB 4: Nursing Assessment & Flowsheet -->
       <!-- ========================================== -->
-      <div *ngIf="activeTab() === 'assessment'" class="space-y-6">
+      <div *ngIf="!isLoading && !errorMessage && activeTab() === 'assessment'" class="space-y-6">
         <div
           class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-border"
         >
@@ -719,7 +729,7 @@ export interface NursingAssessmentRecord {
       <!-- ========================================== -->
       <!-- TAB 5: Allergies & Risk Register -->
       <!-- ========================================== -->
-      <div *ngIf="activeTab() === 'allergies'" class="space-y-6">
+      <div *ngIf="!isLoading && !errorMessage && activeTab() === 'allergies'" class="space-y-6">
         <div
           class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-border"
         >
@@ -751,7 +761,7 @@ export interface NursingAssessmentRecord {
       <!-- ========================================== -->
       <!-- TAB 6: SBAR Shift Handoff Notes -->
       <!-- ========================================== -->
-      <div *ngIf="activeTab() === 'sbar'" class="space-y-6">
+      <div *ngIf="!isLoading && !errorMessage && activeTab() === 'sbar'" class="space-y-6">
         <div
           class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-border"
         >
@@ -824,7 +834,7 @@ export interface NursingAssessmentRecord {
       <!-- ========================================== -->
       <!-- TAB 7: Care Team Directory -->
       <!-- ========================================== -->
-      <div *ngIf="activeTab() === 'care-team'" class="space-y-6">
+      <div *ngIf="!isLoading && !errorMessage && activeTab() === 'care-team'" class="space-y-6">
         <div
           class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-border"
         >
@@ -876,6 +886,9 @@ export interface NursingAssessmentRecord {
   `,
 })
 export class NurseChartComponent implements OnInit {
+  isLoading = false;
+  errorMessage = '';
+
   activeTab = signal<NurseChartTab>('vitals');
   patients = signal<Patient[]>([]);
   activePatient = signal<Patient | null>(null);
@@ -912,6 +925,8 @@ export class NurseChartComponent implements OnInit {
       }
     });
 
+    this.isLoading = true;
+    this.errorMessage = '';
     this.apiService.getPatients().subscribe({
       next: (pts) => {
         const list = Array.isArray(pts) ? pts : [];
@@ -919,6 +934,11 @@ export class NurseChartComponent implements OnInit {
         if (!this.patientContext.activePatient() && list.length > 0) {
           this.patientContext.setActivePatient(list[0]);
         }
+        this.isLoading = false;
+      },
+      error: (err) => {
+        this.errorMessage = err.message || 'Failed to load patients';
+        this.isLoading = false;
       },
     });
   }
@@ -942,19 +962,36 @@ export class NurseChartComponent implements OnInit {
   loadPatientChartData(patientId?: string): void {
     if (!patientId) return;
 
+    this.isLoading = true;
+    this.errorMessage = '';
+
     this.apiService.getVitalsByPatient(patientId).subscribe({
-      next: (v: Vitals[]) => this.vitals.set(Array.isArray(v) ? v : []),
-      error: () => this.vitals.set([]),
+      next: (v: Vitals[]) => {
+        this.vitals.set(Array.isArray(v) ? v : []);
+        this.isLoading = false;
+      },
+      error: (err) => {
+        this.errorMessage = err.message || 'Failed to load vitals';
+        this.isLoading = false;
+      },
     });
 
     this.apiService.getPrescriptionsByPatient(patientId).subscribe({
-      next: (rx: Prescription[]) => this.prescriptions.set(Array.isArray(rx) ? rx : []),
-      error: () => this.prescriptions.set([]),
+      next: (rx: Prescription[]) => {
+        this.prescriptions.set(Array.isArray(rx) ? rx : []);
+      },
+      error: (err) => {
+        this.errorMessage = err.message || 'Failed to load prescriptions';
+      },
     });
 
     this.apiService.getAllergiesByPatient(patientId).subscribe({
-      next: (al: Allergy[]) => this.allergies.set(Array.isArray(al) ? al : []),
-      error: () => this.allergies.set([]),
+      next: (al: Allergy[]) => {
+        this.allergies.set(Array.isArray(al) ? al : []);
+      },
+      error: (err) => {
+        this.errorMessage = err.message || 'Failed to load allergies';
+      },
     });
   }
 

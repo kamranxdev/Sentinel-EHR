@@ -110,7 +110,16 @@ import {
           </div>
         </div>
 
-        <div class="overflow-x-auto">
+        
+        <div *ngIf="loading()" class="p-8 text-center text-muted-foreground flex flex-col items-center justify-center gap-2">
+          <ng-icon name="lucideRefreshCw" size="24" class="animate-spin text-indigo-500"></ng-icon>
+          <p>Loading data...</p>
+        </div>
+        <div *ngIf="errorMessage()" class="p-4 m-4 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive text-sm flex items-center gap-2">
+          <ng-icon name="lucideAlertTriangle" size="16"></ng-icon>
+          {{ errorMessage() }}
+        </div>
+        <div class="overflow-x-auto" *ngIf="!loading() && !errorMessage()">
           <table class="w-full text-xs text-left">
             <thead
               class="bg-muted/50 border-b border-border text-muted-foreground font-semibold uppercase tracking-wider"
@@ -172,7 +181,7 @@ import {
                 </td>
               </tr>
 
-              <tr *ngIf="filteredVerifiedOrders().length === 0">
+              <tr *ngIf="filteredVerifiedOrders().length === 0 && !loading() && !errorMessage()">
                 <td colspan="6" class="py-8 text-center text-muted-foreground text-xs">
                   No verified prescriptions currently waiting for dispensing.
                 </td>
@@ -290,6 +299,7 @@ export class PharmacistDispenseComponent implements OnInit {
   orders = signal<MedicationOrder[]>([]);
   batches = signal<MedicationBatch[]>([]);
   loading = signal(false);
+  errorMessage = signal<string | null>(null);
   searchQuery = signal('');
   selectedOrder = signal<MedicationOrder | null>(null);
 
@@ -328,12 +338,12 @@ export class PharmacistDispenseComponent implements OnInit {
         this.orders.set(orders);
         this.loading.set(false);
       },
-      error: () => this.loading.set(false),
+      error: (err) => { this.errorMessage.set(err.message || 'Failed'); this.loading.set(false); },
     });
 
     this.apiService.getMedicationBatches().subscribe({
       next: (b: MedicationBatch[]) => this.batches.set(b),
-      error: () => {},
+      error: (err) => { this.errorMessage.set(err.message || 'Failed'); },
     });
   }
 
@@ -357,10 +367,8 @@ export class PharmacistDispenseComponent implements OnInit {
         o.status = 'DISPENSED';
         this.selectedOrder.set(null);
       },
-      error: () => {
-        toast.success(`Medication ${o.medicationName} dispensed.`);
-        o.status = 'DISPENSED';
-        this.selectedOrder.set(null);
+      error: (err) => {
+        this.errorMessage.set(err.message || 'Failed');
       },
     });
   }

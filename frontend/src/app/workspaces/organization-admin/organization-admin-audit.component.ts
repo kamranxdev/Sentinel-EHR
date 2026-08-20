@@ -115,7 +115,15 @@ import { AuthService } from '../../core/services/auth.service';
           </a>
         </div>
 
-        <div class="overflow-x-auto">
+        <!-- State Indicators -->
+        <div *ngIf="isLoading()" class="p-4 text-center text-sm text-muted-foreground">
+          Loading audit logs...
+        </div>
+        <div *ngIf="errorMessage()" class="p-4 mb-4 text-sm text-destructive rounded-lg bg-destructive/10 border border-destructive/20">
+          {{ errorMessage() }}
+        </div>
+
+        <div class="overflow-x-auto" *ngIf="!isLoading() && !errorMessage()">
           <table hlmTable class="w-full text-xs">
             <thead hlmTableHeader>
               <tr hlmTableRow class="bg-muted/40">
@@ -178,6 +186,8 @@ import { AuthService } from '../../core/services/auth.service';
 })
 export class OrganizationAdminAuditComponent implements OnInit {
   auditLogs = signal<AuditLog[]>([]);
+  isLoading = signal<boolean>(false);
+  errorMessage = signal<string>('');
 
   deniedCount = computed(() => this.auditLogs().filter((l) => l.action === 'ACCESS_DENIED').length);
   uniqueActorsCount = computed(() => new Set(this.auditLogs().map((l) => l.email)).size);
@@ -186,7 +196,18 @@ export class OrganizationAdminAuditComponent implements OnInit {
 
   ngOnInit(): void {
     const orgId = this.authService.getActiveOrganizationId() || undefined;
-    this.apiService.getAuditLogs(orgId).subscribe((logs) => this.auditLogs.set(logs));
+    this.isLoading.set(true);
+    this.errorMessage.set('');
+    this.apiService.getAuditLogs(orgId).subscribe({
+      next: (logs) => {
+        this.auditLogs.set(logs);
+        this.isLoading.set(false);
+      },
+      error: (err) => {
+        this.errorMessage.set(err.message || 'Failed to load audit logs');
+        this.isLoading.set(false);
+      }
+    });
   }
 
   formatRole(role: string): string {

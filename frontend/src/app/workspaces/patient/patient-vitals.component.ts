@@ -561,6 +561,9 @@ import {
   `,
 })
 export class PatientVitalsComponent implements OnInit {
+  isLoading = false;
+  errorMessage = "";
+
   vitals = signal<Vitals[]>([]);
   latestVitals = computed(() => (this.vitals().length > 0 ? this.vitals()[0] : null));
   latestBmi = computed(() => {
@@ -614,10 +617,7 @@ export class PatientVitalsComponent implements OnInit {
           toast.error('Could not verify patient profile identity.');
         }
       },
-      error: (err) => {
-        console.error('Failed to load patient vitals via API', err);
-        toast.error('Failed to load vitals: ' + (err.error?.message || 'Unknown network error'));
-      },
+      error: (err) => { this.errorMessage = err.message || 'Failed'; this.isLoading = false; },
     });
   }
 
@@ -668,10 +668,7 @@ export class PatientVitalsComponent implements OnInit {
           this.loadVitals();
         }
       },
-      error: (err) => {
-        console.error('Failed to save vitals', err);
-        this.isSubmitting.set(false);
-      },
+      error: (err) => { this.errorMessage = err.message || 'Failed'; this.isLoading = false; },
     });
   }
 

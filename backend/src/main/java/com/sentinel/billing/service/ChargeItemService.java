@@ -98,4 +98,11 @@ public class ChargeItemService {
         dto.setChargedAt(c.getChargedAt());
         return dto;
     }
+
+    @Transactional(readOnly = true)
+    public List<ChargeItemResponseDTO> getAllChargeItems() {
+        return chargeItemRepository.findAll().stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+    }
 }
