@@ -63,9 +63,6 @@ public class Appointment {
     @Transient
     private Vitals vitals;
 
-    @Transient
-    private String stage = "SCHEDULED";
-
     public Appointment() {}
 
     public UUID getId() { return id; }
@@ -92,7 +89,6 @@ public class Appointment {
     public String getStatus() { return status; }
     public void setStatus(String status) {
         this.status = status;
-        this.stage = status;
     }
 
     public String getReason() { return reason; }
@@ -118,9 +114,6 @@ public class Appointment {
 
     public Vitals getVitals() { return vitals; }
     public void setVitals(Vitals vitals) { this.vitals = vitals; }
-
-    public String getStage() { return stage != null ? stage : status; }
-    public void setStage(String stage) { this.stage = stage; }
 
     // Legacy getter helpers
     public User getDoctor() { return createdBy; }

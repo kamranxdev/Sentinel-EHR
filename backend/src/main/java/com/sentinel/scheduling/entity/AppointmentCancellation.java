@@ -16,11 +16,11 @@ public class AppointmentCancellation {
     @JoinColumn(name = "appointment_id", nullable = false)
     private Appointment appointment;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "cancelled_by_user_id", nullable = false)
+    @ManyToOne
+    @JoinColumn(name = "cancelled_by_user_id")
     private User cancelledByUser;
 
-    @Column(name = "cancelled_by_role", nullable = false)
+    @Column(name = "cancelled_by_role")
     private String cancelledByRole; // PATIENT, DOCTOR, RECEPTIONIST, ADMIN
 
     @Column(name = "cancellation_reason", nullable = false)

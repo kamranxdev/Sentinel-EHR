@@ -364,7 +364,7 @@ export interface FastTriageForm {
                     ● Awaiting Vitals Intake
                   </span>
                   <span
-                    *ngIf="apt.status === 'TRIAGED' || apt.stage === 'TRIAGED'"
+                    *ngIf="apt.status === 'TRIAGED'"
                     hlmBadge
                     variant="secondary"
                     class="text-[10px] font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-500/10 border border-emerald-500/20"
@@ -753,7 +753,7 @@ export class NurseAppointmentsComponent implements OnInit {
     private apiService: ApiService,
     private patientContext: PatientContextService,
     private router: Router,
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadAppointments();
@@ -779,7 +779,7 @@ export class NurseAppointmentsComponent implements OnInit {
     () => this.appointments().filter((a) => a.status === 'CHECKED_IN').length,
   );
   triagedCount = computed(
-    () => this.appointments().filter((a) => a.status === 'TRIAGED' || a.stage === 'TRIAGED').length,
+    () => this.appointments().filter((a) => a.status === 'TRIAGED').length,
   );
 
   filteredAppointments = computed(() => {
@@ -792,7 +792,7 @@ export class NurseAppointmentsComponent implements OnInit {
     } else if (mode === 'CHECKED_IN') {
       list = list.filter((a) => a.status === 'CHECKED_IN');
     } else if (mode === 'TRIAGED') {
-      list = list.filter((a) => a.status === 'TRIAGED' || a.stage === 'TRIAGED');
+      list = list.filter((a) => a.status === 'TRIAGED');
     }
 
     if (!q) return list;

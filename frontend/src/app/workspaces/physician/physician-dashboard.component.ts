@@ -421,15 +421,15 @@ export interface ClinicalTaskItem {
                       <span
                         hlmBadge
                         [variant]="
-                          apt.status === 'CHECKED_IN' || apt.stage === 'TRIAGED'
+                          apt.status === 'CHECKED_IN' || apt.status === 'TRIAGED'
                             ? 'secondary'
-                            : apt.status === 'IN_PROGRESS' || apt.stage === 'IN_CONSULTATION'
+                            : apt.status === 'IN_PROGRESS' || apt.status === 'IN_CONSULTATION'
                               ? 'default'
                               : 'outline'
                         "
                         class="text-[10px]"
                       >
-                        {{ apt.stage || apt.status || 'SCHEDULED' }}
+                        {{ apt.status || 'SCHEDULED' }}
                       </span>
                     </td>
                     <td hlmTableCell class="py-3 px-4 text-right">
@@ -684,7 +684,7 @@ export class PhysicianDashboardComponent implements OnInit {
     private apiService: ApiService,
     public patientContext: PatientContextService,
     private router: Router,
-  ) {}
+  ) { }
 
   get currentUser() {
     return this.authService.currentUser();
@@ -821,7 +821,7 @@ export class PhysicianDashboardComponent implements OnInit {
 
   getCheckedInCount(): number {
     return this.outpatientAppointments().filter(
-      (a) => a.status === 'CHECKED_IN' || a.stage === 'TRIAGED' || a.stage === 'IN_CONSULTATION',
+      (a) => a.status === 'CHECKED_IN' || a.status === 'TRIAGED' || a.status === 'IN_CONSULTATION',
     ).length;
   }
 

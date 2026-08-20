@@ -388,10 +388,10 @@ import { StatCardComponent } from '../../shared/ui/stat-card.component';
                 <td hlmTableCell>
                   <span
                     hlmBadge
-                    [variant]="getStageVariant(apt.stage || apt.status)"
+                    [variant]="getStageVariant(apt.status)"
                     class="text-[10px] font-medium"
                   >
-                    {{ getStageLabel(apt.stage || apt.status) }}
+                    {{ getStageLabel(apt.status) }}
                   </span>
                 </td>
                 <td hlmTableCell class="text-right">
@@ -399,7 +399,7 @@ import { StatCardComponent } from '../../shared/ui/stat-card.component';
                     <!-- Arrived action button: ONLY visible for TODAY'S appointments in SCHEDULED state -->
                     <button
                       *ngIf="
-                        (apt.stage === 'SCHEDULED' || apt.status === 'SCHEDULED') &&
+                        apt.status === 'SCHEDULED' &&
                         isToday(apt.appointmentDate)
                       "
                       hlmBtn
@@ -414,7 +414,7 @@ import { StatCardComponent } from '../../shared/ui/stat-card.component';
                     <!-- Indicator badge for scheduled appointments on future or past dates -->
                     <span
                       *ngIf="
-                        (apt.stage === 'SCHEDULED' || apt.status === 'SCHEDULED') &&
+                        apt.status === 'SCHEDULED' &&
                         !isToday(apt.appointmentDate)
                       "
                       hlmBadge
@@ -425,7 +425,7 @@ import { StatCardComponent } from '../../shared/ui/stat-card.component';
                     </span>
                     <!-- Check in action for Arrived patients -->
                     <button
-                      *ngIf="apt.stage === 'ARRIVED'"
+                      *ngIf="apt.status === 'SCHEDULED' || !apt.status || apt.status === 'ARRIVED'"
                       hlmBtn
                       size="sm"
                       variant="secondary"
@@ -436,20 +436,20 @@ import { StatCardComponent } from '../../shared/ui/stat-card.component';
                       <span>Complete Desk Check-In</span>
                     </button>
                     <span
-                      *ngIf="apt.stage === 'CHECKED_IN'"
+                      *ngIf="apt.status === 'CHECKED_IN'"
                       class="text-xs font-semibold text-amber-600 px-2 py-1 rounded bg-amber-500/10 border border-amber-500/20"
                     >
                       Awaiting Nurse Triage
                     </span>
                     <span
-                      *ngIf="apt.stage === 'TRIAGED'"
+                      *ngIf="apt.status === 'TRIAGED'"
                       class="text-xs font-semibold text-sky-600 px-2 py-1 rounded bg-sky-500/10 border border-sky-500/20"
                     >
                       Ready for Doctor
                     </span>
                     <!-- Cancellation button -->
                     <button
-                      *ngIf="apt.stage !== 'CANCELLED' && apt.status !== 'CANCELLED'"
+                      *ngIf="apt.status !== 'CANCELLED'"
                       hlmBtn
                       size="sm"
                       variant="ghost"
@@ -746,7 +746,7 @@ export class ReceptionistAppointmentsComponent implements OnInit {
 
       const docMatch = this.selectedDoctor === 'ALL' || docName === this.selectedDoctor;
       const stageMatch =
-        this.selectedStage === 'ALL' || (apt.stage || apt.status) === this.selectedStage;
+        this.selectedStage === 'ALL' || apt.status === this.selectedStage;
       const termMatch =
         !this.searchTerm.trim() ||
         patName.toLowerCase().includes(this.searchTerm.toLowerCase()) ||
@@ -759,25 +759,25 @@ export class ReceptionistAppointmentsComponent implements OnInit {
   });
 
   scheduledCount = computed(
-    () => this.dateScopedAppointments().filter((a) => (a.stage || a.status) === 'SCHEDULED').length,
+    () => this.dateScopedAppointments().filter((a) => a.status === 'SCHEDULED').length,
   );
 
   arrivedCount = computed(
     () =>
       this.dateScopedAppointments().filter((a) =>
-        ['ARRIVED', 'CHECKED_IN', 'IN_CONSULTATION'].includes(a.stage || a.status),
+        ['ARRIVED', 'CHECKED_IN', 'IN_CONSULTATION'].includes(a.status),
       ).length,
   );
 
   cancelledCount = computed(
-    () => this.dateScopedAppointments().filter((a) => (a.stage || a.status) === 'CANCELLED').length,
+    () => this.dateScopedAppointments().filter((a) => a.status === 'CANCELLED').length,
   );
 
   showBookModal = signal(false);
   patientOptions = signal<Patient[]>([]);
   newAppointment = {
     patientId: '',
-    doctorId: '1',
+    doctorId: '',
     type: 'GENERAL_CONSULTATION',
     date: this.getLocalDateString(new Date()),
     time: '10:00',
@@ -787,7 +787,7 @@ export class ReceptionistAppointmentsComponent implements OnInit {
   constructor(
     public authService: AuthService,
     private apiService: ApiService,
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadData();
@@ -828,7 +828,6 @@ export class ReceptionistAppointmentsComponent implements OnInit {
       appointmentType: this.newAppointment.type,
       reason: this.newAppointment.reason,
       status: 'SCHEDULED',
-      stage: 'SCHEDULED',
     };
 
     this.apiService.createAppointment(aptPayload).subscribe({
@@ -851,7 +850,6 @@ export class ReceptionistAppointmentsComponent implements OnInit {
                 : 'Dr. Attending Physician',
           appointmentDate: `${this.newAppointment.date}T${this.newAppointment.time}:00`,
           status: 'SCHEDULED',
-          stage: 'SCHEDULED',
           reason: this.newAppointment.reason,
           appointmentType: this.newAppointment.type,
         };

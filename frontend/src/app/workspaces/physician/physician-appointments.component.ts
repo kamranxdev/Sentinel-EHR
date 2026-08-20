@@ -129,23 +129,23 @@ interface LabOrderItem {
                   <span
                     hlmBadge
                     [variant]="
-                      (apt.stage || apt.status) === 'TRIAGED'
+                      apt.status === 'TRIAGED'
                         ? 'secondary'
-                        : (apt.stage || apt.status) === 'IN_CONSULTATION'
+                        : apt.status === 'IN_CONSULTATION'
                           ? 'default'
-                          : (apt.stage || apt.status) === 'COMPLETED'
+                          : apt.status === 'COMPLETED'
                             ? 'outline'
                             : 'outline'
                     "
                     class="text-[10px] font-mono uppercase"
                   >
-                    {{ getStageBadgeLabel(apt.stage || apt.status) }}
+                    {{ getStageBadgeLabel(apt.status) }}
                   </span>
                 </td>
                 <td hlmTableCell class="py-3 px-4 text-right">
                   <div class="flex items-center justify-end gap-2">
                     <button
-                      *ngIf="(apt.stage || apt.status) === 'TRIAGED'"
+                      *ngIf="apt.status === 'TRIAGED'"
                       hlmBtn
                       size="sm"
                       variant="default"
@@ -157,7 +157,7 @@ interface LabOrderItem {
                     </button>
 
                     <button
-                      *ngIf="(apt.stage || apt.status) === 'IN_CONSULTATION'"
+                      *ngIf="apt.status === 'IN_CONSULTATION'"
                       hlmBtn
                       size="sm"
                       variant="outline"
@@ -169,7 +169,7 @@ interface LabOrderItem {
                     </button>
 
                     <span
-                      *ngIf="(apt.stage || apt.status) === 'COMPLETED'"
+                      *ngIf="apt.status === 'COMPLETED'"
                       class="text-xs text-emerald-600 font-semibold flex items-center gap-1 justify-end"
                     >
                       <ng-icon name="lucideCheckCircle2" size="14" />
@@ -178,7 +178,7 @@ interface LabOrderItem {
 
                     <span
                       *ngIf="
-                        ['SCHEDULED', 'ARRIVED', 'CHECKED_IN'].includes(apt.stage || apt.status)
+                        ['SCHEDULED', 'ARRIVED', 'CHECKED_IN'].includes(apt.status)
                       "
                       class="text-[11px] text-amber-600 font-medium"
                     >
@@ -262,7 +262,7 @@ interface LabOrderItem {
                 variant="outline"
                 class="text-[10px] border-amber-500/40 text-amber-700 dark:text-amber-300"
               >
-                Status: {{ getStageBadgeLabel(activeApt()?.stage || activeApt()?.status) }}
+                Status: {{ getStageBadgeLabel(activeApt()?.status) }}
               </span>
             </div>
 
@@ -629,7 +629,7 @@ export class PhysicianAppointmentsComponent implements OnInit {
   constructor(
     private apiService: ApiService,
     public patientContext: PatientContextService,
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadAppointments();
@@ -767,7 +767,7 @@ export class PhysicianAppointmentsComponent implements OnInit {
             frequency: rx.frequency,
             status: 'ACTIVE',
           })
-          .subscribe({ error: () => {} });
+          .subscribe({ error: () => { } });
       });
 
       validLabOrders.forEach((lab) => {
@@ -776,7 +776,7 @@ export class PhysicianAppointmentsComponent implements OnInit {
             patientId,
             testName: lab.testName,
           })
-          .subscribe({ error: () => {} });
+          .subscribe({ error: () => { } });
       });
 
       validDiagnoses.forEach((d) => {
@@ -787,7 +787,7 @@ export class PhysicianAppointmentsComponent implements OnInit {
             icdCode: d.icdCode,
             status: 'ACTIVE',
           })
-          .subscribe({ error: () => {} });
+          .subscribe({ error: () => { } });
       });
     }
 

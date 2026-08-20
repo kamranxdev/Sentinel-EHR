@@ -11,7 +11,6 @@ public class AppointmentDTO {
     private String doctorName;
     private OffsetDateTime appointmentDate;
     private String status;
-    private String stage;
     private String reason;
     private String notes;
 
@@ -37,9 +36,6 @@ public class AppointmentDTO {
 
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
-
-    public String getStage() { return stage; }
-    public void setStage(String stage) { this.stage = stage; }
 
     public String getReason() { return reason; }
     public void setReason(String reason) { this.reason = reason; }

@@ -391,16 +391,16 @@ import {
                 <td hlmTableCell>
                   <span
                     hlmBadge
-                    [variant]="getStageVariant(apt.stage || apt.status)"
+                    [variant]="getStageVariant(apt.status)"
                     class="text-[10px] font-medium"
                   >
-                    {{ getStageLabel(apt.stage || apt.status) }}
+                    {{ getStageLabel(apt.status) }}
                   </span>
                 </td>
                 <td hlmTableCell class="text-right">
                   <div class="flex items-center justify-end gap-1.5">
                     <button
-                      *ngIf="apt.stage === 'SCHEDULED' || !apt.stage || apt.stage === 'ARRIVED'"
+                      *ngIf="apt.status === 'SCHEDULED' || !apt.status || apt.status === 'ARRIVED'"
                       hlmBtn
                       size="sm"
                       variant="default"
@@ -411,13 +411,13 @@ import {
                       <span>Complete Desk Check-In</span>
                     </button>
                     <span
-                      *ngIf="apt.stage === 'CHECKED_IN'"
+                      *ngIf="apt.status === 'CHECKED_IN'"
                       class="text-xs font-semibold text-amber-600 px-2 py-1 rounded bg-amber-500/10 border border-amber-500/20"
                     >
                       Awaiting Nurse Triage
                     </span>
                     <span
-                      *ngIf="apt.stage === 'TRIAGED'"
+                      *ngIf="apt.status === 'TRIAGED'"
                       class="text-xs font-semibold text-sky-600 px-2 py-1 rounded bg-sky-500/10 border border-sky-500/20"
                     >
                       Ready for Doctor
@@ -495,12 +495,12 @@ export class ReceptionistDashboardComponent implements OnInit {
   });
 
   scheduledCount = computed(
-    () => this.displayAppointments().filter((a) => (a.stage || a.status) === 'SCHEDULED').length,
+    () => this.displayAppointments().filter((a) => (a.status) === 'SCHEDULED').length,
   );
   arrivedCount = computed(
     () =>
       this.displayAppointments().filter((a) =>
-        ['ARRIVED', 'CHECKED_IN', 'IN_CONSULTATION'].includes(a.stage || a.status),
+        ['ARRIVED', 'CHECKED_IN', 'IN_CONSULTATION'].includes(a.status),
       ).length,
   );
   pendingRteCount = computed(
@@ -510,7 +510,7 @@ export class ReceptionistDashboardComponent implements OnInit {
   constructor(
     public authService: AuthService,
     private apiService: ApiService,
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadData();

@@ -1375,7 +1375,7 @@ export class ApiService {
     if (stage === 'CHECKED_IN') {
       return this.checkInPatient(id);
     }
-    return this.patch<Appointment>(`/appointments/${id}`, { stage, status: stage }).pipe(
+    return this.patch<Appointment>(`/appointments/${id}`, { status: stage }).pipe(
       map((a) => this.normalizeAppointment(a)),
       catchError(() => this.getAppointmentById(id)),
     );
@@ -1385,7 +1385,7 @@ export class ApiService {
     if (status === 'CHECKED_IN') {
       return this.checkInPatient(id);
     }
-    return this.patch<Appointment>(`/appointments/${id}`, { status, stage: status }).pipe(
+    return this.patch<Appointment>(`/appointments/${id}`, { status }).pipe(
       map((a) => this.normalizeAppointment(a)),
       catchError(() => this.getAppointmentById(id)),
     );
@@ -1627,7 +1627,6 @@ export class ApiService {
       doctorSpecialization:
         a.doctorSpecialization || a.doctor?.specialization || 'Clinical Medicine',
       status: a.status || 'SCHEDULED',
-      stage: a.stage || a.status || 'SCHEDULED',
     };
   }
 

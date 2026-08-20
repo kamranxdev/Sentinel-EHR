@@ -808,7 +808,7 @@ export class NurseDashboardComponent implements OnInit {
     private apiService: ApiService,
     public patientContext: PatientContextService,
     private router: Router,
-  ) {}
+  ) { }
 
   get currentUser() {
     return this.authService.currentUser();
@@ -964,7 +964,7 @@ export class NurseDashboardComponent implements OnInit {
   });
 
   getPendingTriageCount(): number {
-    return this.triageQueue().filter((a) => a.status === 'CHECKED_IN' || a.stage === 'ARRIVED')
+    return this.triageQueue().filter((a) => a.status === 'CHECKED_IN' || a.status === 'ARRIVED')
       .length;
   }
 

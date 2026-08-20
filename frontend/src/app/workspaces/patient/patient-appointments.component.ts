@@ -229,30 +229,30 @@ import {
                   <span
                     hlmBadge
                     [variant]="
-                      (apt.stage || apt.status) === 'SCHEDULED'
+                      apt.status === 'SCHEDULED'
                         ? 'default'
-                        : (apt.stage || apt.status) === 'COMPLETED'
+                        : apt.status === 'COMPLETED'
                           ? 'secondary'
-                          : (apt.stage || apt.status) === 'IN_CONSULTATION'
+                          : apt.status === 'IN_CONSULTATION'
                             ? 'default'
                             : 'outline'
                     "
-                    [class.bg-emerald-500/15]="(apt.stage || apt.status) === 'COMPLETED'"
-                    [class.text-emerald-700]="(apt.stage || apt.status) === 'COMPLETED'"
-                    [class.dark:text-emerald-400]="(apt.stage || apt.status) === 'COMPLETED'"
-                    [class.bg-rose-500/15]="(apt.stage || apt.status) === 'CANCELLED'"
-                    [class.text-rose-700]="(apt.stage || apt.status) === 'CANCELLED'"
-                    [class.dark:text-rose-400]="(apt.stage || apt.status) === 'CANCELLED'"
+                    [class.bg-emerald-500/15]="apt.status === 'COMPLETED'"
+                    [class.text-emerald-700]="apt.status === 'COMPLETED'"
+                    [class.dark:text-emerald-400]="apt.status === 'COMPLETED'"
+                    [class.bg-rose-500/15]="apt.status === 'CANCELLED'"
+                    [class.text-rose-700]="apt.status === 'CANCELLED'"
+                    [class.dark:text-rose-400]="apt.status === 'CANCELLED'"
                     class="text-[10px] font-bold tracking-wider px-2 py-0.5"
                   >
                     {{
-                      (apt.stage || apt.status) === 'CHECKED_IN'
+                      apt.status === 'CHECKED_IN'
                         ? 'Checked In (Desk)'
-                        : (apt.stage || apt.status) === 'TRIAGED'
+                        : apt.status === 'TRIAGED'
                           ? 'Triaged (Nurse)'
-                          : (apt.stage || apt.status) === 'IN_CONSULTATION'
+                          : apt.status === 'IN_CONSULTATION'
                             ? 'In Consultation'
-                            : apt.stage || apt.status
+                            : apt.status
                     }}
                   </span>
                 </td>
@@ -430,82 +430,6 @@ import {
                   </p>
                 </div>
 
-                <!-- Searchable Hospital Filter & Quick Selection Grid -->
-                <div class="p-3 rounded-xl border border-border/80 bg-muted/20 space-y-2">
-                  <div class="flex items-center justify-between">
-                    <span
-                      class="text-[11px] font-bold text-muted-foreground flex items-center gap-1"
-                    >
-                      <ng-icon name="lucideSearch" size="12" /> Search & Quick Select Hospital:
-                    </span>
-                    <span class="text-[10px] text-muted-foreground font-medium">
-                      {{ filteredOrganizations().length }} available
-                    </span>
-                  </div>
-
-                  <div class="relative">
-                    <ng-icon
-                      name="lucideSearch"
-                      size="13"
-                      class="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground"
-                    />
-                    <input
-                      hlmInput
-                      type="text"
-                      [(ngModel)]="hospitalSearchQuery"
-                      placeholder="Type hospital name or code to filter..."
-                      class="w-full text-xs pl-7 py-1.5 h-8 bg-background"
-                    />
-                  </div>
-
-                  <!-- Hospital Cards Grid -->
-                  <div
-                    class="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-36 overflow-y-auto pr-0.5"
-                  >
-                    <button
-                      *ngFor="let org of filteredOrganizations()"
-                      type="button"
-                      (click)="selectHospital(org)"
-                      [class.border-primary]="selectedHospital()?.id === org.id"
-                      [class.bg-primary/10]="selectedHospital()?.id === org.id"
-                      [class.ring-1]="selectedHospital()?.id === org.id"
-                      [class.ring-primary]="selectedHospital()?.id === org.id"
-                      class="p-2 rounded-lg border border-border bg-card hover:border-primary/50 text-left transition-all flex items-center justify-between gap-2"
-                    >
-                      <div class="flex items-center gap-2 min-w-0">
-                        <div
-                          class="size-7 rounded-md flex items-center justify-center shrink-0"
-                          [class.bg-primary]="selectedHospital()?.id === org.id"
-                          [class.text-primary-foreground]="selectedHospital()?.id === org.id"
-                          [class.bg-muted]="selectedHospital()?.id !== org.id"
-                          [class.text-muted-foreground]="selectedHospital()?.id !== org.id"
-                        >
-                          <ng-icon name="lucideHospital" size="13" />
-                        </div>
-                        <div class="truncate">
-                          <div class="text-[11px] font-bold text-foreground truncate">
-                            {{ org.name }}
-                          </div>
-                          <div class="text-[9px] text-muted-foreground">
-                            {{ org.code }} • {{ org.organizationType || 'Hospital' }}
-                          </div>
-                        </div>
-                      </div>
-                      <ng-icon
-                        *ngIf="selectedHospital()?.id === org.id"
-                        name="lucideCheckCircle2"
-                        size="13"
-                        class="text-primary shrink-0"
-                      />
-                    </button>
-                  </div>
-                  <div
-                    *ngIf="filteredOrganizations().length === 0"
-                    class="text-center py-2 text-[11px] text-muted-foreground"
-                  >
-                    No hospitals found matching "{{ hospitalSearchQuery }}".
-                  </div>
-                </div>
               </div>
 
               <div>

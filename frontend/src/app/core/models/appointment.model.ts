@@ -73,7 +73,6 @@ export interface Appointment {
   endTime?: string;
   appointmentType?: string;
   status: string;
-  stage?: string;
   reason?: string;
   priority?: string;
   notes?: string;

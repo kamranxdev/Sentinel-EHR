@@ -52,7 +52,6 @@ public class AppointmentActionService {
         recordStatusHistory(appt, "CHECKED_IN", request.getNotes());
 
         appt.setStatus("CHECKED_IN");
-        appt.setStage("CHECKED_IN");
         appt.setCheckedInAt(OffsetDateTime.now());
         appt.setArrivedAt(OffsetDateTime.now());
         if (request.getNotes() != null) appt.setNotes(request.getNotes());
@@ -74,7 +73,6 @@ public class AppointmentActionService {
         recordStatusHistory(appt, "TRIAGED", request.getNotes());
 
         appt.setStatus("TRIAGED");
-        appt.setStage("TRIAGED");
         appt.setUpdatedAt(OffsetDateTime.now());
 
         Appointment saved = appointmentRepository.save(appt);
@@ -93,7 +91,6 @@ public class AppointmentActionService {
         recordStatusHistory(appt, "COMPLETED", request.getTreatmentNotes());
 
         appt.setStatus("COMPLETED");
-        appt.setStage("COMPLETED");
         appt.setCompletedAt(OffsetDateTime.now());
         if (request.getTreatmentNotes() != null) appt.setNotes(request.getTreatmentNotes());
         appt.setUpdatedAt(OffsetDateTime.now());
@@ -114,7 +111,6 @@ public class AppointmentActionService {
         recordStatusHistory(appt, "CANCELLED", request.getCancellationReason());
 
         appt.setStatus("CANCELLED");
-        appt.setStage("CANCELLED");
         appt.setUpdatedAt(OffsetDateTime.now());
         Appointment saved = appointmentRepository.save(appt);
 
@@ -158,7 +154,6 @@ public class AppointmentActionService {
         appt.setStartsAt(reschedule.getNewStartsAt());
         appt.setEndsAt(reschedule.getNewEndsAt());
         appt.setStatus("RESCHEDULED");
-        appt.setStage("RESCHEDULED");
         appt.setUpdatedAt(OffsetDateTime.now());
         Appointment saved = appointmentRepository.save(appt);
 
@@ -196,7 +191,6 @@ public class AppointmentActionService {
         dto.setStartsAt(a.getStartsAt());
         dto.setEndsAt(a.getEndsAt());
         dto.setStatus(a.getStatus());
-        dto.setStage(a.getStage());
         dto.setReason(a.getReason());
         dto.setNotes(a.getNotes());
         dto.setCheckedInAt(a.getCheckedInAt());

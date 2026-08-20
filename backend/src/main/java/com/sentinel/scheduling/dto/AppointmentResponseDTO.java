@@ -12,7 +12,6 @@ public class AppointmentResponseDTO {
     private OffsetDateTime startsAt;
     private OffsetDateTime endsAt;
     private String status;
-    private String stage;
     private String reason;
     private String notes;
     private UUID doctorId;
@@ -45,8 +44,6 @@ public class AppointmentResponseDTO {
     public void setEndsAt(OffsetDateTime endsAt) { this.endsAt = endsAt; }
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
-    public String getStage() { return stage; }
-    public void setStage(String stage) { this.stage = stage; }
     public String getReason() { return reason; }
     public void setReason(String reason) { this.reason = reason; }
     public String getNotes() { return notes; }
