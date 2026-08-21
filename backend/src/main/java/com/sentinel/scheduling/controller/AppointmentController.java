@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
 import java.util.UUID;
@@ -26,6 +27,7 @@ public class AppointmentController {
     }
 
     @PostMapping("/api/v1/appointments")
+    @PreAuthorize("hasAnyAuthority('APPOINTMENT_CREATE', 'RECEPTIONIST', 'PHYSICIAN', 'NURSE', 'ORGANIZATION_ADMIN', 'SUPER_ADMIN')")
     @Operation(summary = "Book a new appointment")
     public ResponseEntity<ApiResponse<AppointmentResponseDTO>> createAppointment(
             @Valid @RequestBody CreateAppointmentRequest request) {
@@ -100,6 +102,7 @@ public class AppointmentController {
     }
 
     @PatchMapping("/api/v1/appointments/{appointmentId}")
+    @PreAuthorize("hasAnyAuthority('APPOINTMENT_UPDATE', 'RECEPTIONIST', 'PHYSICIAN', 'NURSE', 'ORGANIZATION_ADMIN', 'SUPER_ADMIN')")
     @Operation(summary = "Update appointment details")
     public ResponseEntity<ApiResponse<AppointmentResponseDTO>> updateAppointment(
             @PathVariable UUID appointmentId,

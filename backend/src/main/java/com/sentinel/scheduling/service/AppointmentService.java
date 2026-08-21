@@ -15,6 +15,8 @@ import com.sentinel.tenancy.entity.Department;
 import com.sentinel.tenancy.entity.Organization;
 import com.sentinel.tenancy.repository.DepartmentRepository;
 import com.sentinel.tenancy.repository.OrganizationRepository;
+import com.sentinel.security.TenantContext;
+import com.sentinel.common.exception.AccessDeniedCustomException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +28,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import java.util.Map;
+import java.util.Set;
 
 @Service
 @Transactional
@@ -59,6 +63,7 @@ public class AppointmentService {
     }
 
     public AppointmentResponseDTO createAppointment(CreateAppointmentRequest request) {
+        UUID currentOrganizationId = requireCurrentOrganization();
         Patient patient = patientRepository.findById(request.getPatientId())
                 .orElseThrow(
                         () -> new ResourceNotFoundException("Patient not found with id: " + request.getPatientId()));
@@ -90,28 +95,13 @@ public class AppointmentService {
             });
         }
 
-        if (request.getOrganizationId() != null) {
-            organizationRepository.findById(request.getOrganizationId()).ifPresent(appt::setOrganization);
+        if (request.getOrganizationId() != null && !currentOrganizationId.equals(request.getOrganizationId())) {
+            throw new AccessDeniedCustomException("Appointments must be created in the active organization context");
         }
+        appt.setOrganization(organizationRepository.findById(currentOrganizationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Active organization not found")));
         if (request.getDepartmentId() != null) {
             departmentRepository.findById(request.getDepartmentId()).ifPresent(appt::setDepartment);
-        }
-
-        // Fallback for non-null constraints on organization
-        if (appt.getOrganization() == null) {
-            if (appt.getCreatedBy() != null) {
-                userOrganizationRepository.findByUserId(appt.getCreatedBy().getId()).stream()
-                        .filter(uo -> uo.getOrganization() != null)
-                        .findFirst()
-                        .map(UserOrganization::getOrganization)
-                        .ifPresent(appt::setOrganization);
-            }
-            if (appt.getOrganization() == null && patient.getOrganization() != null) {
-                appt.setOrganization(patient.getOrganization());
-            }
-            if (appt.getOrganization() == null) {
-                organizationRepository.findAll().stream().findFirst().ifPresent(appt::setOrganization);
-            }
         }
 
         Appointment saved = appointmentRepository.save(appt);
@@ -185,9 +175,10 @@ public class AppointmentService {
     public AppointmentResponseDTO updateAppointment(UUID appointmentId, UpdateAppointmentRequest request) {
         Appointment appt = appointmentRepository.findById(appointmentId)
                 .orElseThrow(() -> new ResourceNotFoundException("Appointment not found with id: " + appointmentId));
+        assertCurrentOrganization(appt);
 
         if (request.getStatus() != null) {
-            appt.setStatus(request.getStatus());
+            transitionStatus(appt, request.getStatus());
         }
         if (request.getReason() != null)
             appt.setReason(request.getReason());
@@ -207,6 +198,40 @@ public class AppointmentService {
 
         Appointment saved = appointmentRepository.save(appt);
         return mapToDTO(saved);
+    }
+
+    private UUID requireCurrentOrganization() {
+        UUID organizationId = TenantContext.getCurrentOrganizationId();
+        if (organizationId == null) {
+            throw new AccessDeniedCustomException("An active organization context is required");
+        }
+        return organizationId;
+    }
+
+    private void assertCurrentOrganization(Appointment appointment) {
+        UUID currentOrganizationId = requireCurrentOrganization();
+        if (appointment.getOrganization() == null || !currentOrganizationId.equals(appointment.getOrganization().getId())) {
+            throw new AccessDeniedCustomException("You cannot access an appointment from another organization");
+        }
+    }
+
+    private void transitionStatus(Appointment appointment, String requestedStatus) {
+        String current = appointment.getStatus();
+        String next = requestedStatus.trim().toUpperCase();
+        if (next.equals(current)) return;
+        Map<String, Set<String>> transitions = Map.of(
+                "SCHEDULED", Set.of("CONFIRMED", "CANCELLED", "NO_SHOW"),
+                "CONFIRMED", Set.of("CHECKED_IN", "CANCELLED", "NO_SHOW"),
+                "CHECKED_IN", Set.of("IN_CONSULTATION", "CANCELLED"),
+                "IN_CONSULTATION", Set.of("COMPLETED"));
+        if (!transitions.getOrDefault(current, Set.of()).contains(next)) {
+            throw new IllegalStateException("Cannot transition appointment from " + current + " to " + next);
+        }
+        appointment.setStatus(next);
+        OffsetDateTime now = OffsetDateTime.now();
+        if ("CHECKED_IN".equals(next)) appointment.setCheckedInAt(now);
+        if ("NO_SHOW".equals(next)) appointment.setNoShowAt(now);
+        if ("COMPLETED".equals(next)) appointment.setCompletedAt(now);
     }
 
     public AppointmentResponseDTO mapToDTO(Appointment a) {

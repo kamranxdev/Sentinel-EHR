@@ -16,6 +16,8 @@ public interface AppointmentRepository extends JpaRepository<Appointment, UUID> 
     List<Appointment> findByOrganizationId(UUID organizationId);
     List<Appointment> findByOrganizationIdOrderByStartsAtDesc(UUID organizationId);
     List<Appointment> findByCreatedByIdOrderByStartsAtDesc(UUID createdById);
+    long countByOrganizationId(UUID organizationId);
+    long countByOrganizationIdAndStatus(UUID organizationId, String status);
 
     @Query("SELECT a FROM Appointment a WHERE (a.practitioner.id = :practitionerId OR a.createdBy.id = :practitionerId) AND a.organization.id = :organizationId ORDER BY a.startsAt DESC")
     List<Appointment> findByPractitionerIdAndOrganizationIdOrderByStartsAtDesc(@Param("practitionerId") UUID practitionerId, @Param("organizationId") UUID organizationId);

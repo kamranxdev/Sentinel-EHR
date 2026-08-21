@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
-import { Observable } from 'rxjs';
+import { forkJoin, Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import {
   Organization,
@@ -24,7 +24,7 @@ export class OrganizationService {
   private readonly usersUrl = `${this.baseUrl}/users`;
   private readonly auditUrl = `${this.baseUrl}/audit`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   registerOrganization(request: OrganizationRegistrationRequest): Observable<Organization> {
     return this.http
@@ -46,22 +46,18 @@ export class OrganizationService {
     statusPayload: OrganizationStatusUpdate,
   ): Observable<Organization> {
     return this.http
-      .patch<any>(`${this.apiUrl}/${id}/status`, statusPayload)
+      .patch<any>(`${this.apiUrl}/${id}`, statusPayload)
       .pipe(map((res: any) => res?.data || res));
   }
 
   updateOrganization(id: string, organization: Partial<Organization>): Observable<Organization> {
     return this.http
-      .put<any>(`${this.apiUrl}/${id}`, organization)
+      .patch<any>(`${this.apiUrl}/${id}`, organization)
       .pipe(map((res: any) => res?.data || res));
   }
 
-  getSysAdminUsers(): Observable<User[]> {
-    return this.http.get<any>(this.usersUrl).pipe(map((res: any) => res?.data || res || []));
-  }
-
   getSuperAdminUsers(): Observable<User[]> {
-    return this.getSysAdminUsers();
+    return this.http.get<any>(this.usersUrl).pipe(map((res: any) => res?.data || res || []));
   }
 
   getSysAdminAuditLogs(search?: string): Observable<AuditLog[]> {
@@ -77,13 +73,16 @@ export class OrganizationService {
   }
 
   getSysAdminStats(): Observable<SysAdminStatsDTO> {
-    return this.getAllOrganizations().pipe(
-      map((orgs) => ({
-        totalOrganizations: orgs.length,
-        activeOrganizations: orgs.filter((o) => o.status === 'ACTIVE').length,
-        totalUsers: 45,
-        totalAuditEvents: 128,
-        systemUptimeSeconds: 86400,
+    return forkJoin({
+      organizations: this.getAllOrganizations(),
+      users: this.getSuperAdminUsers(),
+      auditEvents: this.getSysAdminAuditLogs(),
+    }).pipe(
+      map(({ organizations, users, auditEvents }) => ({
+        totalOrganizations: organizations.length,
+        activeOrganizations: organizations.filter((o) => o.status === 'ACTIVE').length,
+        totalUsers: users.length,
+        totalAuditEvents: auditEvents.length,
       })),
     );
   }
@@ -98,7 +97,7 @@ export class OrganizationService {
     if (id) {
       return this.updateOrganization(id, payload);
     }
-    return this.http.put<any>(this.apiUrl, payload).pipe(map((res: any) => res?.data || res));
+    throw new Error('An organization identifier is required to update facility settings');
   }
 
   getOrgAdminUsers(organizationId?: string): Observable<User[]> {
@@ -145,17 +144,8 @@ export class OrganizationService {
   }
 
   getOrgAdminDashboardStats(): Observable<OrgAdminDashboardStatsDTO> {
-    return this.getOrgAdminUsers().pipe(
-      map((users) => ({
-        totalStaff: users.length,
-        activePractitioners: users.filter(
-          (u) => u.roles?.includes('PHYSICIAN') || (u as any).role === 'PHYSICIAN',
-        ).length,
-        totalDepartments: 6,
-        totalWards: 12,
-        occupancyRate: 74.5,
-        activeEncounters: 6,
-      })),
-    );
+    return this.http
+      .get<{ data: OrgAdminDashboardStatsDTO }>(`${this.apiUrl}/current/dashboard`)
+      .pipe(map((res) => res.data));
   }
 }

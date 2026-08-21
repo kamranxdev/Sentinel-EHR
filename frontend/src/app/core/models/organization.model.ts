@@ -68,8 +68,13 @@ export interface OrgAdminDashboardStatsDTO {
   activePractitioners: number;
   totalDepartments: number;
   totalWards: number;
-  occupancyRate?: number;
-  activeEncounters?: number;
+  totalBeds: number;
+  occupiedBeds: number;
+  occupancyRate: number;
+  registeredPatients: number;
+  appointments: number;
+  completedAppointments: number;
+  activeEncounters: number;
 }
 
 export interface StaffOnboardingRequestDTO {

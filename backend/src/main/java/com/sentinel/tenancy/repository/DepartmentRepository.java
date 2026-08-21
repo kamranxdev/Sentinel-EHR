@@ -14,4 +14,5 @@ public interface DepartmentRepository extends JpaRepository<Department, UUID> {
     Optional<Department> findByCode(String code);
     Optional<Department> findByOrganizationIdAndCode(UUID organizationId, String code);
     boolean existsByOrganizationIdAndCode(UUID organizationId, String code);
+    long countByOrganizationIdAndStatus(UUID organizationId, String status);
 }

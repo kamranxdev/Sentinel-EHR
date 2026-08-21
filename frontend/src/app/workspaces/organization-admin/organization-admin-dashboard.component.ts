@@ -1,10 +1,8 @@
-import { Component, OnInit, signal, computed } from '@angular/core';
+import { Component, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { ApiService } from '../../core/services/api.service';
 import { OrganizationService } from '../../core/services/organization.service';
-import { User } from '../../core/models/auth-user.model';
-import { Appointment } from '../../core/models/appointment.model';
+import { OrgAdminDashboardStatsDTO } from '../../core/models/organization.model';
 
 import { HlmCardImports } from '@spartan-ng/helm/card';
 import { HlmBadgeImports } from '@spartan-ng/helm/badge';
@@ -150,7 +148,7 @@ interface ToastAlert {
             </div>
           </div>
           <div class="mt-2 flex items-baseline justify-between">
-            <div class="text-2xl font-bold text-foreground font-mono">{{ staffCount() }}</div>
+            <div class="text-2xl font-bold text-foreground font-mono">{{ stats()?.totalStaff }}</div>
             <span class="text-[11px] font-medium text-emerald-500 flex items-center gap-0.5">
               <ng-icon name="lucideArrowUpRight" size="12" /> Provisioned
             </span>
@@ -174,10 +172,10 @@ interface ToastAlert {
             </div>
           </div>
           <div class="mt-2 flex items-baseline justify-between">
-            <div class="text-2xl font-bold text-blue-600 font-mono">Hierarchy</div>
-            <span class="text-[11px] font-medium text-blue-500 font-mono">Active</span>
+            <div class="text-2xl font-bold text-blue-600 font-mono">{{ stats()?.totalDepartments }}</div>
+            <span class="text-[11px] font-medium text-blue-500 font-mono">{{ stats()?.totalWards }} Wards</span>
           </div>
-          <p class="text-[10px] text-muted-foreground mt-1">Depts, Wards, Rooms & Beds</p>
+          <p class="text-[10px] text-muted-foreground mt-1">Active departments · {{ stats()?.totalBeds }} beds</p>
         </a>
 
         <!-- Patient Census Policy Card -->
@@ -196,10 +194,10 @@ interface ToastAlert {
             </div>
           </div>
           <div class="mt-2 flex items-baseline justify-between">
-            <div class="text-2xl font-bold text-foreground font-mono">Demographics</div>
-            <span class="text-[11px] font-medium text-sky-600 font-mono">Admin Only</span>
+            <div class="text-2xl font-bold text-foreground font-mono">{{ stats()?.registeredPatients }}</div>
+            <span class="text-[11px] font-medium text-sky-600 font-mono">Registered</span>
           </div>
-          <p class="text-[10px] text-muted-foreground mt-1">Registration & Insurance Metrics</p>
+          <p class="text-[10px] text-muted-foreground mt-1">Persisted patient records</p>
         </a>
 
         <!-- Consultation Capacity Card -->
@@ -219,10 +217,10 @@ interface ToastAlert {
           </div>
           <div class="mt-2 flex items-baseline justify-between">
             <div class="text-2xl font-bold text-amber-600 font-mono">
-              {{ appointments().length }}
+              {{ stats()?.appointments }}
             </div>
             <span class="text-[11px] font-medium text-amber-600 font-mono"
-              >{{ completionRate() }}% Rate</span
+              >{{ completionRate() }}% completed</span
             >
           </div>
           <p class="text-[10px] text-muted-foreground mt-1">Provider shift loading</p>
@@ -253,7 +251,7 @@ interface ToastAlert {
             </div>
           </div>
           <div class="pt-3 border-t border-border flex items-center justify-between text-xs">
-            <span class="text-muted-foreground">Active Staff: {{ staffCount() }}</span>
+            <span class="text-muted-foreground">Active Staff: {{ stats()?.totalStaff }}</span>
             <a
               routerLink="/organization-admin/users"
               class="text-xs font-semibold text-emerald-600 hover:underline flex items-center gap-1"
@@ -285,7 +283,7 @@ interface ToastAlert {
             </div>
           </div>
           <div class="pt-3 border-t border-border flex items-center justify-between text-xs">
-            <span class="text-muted-foreground">Status: VERIFIED</span>
+            <span class="text-muted-foreground">{{ stats()?.occupiedBeds }} / {{ stats()?.totalBeds }} beds occupied</span>
             <a
               routerLink="/organization-admin/facility-settings"
               class="text-xs font-semibold text-blue-600 hover:underline flex items-center gap-1"
@@ -334,36 +332,17 @@ interface ToastAlert {
   `,
 })
 export class OrganizationAdminDashboardComponent implements OnInit {
-  users = signal<User[]>([]);
-  appointments = signal<Appointment[]>([]);
+  stats = signal<OrgAdminDashboardStatsDTO | null>(null);
   isLoading = signal<boolean>(false);
   errorMessage = signal<string>('');
 
-  staffCount = computed(() => {
-    return this.users().filter((u) => {
-      const roles = Array.isArray(u.roles) ? u.roles.join(',') : '';
-      return (
-        roles.includes('ADMIN') ||
-        roles.includes('DOCTOR') ||
-        roles.includes('PHYSICIAN') ||
-        roles.includes('NURSE') ||
-        roles.includes('PHARMACIST') ||
-        roles.includes('RECEPTIONIST') ||
-        roles.includes('BILLING')
-      );
-    }).length;
-  });
+  completionRate(): number {
+    const stats = this.stats();
+    if (!stats || stats.appointments === 0) return 0;
+    return Math.round((stats.completedAppointments / stats.appointments) * 100);
+  }
 
-  completionRate = computed(() => {
-    const total = this.appointments().length;
-    if (!total) return 0;
-    const completed = this.appointments().filter(
-      (a) => a.status === 'COMPLETED' || a.status === 'CHECKED_IN',
-    ).length;
-    return Math.round((completed / total) * 100);
-  });
-
-  constructor(private apiService: ApiService) {}
+  constructor(private organizationService: OrganizationService) {}
 
   ngOnInit(): void {
     this.loadData();
@@ -373,31 +352,14 @@ export class OrganizationAdminDashboardComponent implements OnInit {
     this.isLoading.set(true);
     this.errorMessage.set('');
     
-    let pending = 2;
-    const checkDone = () => {
-      pending--;
-      if (pending === 0) this.isLoading.set(false);
-    };
-
-    this.apiService.getUsers().subscribe({
-      next: (u) => {
-        this.users.set(u);
-        checkDone();
+    this.organizationService.getOrgAdminDashboardStats().subscribe({
+      next: (stats) => {
+        this.stats.set(stats);
+        this.isLoading.set(false);
       },
       error: (err) => {
-        this.errorMessage.set(err.message || 'Failed to load users');
-        checkDone();
-      },
-    });
-
-    this.apiService.getAppointments().subscribe({
-      next: (a) => {
-        this.appointments.set(a);
-        checkDone();
-      },
-      error: (err) => {
-        this.errorMessage.set(err.message || 'Failed to load appointments');
-        checkDone();
+        this.errorMessage.set(err.error?.message || 'Failed to load organization dashboard data');
+        this.isLoading.set(false);
       },
     });
   }

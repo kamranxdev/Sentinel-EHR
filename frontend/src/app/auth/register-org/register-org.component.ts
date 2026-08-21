@@ -308,19 +308,6 @@ interface StepItem {
           </div>
 
           <div class="flex items-center gap-2 ml-auto">
-            <button
-              type="button"
-              (click)="fillDemoData()"
-              hlmBtn
-              variant="outline"
-              size="sm"
-              class="text-xs gap-1.5 h-8 border-dashed border-primary/40 text-primary hover:bg-primary/5 cursor-pointer"
-              title="Pre-populate with sample healthcare facility data for quick testing"
-            >
-              <ng-icon name="lucideActivity" size="13" />
-              <span>Fill Demo Data</span>
-            </button>
-
             <a
               routerLink="/"
               hlmBtn
@@ -1116,28 +1103,6 @@ export class RegisterOrgComponent {
       .replace(/\s+/g, '-')
       .replace(/-+/g, '-')
       .slice(0, 30);
-  }
-
-  fillDemoData(): void {
-    this.formData = {
-      orgName: 'Apollo Specialty Hospital Mumbai',
-      orgCode: 'APOLLO-MUMBAI',
-      code: 'APOLLO-MUMBAI',
-      legalName: 'Apollo Hospitals Enterprise Ltd',
-      organizationType: 'HOSPITAL',
-      licenseNumber: 'NABH/2026/MH/0912',
-      email: 'admin@apollomumbai.org',
-      phone: '+91 22 6692 0000',
-      address: 'Plot 13, Parsik Hill Rd, Sector 23, CBD Belapur, Navi Mumbai 400614',
-      website: 'https://www.apollohospitals.com',
-      countryCode: 'IN',
-      timezone: 'Asia/Kolkata',
-      adminFullName: 'Dr. Vikramaditya Singh',
-      adminEmail: 'vikram.singh@apollomumbai.org',
-      adminPassword: 'Sentinel@Admin2026',
-    };
-    this.confirmPassword = 'Sentinel@Admin2026';
-    this.agreedToTerms = true;
   }
 
   isStep1Valid(): boolean {

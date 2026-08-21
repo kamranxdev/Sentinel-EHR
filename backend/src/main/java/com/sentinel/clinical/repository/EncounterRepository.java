@@ -16,6 +16,7 @@ public interface EncounterRepository extends JpaRepository<Encounter, UUID> {
     List<Encounter> findByPatientIdOrderByStartedAtDesc(UUID patientId);
     Optional<Encounter> findByEncounterNumber(String encounterNumber);
     Optional<Encounter> findByAppointmentId(UUID appointmentId);
+    long countByOrganizationIdAndStatus(UUID organizationId, String status);
 
     @Query("SELECT e FROM Encounter e WHERE " +
            "(:patientId IS NULL OR e.patient.id = :patientId) AND " +

@@ -12,9 +12,19 @@ import com.sentinel.security.repository.RoleRepository;
 import com.sentinel.tenancy.dto.CreateOrganizationRequest;
 import com.sentinel.tenancy.dto.OrganizationResponseDTO;
 import com.sentinel.tenancy.dto.OrganizationSearchCriteria;
+import com.sentinel.tenancy.dto.OrganizationDashboardStatsDTO;
 import com.sentinel.tenancy.dto.UpdateOrganizationRequest;
 import com.sentinel.tenancy.entity.Organization;
+import com.sentinel.tenancy.repository.BedRepository;
+import com.sentinel.tenancy.repository.DepartmentRepository;
 import com.sentinel.tenancy.repository.OrganizationRepository;
+import com.sentinel.tenancy.repository.WardRepository;
+import com.sentinel.patient.repository.PatientOrganizationRepository;
+import com.sentinel.scheduling.repository.AppointmentRepository;
+import com.sentinel.clinical.repository.EncounterRepository;
+import com.sentinel.security.TenantContext;
+import com.sentinel.common.exception.AccessDeniedCustomException;
+import com.sentinel.security.security.SecurityContextUtils;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,19 +45,37 @@ public class OrganizationService {
     private final RoleRepository roleRepository;
     private final UserOrganizationRepository userOrganizationRepository;
     private final PasswordEncoder passwordEncoder;
+    private final DepartmentRepository departmentRepository;
+    private final WardRepository wardRepository;
+    private final BedRepository bedRepository;
+    private final PatientOrganizationRepository patientOrganizationRepository;
+    private final AppointmentRepository appointmentRepository;
+    private final EncounterRepository encounterRepository;
 
     public OrganizationService(OrganizationRepository organizationRepository,
                                UserRepository userRepository,
                                PersonRepository personRepository,
                                RoleRepository roleRepository,
                                UserOrganizationRepository userOrganizationRepository,
-                               PasswordEncoder passwordEncoder) {
+                               PasswordEncoder passwordEncoder,
+                               DepartmentRepository departmentRepository,
+                               WardRepository wardRepository,
+                               BedRepository bedRepository,
+                               PatientOrganizationRepository patientOrganizationRepository,
+                               AppointmentRepository appointmentRepository,
+                               EncounterRepository encounterRepository) {
         this.organizationRepository = organizationRepository;
         this.userRepository = userRepository;
         this.personRepository = personRepository;
         this.roleRepository = roleRepository;
         this.userOrganizationRepository = userOrganizationRepository;
         this.passwordEncoder = passwordEncoder;
+        this.departmentRepository = departmentRepository;
+        this.wardRepository = wardRepository;
+        this.bedRepository = bedRepository;
+        this.patientOrganizationRepository = patientOrganizationRepository;
+        this.appointmentRepository = appointmentRepository;
+        this.encounterRepository = encounterRepository;
     }
 
     public OrganizationResponseDTO createOrganization(CreateOrganizationRequest request) {
@@ -114,9 +142,10 @@ public class OrganizationService {
 
             User user = new User();
             user.setEmail(adminEmail);
-            String rawPassword = request.getAdminPassword() != null && !request.getAdminPassword().isBlank()
-                    ? request.getAdminPassword()
-                    : "Sentinel@Admin2026";
+            if (request.getAdminPassword() == null || request.getAdminPassword().isBlank()) {
+                throw new IllegalArgumentException("Administrator password is required");
+            }
+            String rawPassword = request.getAdminPassword();
             user.setPassword(passwordEncoder.encode(rawPassword));
             user.setPerson(savedPerson);
             user.setStatus("ACTIVE");
@@ -154,12 +183,14 @@ public class OrganizationService {
 
     @Transactional(readOnly = true)
     public OrganizationResponseDTO getOrganization(UUID organizationId) {
+        assertOrganizationAccess(organizationId);
         Organization org = organizationRepository.findById(organizationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Organization not found with id: " + organizationId));
         return mapToDTO(org);
     }
 
     public OrganizationResponseDTO updateOrganization(UUID organizationId, UpdateOrganizationRequest request) {
+        assertOrganizationAccess(organizationId);
         Organization org = organizationRepository.findById(organizationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Organization not found with id: " + organizationId));
 
@@ -193,6 +224,41 @@ public class OrganizationService {
         organizationRepository.save(org);
     }
 
+    private void assertOrganizationAccess(UUID organizationId) {
+        if (SecurityContextUtils.hasAuthority("SUPER_ADMIN")) {
+            return;
+        }
+        UUID currentOrganizationId = TenantContext.getCurrentOrganizationId();
+        if (!organizationId.equals(currentOrganizationId)) {
+            throw new AccessDeniedCustomException("You cannot access another organization");
+        }
+    }
+
+    @Transactional(readOnly = true)
+    public OrganizationDashboardStatsDTO getCurrentOrganizationDashboard() {
+        UUID organizationId = TenantContext.getCurrentOrganizationId();
+        if (organizationId == null) {
+            throw new AccessDeniedCustomException("An active organization context is required");
+        }
+
+        OrganizationDashboardStatsDTO stats = new OrganizationDashboardStatsDTO();
+        stats.setTotalStaff(userOrganizationRepository.countByOrganizationIdAndStatus(organizationId, "ACTIVE"));
+        stats.setActivePractitioners(userOrganizationRepository.countActivePractitionersByOrganizationId(organizationId));
+        stats.setTotalDepartments(departmentRepository.countByOrganizationIdAndStatus(organizationId, "ACTIVE"));
+        stats.setTotalWards(wardRepository.countByOrganizationIdAndStatus(organizationId, "ACTIVE"));
+        long totalBeds = bedRepository.countByOrganizationId(organizationId);
+        long occupiedBeds = bedRepository.countByOrganizationIdAndStatus(organizationId, "OCCUPIED");
+        stats.setTotalBeds(totalBeds);
+        stats.setOccupiedBeds(occupiedBeds);
+        stats.setOccupancyRate(totalBeds == 0 ? 0 : Math.round((occupiedBeds * 10000.0) / totalBeds) / 100.0);
+        stats.setRegisteredPatients(patientOrganizationRepository.countByOrganizationId(organizationId));
+        long appointments = appointmentRepository.countByOrganizationId(organizationId);
+        stats.setAppointments(appointments);
+        stats.setCompletedAppointments(appointmentRepository.countByOrganizationIdAndStatus(organizationId, "COMPLETED"));
+        stats.setActiveEncounters(encounterRepository.countByOrganizationIdAndStatus(organizationId, "IN_PROGRESS"));
+        return stats;
+    }
+
     public OrganizationResponseDTO mapToDTO(Organization org) {
         OrganizationResponseDTO dto = new OrganizationResponseDTO();
         dto.setId(org.getId());
@@ -218,4 +284,3 @@ public class OrganizationService {
         return dto;
     }
 }
-

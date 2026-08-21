@@ -16,6 +16,8 @@ public interface BedRepository extends JpaRepository<Bed, UUID> {
     List<Bed> findByWardId(UUID wardId);
     List<Bed> findByOrganizationId(UUID organizationId);
     Optional<Bed> findByBedCode(String bedCode);
+    long countByOrganizationId(UUID organizationId);
+    long countByOrganizationIdAndStatus(UUID organizationId, String status);
 
     @Query("SELECT b FROM Bed b WHERE b.status = 'AVAILABLE' AND " +
            "(:organizationId IS NULL OR b.organization.id = :organizationId) AND " +

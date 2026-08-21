@@ -13,4 +13,5 @@ public interface WardRepository extends JpaRepository<Ward, UUID> {
     List<Ward> findByDepartmentId(UUID departmentId);
     Optional<Ward> findByCode(String code);
     List<Ward> findByOrganizationId(UUID organizationId);
+    long countByOrganizationIdAndStatus(UUID organizationId, String status);
 }

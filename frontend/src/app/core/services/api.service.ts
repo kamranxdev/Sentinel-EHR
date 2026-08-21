@@ -1351,7 +1351,8 @@ export class ApiService {
       reportsUploaded?: string;
     } = {},
   ): Observable<Appointment> {
-    return this.post<Appointment>(`/appointments/${id}/check-in`, {
+    return this.patch<Appointment>(`/appointments/${id}`, {
+      status: 'CHECKED_IN',
       notes: payload.notes || payload.insuranceDetails,
     }).pipe(map((a) => this.normalizeAppointment(a)));
   }
@@ -1360,7 +1361,7 @@ export class ApiService {
     id: string,
     payload?: AppointmentNoShowRequestDTO,
   ): Observable<Appointment> {
-    return this.post<Appointment>(`/appointments/${id}/no-show`, payload || {}).pipe(
+    return this.patch<Appointment>(`/appointments/${id}`, { status: 'NO_SHOW', notes: payload?.notes }).pipe(
       map((a) => this.normalizeAppointment(a)),
     );
   }
@@ -1393,7 +1394,6 @@ export class ApiService {
     }
     return this.patch<Appointment>(`/appointments/${id}`, { status: stage }).pipe(
       map((a) => this.normalizeAppointment(a)),
-      catchError(() => this.getAppointmentById(id)),
     );
   }
 
@@ -1403,7 +1403,6 @@ export class ApiService {
     }
     return this.patch<Appointment>(`/appointments/${id}`, { status }).pipe(
       map((a) => this.normalizeAppointment(a)),
-      catchError(() => this.getAppointmentById(id)),
     );
   }
 
@@ -1431,11 +1430,6 @@ export class ApiService {
   startConsultation(id: string): Observable<Appointment> {
     return this.patch<Appointment>(`/appointments/${id}`, { status: 'IN_CONSULTATION' }).pipe(
       map((a) => this.normalizeAppointment(a)),
-      catchError(() =>
-        this.getAppointmentById(id).pipe(
-          map((a) => ({ ...a, status: 'IN_CONSULTATION', stage: 'IN_CONSULTATION' })),
-        ),
-      ),
     );
   }
 
@@ -2436,21 +2430,15 @@ export class ApiService {
   }
 
   createPlatformOrganization(payload: Partial<Organization>): Observable<Organization> {
-    return this.post<Organization>('/organizations', payload).pipe(
-      catchError(() => this.post<Organization>('/organizations/register', payload)),
-    );
+    return this.post<Organization>('/organizations', payload);
   }
 
   activatePlatformOrganization(id: string): Observable<Organization> {
-    return this.patch<Organization>(`/organizations/${id}/status`, { status: 'ACTIVE' }).pipe(
-      catchError(() => this.patch<Organization>(`/organizations/${id}`, { status: 'ACTIVE' })),
-    );
+    return this.patch<Organization>(`/organizations/${id}`, { status: 'ACTIVE' });
   }
 
   suspendPlatformOrganization(id: string): Observable<Organization> {
-    return this.patch<Organization>(`/organizations/${id}/status`, { status: 'SUSPENDED' }).pipe(
-      catchError(() => this.patch<Organization>(`/organizations/${id}`, { status: 'SUSPENDED' })),
-    );
+    return this.patch<Organization>(`/organizations/${id}`, { status: 'SUSPENDED' });
   }
 
   getPlatformUsers(): Observable<User[]> {
@@ -2642,14 +2630,10 @@ export class ApiService {
   }
 
   confirmAppointment(id: string): Observable<Appointment> {
-    return this.post<Appointment>('/reception/appointments/' + id + '/confirm', {}).pipe(
-      catchError(() => this.updateAppointmentStatus(id, 'CONFIRMED')),
-    );
+    return this.updateAppointmentStatus(id, 'CONFIRMED');
   }
 
   markNoShowAppointment(id: string): Observable<Appointment> {
-    return this.post<Appointment>('/reception/appointments/' + id + '/no-show', {}).pipe(
-      catchError(() => this.updateAppointmentStatus(id, 'NO_SHOW')),
-    );
+    return this.updateAppointmentStatus(id, 'NO_SHOW');
   }
 }

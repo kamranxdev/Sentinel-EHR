@@ -14,4 +14,5 @@ public interface PatientOrganizationRepository extends JpaRepository<PatientOrga
     Optional<PatientOrganization> findByPatientIdAndOrganizationId(UUID patientId, UUID organizationId);
     Optional<PatientOrganization> findByOrganizationIdAndMrn(UUID organizationId, String mrn);
     boolean existsByOrganizationIdAndMrn(UUID organizationId, String mrn);
+    long countByOrganizationId(UUID organizationId);
 }

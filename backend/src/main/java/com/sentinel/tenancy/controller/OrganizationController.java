@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
 import java.util.UUID;
@@ -36,6 +37,7 @@ public class OrganizationController {
     }
 
     @GetMapping
+    @PreAuthorize("hasAuthority('SUPER_ADMIN')")
     @Operation(summary = "Get or search organizations")
     public ResponseEntity<ApiResponse<List<OrganizationResponseDTO>>> getOrganizations(
             @RequestParam(required = false) String query,
@@ -46,7 +48,15 @@ public class OrganizationController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
+    @GetMapping("/current/dashboard")
+    @PreAuthorize("hasAnyAuthority('ORGANIZATION_ADMIN', 'SUPER_ADMIN')")
+    @Operation(summary = "Get persisted operational metrics for the current organization")
+    public ResponseEntity<ApiResponse<com.sentinel.tenancy.dto.OrganizationDashboardStatsDTO>> getCurrentOrganizationDashboard() {
+        return ResponseEntity.ok(ApiResponse.success(organizationService.getCurrentOrganizationDashboard()));
+    }
+
     @GetMapping("/{organizationId}")
+    @PreAuthorize("hasAnyAuthority('ORGANIZATION_ADMIN', 'SUPER_ADMIN')")
     @Operation(summary = "Get organization by ID")
     public ResponseEntity<ApiResponse<OrganizationResponseDTO>> getOrganization(
             @PathVariable UUID organizationId) {
@@ -55,6 +65,7 @@ public class OrganizationController {
     }
 
     @PatchMapping("/{organizationId}")
+    @PreAuthorize("hasAnyAuthority('ORGANIZATION_ADMIN', 'SUPER_ADMIN')")
     @Operation(summary = "Update organization")
     public ResponseEntity<ApiResponse<OrganizationResponseDTO>> updateOrganization(
             @PathVariable UUID organizationId,
@@ -64,6 +75,7 @@ public class OrganizationController {
     }
 
     @DeleteMapping("/{organizationId}")
+    @PreAuthorize("hasAuthority('SUPER_ADMIN')")
     @Operation(summary = "Deactivate organization")
     public ResponseEntity<ApiResponse<Void>> deleteOrganization(
             @PathVariable UUID organizationId) {
