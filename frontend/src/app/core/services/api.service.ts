@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 import { Observable, of, forkJoin, throwError } from 'rxjs';
 import { map, catchError, switchMap } from 'rxjs/operators';
 import { User, UserUpdateRequestDTO, OrganizationContextDTO } from '../models/auth-user.model';
@@ -158,7 +159,7 @@ import {
   providedIn: 'root',
 })
 export class ApiService {
-  private baseUrl = 'http://localhost:8080/api/v1';
+  private readonly baseUrl = environment.apiBaseUrl;
 
   constructor(private http: HttpClient) { }
 
@@ -1999,7 +2000,7 @@ export class ApiService {
   // =========================================================================
   // 18. HL7 FHIR R4 Interoperability Subsystem
   // =========================================================================
-  private fhirUrl = 'http://localhost:8080/fhir';
+  private readonly fhirUrl = environment.fhirBaseUrl;
 
   getFhirMetadata(): Observable<FhirCapabilityStatement> {
     return this.http.get<FhirCapabilityStatement>(`${this.fhirUrl}/metadata`);

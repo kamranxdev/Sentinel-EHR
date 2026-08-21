@@ -4,6 +4,7 @@ import com.sentinel.audit.service.AuditService;
 import com.sentinel.clinical.entity.Encounter;
 import com.sentinel.clinical.repository.EncounterRepository;
 import com.sentinel.common.exception.ResourceNotFoundException;
+import com.sentinel.common.exception.AccessDeniedCustomException;
 import com.sentinel.insurance.dto.CreateInsuranceClaimRequest;
 import com.sentinel.insurance.dto.InsuranceClaimResponseDTO;
 import com.sentinel.insurance.dto.UpdateInsuranceClaimRequest;
@@ -13,6 +14,7 @@ import com.sentinel.insurance.entity.InsurancePayer;
 import com.sentinel.insurance.repository.InsuranceClaimItemRepository;
 import com.sentinel.insurance.repository.InsuranceClaimRepository;
 import com.sentinel.insurance.repository.InsurancePayerRepository;
+import com.sentinel.security.TenantContext;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -47,6 +49,7 @@ public class InsuranceClaimService {
     public InsuranceClaimResponseDTO createClaim(UUID encounterId, CreateInsuranceClaimRequest request) {
         Encounter encounter = encounterRepository.findById(encounterId)
                 .orElseThrow(() -> new ResourceNotFoundException("Encounter not found with id: " + encounterId));
+        requireTenantAccess(encounter.getOrganization().getId());
 
         InsurancePayer payer = payerRepository.findById(request.getPayerId())
                 .orElseThrow(() -> new ResourceNotFoundException("Payer not found with id: " + request.getPayerId()));
@@ -85,6 +88,7 @@ public class InsuranceClaimService {
     public List<InsuranceClaimResponseDTO> getEncounterClaims(UUID encounterId) {
         Encounter encounter = encounterRepository.findById(encounterId)
                 .orElseThrow(() -> new ResourceNotFoundException("Encounter not found with id: " + encounterId));
+        requireTenantAccess(encounter.getOrganization().getId());
 
         return claimRepository.findByPatientId(encounter.getPatient().getId()).stream()
                 .map(this::mapToDTO)
@@ -95,12 +99,14 @@ public class InsuranceClaimService {
     public InsuranceClaimResponseDTO getClaim(UUID claimId) {
         InsuranceClaim claim = claimRepository.findById(claimId)
                 .orElseThrow(() -> new ResourceNotFoundException("Insurance claim not found with id: " + claimId));
+        requireTenantAccess(claim.getOrganization().getId());
         return mapToDTO(claim);
     }
 
     public InsuranceClaimResponseDTO updateClaim(UUID claimId, UpdateInsuranceClaimRequest request) {
         InsuranceClaim claim = claimRepository.findById(claimId)
                 .orElseThrow(() -> new ResourceNotFoundException("Insurance claim not found with id: " + claimId));
+        requireTenantAccess(claim.getOrganization().getId());
 
         if (request.getStatus() != null) claim.setStatus(request.getStatus());
         if (request.getApprovedAmount() != null) claim.setApprovedAmount(request.getApprovedAmount());
@@ -114,6 +120,7 @@ public class InsuranceClaimService {
     public InsuranceClaimResponseDTO submitClaim(UUID claimId) {
         InsuranceClaim claim = claimRepository.findById(claimId)
                 .orElseThrow(() -> new ResourceNotFoundException("Insurance claim not found with id: " + claimId));
+        requireTenantAccess(claim.getOrganization().getId());
 
         claim.setStatus("SUBMITTED");
         claim.setSubmittedAt(OffsetDateTime.now());
@@ -130,7 +137,10 @@ public class InsuranceClaimService {
     public InsuranceClaimResponseDTO mapToDTO(InsuranceClaim c) {
         InsuranceClaimResponseDTO dto = new InsuranceClaimResponseDTO();
         dto.setId(c.getId());
-        if (c.getPatient() != null) dto.setPatientId(c.getPatient().getId());
+        if (c.getPatient() != null) {
+            dto.setPatientId(c.getPatient().getId());
+            dto.setPatientName(c.getPatient().getFullName());
+        }
         if (c.getOrganization() != null) dto.setOrganizationId(c.getOrganization().getId());
         if (c.getPayer() != null) {
             dto.setPayerId(c.getPayer().getId());
@@ -164,8 +174,19 @@ public class InsuranceClaimService {
 
     @Transactional(readOnly = true)
     public List<InsuranceClaimResponseDTO> getAllClaims() {
-        return claimRepository.findAll().stream()
+        UUID organizationId = TenantContext.getCurrentOrganizationId();
+        if (organizationId == null) {
+            throw new AccessDeniedCustomException("An organization context is required to access insurance claims.");
+        }
+        return claimRepository.findByOrganizationId(organizationId).stream()
                 .map(this::mapToDTO)
                 .collect(Collectors.toList());
+    }
+
+    private void requireTenantAccess(UUID resourceOrganizationId) {
+        UUID organizationId = TenantContext.getCurrentOrganizationId();
+        if (organizationId == null || !organizationId.equals(resourceOrganizationId)) {
+            throw new AccessDeniedCustomException("The requested insurance claim does not belong to the active organization.");
+        }
     }
 }

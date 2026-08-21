@@ -2,6 +2,7 @@ package com.sentinel.config;
 
 import com.sentinel.security.auth.security.JwtAuthenticationEntryPoint;
 import com.sentinel.security.auth.security.JwtAuthenticationFilter;
+import com.sentinel.security.TenantContextFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -63,6 +64,7 @@ public class SecurityConfig {
         http.headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable));
 
         http.addFilterBefore(authenticationFilter, org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter.class);
+        http.addFilterAfter(new TenantContextFilter(), JwtAuthenticationFilter.class);
 
         return http.build();
     }

@@ -8,6 +8,7 @@ import java.util.UUID;
 public class InsuranceClaimResponseDTO {
     private UUID id;
     private UUID patientId;
+    private String patientName;
     private UUID organizationId;
     private UUID payerId;
     private String payerName;
@@ -55,6 +56,8 @@ public class InsuranceClaimResponseDTO {
     public void setId(UUID id) { this.id = id; }
     public UUID getPatientId() { return patientId; }
     public void setPatientId(UUID patientId) { this.patientId = patientId; }
+    public String getPatientName() { return patientName; }
+    public void setPatientName(String patientName) { this.patientName = patientName; }
     public UUID getOrganizationId() { return organizationId; }
     public void setOrganizationId(UUID organizationId) { this.organizationId = organizationId; }
     public UUID getPayerId() { return payerId; }

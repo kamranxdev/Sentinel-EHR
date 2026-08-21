@@ -635,9 +635,10 @@ type ProfileTab = 'demographics' | 'contact' | 'insurance' | 'allergies' | 'hist
                     <div class="space-y-1">
                       <label class="font-semibold block text-foreground">Relationship *</label>
                       <select
+                        name="emergencyContactRelationship"
                         hlmInput
                         [(ngModel)]="emergencyContactRelationship"
-                        (change)="syncEmergencyContact()"
+                        (ngModelChange)="syncEmergencyContact()"
                         class="w-full h-9 text-xs bg-background"
                       >
                         <option value="Spouse">Spouse</option>

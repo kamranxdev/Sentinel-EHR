@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import {
@@ -18,10 +19,10 @@ import { AuditLog } from '../models/audit.model';
   providedIn: 'root',
 })
 export class OrganizationService {
-  private baseUrl = 'http://localhost:8080/api/v1';
-  private apiUrl = 'http://localhost:8080/api/v1/organizations';
-  private usersUrl = 'http://localhost:8080/api/v1/users';
-  private auditUrl = 'http://localhost:8080/api/v1/audit';
+  private readonly baseUrl = environment.apiBaseUrl;
+  private readonly apiUrl = `${this.baseUrl}/organizations`;
+  private readonly usersUrl = `${this.baseUrl}/users`;
+  private readonly auditUrl = `${this.baseUrl}/audit`;
 
   constructor(private http: HttpClient) {}
 

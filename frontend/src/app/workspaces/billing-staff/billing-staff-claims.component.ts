@@ -5,7 +5,7 @@ import { RouterModule } from '@angular/router';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
 import { Appointment } from '../../core/models/appointment.model';
-import { InsuranceClaim, InsurancePayer } from '../../core/models/insurance.model';
+import { CreateInsuranceClaimRequest, InsuranceClaim, InsurancePayer } from '../../core/models/insurance.model';
 
 import { HlmCardImports } from '@spartan-ng/helm/card';
 import { HlmBadgeImports } from '@spartan-ng/helm/badge';
@@ -280,25 +280,22 @@ export interface ClaimViewModel {
           </div>
           <div class="space-y-3 text-xs">
             <div>
-              <label class="font-medium text-foreground block mb-1">Patient Name *</label>
+              <label class="font-medium text-foreground block mb-1">Encounter ID *</label>
               <input
                 type="text"
-                [(ngModel)]="newClaimForm.patientName"
-                placeholder="Patient Full Name"
+                [(ngModel)]="newClaimForm.encounterId"
+                placeholder="Encounter UUID"
                 class="w-full p-2.5 rounded-lg border border-input bg-background text-xs"
               />
             </div>
             <div>
               <label class="font-medium text-foreground block mb-1">Insurance Carrier / Payer</label>
               <select
-                [(ngModel)]="newClaimForm.carrier"
+                [(ngModel)]="newClaimForm.payerId"
                 class="w-full p-2.5 rounded-lg border border-input bg-background text-xs"
               >
-                <option value="Star Health and Allied Insurance">Star Health & Allied Insurance</option>
-                <option value="PM-JAY Ayushman Bharat">PM-JAY Ayushman Bharat</option>
-                <option value="HDFC ERGO General Insurance">HDFC ERGO General Insurance</option>
-                <option value="ICICI Lombard Health Care">ICICI Lombard Health Care</option>
-                <option value="New India Assurance">New India Assurance</option>
+                <option value="" disabled>Select an active payer</option>
+                <option *ngFor="let payer of payers()" [value]="payer.id">{{ payer.payerName }}</option>
               </select>
             </div>
             <div>
@@ -318,7 +315,7 @@ export interface ClaimViewModel {
               hlmBtn
               variant="default"
               size="sm"
-              [disabled]="!newClaimForm.patientName || !newClaimForm.amount"
+              [disabled]="isSubmitting || !newClaimForm.encounterId || !newClaimForm.payerId || !newClaimForm.amount"
               (click)="createClaimSubmit()"
               class="text-xs bg-emerald-600 hover:bg-emerald-700 text-white"
             >
@@ -332,6 +329,7 @@ export interface ClaimViewModel {
 })
 export class BillingStaffClaimsComponent implements OnInit {
   claims = signal<ClaimViewModel[]>([]);
+  payers = signal<InsurancePayer[]>([]);
   isLoading: boolean = false;
   errorMessage: string = '';
 
@@ -340,10 +338,11 @@ export class BillingStaffClaimsComponent implements OnInit {
 
   showCreateModal = signal(false);
   newClaimForm = {
-    patientName: '',
-    carrier: 'Star Health and Allied Insurance',
-    amount: 3500,
+    encounterId: '',
+    payerId: '',
+    amount: null as number | null,
   };
+  isSubmitting = false;
 
   filteredClaims = computed(() => {
     return this.claims().filter((c) => {
@@ -377,6 +376,17 @@ export class BillingStaffClaimsComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadClaims();
+    this.loadPayers();
+  }
+
+  loadPayers(): void {
+    this.apiService.getInsurancePayers().subscribe({
+      next: (payers) => this.payers.set(payers),
+      error: (err: unknown) => {
+        console.error('Failed to load insurance payers:', err);
+        this.errorMessage = 'Unable to load insurance payers. Please retry.';
+      },
+    });
   }
 
   loadClaims(): void {
@@ -384,17 +394,19 @@ export class BillingStaffClaimsComponent implements OnInit {
     this.errorMessage = '';
     this.apiService.getAllClaims().subscribe({
       next: (claims: any[]) => {
-        const list: ClaimViewModel[] = (Array.isArray(claims) ? claims : []).map(
-          (c: any, idx: number) => ({
-            id: c.id || `CLM-${900 + idx}`,
-            claimNumber: c.claimNumber || `CLM-${String(idx).substring(0, 6).toUpperCase()}-2024`,
-            patientName: c.patientName || 'Registered Patient',
-            carrier: c.payerName || 'Star Health / PM-JAY Ayushman',
-            encounterId: c.encounterId,
-            amount: c.totalAmount || 0,
-            approvedAmount: c.approvedAmount || 0,
-            rejectedAmount: c.rejectedAmount || 0,
-            status: c.status || 'DRAFT',
+        if (!Array.isArray(claims)) {
+          throw new Error('The claims API returned an invalid response.');
+        }
+        const list: ClaimViewModel[] = claims.map(
+          (c: InsuranceClaim) => ({
+            id: String(c.id),
+            claimNumber: c.claimNumber,
+            patientName: c.patientName ?? 'Unavailable',
+            carrier: c.payerName ?? 'Unavailable',
+            amount: c.totalAmount,
+            approvedAmount: c.approvedAmount,
+            rejectedAmount: c.rejectedAmount,
+            status: c.status,
             submittedAt: c.submittedAt,
           })
         );
@@ -410,25 +422,34 @@ export class BillingStaffClaimsComponent implements OnInit {
   }
 
   submitClaim(claim: ClaimViewModel): void {
-    claim.status = 'SUBMITTED';
+    this.apiService.submitInsuranceClaim(claim.id).subscribe({
+      next: () => this.loadClaims(),
+      error: (err: any) => (this.errorMessage = err?.error?.message || 'Unable to submit claim.'),
+    });
   }
 
   settleClaim(claim: ClaimViewModel): void {
-    claim.status = 'SETTLED';
-    claim.approvedAmount = claim.amount * 0.9;
-    claim.rejectedAmount = claim.amount * 0.1;
+    // Adjudication amounts must be received from the payer; this screen never invents them.
+    this.errorMessage = `Claim ${claim.claimNumber} is awaiting payer adjudication.`;
   }
 
   createClaimSubmit(): void {
-    if (!this.newClaimForm.patientName || !this.newClaimForm.amount) return;
-    // TODO: Call API endpoint like this.apiService.createInsuranceClaim
-    
-    this.showCreateModal.set(false);
-    this.newClaimForm = {
-      patientName: '',
-      carrier: 'Star Health and Allied Insurance',
-      amount: 3500,
-    };
+    const { encounterId, payerId, amount } = this.newClaimForm;
+    if (!encounterId || !payerId || amount === null || amount <= 0) return;
+    this.isSubmitting = true;
+    const payload: CreateInsuranceClaimRequest = { payerId, totalAmount: amount };
+    this.apiService.createInsuranceClaim(encounterId, payload).subscribe({
+      next: () => {
+        this.showCreateModal.set(false);
+        this.newClaimForm = { encounterId: '', payerId: '', amount: null };
+        this.isSubmitting = false;
+        this.loadClaims();
+      },
+      error: (err: any) => {
+        this.isSubmitting = false;
+        this.errorMessage = err?.error?.message || 'Unable to create the claim.';
+      },
+    });
   }
 
   getStatusBadgeClass(status: string): string {

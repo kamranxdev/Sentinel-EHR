@@ -57,16 +57,15 @@ export interface InsuranceAuthorization {
 
 export interface InsuranceClaim {
   id: number | string;
-  encounterId: string;
+  patientId?: string;
+  organizationId?: string;
   claimNumber: string;
   payerId: number | string;
   payerName?: string;
   patientName?: string;
-  patientCode?: string;
-  totalBilledAmount: number;
-  allowedAmount?: number;
-  patientPaidAmount?: number;
-  insurancePaidAmount?: number;
+  totalAmount: number;
+  approvedAmount?: number;
+  rejectedAmount?: number;
   status: 'DRAFT' | 'SUBMITTED' | 'IN_REVIEW' | 'ADJUDICATED' | 'DENIED' | 'PAID';
   submittedAt?: string;
   adjudicatedAt?: string;
@@ -87,7 +86,7 @@ export interface ClaimItem {
 
 export interface CreateInsuranceClaimRequest {
   payerId: number | string;
-  totalBilledAmount: number;
+  totalAmount: number;
   items?: Partial<ClaimItem>[];
 }
 

@@ -1,5 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
+import { environment } from '../../../environments/environment';
 import { Observable, map, tap } from 'rxjs';
 import {
   JwtAuthResponse,
@@ -14,7 +15,7 @@ import { Capability, ROLE_CAPABILITY_MAP, UserRole } from '../models/permissions
   providedIn: 'root',
 })
 export class AuthService {
-  private apiUrl = 'http://localhost:8080/api/v1/auth';
+  private readonly apiUrl = `${environment.apiBaseUrl}/auth`;
 
   currentUser = signal<JwtAuthResponse | null>(this.getStoredUser());
   activeContext = signal<SelectedContext | null>(this.getStoredContext());
