@@ -48,6 +48,23 @@ public class OrganizationController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
+    @GetMapping("/current")
+    @PreAuthorize("hasAnyAuthority('ORGANIZATION_ADMIN', 'SUPER_ADMIN', 'PHYSICIAN', 'NURSE', 'PHARMACIST', 'RECEPTIONIST', 'BILLING_STAFF', 'LAB_TECHNICIAN')")
+    @Operation(summary = "Get current organization details from active tenant context")
+    public ResponseEntity<ApiResponse<OrganizationResponseDTO>> getCurrentOrganization() {
+        OrganizationResponseDTO response = organizationService.getCurrentOrganization();
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @PatchMapping("/current")
+    @PreAuthorize("hasAnyAuthority('ORGANIZATION_ADMIN', 'SUPER_ADMIN')")
+    @Operation(summary = "Update current organization details")
+    public ResponseEntity<ApiResponse<OrganizationResponseDTO>> updateCurrentOrganization(
+            @Valid @RequestBody UpdateOrganizationRequest request) {
+        OrganizationResponseDTO response = organizationService.updateCurrentOrganization(request);
+        return ResponseEntity.ok(ApiResponse.success("Organization updated successfully", response));
+    }
+
     @GetMapping("/current/dashboard")
     @PreAuthorize("hasAnyAuthority('ORGANIZATION_ADMIN', 'SUPER_ADMIN')")
     @Operation(summary = "Get persisted operational metrics for the current organization")

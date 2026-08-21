@@ -34,6 +34,45 @@ public class PrescriptionController {
         return new ResponseEntity<>(ApiResponse.success("Prescription created successfully", response), HttpStatus.CREATED);
     }
 
+    @GetMapping("/api/v1/prescriptions")
+    @Operation(summary = "Get all prescriptions with optional status and search filters")
+    public ResponseEntity<ApiResponse<List<PrescriptionResponseDTO>>> getAllPrescriptions(
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String search) {
+        List<PrescriptionResponseDTO> response = prescriptionService.getAllPrescriptions(status, search);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @PostMapping("/api/v1/prescriptions/{prescriptionId}/verify")
+    @Operation(summary = "Pharmacist verification for a prescription")
+    public ResponseEntity<ApiResponse<PrescriptionResponseDTO>> verifyPrescription(
+            @PathVariable UUID prescriptionId,
+            @RequestBody(required = false) java.util.Map<String, String> body) {
+        String notes = body != null ? body.get("notes") : null;
+        PrescriptionResponseDTO response = prescriptionService.verifyPrescription(prescriptionId, notes);
+        return ResponseEntity.ok(ApiResponse.success("Prescription verified successfully", response));
+    }
+
+    @PostMapping("/api/v1/prescriptions/{prescriptionId}/reject")
+    @Operation(summary = "Pharmacist rejection for a prescription")
+    public ResponseEntity<ApiResponse<PrescriptionResponseDTO>> rejectPrescription(
+            @PathVariable UUID prescriptionId,
+            @RequestBody(required = false) java.util.Map<String, String> body) {
+        String reason = body != null ? body.get("reason") : "Safety verification rejection";
+        PrescriptionResponseDTO response = prescriptionService.rejectPrescription(prescriptionId, reason);
+        return ResponseEntity.ok(ApiResponse.success("Prescription rejected", response));
+    }
+
+    @PostMapping("/api/v1/prescriptions/{prescriptionId}/dispense")
+    @Operation(summary = "Pharmacist dispensation for a prescription")
+    public ResponseEntity<ApiResponse<PrescriptionResponseDTO>> dispensePrescription(
+            @PathVariable UUID prescriptionId,
+            @RequestBody(required = false) java.util.Map<String, Object> body) {
+        String notes = body != null && body.get("notes") != null ? String.valueOf(body.get("notes")) : null;
+        PrescriptionResponseDTO response = prescriptionService.dispensePrescription(prescriptionId, notes);
+        return ResponseEntity.ok(ApiResponse.success("Prescription dispensed successfully", response));
+    }
+
     @GetMapping("/api/v1/encounters/{encounterId}/prescriptions")
     @Operation(summary = "Get prescriptions for an encounter")
     public ResponseEntity<ApiResponse<List<PrescriptionResponseDTO>>> getEncounterPrescriptions(

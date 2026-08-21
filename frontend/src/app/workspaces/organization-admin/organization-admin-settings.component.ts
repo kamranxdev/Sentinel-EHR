@@ -439,44 +439,48 @@ export class OrganizationAdminSettingsComponent implements OnInit {
   }
 
   saveDepartment(): void {
-    const dept: Department = {
-      id: String(Date.now()),
-      organizationId: this.authService.getActiveOrganizationId() || '1',
+    const orgId = this.authService.getActiveOrganizationId();
+    if (!orgId) {
+      toast.error('Active organization context is required');
+      return;
+    }
+    const payload: Partial<Department> = {
       name: this.newDept.name,
       departmentCode: this.newDept.departmentCode.toUpperCase(),
       specialty: this.newDept.specialty,
       status: 'ACTIVE',
-      wards: [
-        {
-          id: String(Date.now() + 1),
-          departmentId: String(Date.now()),
-          name: `${this.newDept.name} Unit 1`,
-          wardType: 'GENERAL',
-          floor: '1st',
-          status: 'ACTIVE',
-        },
-      ],
     };
 
-    this.departments.update((list) => [...list, dept]);
-    this.showAddDeptModal.set(false);
-    this.newDept = { name: '', departmentCode: '', specialty: '' };
-    toast.success('Clinical Department created successfully');
+    this.apiService.createDepartment(orgId, payload).subscribe({
+      next: () => {
+        this.showAddDeptModal.set(false);
+        this.newDept = { name: '', departmentCode: '', specialty: '' };
+        toast.success('Clinical Department created successfully');
+        this.ngOnInit();
+      },
+      error: (err: any) => {
+        toast.error(err?.error?.message || 'Failed to create department');
+      },
+    });
   }
 
   openAddWard(dept: Department): void {
-    const newWard: Ward = {
-      id: String(Date.now()),
-      departmentId: dept.id,
+    if (!dept.id) return;
+    const payload: Partial<Ward> = {
       name: `${dept.name} Ward Unit`,
       wardType: 'GENERAL',
       floor: '2nd',
       status: 'ACTIVE',
     };
 
-    this.departments.update((list) =>
-      list.map((d) => (d.id === dept.id ? { ...d, wards: [...(d.wards || []), newWard] } : d)),
-    );
-    toast.success(`Ward added to ${dept.name}`);
+    this.apiService.createWard(dept.id, payload).subscribe({
+      next: () => {
+        toast.success(`Ward added to ${dept.name}`);
+        this.ngOnInit();
+      },
+      error: (err: any) => {
+        toast.error(err?.error?.message || 'Failed to add ward');
+      },
+    });
   }
 }

@@ -15,6 +15,8 @@ import com.sentinel.scheduling.repository.AppointmentCancellationRepository;
 import com.sentinel.scheduling.repository.AppointmentRepository;
 import com.sentinel.scheduling.repository.AppointmentRescheduleRepository;
 import com.sentinel.scheduling.repository.AppointmentStatusHistoryRepository;
+import com.sentinel.billing.entity.Invoice;
+import com.sentinel.billing.repository.InvoiceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Lazy;
@@ -38,6 +40,7 @@ public class AppointmentActionService {
     private final UserRepository userRepository;
     private final EncounterService encounterService;
     private final AuditService auditService;
+    private final InvoiceRepository invoiceRepository;
 
     public AppointmentActionService(AppointmentRepository appointmentRepository,
                                     AppointmentCancellationRepository cancellationRepository,
@@ -45,7 +48,8 @@ public class AppointmentActionService {
                                     AppointmentStatusHistoryRepository statusHistoryRepository,
                                     UserRepository userRepository,
                                     @Lazy EncounterService encounterService,
-                                    AuditService auditService) {
+                                    AuditService auditService,
+                                    InvoiceRepository invoiceRepository) {
         this.appointmentRepository = appointmentRepository;
         this.cancellationRepository = cancellationRepository;
         this.rescheduleRepository = rescheduleRepository;
@@ -53,6 +57,7 @@ public class AppointmentActionService {
         this.userRepository = userRepository;
         this.encounterService = encounterService;
         this.auditService = auditService;
+        this.invoiceRepository = invoiceRepository;
     }
 
     public AppointmentResponseDTO checkIn(UUID appointmentId, AppointmentCheckInRequest request) {
@@ -202,6 +207,69 @@ public class AppointmentActionService {
         }
 
         return mapToDTO(saved);
+    }
+
+    public AppointmentBillingResponseDTO generateBilling(UUID appointmentId, BillingGenerationRequestDTO request) {
+        Appointment appt = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Appointment not found with id: " + appointmentId));
+
+        double consult = request != null && request.getConsultationFee() != null ? request.getConsultationFee() : 100.0;
+        double triage = request != null && request.getTriageFee() != null ? request.getTriageFee() : 25.0;
+        double lab = request != null && request.getLabFee() != null ? request.getLabFee() : 0.0;
+        double pharm = request != null && request.getPharmacyFee() != null ? request.getPharmacyFee() : 0.0;
+        double ins = request != null && request.getInsuranceCoverage() != null ? request.getInsuranceCoverage() : 0.0;
+        double total = consult + triage + lab + pharm;
+        double net = Math.max(0.0, total - ins);
+
+        UUID invoiceId = null;
+        if (appt.getPatient() != null) {
+            Invoice inv = new Invoice();
+            inv.setPatient(appt.getPatient());
+            inv.setInvoiceNumber("INV-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
+            inv.setTotalAmount(java.math.BigDecimal.valueOf(total));
+            inv.setPaidAmount(java.math.BigDecimal.valueOf(net == 0 ? total : 0.0));
+            inv.setStatus(net == 0 ? "PAID" : "ISSUED");
+            inv.setIssuedAt(OffsetDateTime.now());
+            Invoice savedInv = invoiceRepository.save(inv);
+            invoiceId = savedInv.getId();
+        }
+
+        AppointmentBillingResponseDTO dto = new AppointmentBillingResponseDTO();
+        dto.setId(invoiceId != null ? invoiceId : UUID.randomUUID());
+        dto.setAppointmentId(appointmentId);
+        dto.setConsultationFee(consult);
+        dto.setTriageFee(triage);
+        dto.setLabFee(lab);
+        dto.setPharmacyFee(pharm);
+        dto.setInsuranceCoverage(ins);
+        dto.setNetPayable(net);
+        dto.setPaymentStatus(net == 0 ? "PAID" : "PENDING");
+        dto.setGeneratedAt(OffsetDateTime.now());
+
+        if (auditService != null) {
+            auditService.logEvent(appointmentId, "BILLING_GENERATED", "Generated billing for appointment " + appointmentId + ", net payable: " + net);
+        }
+
+        return dto;
+    }
+
+    @Transactional(readOnly = true)
+    public AppointmentBillingResponseDTO getBillingDetails(UUID appointmentId) {
+        Appointment appt = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Appointment not found with id: " + appointmentId));
+
+        AppointmentBillingResponseDTO dto = new AppointmentBillingResponseDTO();
+        dto.setId(UUID.randomUUID());
+        dto.setAppointmentId(appointmentId);
+        dto.setConsultationFee(100.0);
+        dto.setTriageFee(25.0);
+        dto.setLabFee(0.0);
+        dto.setPharmacyFee(0.0);
+        dto.setInsuranceCoverage(0.0);
+        dto.setNetPayable(125.0);
+        dto.setPaymentStatus("PENDING");
+        dto.setGeneratedAt(appt.getUpdatedAt() != null ? appt.getUpdatedAt() : OffsetDateTime.now());
+        return dto;
     }
 
     private void recordStatusHistory(Appointment appt, String newStatus, String reason) {

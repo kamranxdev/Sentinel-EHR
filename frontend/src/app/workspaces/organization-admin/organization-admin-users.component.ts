@@ -831,8 +831,8 @@ export class OrganizationAdminUsersComponent implements OnInit {
   }
 
   submitCreateUser(): void {
-    if (!this.newUserForm.email || !this.newUserForm.email || !this.newUserForm.password) {
-      this.toastMessage.set({ text: 'Email, Email, and Password are required.', type: 'error' });
+    if (!this.newUserForm.fullName || !this.newUserForm.email || !this.newUserForm.password) {
+      this.toastMessage.set({ text: 'Full Name, Email, and Password are required.', type: 'error' });
       return;
     }
 

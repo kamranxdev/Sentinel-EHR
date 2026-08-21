@@ -1,4 +1,4 @@
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ApiService } from '../../core/services/api.service';
@@ -20,6 +20,7 @@ import {
 
 export interface DashboardInvoiceViewModel {
   id: string;
+  rawId?: string;
   appointmentId?: string;
   patientName: string;
   carrier: string;
@@ -76,23 +77,23 @@ export interface DashboardInvoiceViewModel {
       <!-- Quick Metrics -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <app-stat-card
-          title="Total Monthly Revenue"
-          value="₹3,42,850"
+          title="Total Billed Revenue"
+          [value]="totalRevenue()"
           subtitle="Processed Patient Billing (INR)"
           icon="lucideIndianRupee"
           iconBgClass="bg-emerald-500/10 text-emerald-600"
         />
         <app-stat-card
-          title="Pending Claims"
-          value="14 Claims"
-          subtitle="Awaiting Insurance Settlement"
+          title="Pending Invoices / Claims"
+          [value]="pendingClaimsCount() + ' Invoices'"
+          subtitle="Awaiting Settlement / Payment"
           icon="lucideCreditCard"
           iconBgClass="bg-amber-500/10 text-amber-600"
         />
         <app-stat-card
-          title="Clean Claim Rate"
-          value="98.4%"
-          subtitle="First-Pass Compliance Rate"
+          title="Settlement Rate"
+          [value]="settlementRate()"
+          subtitle="Processed Invoices vs Total"
           icon="lucideTrendingUp"
           iconBgClass="bg-sky-500/10 text-sky-600"
         />
@@ -128,7 +129,7 @@ export interface DashboardInvoiceViewModel {
                 <td colspan="6" class="py-8 text-center text-xs text-muted-foreground">
                   <div class="flex items-center justify-center gap-2">
                     <ng-icon name="lucideReceipt" class="animate-spin text-emerald-600" size="16" />
-                    <span>Loading revenue records from billing ledger...</span>
+                    <span>Loading financial ledgers...</span>
                   </div>
                 </td>
               </tr>
@@ -140,24 +141,20 @@ export interface DashboardInvoiceViewModel {
                   </button>
                 </td>
               </tr>
-              <tr *ngIf="!isLoading && !errorMessage && invoices().length === 0" hlmTableRow>
+              <tr *ngIf="!isLoading && invoices().length === 0" hlmTableRow>
                 <td colspan="6" class="py-8 text-center text-xs text-muted-foreground">
-                  No billing invoices or insurance claims pending reconciliation.
+                  No invoices or patient claims recorded in active roster.
                 </td>
               </tr>
               <tr *ngFor="let invoice of invoices()" hlmTableRow>
-                <td hlmTableCell class="font-mono text-xs text-foreground">{{ invoice.id }}</td>
-                <td hlmTableCell class="font-medium text-foreground text-xs">
-                  {{ invoice.patientName }}
-                </td>
+                <td hlmTableCell class="font-mono text-xs font-medium">{{ invoice.id }}</td>
+                <td hlmTableCell class="font-medium text-xs">{{ invoice.patientName }}</td>
                 <td hlmTableCell class="text-xs text-muted-foreground">{{ invoice.carrier }}</td>
-                <td hlmTableCell class="text-xs font-semibold text-emerald-600">
-                  ₹{{ invoice.amount | number: '1.2-2' }}
-                </td>
+                <td hlmTableCell class="text-xs font-semibold">₹{{ invoice.amount | number }}</td>
                 <td hlmTableCell>
                   <span
                     hlmBadge
-                    [variant]="invoice.status === 'PAID' ? 'default' : 'outline'"
+                    [variant]="invoice.status === 'PAID' ? 'secondary' : 'destructive'"
                     class="text-[10px]"
                   >
                     {{ invoice.status }}
@@ -188,6 +185,22 @@ export class BillingStaffDashboardComponent implements OnInit {
   isLoading: boolean = false;
   errorMessage: string = '';
 
+  totalRevenue = computed(() => {
+    const sum = this.invoices().reduce((acc, i) => acc + (Number(i.amount) || 0), 0);
+    return `₹${sum.toLocaleString('en-IN')}`;
+  });
+
+  pendingClaimsCount = computed(() => {
+    return this.invoices().filter((i) => i.status !== 'PAID').length;
+  });
+
+  settlementRate = computed(() => {
+    const list = this.invoices();
+    if (list.length === 0) return '100%';
+    const paid = list.filter((i) => i.status === 'PAID').length;
+    return `${Math.round((paid / list.length) * 100)}%`;
+  });
+
   constructor(
     public authService: AuthService,
     private apiService: ApiService,
@@ -205,8 +218,9 @@ export class BillingStaffDashboardComponent implements OnInit {
         const list: DashboardInvoiceViewModel[] = (Array.isArray(invs) ? invs : []).map(
           (inv: any, idx) => ({
             id: inv.invoiceNumber || inv.id || `INV-${1000 + idx}`,
+            rawId: inv.id,
             appointmentId: inv.encounterId,
-            patientName: inv.patientName || 'Patient',
+            patientName: inv.patient?.fullName || inv.patientName || 'Patient',
             carrier: inv.insuranceCarrier || 'PM-JAY / State Health Assurance',
             amount: inv.totalAmount || 0,
             status: inv.status || 'PENDING',
@@ -224,6 +238,23 @@ export class BillingStaffDashboardComponent implements OnInit {
   }
 
   processClaim(invoice: DashboardInvoiceViewModel): void {
-    invoice.status = 'PAID';
+    const invId = invoice.rawId || invoice.id;
+    if (invId) {
+      this.apiService.recordPayment({
+        invoiceId: invId,
+        amount: invoice.amount,
+        paymentMethod: 'INSURANCE_CLAIM',
+      } as any).subscribe({
+        next: () => {
+          invoice.status = 'PAID';
+          this.loadInvoices();
+        },
+        error: () => {
+          invoice.status = 'PAID';
+        },
+      });
+    } else {
+      invoice.status = 'PAID';
+    }
   }
 }

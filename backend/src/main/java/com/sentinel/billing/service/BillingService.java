@@ -49,6 +49,10 @@ public class BillingService {
 
     @Transactional(readOnly = true)
     public List<Invoice> getAllInvoices() {
+        UUID orgId = com.sentinel.security.TenantContext.getCurrentOrganizationId();
+        if (orgId != null) {
+            return invoiceRepository.findByOrganizationId(orgId);
+        }
         return invoiceRepository.findAll();
     }
 }

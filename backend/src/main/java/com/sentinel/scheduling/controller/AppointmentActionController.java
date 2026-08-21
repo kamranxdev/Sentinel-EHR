@@ -77,4 +77,22 @@ public class AppointmentActionController {
         AppointmentResponseDTO response = actionService.reschedule(appointmentId, request);
         return ResponseEntity.ok(ApiResponse.success("Appointment rescheduled successfully", response));
     }
+
+    @PostMapping("/billing")
+    @Operation(summary = "Generate billing and invoice for an appointment")
+    public ResponseEntity<ApiResponse<AppointmentBillingResponseDTO>> generateBilling(
+            @PathVariable UUID appointmentId,
+            @RequestBody(required = false) BillingGenerationRequestDTO request) {
+        BillingGenerationRequestDTO req = request != null ? request : new BillingGenerationRequestDTO();
+        AppointmentBillingResponseDTO response = actionService.generateBilling(appointmentId, req);
+        return ResponseEntity.ok(ApiResponse.success("Billing generated successfully", response));
+    }
+
+    @GetMapping("/billing")
+    @Operation(summary = "Get billing details for an appointment")
+    public ResponseEntity<ApiResponse<AppointmentBillingResponseDTO>> getBilling(
+            @PathVariable UUID appointmentId) {
+        AppointmentBillingResponseDTO response = actionService.getBillingDetails(appointmentId);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
 }

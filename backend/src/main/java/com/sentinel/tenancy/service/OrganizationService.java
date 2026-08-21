@@ -229,9 +229,26 @@ public class OrganizationService {
             return;
         }
         UUID currentOrganizationId = TenantContext.getCurrentOrganizationId();
-        if (!organizationId.equals(currentOrganizationId)) {
+        if (currentOrganizationId == null || !organizationId.equals(currentOrganizationId)) {
             throw new AccessDeniedCustomException("You cannot access another organization");
         }
+    }
+
+    @Transactional(readOnly = true)
+    public OrganizationResponseDTO getCurrentOrganization() {
+        UUID organizationId = TenantContext.getCurrentOrganizationId();
+        if (organizationId == null) {
+            throw new AccessDeniedCustomException("An active organization context is required");
+        }
+        return getOrganization(organizationId);
+    }
+
+    public OrganizationResponseDTO updateCurrentOrganization(UpdateOrganizationRequest request) {
+        UUID organizationId = TenantContext.getCurrentOrganizationId();
+        if (organizationId == null) {
+            throw new AccessDeniedCustomException("An active organization context is required");
+        }
+        return updateOrganization(organizationId, request);
     }
 
     @Transactional(readOnly = true)

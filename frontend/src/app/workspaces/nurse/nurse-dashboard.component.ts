@@ -910,7 +910,7 @@ export class NurseDashboardComponent implements OnInit {
   });
 
   totalMedsDue = computed(() => {
-    return this.assignedInpatients().reduce((acc, curr) => acc + (curr.medsDueCount || 0), 0) + 1;
+    return this.assignedInpatients().reduce((acc, curr) => acc + (curr.medsDueCount || 0), 0);
   });
 
   getPendingTriageCount(): number {

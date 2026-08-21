@@ -89,15 +89,15 @@ export class OrganizationService {
 
   // --- ORGANIZATION ADMIN (Facility-Scoped Multi-Tenant Workspace) ---
   getOrgAdminFacility(): Observable<Organization> {
-    return this.getAllOrganizations().pipe(map((orgs) => orgs[0] || ({} as Organization)));
+    return this.http.get<any>(`${this.apiUrl}/current`).pipe(
+      map((res: any) => res?.data || res || ({} as Organization))
+    );
   }
 
   updateOrgAdminFacility(payload: Partial<Organization>): Observable<Organization> {
-    const id = payload.id;
-    if (id) {
-      return this.updateOrganization(id, payload);
-    }
-    throw new Error('An organization identifier is required to update facility settings');
+    return this.http.patch<any>(`${this.apiUrl}/current`, payload).pipe(
+      map((res: any) => res?.data || res)
+    );
   }
 
   getOrgAdminUsers(organizationId?: string): Observable<User[]> {

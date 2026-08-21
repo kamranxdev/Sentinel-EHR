@@ -43,8 +43,8 @@ public class MedicationController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
-    @GetMapping("/search")
-    @Operation(summary = "Search medications by name or form")
+    @GetMapping({"", "/search"})
+    @Operation(summary = "Search or list all medications by name or form")
     public ResponseEntity<ApiResponse<List<MedicationResponseDTO>>> searchMedications(
             @RequestParam(required = false) String query,
             @RequestParam(required = false) String form) {

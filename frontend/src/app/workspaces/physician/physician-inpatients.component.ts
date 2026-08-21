@@ -329,7 +329,7 @@ export class PhysicianInpatientsComponent implements OnInit {
     private apiService: ApiService,
     public patientContext: PatientContextService,
     private router: Router,
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadInpatients();
@@ -343,16 +343,21 @@ export class PhysicianInpatientsComponent implements OnInit {
         const occupied = Array.isArray(beds)
           ? beds.filter((b) => b.status === 'OCCUPIED' && b.currentEncounter?.patient)
           : [];
-        const items: InpatientCareItem[] = occupied.map((b, idx) => ({
-          patient: b.currentEncounter!.patient!,
-          bedCode: b.bedNumber || b.bedCode || `Bed-${b.id?.substring(0, 4)}`,
-          wardName: b.wardName || b.departmentName || 'General Medicine Ward',
-          admissionDate: new Date(Date.now() - (idx + 1) * 86400000).toISOString(),
-          admissionDiagnosis: b.currentEncounter?.chiefComplaint || 'Unknown Diagnosis',
-          careRole: idx % 2 === 0 ? 'ATTENDING' : 'CONSULTANT',
-          ewsScore: idx === 0 ? 4 : 1,
-          acuityLevel: idx === 0 ? 'OBSERVED' : 'STABLE',
-        }));
+        const items: InpatientCareItem[] = occupied.map((b) => {
+          const enc = b.currentEncounter;
+          const admDate = (enc as any)?.startedAt || (enc as any)?.admittedAt || (enc as any)?.createdAt || new Date().toISOString();
+          const diagnosis = (enc as any)?.chiefComplaint || (enc as any)?.reasonForVisit || 'Inpatient Observation';
+          return {
+            patient: enc!.patient!,
+            bedCode: b.bedNumber || b.bedCode || `Bed-${b.id?.substring(0, 4)}`,
+            wardName: b.wardName || b.departmentName || 'Inpatient Ward',
+            admissionDate: admDate,
+            admissionDiagnosis: diagnosis,
+            careRole: (enc?.encounterType === 'INPATIENT' || enc?.classCode === 'IMP') ? 'ATTENDING' : 'CARE_TEAM',
+            ewsScore: 0,
+            acuityLevel: 'STABLE',
+          };
+        });
         this.inpatientsList.set(items);
         this.isLoading = false;
       },

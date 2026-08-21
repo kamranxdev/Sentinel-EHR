@@ -130,9 +130,9 @@ import {
               ></span
             >
             <span class="text-border">•</span>
-            <span
-              >Blood Group:
-              <strong class="text-foreground">{{ patient()?.bloodType || 'A+' }}</strong></span
+            <span>
+              Blood Group:
+              <strong class="text-foreground">{{ patient()?.bloodType || 'N/A' }}</strong></span
             >
             <span class="text-border">•</span>
             <span
@@ -632,8 +632,8 @@ import {
                   >Heart Rate</span
                 >
                 <div class="text-base font-extrabold font-mono text-foreground">
-                  {{ latestVitals()?.heartRate || '72' }}
-                  <span class="text-[10px] font-normal text-muted-foreground">bpm</span>
+                  {{ latestVitals()?.heartRate || '--' }}
+                  <span *ngIf="latestVitals()?.heartRate" class="text-[10px] font-normal text-muted-foreground">bpm</span>
                 </div>
               </div>
 
@@ -642,7 +642,7 @@ import {
                   >Oxygen (SpO2)</span
                 >
                 <div class="text-base font-extrabold font-mono text-foreground">
-                  {{ latestVitals()?.oxygenSaturation || '98' }}%
+                  {{ latestVitals()?.oxygenSaturation ? (latestVitals()?.oxygenSaturation + '%') : '--' }}
                 </div>
               </div>
 
@@ -651,15 +651,15 @@ import {
                   >Temperature</span
                 >
                 <div class="text-base font-extrabold font-mono text-foreground">
-                  {{ latestVitals()?.temperature || '98.6' }}
-                  <span class="text-[10px] font-normal text-muted-foreground">°F</span>
+                  {{ latestVitals()?.temperature || '--' }}
+                  <span *ngIf="latestVitals()?.temperature" class="text-[10px] font-normal text-muted-foreground">°F</span>
                 </div>
               </div>
 
               <div class="p-3 rounded-xl bg-muted/20 border border-border/80 space-y-0.5">
                 <span class="text-[10px] uppercase font-bold text-muted-foreground block">BMI</span>
                 <div class="text-base font-extrabold font-mono text-foreground">
-                  {{ latestVitals()?.bmi || '22.4' }}
+                  {{ latestVitals()?.bmi || '--' }}
                 </div>
               </div>
             </div>

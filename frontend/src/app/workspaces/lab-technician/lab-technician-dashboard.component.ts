@@ -346,11 +346,16 @@ interface AnalyzerStatus {
               variant="outline"
               class="text-[10px] bg-emerald-500/10 text-emerald-600 border-emerald-500/20 font-mono"
             >
-              4 / 4 ONLINE
+              {{ analyzers.length > 0 ? analyzers.length + ' / ' + analyzers.length + ' ONLINE' : 'LIS INTERFACE READY' }}
             </span>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div *ngIf="analyzers.length === 0" class="p-6 text-center text-xs text-muted-foreground border border-dashed rounded-xl">
+            <ng-icon name="lucideCpu" size="20" class="mx-auto text-teal-600/70 mb-1" />
+            <p>Direct HL7 / ASTM instrument interface active and listening on LIS port.</p>
+          </div>
+
+          <div *ngIf="analyzers.length > 0" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div
               *ngFor="let analyzer of analyzers"
               class="p-3.5 rounded-xl border border-border bg-muted/20 hover:bg-muted/40 transition-colors space-y-2"

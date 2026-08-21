@@ -838,28 +838,7 @@ export class ApiService {
     if (search) params.push(`search=${encodeURIComponent(search)}`);
     const qs = params.length > 0 ? `?${params.join('&')}` : '';
 
-    return this.get<LabOrder[]>(`/lab-orders${qs}`).pipe(
-      catchError(() => {
-        // Fallback: Query across patients
-        return this.getPatients().pipe(
-          switchMap((patients) => {
-            if (!patients || patients.length === 0) return of([]);
-            const tasks = patients.slice(0, 15).map((p) =>
-              this.get<LabOrder[]>(`/patients/${p.id}/lab-orders`).pipe(
-                map((orders) =>
-                  Array.isArray(orders)
-                    ? orders.map((o) => ({ ...o, patient: p, patientFullName: p.fullName }))
-                    : [],
-                ),
-
-              ),
-            );
-            return forkJoin(tasks).pipe(map((res) => res.flat()));
-          }),
-
-        );
-      }),
-    );
+    return this.get<LabOrder[]>(`/lab-orders${qs}`);
   }
 
   getLabOrderById(id: string | number): Observable<LabOrder> {
@@ -2476,68 +2455,23 @@ export class ApiService {
   // 30. Clinical Pharmacy & Dispensing Engine (Pharmacist)
   // =========================================================================
   getPharmacyMedicationOrders(): Observable<MedicationOrder[]> {
-    return this.get<MedicationOrder[]>('/pharmacy/orders').pipe(
-      catchError(() =>
-        this.getPatients().pipe(
-          switchMap((patients: Patient[]) => {
-            if (!patients || patients.length === 0) return of([]);
-            const tasks = patients.slice(0, 15).map((p) =>
-              this.getPrescriptionsByPatient(p.id!).pipe(
-                map((rxs: Prescription[]) =>
-                  Array.isArray(rxs)
-                    ? rxs.map(
-                      (r: Prescription) =>
-                        ({
-                          id: r.id || String(Date.now()),
-                          patientId: p.id!,
-                          patient: p,
-                          encounterId: r.encounterId,
-                          medicationName: r.medicationName,
-                          medicationCode: r.medicationCode,
-                          rxNormCode: r.rxNormCode,
-                          dosage: r.dosage || r.dose || 'Standard',
-                          route: r.route || 'Oral',
-                          frequency: r.frequency || 'Daily',
-                          quantity: r.quantity || 1,
-                          refills: r.refills || 0,
-                          instructions: r.instructions,
-                          status: r.status || 'PENDING_VERIFICATION',
-                          doctorName: (r as any).prescriberName || (r as any).doctorName,
-                          orderedAt:
-                            r.prescribedAt || (r as any).createdAt || new Date().toISOString(),
-                        }) as MedicationOrder,
-                    )
-                    : [],
-                ),
-
-              ),
-            );
-            return forkJoin(tasks).pipe(
-              map((results: MedicationOrder[][]) =>
-                results.reduce((acc, val) => acc.concat(val), []),
-              ),
-            );
-          }),
-
-        ),
-      ),
-    );
+    return this.get<MedicationOrder[]>('/prescriptions');
   }
 
   verifyPharmacyOrder(orderId: string, notes?: string): Observable<MedicationOrder> {
-    return this.post<MedicationOrder>('/pharmacy/orders/' + orderId + '/verify', { notes });
+    return this.post<MedicationOrder>('/prescriptions/' + orderId + '/verify', { notes });
   }
 
   rejectPharmacyOrder(orderId: string, reason: string): Observable<MedicationOrder> {
-    return this.post<MedicationOrder>('/pharmacy/orders/' + orderId + '/reject', { reason });
+    return this.post<MedicationOrder>('/prescriptions/' + orderId + '/reject', { reason });
   }
 
   requestPharmacyClarification(
     orderId: string,
     clarificationText: string,
   ): Observable<MedicationOrder> {
-    return this.post<MedicationOrder>('/pharmacy/orders/' + orderId + '/request-clarification', {
-      clarificationText,
+    return this.post<MedicationOrder>('/prescriptions/' + orderId + '/reject', {
+      reason: clarificationText,
     });
   }
 
@@ -2545,7 +2479,7 @@ export class ApiService {
     orderId: string,
     payload: { batchId?: string; quantity: number; notes?: string },
   ): Observable<DispensationRecord> {
-    return this.post<DispensationRecord>('/pharmacy/orders/' + orderId + '/dispense', payload);
+    return this.post<DispensationRecord>('/prescriptions/' + orderId + '/dispense', payload);
   }
 
   searchMedications(query: string = ''): Observable<MedicationCatalogItem[]> {
