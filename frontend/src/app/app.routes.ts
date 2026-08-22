@@ -332,6 +332,20 @@ export const routes: Routes = [
     canActivate: [authGuard, roleGuard],
     data: { roles: ['ORGANIZATION_ADMIN'] },
   },
+  {
+    path: 'organization-admin/fhir',
+    loadComponent: () =>
+      import('./workspaces/organization-admin/organization-admin-fhir.component').then(
+        (m) => m.OrganizationAdminFhirComponent,
+      ),
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['ORGANIZATION_ADMIN'] },
+  },
+  {
+    path: 'organization-admin/fhir-explorer',
+    redirectTo: () => '/organization-admin/fhir',
+    pathMatch: 'full',
+  },
 
   // --- PATIENT WORKSPACE ROUTES ---
   {

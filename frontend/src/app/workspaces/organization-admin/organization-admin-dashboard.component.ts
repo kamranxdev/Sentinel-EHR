@@ -23,6 +23,7 @@ import {
   lucideRefreshCw,
   lucideAlertCircle,
   lucideCheck,
+  lucideDatabase,
 } from '@ng-icons/lucide';
 
 interface ToastAlert {
@@ -50,6 +51,7 @@ interface ToastAlert {
       lucideRefreshCw,
       lucideAlertCircle,
       lucideCheck,
+      lucideDatabase,
     }),
   ],
   template: `
@@ -228,7 +230,7 @@ interface ToastAlert {
       </div>
 
       <!-- Core Hospital Operational Workspaces -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
         <!-- Staff & Role Management -->
         <div
           class="p-5 rounded-xl border border-border bg-card space-y-4 flex flex-col justify-between shadow-xs"
@@ -243,10 +245,9 @@ interface ToastAlert {
               <span hlmBadge variant="outline" class="text-[10px]">Staff Management</span>
             </div>
             <div>
-              <h3 class="text-base font-semibold text-foreground">Hospital Staff & Role Matrix</h3>
+              <h3 class="text-base font-semibold text-foreground">Hospital Staff & Roles</h3>
               <p class="text-xs text-muted-foreground mt-1 leading-relaxed">
-                Onboard clinical practitioners and administrative staff. Assign and revoke scoped
-                organization roles (Physician, Nurse, Pharmacist, Receptionist, Billing).
+                Onboard practitioners and administrative personnel with scoped roles.
               </p>
             </div>
           </div>
@@ -275,10 +276,9 @@ interface ToastAlert {
               <span hlmBadge variant="outline" class="text-[10px]">Spatial Layout</span>
             </div>
             <div>
-              <h3 class="text-base font-semibold text-foreground">Departments, Wards & Beds</h3>
+              <h3 class="text-base font-semibold text-foreground">Departments & Beds</h3>
               <p class="text-xs text-muted-foreground mt-1 leading-relaxed">
-                Configure organizational tree: Departments (ICU, Cardiology, Surgery) $ ightarrow$
-                Wards $ ightarrow$ Rooms $ ightarrow$ Physical Beds with operational statuses.
+                Configure organizational units: Departments, Wards, Rooms, and Physical Beds.
               </p>
             </div>
           </div>
@@ -288,7 +288,7 @@ interface ToastAlert {
               routerLink="/organization-admin/facility-settings"
               class="text-xs font-semibold text-blue-600 hover:underline flex items-center gap-1"
             >
-              Configure Layout <ng-icon name="lucideChevronRight" size="14" />
+              Configure <ng-icon name="lucideChevronRight" size="14" />
             </a>
           </div>
         </div>
@@ -308,11 +308,10 @@ interface ToastAlert {
             </div>
             <div>
               <h3 class="text-base font-semibold text-foreground">
-                Capacity & Consultation Analytics
+                Consultation Analytics
               </h3>
               <p class="text-xs text-muted-foreground mt-1 leading-relaxed">
-                Monitor clinic load volumes, practitioner scheduling capacity, consultation
-                fulfillment percentages, and cancellation risk patterns.
+                Monitor clinic load volumes, provider scheduling capacity, and completion rates.
               </p>
             </div>
           </div>
@@ -322,7 +321,40 @@ interface ToastAlert {
               routerLink="/organization-admin/schedule-analytics"
               class="text-xs font-semibold text-amber-600 hover:underline flex items-center gap-1"
             >
-              View Analytics <ng-icon name="lucideChevronRight" size="14" />
+              Analytics <ng-icon name="lucideChevronRight" size="14" />
+            </a>
+          </div>
+        </div>
+
+        <!-- FHIR R4 Interoperability & Explorer -->
+        <div
+          class="p-5 rounded-xl border border-border bg-card space-y-4 flex flex-col justify-between shadow-xs"
+        >
+          <div class="space-y-3">
+            <div class="flex items-center justify-between">
+              <div
+                class="size-10 rounded-lg bg-purple-500/10 text-purple-600 flex items-center justify-center"
+              >
+                <ng-icon name="lucideDatabase" size="20" />
+              </div>
+              <span hlmBadge variant="outline" class="text-[10px] text-purple-600 border-purple-500/30">FHIR R4 v4.0.1</span>
+            </div>
+            <div>
+              <h3 class="text-base font-semibold text-foreground">
+                FHIR R4 Explorer & ABDM
+              </h3>
+              <p class="text-xs text-muted-foreground mt-1 leading-relaxed">
+                Query facility FHIR R4 resources, execute $everything exports, and inspect conformance.
+              </p>
+            </div>
+          </div>
+          <div class="pt-3 border-t border-border flex items-center justify-between text-xs">
+            <span class="text-muted-foreground font-mono text-[11px]">/fhir/v1 gateway</span>
+            <a
+              routerLink="/organization-admin/fhir"
+              class="text-xs font-semibold text-purple-600 hover:underline flex items-center gap-1"
+            >
+              Open Explorer <ng-icon name="lucideChevronRight" size="14" />
             </a>
           </div>
         </div>

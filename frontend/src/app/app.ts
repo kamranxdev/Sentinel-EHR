@@ -37,6 +37,7 @@ import {
   lucideBoxes,
   lucideServer,
   lucideLock,
+  lucideDatabase,
 } from '@ng-icons/lucide';
 
 import { AuthService } from './core/services/auth.service';
@@ -125,6 +126,7 @@ interface PatientOption {
       lucideBoxes,
       lucideServer,
       lucideLock,
+      lucideDatabase,
     }),
   ],
   templateUrl: './app.component.html',
@@ -212,7 +214,11 @@ export class App implements OnInit, OnDestroy {
       mpi: { label: 'Master Patient Index (MPI)', icon: 'lucideHeartPulse' },
       eligibility: { label: 'Real-Time Eligibility (RTE)', icon: 'lucideShieldCheck' },
       'audit-ledger': { label: 'Compliance Audit Ledger', icon: 'lucideShieldCheck' },
-      'fhir-explorer': { label: 'FHIR R4 API Explorer', icon: 'lucideShieldCheck' },
+      audit: { label: 'Compliance & Audit Log', icon: 'lucideShieldCheck' },
+      'facility-settings': { label: 'Hospital Layout & Units', icon: 'lucideBuilding2' },
+      'schedule-analytics': { label: 'Schedule & Capacity Analytics', icon: 'lucideCalendarClock' },
+      fhir: { label: 'FHIR R4 Interoperability Explorer', icon: 'lucideDatabase' },
+      'fhir-explorer': { label: 'FHIR R4 Interoperability Explorer', icon: 'lucideDatabase' },
       admin: { label: 'System Administration', icon: 'lucideSettings' },
     };
 
@@ -654,8 +660,13 @@ export class App implements OnInit, OnDestroy {
           ],
         },
         {
-          label: 'Security & Compliance',
+          label: 'Security & Interoperability',
           items: [
+            {
+              icon: 'lucideDatabase',
+              label: 'FHIR R4 Explorer',
+              routerLink: '/organization-admin/fhir',
+            },
             {
               icon: 'lucideShieldCheck',
               label: 'Organization Audit Log',

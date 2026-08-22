@@ -2081,9 +2081,17 @@ export class ApiService {
     resourceType: string,
     patientId?: string,
   ): Observable<FhirBundle<FhirResource> | FhirResource> {
-    const query = patientId ? `?patientId=${patientId}` : '';
+    if (patientId && patientId.trim()) {
+      const pid = patientId.trim();
+      if (resourceType === 'Patient') {
+        return this.getFhirResourceById('Patient', pid);
+      }
+      return this.http.get<FhirBundle<FhirResource> | FhirResource>(
+        `${this.fhirUrl}/${resourceType}?patient=${pid}`,
+      );
+    }
     return this.http.get<FhirBundle<FhirResource> | FhirResource>(
-      `${this.fhirUrl}/${resourceType}${query}`,
+      `${this.fhirUrl}/${resourceType}`,
     );
   }
 

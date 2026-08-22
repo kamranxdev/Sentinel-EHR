@@ -20,11 +20,14 @@ public class PatientResourceProvider implements IResourceProvider {
 
     private final PatientRepository patientRepository;
     private final com.sentinel.identity.repository.PersonRepository personRepository;
+    private final com.sentinel.fhir.service.FhirService fhirService;
 
     public PatientResourceProvider(PatientRepository patientRepository,
-                                   com.sentinel.identity.repository.PersonRepository personRepository) {
+                                   com.sentinel.identity.repository.PersonRepository personRepository,
+                                   com.sentinel.fhir.service.FhirService fhirService) {
         this.patientRepository = patientRepository;
         this.personRepository = personRepository;
+        this.fhirService = fhirService;
     }
 
     @Override
@@ -44,11 +47,38 @@ public class PatientResourceProvider implements IResourceProvider {
         return fhir;
     }
 
+    @Operation(name = "$everything", idempotent = true)
+    public org.hl7.fhir.r4.model.Bundle getPatientEverything(@IdParam IdType id) {
+        UUID patientId = UUID.fromString(id.getIdPart());
+        return fhirService.getPatientEverythingBundle(patientId);
+    }
+
     @Search
     public List<org.hl7.fhir.r4.model.Patient> searchPatients(
+            @OptionalParam(name = org.hl7.fhir.r4.model.Patient.SP_RES_ID) StringParam resId,
+            @OptionalParam(name = "_id") StringParam idParam,
+            @OptionalParam(name = "patientId") StringParam patientIdParam,
             @OptionalParam(name = org.hl7.fhir.r4.model.Patient.SP_NAME) StringParam name,
             @OptionalParam(name = org.hl7.fhir.r4.model.Patient.SP_GENDER) StringParam gender,
             @OptionalParam(name = org.hl7.fhir.r4.model.Patient.SP_IDENTIFIER) StringParam identifier) {
+
+        String explicitId = resId != null ? resId.getValue() : (idParam != null ? idParam.getValue() : (patientIdParam != null ? patientIdParam.getValue() : null));
+        if (explicitId != null && !explicitId.isBlank()) {
+            try {
+                UUID uuid = UUID.fromString(explicitId.trim());
+                return patientRepository.findById(uuid)
+                        .map(p -> {
+                            org.hl7.fhir.r4.model.Patient fhir = new org.hl7.fhir.r4.model.Patient();
+                            fhir.setId(p.getId().toString());
+                            fhir.addName().addGiven(p.getFullName());
+                            return List.of(fhir);
+                        })
+                        .orElse(List.of());
+            } catch (IllegalArgumentException ignored) {
+                // If not valid UUID, fallback to identifier search
+                identifier = new StringParam(explicitId.trim());
+            }
+        }
 
         String nameVal = name != null ? name.getValue() : null;
         String identifierVal = identifier != null ? identifier.getValue() : null;

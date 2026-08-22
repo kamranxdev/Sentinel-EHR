@@ -199,7 +199,9 @@
               ? 'Patient/' + patientIdFilter + '/$everything'
               : selectedResourceId
                 ? selectedResource + '/' + selectedResourceId
-                : selectedResource + (patientIdFilter ? '?patientId=' + patientIdFilter : '')
+                : (patientIdFilter && selectedResource === 'Patient'
+                    ? 'Patient/' + patientIdFilter
+                    : selectedResource + (patientIdFilter ? '?patient=' + patientIdFilter : ''))
           }}
         </span>
       </div>

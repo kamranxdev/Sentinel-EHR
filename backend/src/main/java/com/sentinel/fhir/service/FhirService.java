@@ -89,6 +89,64 @@ public class FhirService {
             return bundle;
         }
 
+        Patient patient = patientOpt.get();
+        org.hl7.fhir.r4.model.Patient fhirPatient = new org.hl7.fhir.r4.model.Patient();
+        fhirPatient.setId(patient.getId().toString());
+        fhirPatient.addName().addGiven(patient.getFullName());
+        bundle.addEntry().setResource(fhirPatient);
+
+        // Encounters
+        List<Encounter> encounters = searchEncounters(patientId);
+        for (Encounter enc : encounters) {
+            org.hl7.fhir.r4.model.Encounter fhirEnc = new org.hl7.fhir.r4.model.Encounter();
+            fhirEnc.setId(enc.getId().toString());
+            fhirEnc.setSubject(new Reference("Patient/" + patientId));
+            if ("INPATIENT".equalsIgnoreCase(enc.getEncounterType())) {
+                fhirEnc.setClass_(new Coding("http://terminology.hl7.org/CodeSystem/v3-ActCode", "IMP", "inpatient encounter"));
+            } else {
+                fhirEnc.setClass_(new Coding("http://terminology.hl7.org/CodeSystem/v3-ActCode", "AMB", "ambulatory"));
+            }
+            bundle.addEntry().setResource(fhirEnc);
+        }
+
+        // Conditions / Diagnoses
+        List<Diagnosis> diagnoses = searchConditions(patientId);
+        for (Diagnosis diag : diagnoses) {
+            org.hl7.fhir.r4.model.Condition fhirCond = new org.hl7.fhir.r4.model.Condition();
+            fhirCond.setId(diag.getId().toString());
+            fhirCond.setSubject(new Reference("Patient/" + patientId));
+            bundle.addEntry().setResource(fhirCond);
+        }
+
+        // Medications
+        List<Prescription> prescriptions = searchMedications(patientId);
+        for (Prescription rx : prescriptions) {
+            org.hl7.fhir.r4.model.MedicationRequest fhirReq = new org.hl7.fhir.r4.model.MedicationRequest();
+            fhirReq.setId(rx.getId().toString());
+            fhirReq.setSubject(new Reference("Patient/" + patientId));
+            bundle.addEntry().setResource(fhirReq);
+        }
+
+        // Observations / Vitals
+        List<Vitals> vitals = searchObservations(patientId);
+        for (Vitals v : vitals) {
+            org.hl7.fhir.r4.model.Observation fhirObs = new org.hl7.fhir.r4.model.Observation();
+            fhirObs.setId(v.getId().toString());
+            fhirObs.setSubject(new Reference("Patient/" + patientId));
+            fhirObs.setStatus(org.hl7.fhir.r4.model.Observation.ObservationStatus.FINAL);
+            bundle.addEntry().setResource(fhirObs);
+        }
+
+        // Allergies
+        List<Allergy> allergies = searchAllergies(patientId);
+        for (Allergy allergy : allergies) {
+            org.hl7.fhir.r4.model.AllergyIntolerance fhirAllergy = new org.hl7.fhir.r4.model.AllergyIntolerance();
+            fhirAllergy.setId(allergy.getId().toString());
+            fhirAllergy.setPatient(new Reference("Patient/" + patientId));
+            bundle.addEntry().setResource(fhirAllergy);
+        }
+
+        bundle.setTotal(bundle.getEntry().size());
         return bundle;
     }
 

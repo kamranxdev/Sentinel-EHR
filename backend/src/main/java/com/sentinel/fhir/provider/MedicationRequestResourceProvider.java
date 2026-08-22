@@ -40,11 +40,13 @@ public class MedicationRequestResourceProvider implements IResourceProvider {
 
     @Search
     public List<org.hl7.fhir.r4.model.MedicationRequest> searchMedicationRequests(
-            @OptionalParam(name = org.hl7.fhir.r4.model.MedicationRequest.SP_PATIENT) ReferenceParam patientParam) {
+            @OptionalParam(name = org.hl7.fhir.r4.model.MedicationRequest.SP_PATIENT) ReferenceParam patientParam,
+            @OptionalParam(name = "patientId") ReferenceParam patientIdParam) {
 
+        ReferenceParam effectivePatient = patientParam != null ? patientParam : patientIdParam;
         List<Prescription> list;
-        if (patientParam != null) {
-            UUID patientId = UUID.fromString(patientParam.getIdPart());
+        if (effectivePatient != null) {
+            UUID patientId = UUID.fromString(effectivePatient.getIdPart());
             list = prescriptionRepository.findByPatientId(patientId);
         } else {
             list = prescriptionRepository.findAll();
