@@ -113,7 +113,7 @@ public class OrganizationService {
         org.setDistrict(request.getDistrict());
         org.setState(request.getState());
         org.setPostalCode(request.getPostalCode());
-        org.setStatus("ACTIVE");
+        org.setStatus("PENDING_VERIFICATION");
         org.setCreatedAt(OffsetDateTime.now());
         org.setUpdatedAt(OffsetDateTime.now());
 
@@ -122,7 +122,7 @@ public class OrganizationService {
         // Provision Primary Administrator Account if provided
         String adminEmail = request.getAdminEmail() != null && !request.getAdminEmail().isBlank()
                 ? request.getAdminEmail().trim()
-                : (request.getAdminEmail() != null && !request.getAdminEmail().isBlank() ? request.getAdminEmail().trim() : null);
+                : null;
 
         if (adminEmail != null) {
             if (userRepository.existsByEmail(adminEmail)) {
@@ -148,7 +148,7 @@ public class OrganizationService {
             String rawPassword = request.getAdminPassword();
             user.setPassword(passwordEncoder.encode(rawPassword));
             user.setPerson(savedPerson);
-            user.setStatus("ACTIVE");
+            user.setStatus("PENDING_VERIFICATION");
             user.setMfaEnabled(false);
             user.setCreatedAt(OffsetDateTime.now());
             user.setUpdatedAt(OffsetDateTime.now());
@@ -162,7 +162,7 @@ public class OrganizationService {
             UserOrganization uo = new UserOrganization();
             uo.setUser(savedUser);
             uo.setOrganization(saved);
-            uo.setStatus("ACTIVE");
+            uo.setStatus("PENDING_VERIFICATION");
             uo.setJoinedAt(LocalDate.now());
             userOrganizationRepository.save(uo);
         }
@@ -209,7 +209,24 @@ public class OrganizationService {
         if (request.getDistrict() != null) org.setDistrict(request.getDistrict());
         if (request.getState() != null) org.setState(request.getState());
         if (request.getPostalCode() != null) org.setPostalCode(request.getPostalCode());
-        if (request.getStatus() != null) org.setStatus(request.getStatus());
+        if (request.getStatus() != null) {
+            String newStatus = request.getStatus();
+            org.setStatus(newStatus);
+            if ("ACTIVE".equalsIgnoreCase(newStatus) || "VERIFIED".equalsIgnoreCase(newStatus)) {
+                List<UserOrganization> userOrgs = userOrganizationRepository.findByOrganizationId(organizationId);
+                for (UserOrganization uo : userOrgs) {
+                    if ("PENDING_VERIFICATION".equalsIgnoreCase(uo.getStatus()) || "PENDING".equalsIgnoreCase(uo.getStatus())) {
+                        uo.setStatus("ACTIVE");
+                        userOrganizationRepository.save(uo);
+                    }
+                    User u = uo.getUser();
+                    if (u != null && ("PENDING_VERIFICATION".equalsIgnoreCase(u.getStatus()) || "PENDING".equalsIgnoreCase(u.getStatus()))) {
+                        u.setStatus("ACTIVE");
+                        userRepository.save(u);
+                    }
+                }
+            }
+        }
         org.setUpdatedAt(OffsetDateTime.now());
 
         Organization saved = organizationRepository.save(org);

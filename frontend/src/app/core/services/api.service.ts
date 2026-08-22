@@ -1974,8 +1974,17 @@ export class ApiService {
   // =========================================================================
   // 17. Compliance Audit Ledger & User RBAC Management
   // =========================================================================
-  getUsers(): Observable<User[]> {
-    return this.get<User[]>('/users');
+  getUsers(organizationId?: string): Observable<User[]> {
+    const url = organizationId ? `/organizations/${organizationId}/users` : '/users';
+    return this.get<User[]>(url);
+  }
+
+  getOrganizationUsers(organizationId: string): Observable<User[]> {
+    return this.get<User[]>(`/organizations/${organizationId}/users`);
+  }
+
+  getCurrentOrganizationUsers(): Observable<User[]> {
+    return this.get<User[]>('/organizations/current/users');
   }
 
   updateUser(id: string, payload: UserUpdateRequestDTO): Observable<User> {

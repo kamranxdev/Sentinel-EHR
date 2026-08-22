@@ -35,6 +35,9 @@ import {
   lucideActivity,
   lucideCheck,
   lucideSparkles,
+  lucideClock,
+  lucideZap,
+  lucideShieldAlert,
 } from '@ng-icons/lucide';
 
 interface StepItem {
@@ -42,6 +45,13 @@ interface StepItem {
   title: string;
   subtitle: string;
   description: string;
+}
+
+export interface DemoPreset {
+  name: string;
+  shortLabel: string;
+  badge: string;
+  data: OrganizationRegistrationRequest;
 }
 
 @Component({
@@ -81,6 +91,9 @@ interface StepItem {
       lucideActivity,
       lucideCheck,
       lucideSparkles,
+      lucideClock,
+      lucideZap,
+      lucideShieldAlert,
     }),
   ],
   template: `
@@ -242,7 +255,7 @@ interface StepItem {
               <ng-icon name="lucideShieldCheck" size="15" class="text-emerald-300 shrink-0" />
               <span *ngIf="currentStep() === 1">Multi-Tenant Isolation Guaranteed</span>
               <span *ngIf="currentStep() === 2">Accreditation & Registry Verification</span>
-              <span *ngIf="currentStep() === 3">Zero-Trust Super-Admin Security</span>
+              <span *ngIf="currentStep() === 3">Super Admin Governance & Verification</span>
             </div>
             <p class="text-[11px] text-white/80 leading-relaxed">
               <span *ngIf="currentStep() === 1">
@@ -254,8 +267,8 @@ interface StepItem {
                 Authority and ABDM standards.
               </span>
               <span *ngIf="currentStep() === 3">
-                Your Org Admin account will have master authority over role-based access control
-                (RBAC) and clinical workspaces.
+                Newly registered organizations receive PENDING_VERIFICATION status and require
+                Super Administrator approval before login is enabled.
               </span>
             </p>
           </div>
@@ -296,8 +309,8 @@ interface StepItem {
       <div
         class="w-full lg:w-7/12 xl:w-8/12 flex flex-col justify-between p-6 sm:p-10 lg:p-12 xl:p-16 overflow-y-auto max-h-screen"
       >
-        <!-- Top Navigation Bar -->
-        <div class="flex items-center justify-between mb-6">
+        <!-- Top Navigation Bar & Quick Demo Fill Toolbar -->
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
           <div class="flex items-center gap-2.5 lg:hidden">
             <div
               class="size-8 rounded-lg bg-primary text-primary-foreground flex items-center justify-center shadow-xs"
@@ -307,7 +320,41 @@ interface StepItem {
             <span class="font-bold text-sm">Sentinel EHR</span>
           </div>
 
-          <div class="flex items-center gap-2 ml-auto">
+          <!-- Demo Fill Bar & Presets -->
+          <div class="flex items-center gap-2 ml-auto flex-wrap">
+            <div
+              *ngIf="!successMessage()"
+              class="flex items-center gap-1.5 p-1 rounded-xl bg-purple-500/10 border border-purple-500/25 shadow-xs"
+            >
+              <button
+                type="button"
+                (click)="fillDemoData(0)"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold bg-purple-600 hover:bg-purple-700 text-white transition-all cursor-pointer shadow-xs"
+                title="Auto-fill form with realistic demo hospital data"
+              >
+                <ng-icon name="lucideSparkles" size="13" />
+                <span>Demo Fill (Fortis)</span>
+              </button>
+
+              <button
+                type="button"
+                (click)="fillDemoData(1)"
+                class="hidden sm:inline-flex items-center px-2 py-1 rounded-lg text-[11px] font-semibold text-purple-700 dark:text-purple-300 hover:bg-purple-500/20 transition-all cursor-pointer"
+                title="Fill Manipal Health preset"
+              >
+                Manipal
+              </button>
+
+              <button
+                type="button"
+                (click)="fillDemoData(2)"
+                class="hidden sm:inline-flex items-center px-2 py-1 rounded-lg text-[11px] font-semibold text-purple-700 dark:text-purple-300 hover:bg-purple-500/20 transition-all cursor-pointer"
+                title="Fill Tata Memorial preset"
+              >
+                Tata Cancer
+              </button>
+            </div>
+
             <a
               routerLink="/"
               hlmBtn
@@ -332,7 +379,7 @@ interface StepItem {
               Register New Organization
             </h1>
             <p class="text-xs sm:text-sm text-muted-foreground">
-              Complete the facility profile and configure the primary administrator account.
+              Complete the facility profile and configure the primary administrator account. Requires platform Super Admin verification.
             </p>
           </div>
 
@@ -375,28 +422,35 @@ interface StepItem {
             </div>
           </div>
 
-          <!-- Success Alert Screen -->
+          <!-- Success Alert Screen (Pending Super Admin Approval Roadmap) -->
           <div
             *ngIf="successMessage()"
-            class="p-6 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-800 dark:text-emerald-200 text-xs space-y-4 animate-in fade-in duration-300"
+            class="p-6 sm:p-7 rounded-2xl bg-card border border-border text-xs space-y-5 shadow-lg animate-in fade-in duration-300"
           >
-            <div class="flex items-start gap-3.5">
+            <!-- Header with Pending Status Badge -->
+            <div class="flex items-start gap-4 pb-4 border-b border-border">
               <div
-                class="size-10 rounded-xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0"
+                class="size-12 rounded-2xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 ring-1 ring-amber-500/30"
               >
-                <ng-icon name="lucideCheckCircle2" size="22" />
+                <ng-icon name="lucideClock" size="24" />
               </div>
               <div class="space-y-1">
-                <h3 class="font-bold text-base text-foreground">Healthcare Facility Registered!</h3>
+                <div class="flex flex-wrap items-center gap-2">
+                  <h3 class="font-bold text-base text-foreground">Facility Submitted for Verification</h3>
+                  <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30">
+                    PENDING SUPER ADMIN APPROVAL
+                  </span>
+                </div>
                 <p class="text-xs text-muted-foreground leading-relaxed">
-                  {{ successMessage() }}
+                  Your healthcare facility registration has been received and queued for governance review.
+                  <strong>Direct login is locked</strong> until a Sentinel Super Administrator approves and activates this tenant.
                 </p>
               </div>
             </div>
 
             <!-- Summary Card -->
             <div
-              class="p-4 rounded-xl bg-card border border-border/70 text-foreground space-y-2.5 shadow-xs"
+              class="p-4 rounded-xl bg-muted/40 border border-border/70 text-foreground space-y-2.5 shadow-xs"
             >
               <div class="flex justify-between items-center pb-2 border-b border-border text-xs">
                 <span class="text-muted-foreground">Facility Name:</span>
@@ -412,33 +466,38 @@ interface StepItem {
                 <span class="text-muted-foreground">Primary Admin Email:</span>
                 <span class="font-mono font-semibold">{{ formData.adminEmail }}</span>
               </div>
+              <div class="flex justify-between items-center pb-2 border-b border-border text-xs">
+                <span class="text-muted-foreground">Medical License # / Accreditation:</span>
+                <span class="font-mono">{{ formData.licenseNumber }}</span>
+              </div>
               <div class="flex justify-between items-center text-xs">
-                <span class="text-muted-foreground">Tenant Status:</span>
+                <span class="text-muted-foreground">Access Status:</span>
                 <span
-                  class="inline-flex items-center gap-1 font-semibold text-amber-600 dark:text-amber-400"
+                  class="inline-flex items-center gap-1.5 font-bold text-amber-600 dark:text-amber-400"
                 >
-                  <span class="size-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-                  PENDING_VERIFICATION
+                  <span class="size-2 rounded-full bg-amber-500 animate-pulse"></span>
+                  LOGIN_LOCKED_UNTIL_ACTIVATION
                 </span>
               </div>
             </div>
 
+            <!-- Actions -->
             <div class="pt-2 flex flex-col sm:flex-row gap-3">
               <a
-                routerLink="/login"
+                routerLink="/"
                 hlmBtn
                 variant="default"
-                class="w-full sm:w-auto flex-1 gap-2 font-semibold text-xs h-10 shadow-sm"
+                class="w-full sm:w-auto flex-1 gap-2 font-semibold text-xs h-10 shadow-sm cursor-pointer"
               >
-                <span>Proceed to Staff Login</span>
-                <ng-icon name="lucideArrowRight" size="14" />
+                <ng-icon name="lucideHome" size="14" />
+                <span>Return to Sentinel Home</span>
               </a>
               <button
                 type="button"
                 (click)="resetForm()"
                 hlmBtn
                 variant="outline"
-                class="w-full sm:w-auto text-xs h-10"
+                class="w-full sm:w-auto text-xs h-10 cursor-pointer"
               >
                 Register Another Facility
               </button>
@@ -1220,6 +1279,84 @@ export class RegisterOrgComponent {
         this.errorMessage.set(msg);
       },
     });
+  }
+
+  readonly demoPresets: DemoPreset[] = [
+    {
+      name: 'Fortis Memorial Research Institute',
+      shortLabel: 'Fortis Hospital',
+      badge: 'Tertiary Hospital',
+      data: {
+        orgName: 'Fortis Memorial Research Institute',
+        orgCode: 'FORTIS-GURGAON',
+        code: 'FORTIS-GURGAON',
+        legalName: 'Fortis Healthcare Limited',
+        organizationType: 'HOSPITAL',
+        licenseNumber: 'NABH/2026/HR/08821',
+        email: 'contact@fortisgurgaon.org',
+        phone: '+91 124 4921000',
+        address: 'Sector 44, Opposite HUDA City Centre, Gurugram, Haryana 122002',
+        website: 'https://www.fortishealthcare.com',
+        countryCode: 'IN',
+        timezone: 'Asia/Kolkata',
+        adminFullName: 'Dr. Rohit Verma',
+        adminEmail: 'rohit.verma@fortisgurgaon.org',
+        adminPassword: 'Sentinel@Admin2026',
+      },
+    },
+    {
+      name: 'Manipal Health City',
+      shortLabel: 'Manipal Hospital',
+      badge: 'Super-Specialty',
+      data: {
+        orgName: 'Manipal Health City',
+        orgCode: 'MANIPAL-BLR',
+        code: 'MANIPAL-BLR',
+        legalName: 'Manipal Health Enterprises Private Limited',
+        organizationType: 'HOSPITAL',
+        licenseNumber: 'NABH/2026/KA/10492',
+        email: 'info@manipalhospitals.com',
+        phone: '+91 80 2502 4444',
+        address: '98 HAL Old Airport Road, Kodihalli, Bengaluru, Karnataka 560017',
+        website: 'https://www.manipalhospitals.com',
+        countryCode: 'IN',
+        timezone: 'Asia/Kolkata',
+        adminFullName: 'Dr. Sudarshan Ballal',
+        adminEmail: 'sudarshan.ballal@manipalhospitals.com',
+        adminPassword: 'Sentinel@Admin2026',
+      },
+    },
+    {
+      name: 'Tata Memorial Cancer Centre',
+      shortLabel: 'Tata Memorial',
+      badge: 'Oncology Institute',
+      data: {
+        orgName: 'Tata Memorial Cancer Centre',
+        orgCode: 'TATA-CANCER-MUM',
+        code: 'TATA-CANCER-MUM',
+        legalName: 'Tata Memorial Centre Research Institute',
+        organizationType: 'RESEARCH_INSTITUTE',
+        licenseNumber: 'NABH/2026/MH/04719',
+        email: 'contact@tmc.gov.in',
+        phone: '+91 22 2417 7000',
+        address: 'Dr. E Borges Road, Parel, Mumbai, Maharashtra 400012',
+        website: 'https://tmc.gov.in',
+        countryCode: 'IN',
+        timezone: 'Asia/Kolkata',
+        adminFullName: 'Dr. Rajendra Badwe',
+        adminEmail: 'rajendra.badwe@tmc.gov.in',
+        adminPassword: 'Sentinel@Admin2026',
+      },
+    },
+  ];
+
+  fillDemoData(presetIndex: number = 0): void {
+    const preset = this.demoPresets[presetIndex] || this.demoPresets[0];
+    this.errorMessage.set(null);
+    this.successMessage.set(null);
+    this.formData = { ...preset.data };
+    this.confirmPassword = preset.data.adminPassword;
+    this.agreedToTerms = true;
   }
 
   resetForm(): void {

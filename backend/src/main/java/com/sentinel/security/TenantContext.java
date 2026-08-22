@@ -11,11 +11,19 @@ public class TenantContext {
         return CURRENT_ORGANIZATION_ID.get();
     }
 
+    public static UUID getOrganizationId() {
+        return CURRENT_ORGANIZATION_ID.get();
+    }
+
     public static void setCurrentOrganizationId(UUID organizationId) {
         CURRENT_ORGANIZATION_ID.set(organizationId);
     }
 
     public static UUID getCurrentUserId() {
+        return CURRENT_USER_ID.get();
+    }
+
+    public static UUID getUserId() {
         return CURRENT_USER_ID.get();
     }
 

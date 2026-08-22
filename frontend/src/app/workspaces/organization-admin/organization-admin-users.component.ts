@@ -751,13 +751,21 @@ export class OrganizationAdminUsersComponent implements OnInit {
   loadUsers(): void {
     this.loading.set(true);
     this.errorMessage.set('');
-    this.apiService.getUsers().subscribe({
+    const orgId =
+      this.authService.getActiveOrganizationId() ||
+      this.authService.currentUser()?.organizations?.[0]?.id;
+
+    const request$ = orgId
+      ? this.apiService.getOrganizationUsers(orgId)
+      : this.apiService.getCurrentOrganizationUsers();
+
+    request$.subscribe({
       next: (res) => {
-        this.users.set(res);
+        this.users.set(res || []);
         this.loading.set(false);
       },
       error: (err) => {
-        this.errorMessage.set(err.message || 'Failed to load users');
+        this.errorMessage.set(err.message || 'Failed to load organization staff roster');
         this.loading.set(false);
       },
     });
@@ -836,17 +844,24 @@ export class OrganizationAdminUsersComponent implements OnInit {
       return;
     }
 
+    const orgId =
+      this.authService.getActiveOrganizationId() ||
+      this.authService.currentUser()?.organizations?.[0]?.id;
+
     this.saving.set(true);
     const payload = {
       ...this.newUserForm,
       roles: [this.newUserForm.role],
+      roleNames: [this.newUserForm.role],
+      organizationId: orgId,
     };
-    this.authService.createStaffUser(payload).subscribe({
+
+    this.apiService.post<User>('/users', payload).subscribe({
       next: () => {
         this.saving.set(false);
         this.showCreateModal.set(false);
         this.toastMessage.set({
-          text: `Account for ${this.newUserForm.fullName || this.newUserForm.email} created successfully.`,
+          text: `Account for ${this.newUserForm.fullName || this.newUserForm.email} created successfully in facility roster.`,
           type: 'success',
         });
         this.loadUsers();
@@ -854,7 +869,7 @@ export class OrganizationAdminUsersComponent implements OnInit {
       error: (err: any) => {
         this.saving.set(false);
         this.toastMessage.set({
-          text: err.error?.message || 'Failed to create user account.',
+          text: err.error?.message || err.message || 'Failed to create user account.',
           type: 'error',
         });
       },

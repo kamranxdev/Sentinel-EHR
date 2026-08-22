@@ -4,6 +4,9 @@ import com.sentinel.common.response.ApiResponse;
 import com.sentinel.identity.dto.AddOrganizationMemberRequest;
 import com.sentinel.identity.dto.UserOrganizationResponseDTO;
 import com.sentinel.identity.service.UserOrganizationService;
+import com.sentinel.identity.dto.UserResponseDTO;
+import com.sentinel.identity.service.UserService;
+import com.sentinel.security.TenantContext;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -19,9 +22,12 @@ import java.util.UUID;
 public class UserOrganizationController {
 
     private final UserOrganizationService userOrganizationService;
+    private final UserService userService;
 
-    public UserOrganizationController(UserOrganizationService userOrganizationService) {
+    public UserOrganizationController(UserOrganizationService userOrganizationService,
+                                    UserService userService) {
         this.userOrganizationService = userOrganizationService;
+        this.userService = userService;
     }
 
     @PostMapping("/api/v1/organizations/{organizationId}/users/{userId}")
@@ -45,9 +51,20 @@ public class UserOrganizationController {
 
     @GetMapping("/api/v1/organizations/{organizationId}/users")
     @Operation(summary = "Get all users in an organization")
-    public ResponseEntity<ApiResponse<List<UserOrganizationResponseDTO>>> getOrganizationUsers(
+    public ResponseEntity<ApiResponse<List<UserResponseDTO>>> getOrganizationUsers(
             @PathVariable UUID organizationId) {
-        List<UserOrganizationResponseDTO> response = userOrganizationService.getOrganizationUsers(organizationId);
+        List<UserResponseDTO> response = userService.getUsersByOrganization(organizationId);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @GetMapping("/api/v1/organizations/current/users")
+    @Operation(summary = "Get all users in the current active organization context")
+    public ResponseEntity<ApiResponse<List<UserResponseDTO>>> getCurrentOrganizationUsers() {
+        UUID currentOrgId = TenantContext.getCurrentOrganizationId();
+        if (currentOrgId == null) {
+            throw new IllegalArgumentException("No active organization context found in session");
+        }
+        List<UserResponseDTO> response = userService.getUsersByOrganization(currentOrgId);
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 }

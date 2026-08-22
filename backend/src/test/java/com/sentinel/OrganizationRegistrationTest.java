@@ -49,6 +49,7 @@ public class OrganizationRegistrationTest {
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.success").value(true))
                 .andExpect(jsonPath("$.data.code").value("FORTIS-GURGAON"))
-                .andExpect(jsonPath("$.data.name").value("Fortis Memorial Research Institute"));
+                .andExpect(jsonPath("$.data.name").value("Fortis Memorial Research Institute"))
+                .andExpect(jsonPath("$.data.status").value("PENDING_VERIFICATION"));
     }
 }

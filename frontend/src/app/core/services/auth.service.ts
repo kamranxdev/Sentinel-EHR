@@ -284,7 +284,7 @@ export class AuthService {
 
   createStaffUser(payload: StaffOnboardingRequestDTO): Observable<User> {
     return this.http
-      .post<User>(`${this.apiUrl}/admin/create-user`, payload)
+      .post<User>(`${environment.apiBaseUrl}/users`, payload)
       .pipe(map((res: any) => (res && res.data ? res.data : res)));
   }
 }

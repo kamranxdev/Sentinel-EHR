@@ -73,17 +73,62 @@ public class AuthService {
 
         @Transactional(readOnly = true)
         public JwtAuthResponse login(LoginRequest loginRequest) {
+                if (loginRequest.getEmail() == null || loginRequest.getEmail().isBlank()) {
+                        throw new IllegalArgumentException("Email is required");
+                }
+                if (loginRequest.getPassword() == null || loginRequest.getPassword().isBlank()) {
+                        throw new IllegalArgumentException("Password is required");
+                }
+
+                String email = loginRequest.getEmail().trim();
+                Optional<User> userOpt = userRepository.findByEmail(email);
+                if (userOpt.isPresent()) {
+                        User user = userOpt.get();
+                        // Check user account status
+                        if ("PENDING_VERIFICATION".equalsIgnoreCase(user.getStatus()) || "PENDING".equalsIgnoreCase(user.getStatus())) {
+                                throw new IllegalArgumentException(
+                                        "Your account is pending Super Admin approval. Direct login is disabled until platform verification is complete.");
+                        }
+                        if ("SUSPENDED".equalsIgnoreCase(user.getStatus()) || "INACTIVE".equalsIgnoreCase(user.getStatus())) {
+                                throw new IllegalArgumentException(
+                                        "Your account is currently inactive or suspended. Please contact platform administration.");
+                        }
+
+                        Set<String> roles = user.getRoles().stream()
+                                        .map(Role::getName)
+                                        .collect(Collectors.toSet());
+
+                        // If user is not super admin, verify organization status
+                        boolean isSuperAdmin = roles.contains("SUPER_ADMIN");
+                        if (!isSuperAdmin) {
+                                List<UserOrganization> userOrgs = userOrganizationRepository.findByUserId(user.getId());
+                                if (!userOrgs.isEmpty()) {
+                                        boolean hasActiveOrg = userOrgs.stream().anyMatch(uo -> {
+                                                Organization org = uo.getOrganization();
+                                                return org != null && ("ACTIVE".equalsIgnoreCase(org.getStatus()) || "VERIFIED".equalsIgnoreCase(org.getStatus()));
+                                        });
+                                        boolean hasPendingOrg = userOrgs.stream().anyMatch(uo -> {
+                                                Organization org = uo.getOrganization();
+                                                return org != null && ("PENDING_VERIFICATION".equalsIgnoreCase(org.getStatus()) || "PENDING".equalsIgnoreCase(org.getStatus()));
+                                        });
+                                        if (!hasActiveOrg && hasPendingOrg) {
+                                                throw new IllegalArgumentException(
+                                                        "Your organization registration is pending Super Admin approval. Direct login is disabled until platform verification is complete.");
+                                        }
+                                }
+                        }
+                }
+
                 Authentication authentication = authenticationManager.authenticate(
                                 new UsernamePasswordAuthenticationToken(
-                                                loginRequest.getEmail(),
+                                                email,
                                                 loginRequest.getPassword()));
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
                 String jwt = tokenProvider.generateToken(authentication);
 
-                User user = userRepository.findByEmail(loginRequest.getEmail())
-                                .orElseThrow(() -> new IllegalArgumentException(
-                                                "User not found with email: " + loginRequest.getEmail()));
+                User user = userOpt.orElseGet(() -> userRepository.findByEmail(email)
+                                .orElseThrow(() -> new IllegalArgumentException("User not found with email: " + email)));
 
                 Set<String> roles = user.getRoles().stream()
                                 .map(Role::getName)

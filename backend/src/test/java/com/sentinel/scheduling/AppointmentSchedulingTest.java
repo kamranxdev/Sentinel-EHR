@@ -40,6 +40,7 @@ public class AppointmentSchedulingTest {
     private OrganizationRepository organizationRepository;
     private DepartmentRepository departmentRepository;
     private AuditService auditService;
+    private com.sentinel.clinical.repository.VitalsRepository vitalsRepository;
 
     private AppointmentService appointmentService;
     private AppointmentController appointmentController;
@@ -65,6 +66,7 @@ public class AppointmentSchedulingTest {
         organizationRepository = mock(OrganizationRepository.class);
         departmentRepository = mock(DepartmentRepository.class);
         auditService = mock(AuditService.class);
+        vitalsRepository = mock(com.sentinel.clinical.repository.VitalsRepository.class);
 
         appointmentService = new AppointmentService(
                 appointmentRepository,
@@ -74,7 +76,8 @@ public class AppointmentSchedulingTest {
                 userOrganizationRepository,
                 organizationRepository,
                 departmentRepository,
-                auditService
+                auditService,
+                vitalsRepository
         );
 
         appointmentController = new AppointmentController(appointmentService);

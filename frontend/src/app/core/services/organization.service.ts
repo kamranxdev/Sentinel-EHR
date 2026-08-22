@@ -102,8 +102,8 @@ export class OrganizationService {
 
   getOrgAdminUsers(organizationId?: string): Observable<User[]> {
     const url = organizationId
-      ? `${this.usersUrl}?organizationId=${organizationId}`
-      : this.usersUrl;
+      ? `${this.apiUrl}/${organizationId}/users`
+      : `${this.apiUrl}/current/users`;
     return this.http.get<any>(url).pipe(map((res: any) => res?.data || res || []));
   }
 

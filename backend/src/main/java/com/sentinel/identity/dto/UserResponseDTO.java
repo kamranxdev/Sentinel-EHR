@@ -23,6 +23,13 @@ public class UserResponseDTO {
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
 
+    private String specialization;
+    private String specialty;
+    private String department;
+    private String licenseNumber;
+    private String qualifications;
+    private String verificationStatus;
+
     public UserResponseDTO() {}
 
     public static class UserOrgDTO {
@@ -69,7 +76,14 @@ public class UserResponseDTO {
     public String getPhone() { return phone; }
     public void setPhone(String phone) { this.phone = phone; }
     public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public void setStatus(String status) { 
+        this.status = status; 
+        if (this.verificationStatus == null) {
+            this.verificationStatus = status;
+        }
+    }
+    public String getVerificationStatus() { return verificationStatus != null ? verificationStatus : status; }
+    public void setVerificationStatus(String verificationStatus) { this.verificationStatus = verificationStatus; }
     public Boolean getMfaEnabled() { return mfaEnabled; }
     public void setMfaEnabled(Boolean mfaEnabled) { this.mfaEnabled = mfaEnabled; }
     public Set<String> getRoles() { return roles; }
@@ -82,4 +96,21 @@ public class UserResponseDTO {
     public void setCreatedAt(OffsetDateTime createdAt) { this.createdAt = createdAt; }
     public OffsetDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(OffsetDateTime updatedAt) { this.updatedAt = updatedAt; }
+
+    public String getSpecialization() { return specialization; }
+    public void setSpecialization(String specialization) { 
+        this.specialization = specialization; 
+        if (this.specialty == null) this.specialty = specialization;
+    }
+    public String getSpecialty() { return specialty != null ? specialty : specialization; }
+    public void setSpecialty(String specialty) { 
+        this.specialty = specialty; 
+        if (this.specialization == null) this.specialization = specialty;
+    }
+    public String getDepartment() { return department; }
+    public void setDepartment(String department) { this.department = department; }
+    public String getLicenseNumber() { return licenseNumber; }
+    public void setLicenseNumber(String licenseNumber) { this.licenseNumber = licenseNumber; }
+    public String getQualifications() { return qualifications; }
+    public void setQualifications(String qualifications) { this.qualifications = qualifications; }
 }

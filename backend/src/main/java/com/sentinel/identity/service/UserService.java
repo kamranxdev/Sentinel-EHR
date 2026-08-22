@@ -6,9 +6,13 @@ import com.sentinel.identity.dto.UpdateUserRequest;
 import com.sentinel.identity.dto.UserResponseDTO;
 import com.sentinel.identity.dto.UserSearchCriteria;
 import com.sentinel.identity.entity.Person;
+import com.sentinel.identity.entity.Practitioner;
+import com.sentinel.identity.entity.PractitionerSpecialty;
 import com.sentinel.identity.entity.User;
 import com.sentinel.identity.entity.UserOrganization;
 import com.sentinel.identity.repository.PersonRepository;
+import com.sentinel.identity.repository.PractitionerRepository;
+import com.sentinel.identity.repository.PractitionerSpecialtyRepository;
 import com.sentinel.identity.repository.UserOrganizationRepository;
 import com.sentinel.identity.repository.UserRepository;
 import com.sentinel.security.entity.Role;
@@ -23,6 +27,7 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -36,6 +41,8 @@ public class UserService {
     private final RoleRepository roleRepository;
     private final OrganizationRepository organizationRepository;
     private final UserOrganizationRepository userOrganizationRepository;
+    private final PractitionerRepository practitionerRepository;
+    private final PractitionerSpecialtyRepository practitionerSpecialtyRepository;
     private final PasswordEncoder passwordEncoder;
 
     public UserService(UserRepository userRepository,
@@ -43,12 +50,16 @@ public class UserService {
                        RoleRepository roleRepository,
                        OrganizationRepository organizationRepository,
                        UserOrganizationRepository userOrganizationRepository,
+                       PractitionerRepository practitionerRepository,
+                       PractitionerSpecialtyRepository practitionerSpecialtyRepository,
                        PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.personRepository = personRepository;
         this.roleRepository = roleRepository;
         this.organizationRepository = organizationRepository;
         this.userOrganizationRepository = userOrganizationRepository;
+        this.practitionerRepository = practitionerRepository;
+        this.practitionerSpecialtyRepository = practitionerSpecialtyRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -57,9 +68,17 @@ public class UserService {
             throw new IllegalArgumentException("Email already taken: " + request.getEmail());
         }
 
+        String firstName = request.getFirstName();
+        String lastName = request.getLastName();
+        if ((firstName == null || firstName.isBlank()) && request.getFullName() != null && !request.getFullName().isBlank()) {
+            String[] parts = request.getFullName().trim().split("\\s+", 2);
+            firstName = parts[0];
+            lastName = parts.length > 1 ? parts[1] : "";
+        }
+
         Person person = new Person();
-        person.setFirstName(request.getFirstName() != null ? request.getFirstName() : request.getEmail());
-        person.setLastName(request.getLastName());
+        person.setFirstName(firstName != null ? firstName : request.getEmail());
+        person.setLastName(lastName);
         person.setMiddleName(request.getMiddleName());
         person.setSexAtBirth(request.getGender());
         person.setPhone(request.getPhone());
@@ -99,6 +118,34 @@ public class UserService {
             });
         }
 
+        // Link/create Practitioner record for clinical staff if applicable
+        boolean isClinical = request.getRoleNames() != null && request.getRoleNames().stream()
+                .anyMatch(r -> r.contains("PHYSICIAN") || r.contains("DOCTOR") || r.contains("NURSE"));
+        if (isClinical || request.getSpecialization() != null || request.getLicenseNumber() != null) {
+            Practitioner practitioner = new Practitioner();
+            practitioner.setPerson(savedPerson);
+            practitioner.setIdentifier(request.getLicenseNumber() != null && !request.getLicenseNumber().isBlank()
+                    ? request.getLicenseNumber()
+                    : "PRAC-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
+            practitioner.setPractitionerType(request.getRoleNames() != null && request.getRoleNames().contains("NURSE") ? "NURSE" : "DOCTOR");
+            practitioner.setPrimarySpecialty(request.getSpecialization() != null && !request.getSpecialization().isBlank()
+                    ? request.getSpecialization()
+                    : (request.getDepartment() != null ? request.getDepartment() : "General Practice"));
+            practitioner.setStatus("ACTIVE");
+            practitioner.setCreatedAt(OffsetDateTime.now());
+            practitioner.setUpdatedAt(OffsetDateTime.now());
+            Practitioner savedPractitioner = practitionerRepository.save(practitioner);
+
+            if (request.getSpecialization() != null && !request.getSpecialization().isBlank()) {
+                PractitionerSpecialty specialty = new PractitionerSpecialty();
+                specialty.setPractitioner(savedPractitioner);
+                specialty.setSpecialtyCode(request.getSpecialization());
+                specialty.setSpecialtyName(request.getSpecialization());
+                specialty.setIsPrimary(true);
+                practitionerSpecialtyRepository.save(specialty);
+            }
+        }
+
         return mapToDTO(savedUser);
     }
 
@@ -107,6 +154,17 @@ public class UserService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
         return mapToDTO(user);
+    }
+
+    @Transactional(readOnly = true)
+    public List<UserResponseDTO> getUsersByOrganization(UUID organizationId) {
+        List<UserOrganization> userOrgs = userOrganizationRepository.findByOrganizationId(organizationId);
+        return userOrgs.stream()
+                .map(UserOrganization::getUser)
+                .filter(Objects::nonNull)
+                .distinct()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
@@ -152,18 +210,41 @@ public class UserService {
 
         if (request.getEmail() != null) user.setEmail(request.getEmail());
         if (request.getStatus() != null) user.setStatus(request.getStatus());
+        if (request.getVerificationStatus() != null) user.setStatus(request.getVerificationStatus());
         if (request.getMfaEnabled() != null) user.setMfaEnabled(request.getMfaEnabled());
 
         Person person = user.getPerson();
         if (person != null) {
-            if (request.getFirstName() != null) person.setFirstName(request.getFirstName());
-            if (request.getLastName() != null) person.setLastName(request.getLastName());
+            String firstName = request.getFirstName();
+            String lastName = request.getLastName();
+            if ((firstName == null || firstName.isBlank()) && request.getFullName() != null && !request.getFullName().isBlank()) {
+                String[] parts = request.getFullName().trim().split("\\s+", 2);
+                firstName = parts[0];
+                lastName = parts.length > 1 ? parts[1] : "";
+            }
+
+            if (firstName != null) person.setFirstName(firstName);
+            if (lastName != null) person.setLastName(lastName);
             if (request.getMiddleName() != null) person.setMiddleName(request.getMiddleName());
             if (request.getGender() != null) person.setSexAtBirth(request.getGender());
             if (request.getPhone() != null) person.setPhone(request.getPhone());
             if (request.getEmail() != null) person.setEmail(request.getEmail());
             person.setUpdatedAt(OffsetDateTime.now());
             personRepository.save(person);
+
+            // Update practitioner if present
+            if (request.getSpecialization() != null || request.getLicenseNumber() != null) {
+                practitionerRepository.findByPersonId(person.getId()).ifPresent(p -> {
+                    if (request.getSpecialization() != null && !request.getSpecialization().isBlank()) {
+                        p.setPrimarySpecialty(request.getSpecialization());
+                    }
+                    if (request.getLicenseNumber() != null && !request.getLicenseNumber().isBlank()) {
+                        p.setIdentifier(request.getLicenseNumber());
+                    }
+                    p.setUpdatedAt(OffsetDateTime.now());
+                    practitionerRepository.save(p);
+                });
+            }
         }
 
         if (request.getRoleNames() != null) {
@@ -200,6 +281,7 @@ public class UserService {
         dto.setId(user.getId());
         dto.setEmail(user.getEmail());
         dto.setStatus(user.getStatus());
+        dto.setVerificationStatus(user.getStatus());
         dto.setMfaEnabled(user.getMfaEnabled());
         dto.setLastLoginAt(user.getLastLoginAt());
         dto.setCreatedAt(user.getCreatedAt());
@@ -213,6 +295,13 @@ public class UserService {
             dto.setFullName(user.getPerson().getFullName());
             dto.setGender(user.getPerson().getSexAtBirth());
             dto.setPhone(user.getPerson().getPhone());
+
+            practitionerRepository.findByPersonId(user.getPerson().getId()).ifPresent(p -> {
+                dto.setSpecialization(p.getPrimarySpecialty());
+                dto.setSpecialty(p.getPrimarySpecialty());
+                dto.setDepartment(p.getPrimarySpecialty());
+                dto.setLicenseNumber(p.getIdentifier());
+            });
         } else {
             dto.setFullName(user.getEmail());
         }
