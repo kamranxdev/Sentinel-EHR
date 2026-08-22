@@ -84,17 +84,16 @@ import {
             </a>
             <div>
               <h1 class="text-xl font-bold tracking-tight text-foreground flex items-center gap-2">
-                5-Step Patient Demographic Intake Wizard
+                Patient Registration & Clinical Intake Wizard
                 <span
                   hlmBadge
                   variant="secondary"
-                  class="text-[11px] bg-sky-500/10 text-sky-600 border border-sky-500/20"
-                  >Intake Modal</span
+                  class="text-[11px] bg-emerald-500/10 text-emerald-600 border border-emerald-500/20"
+                  >Registration & Emergency</span
                 >
               </h1>
               <p class="text-xs text-muted-foreground mt-0.5">
-                Capture identity markers, PIN Code address validation, insurance coverage &
-                electronic ABDM/DPDP consent.
+                Capture legal identity markers, contact details, insurance policies, and digital consent agreements.
               </p>
             </div>
           </div>

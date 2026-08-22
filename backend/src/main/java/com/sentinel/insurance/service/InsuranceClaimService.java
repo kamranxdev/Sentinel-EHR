@@ -96,6 +96,17 @@ public class InsuranceClaimService {
     }
 
     @Transactional(readOnly = true)
+    public List<InsuranceClaimResponseDTO> getPatientClaims(UUID patientId) {
+        return claimRepository.findByPatientId(patientId).stream()
+                .filter(claim -> {
+                    UUID orgId = TenantContext.getCurrentOrganizationId();
+                    return orgId == null || orgId.equals(claim.getOrganization().getId());
+                })
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
     public InsuranceClaimResponseDTO getClaim(UUID claimId) {
         InsuranceClaim claim = claimRepository.findById(claimId)
                 .orElseThrow(() -> new ResourceNotFoundException("Insurance claim not found with id: " + claimId));

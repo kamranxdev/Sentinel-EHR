@@ -19,7 +19,7 @@ import {
   lucideCheckCircle2,
   lucideClock,
   lucideX,
-  lucideDollarSign,
+  lucideIndianRupee,
   lucideFileText,
   lucideUser,
   lucideTag,
@@ -39,7 +39,7 @@ import {
       lucideCheckCircle2,
       lucideClock,
       lucideX,
-      lucideDollarSign,
+      lucideIndianRupee,
       lucideFileText,
       lucideUser,
       lucideTag,
@@ -257,7 +257,7 @@ import {
                 <div
                   class="px-3 py-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 text-emerald-600 font-semibold font-mono text-[11px] flex items-center gap-1"
                 >
-                  <ng-icon name="lucideDollarSign" size="13" />
+                  <ng-icon name="lucideIndianRupee" size="13" />
                   Auto-Bill Account
                 </div>
               </div>
@@ -364,7 +364,11 @@ export class PharmacistDispenseComponent implements OnInit {
         toast.success(
           `Medication ${o.medicationName} dispensed successfully. Stock deducted & billable charge created.`,
         );
-        o.status = 'DISPENSED';
+        this.orders.update((orders) =>
+          orders.map((item) =>
+            item.id === o.id ? { ...item, status: 'DISPENSED' } : item,
+          ),
+        );
         this.selectedOrder.set(null);
       },
       error: (err) => {

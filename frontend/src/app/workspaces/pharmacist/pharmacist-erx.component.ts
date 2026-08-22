@@ -101,17 +101,6 @@ import {
 
         <div class="flex items-center gap-2 flex-wrap">
           <button
-            (click)="selectedStatus.set('ALL')"
-            [ngClass]="
-              selectedStatus() === 'ALL'
-                ? 'bg-indigo-600 text-white'
-                : 'bg-card text-muted-foreground hover:text-foreground'
-            "
-            class="px-3 py-1.5 rounded-lg text-xs font-medium border border-border transition-all"
-          >
-            All Orders ({{ orders().length }})
-          </button>
-          <button
             (click)="selectedStatus.set('PENDING')"
             [ngClass]="
               selectedStatus() === 'PENDING'
@@ -134,6 +123,17 @@ import {
             Verified ({{ verifiedCount() }})
           </button>
           <button
+            (click)="selectedStatus.set('DISPENSED')"
+            [ngClass]="
+              selectedStatus() === 'DISPENSED'
+                ? 'bg-blue-600 text-white'
+                : 'bg-card text-blue-600 hover:bg-blue-500/10'
+            "
+            class="px-3 py-1.5 rounded-lg text-xs font-medium border border-blue-500/30 transition-all"
+          >
+            Dispensed ({{ dispensedCount() }})
+          </button>
+          <button
             (click)="selectedStatus.set('CLARIFICATION')"
             [ngClass]="
               selectedStatus() === 'CLARIFICATION'
@@ -142,7 +142,18 @@ import {
             "
             class="px-3 py-1.5 rounded-lg text-xs font-medium border border-sky-500/30 transition-all"
           >
-            In Clarification
+            In Clarification ({{ clarificationCount() }})
+          </button>
+          <button
+            (click)="selectedStatus.set('ALL')"
+            [ngClass]="
+              selectedStatus() === 'ALL'
+                ? 'bg-indigo-600 text-white'
+                : 'bg-card text-muted-foreground hover:text-foreground'
+            "
+            class="px-3 py-1.5 rounded-lg text-xs font-medium border border-border transition-all"
+          >
+            All Orders ({{ orders().length }})
           </button>
         </div>
       </div>
@@ -206,27 +217,89 @@ import {
                   <span
                     [ngClass]="{
                       'bg-amber-500/15 text-amber-600 border-amber-500/30':
-                        o.status === 'PENDING_VERIFICATION' || o.status === 'PRESCRIBED',
+                        o.status === 'PENDING_VERIFICATION' || o.status === 'PRESCRIBED' || o.status === 'ORDERED',
                       'bg-emerald-500/15 text-emerald-600 border-emerald-500/30':
                         o.status === 'PHARMACY_VERIFIED' || o.status === 'VERIFIED',
+                      'bg-blue-500/15 text-blue-600 border-blue-500/30':
+                        o.status === 'DISPENSED',
                       'bg-sky-500/15 text-sky-600 border-sky-500/30':
                         o.status === 'CLARIFICATION_REQUESTED',
                       'bg-destructive/15 text-destructive border-destructive/30':
                         o.status === 'REJECTED',
+                      'bg-muted text-muted-foreground border-border':
+                        o.status === 'DISCONTINUED'
                     }"
                     class="px-2.5 py-1 rounded-full text-[10px] font-bold border inline-flex items-center gap-1"
                   >
-                    {{ o.status }}
+                    {{ o.status === 'PENDING_VERIFICATION' || o.status === 'PRESCRIBED' || o.status === 'ORDERED' ? 'PENDING' : o.status === 'PHARMACY_VERIFIED' ? 'VERIFIED' : o.status }}
                   </span>
                 </td>
                 <td class="py-3.5 px-4 text-right">
+                  <!-- Pending Verification: Show Review & Verify Action -->
                   <button
+                    *ngIf="o.status === 'PENDING_VERIFICATION' || o.status === 'PRESCRIBED' || o.status === 'ORDERED'"
                     (click)="openReviewModal(o)"
-                    class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white hover:bg-indigo-700 transition-all inline-flex items-center gap-1"
+                    class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white hover:bg-indigo-700 transition-all inline-flex items-center gap-1 shadow-xs"
                   >
                     <ng-icon name="lucideShieldCheck" size="13" />
                     Review & Verify
                   </button>
+
+                  <!-- Verified: Ready for Dispensing -->
+                  <div
+                    *ngIf="o.status === 'PHARMACY_VERIFIED' || o.status === 'VERIFIED'"
+                    class="inline-flex items-center gap-2"
+                  >
+                    <span
+                      class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 inline-flex items-center gap-1"
+                    >
+                      <ng-icon name="lucideCheckCircle2" size="13" />
+                      Verified
+                    </span>
+                    <a
+                      routerLink="/pharmacist/dispense"
+                      class="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition-all inline-flex items-center gap-1 shadow-xs"
+                    >
+                      <ng-icon name="lucidePill" size="12" />
+                      Dispense
+                    </a>
+                  </div>
+
+                  <!-- Dispensed: Show Dispensed Indicator without Review button -->
+                  <div
+                    *ngIf="o.status === 'DISPENSED'"
+                    class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-semibold bg-blue-500/10 text-blue-600 border border-blue-500/20"
+                  >
+                    <ng-icon name="lucideCheckCircle2" size="13" />
+                    Dispensed
+                  </div>
+
+                  <!-- In Clarification: Allow Re-reviewing or Updating Note -->
+                  <button
+                    *ngIf="o.status === 'CLARIFICATION_REQUESTED'"
+                    (click)="openReviewModal(o)"
+                    class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-sky-500/10 text-sky-600 hover:bg-sky-500/20 border border-sky-500/30 transition-all inline-flex items-center gap-1"
+                  >
+                    <ng-icon name="lucideMessageSquare" size="13" />
+                    Re-Review
+                  </button>
+
+                  <!-- Rejected -->
+                  <span
+                    *ngIf="o.status === 'REJECTED'"
+                    class="px-2.5 py-1 rounded-lg text-xs font-semibold bg-destructive/10 text-destructive border border-destructive/20 inline-flex items-center gap-1"
+                  >
+                    <ng-icon name="lucideX" size="13" />
+                    Rejected
+                  </span>
+
+                  <!-- Discontinued / Other -->
+                  <span
+                    *ngIf="o.status === 'DISCONTINUED'"
+                    class="px-2.5 py-1 rounded-lg text-xs font-medium bg-muted text-muted-foreground border border-border inline-flex items-center gap-1"
+                  >
+                    Discontinued
+                  </span>
                 </td>
               </tr>
 
@@ -370,7 +443,7 @@ export class PharmacistErxComponent implements OnInit {
   loading = signal(false);
   errorMessage = signal<string | null>(null);
   searchQuery = signal('');
-  selectedStatus = signal<'ALL' | 'PENDING' | 'VERIFIED' | 'CLARIFICATION'>('ALL');
+  selectedStatus = signal<'ALL' | 'PENDING' | 'VERIFIED' | 'DISPENSED' | 'CLARIFICATION'>('PENDING');
   selectedOrder = signal<MedicationOrder | null>(null);
   verificationNotes = '';
 
@@ -388,6 +461,14 @@ export class PharmacistErxComponent implements OnInit {
       this.orders().filter((o) => o.status === 'PHARMACY_VERIFIED' || o.status === 'VERIFIED')
         .length,
   );
+  dispensedCount = computed(
+    () =>
+      this.orders().filter((o) => o.status === 'DISPENSED').length,
+  );
+  clarificationCount = computed(
+    () =>
+      this.orders().filter((o) => o.status === 'CLARIFICATION_REQUESTED').length,
+  );
 
   filteredOrders = computed(() => {
     let list = this.orders();
@@ -403,6 +484,8 @@ export class PharmacistErxComponent implements OnInit {
       );
     } else if (st === 'VERIFIED') {
       list = list.filter((o) => o.status === 'PHARMACY_VERIFIED' || o.status === 'VERIFIED');
+    } else if (st === 'DISPENSED') {
+      list = list.filter((o) => o.status === 'DISPENSED');
     } else if (st === 'CLARIFICATION') {
       list = list.filter((o) => o.status === 'CLARIFICATION_REQUESTED');
     }
@@ -438,6 +521,10 @@ export class PharmacistErxComponent implements OnInit {
   }
 
   openReviewModal(o: MedicationOrder): void {
+    if (o.status === 'DISPENSED') {
+      toast.error('This prescription has already been dispensed and cannot be re-verified.');
+      return;
+    }
     this.selectedOrder.set(o);
     this.verificationNotes = 'Dosage and safety verified against clinical guideline.';
   }
@@ -445,10 +532,19 @@ export class PharmacistErxComponent implements OnInit {
   verifyOrder(): void {
     const o = this.selectedOrder();
     if (!o) return;
+    if (o.status === 'DISPENSED') {
+      toast.error('Cannot verify an already dispensed order.');
+      this.selectedOrder.set(null);
+      return;
+    }
     this.apiService.verifyPharmacyOrder(o.id, this.verificationNotes).subscribe({
       next: () => {
         toast.success(`Prescription for ${o.medicationName} verified and approved for dispensing.`);
-        o.status = 'PHARMACY_VERIFIED';
+        this.orders.update((orders) =>
+          orders.map((item) =>
+            item.id === o.id ? { ...item, status: 'PHARMACY_VERIFIED' } : item,
+          ),
+        );
         this.selectedOrder.set(null);
       },
       error: (err) => { this.errorMessage.set(err.message || 'Failed'); },
@@ -461,7 +557,11 @@ export class PharmacistErxComponent implements OnInit {
     this.apiService.requestPharmacyClarification(o.id, this.verificationNotes).subscribe({
       next: () => {
         toast.info(`Clarification requested from prescribing doctor for ${o.medicationName}.`);
-        o.status = 'CLARIFICATION_REQUESTED';
+        this.orders.update((orders) =>
+          orders.map((item) =>
+            item.id === o.id ? { ...item, status: 'CLARIFICATION_REQUESTED' } : item,
+          ),
+        );
         this.selectedOrder.set(null);
       },
       error: (err) => { this.errorMessage.set(err.message || 'Failed'); },
@@ -476,12 +576,20 @@ export class PharmacistErxComponent implements OnInit {
       .subscribe({
         next: () => {
           toast.error(`Prescription for ${o.medicationName} rejected.`);
-          o.status = 'REJECTED';
+          this.orders.update((orders) =>
+            orders.map((item) =>
+              item.id === o.id ? { ...item, status: 'REJECTED' } : item,
+            ),
+          );
           this.selectedOrder.set(null);
         },
         error: () => {
           toast.error(`Prescription for ${o.medicationName} rejected.`);
-          o.status = 'REJECTED';
+          this.orders.update((orders) =>
+            orders.map((item) =>
+              item.id === o.id ? { ...item, status: 'REJECTED' } : item,
+            ),
+          );
           this.selectedOrder.set(null);
         },
       });

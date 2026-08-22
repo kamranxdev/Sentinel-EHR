@@ -22,7 +22,7 @@ import {
   lucideBoxes,
   lucideCalendar,
   lucideActivity,
-  lucideDollarSign,
+  lucideIndianRupee,
   lucideSparkles,
 } from '@ng-icons/lucide';
 
@@ -44,7 +44,7 @@ import {
       lucideBoxes,
       lucideCalendar,
       lucideActivity,
-      lucideDollarSign,
+      lucideIndianRupee,
       lucideSparkles,
     }),
   ],

@@ -1,14 +1,23 @@
 package com.sentinel.service;
 
-import com.sentinel.audit.service.AuditTrailService;
 import com.sentinel.clinical.entity.Encounter;
+import com.sentinel.clinical.repository.AdmissionRepository;
+import com.sentinel.clinical.repository.CareEpisodeRepository;
+import com.sentinel.clinical.repository.EncounterLocationRepository;
+import com.sentinel.clinical.repository.EncounterParticipantRepository;
 import com.sentinel.clinical.repository.EncounterRepository;
+import com.sentinel.clinical.service.CareEpisodeService;
 import com.sentinel.clinical.service.EncounterService;
+import com.sentinel.clinical.service.AdmissionService;
 import com.sentinel.identity.entity.Person;
 import com.sentinel.patient.entity.Patient;
+import com.sentinel.patient.repository.PatientOrganizationRepository;
 import com.sentinel.patient.repository.PatientRepository;
 import com.sentinel.identity.entity.User;
 import com.sentinel.identity.repository.UserRepository;
+import com.sentinel.tenancy.repository.DepartmentRepository;
+import com.sentinel.tenancy.repository.OrganizationRepository;
+import com.sentinel.audit.service.AuditService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -22,9 +31,18 @@ import static org.mockito.Mockito.*;
 public class EncounterServiceTest {
 
     private EncounterRepository encounterRepository;
+    private EncounterLocationRepository encounterLocationRepository;
+    private EncounterParticipantRepository encounterParticipantRepository;
+    private CareEpisodeRepository careEpisodeRepository;
+    private CareEpisodeService careEpisodeService;
+    private AdmissionRepository admissionRepository;
+    private AdmissionService admissionService;
     private PatientRepository patientRepository;
+    private PatientOrganizationRepository patientOrganizationRepository;
+    private OrganizationRepository organizationRepository;
+    private DepartmentRepository departmentRepository;
     private UserRepository userRepository;
-    private AuditTrailService auditTrailService;
+    private AuditService auditService;
 
     private EncounterService encounterService;
 
@@ -39,14 +57,34 @@ public class EncounterServiceTest {
     @BeforeEach
     public void setUp() {
         encounterRepository = mock(EncounterRepository.class);
-        com.sentinel.clinical.repository.EncounterLocationRepository encounterLocationRepository = mock(com.sentinel.clinical.repository.EncounterLocationRepository.class);
+        encounterLocationRepository = mock(EncounterLocationRepository.class);
+        encounterParticipantRepository = mock(EncounterParticipantRepository.class);
+        careEpisodeRepository = mock(CareEpisodeRepository.class);
+        careEpisodeService = mock(CareEpisodeService.class);
+        admissionRepository = mock(AdmissionRepository.class);
+        admissionService = mock(AdmissionService.class);
         patientRepository = mock(PatientRepository.class);
-        com.sentinel.patient.repository.PatientOrganizationRepository patientOrganizationRepository = mock(com.sentinel.patient.repository.PatientOrganizationRepository.class);
-        com.sentinel.tenancy.repository.OrganizationRepository organizationRepository = mock(com.sentinel.tenancy.repository.OrganizationRepository.class);
-        com.sentinel.tenancy.repository.DepartmentRepository departmentRepository = mock(com.sentinel.tenancy.repository.DepartmentRepository.class);
-        com.sentinel.audit.service.AuditService auditService = mock(com.sentinel.audit.service.AuditService.class);
+        patientOrganizationRepository = mock(PatientOrganizationRepository.class);
+        organizationRepository = mock(OrganizationRepository.class);
+        departmentRepository = mock(DepartmentRepository.class);
+        userRepository = mock(UserRepository.class);
+        auditService = mock(AuditService.class);
 
-        encounterService = new EncounterService(encounterRepository, encounterLocationRepository, null, null, patientRepository, patientOrganizationRepository, organizationRepository, departmentRepository, auditService);
+        encounterService = new EncounterService(
+                encounterRepository,
+                encounterLocationRepository,
+                encounterParticipantRepository,
+                careEpisodeRepository,
+                careEpisodeService,
+                admissionRepository,
+                admissionService,
+                patientRepository,
+                patientOrganizationRepository,
+                organizationRepository,
+                departmentRepository,
+                userRepository,
+                auditService
+        );
 
         Person p = new Person();
         p.setFirstName("Kamran");
@@ -61,8 +99,8 @@ public class EncounterServiceTest {
         testEncounter = new Encounter();
         testEncounter.setId(encounterId);
         testEncounter.setPatient(testPatient);
-        testEncounter.setEncounterType("AMBULATORY");
-        testEncounter.setStatus("FINISHED");
+        testEncounter.setEncounterType("OUTPATIENT");
+        testEncounter.setStatus("COMPLETED");
     }
 
     @Test

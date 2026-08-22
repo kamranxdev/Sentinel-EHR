@@ -25,7 +25,7 @@ import {
   lucideSave,
   lucideRotateCcw,
   lucideCreditCard,
-  lucideDollarSign,
+  lucideIndianRupee,
   lucideTag,
   lucideActivity,
 } from '@ng-icons/lucide';
@@ -65,7 +65,7 @@ export interface BillingInvoiceViewModel {
       lucideSave,
       lucideRotateCcw,
       lucideCreditCard,
-      lucideDollarSign,
+      lucideIndianRupee,
       lucideTag,
       lucideActivity,
     }),
@@ -174,7 +174,7 @@ export interface BillingInvoiceViewModel {
                   {{ inv.date || (inv.createdAt | date: 'shortDate') }}
                 </td>
                 <td hlmTableCell class="text-xs font-semibold text-emerald-600 font-mono">
-                  &dollar;{{ inv.amount || inv.totalAmount || 150 | number: '1.2-2' }}
+                  ₹{{ inv.amount || inv.totalAmount || 150 | number: '1.2-2' }}
                 </td>
                 <td hlmTableCell>
                   <span
@@ -254,7 +254,7 @@ export interface BillingInvoiceViewModel {
                   <span hlmBadge variant="outline" class="text-[10px]">{{ chg.category }}</span>
                 </td>
                 <td hlmTableCell class="text-xs font-mono font-bold text-emerald-600">
-                  &dollar;{{ chg.totalPrice | number: '1.2-2' }}
+                  ₹{{ chg.totalPrice | number: '1.2-2' }}
                 </td>
                 <td hlmTableCell>
                   <span
@@ -322,7 +322,7 @@ export interface BillingInvoiceViewModel {
                   <span hlmBadge variant="outline" class="text-[10px]">{{ item.category }}</span>
                 </td>
                 <td hlmTableCell class="text-xs font-mono font-bold text-emerald-600">
-                  &dollar;{{ item.unitPrice | number: '1.2-2' }}
+                  ₹{{ item.unitPrice | number: '1.2-2' }}
                 </td>
                 <td hlmTableCell class="text-xs text-muted-foreground">
                   {{ (item.taxRate || 0) * 100 }}%

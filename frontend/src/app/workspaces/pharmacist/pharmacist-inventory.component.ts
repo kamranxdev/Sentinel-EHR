@@ -20,7 +20,7 @@ import {
   lucideCheckCircle2,
   lucideCalendar,
   lucideMapPin,
-  lucideDollarSign,
+  lucideIndianRupee,
   lucideX,
   lucidePill,
   lucideTag,
@@ -40,7 +40,7 @@ import {
       lucideCheckCircle2,
       lucideCalendar,
       lucideMapPin,
-      lucideDollarSign,
+      lucideIndianRupee,
       lucideX,
       lucidePill,
       lucideTag,
@@ -221,7 +221,7 @@ import {
                   </div>
                 </td>
                 <td class="py-3.5 px-4 text-right font-mono font-bold text-foreground">
-                  \${{ item.unitPrice | number: '1.2-2' }}
+                  ₹{{ item.unitPrice | number: '1.2-2' }}
                 </td>
               </tr>
 

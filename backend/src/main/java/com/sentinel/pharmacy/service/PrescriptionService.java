@@ -153,6 +153,9 @@ public class PrescriptionService {
     public PrescriptionResponseDTO verifyPrescription(UUID prescriptionId, String notes) {
         Prescription rx = prescriptionRepository.findById(prescriptionId)
                 .orElseThrow(() -> new ResourceNotFoundException("Prescription not found with id: " + prescriptionId));
+        if ("DISPENSED".equalsIgnoreCase(rx.getStatus())) {
+            throw new IllegalStateException("Prescription has already been dispensed and cannot be re-verified.");
+        }
         rx.setStatus("PHARMACY_VERIFIED");
         if (notes != null && !notes.isBlank()) {
             String existing = rx.getInstructions() != null ? rx.getInstructions() + " | Verification notes: " + notes : "Verification notes: " + notes;

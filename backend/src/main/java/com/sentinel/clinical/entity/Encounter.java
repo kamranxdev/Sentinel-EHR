@@ -26,13 +26,24 @@ public class Encounter {
     @JoinColumn(name = "patient_id", nullable = false)
     private Patient patient;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "care_episode_id")
+    private CareEpisode careEpisode;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "source_encounter_id")
+    private Encounter sourceEncounter;
+
+    @Column(name = "relationship_type", length = 50)
+    private String relationshipType; // e.g. ADMISSION_FROM, FOLLOW_UP_OF, REFERRAL_FROM
+
     private String encounterNumber;
 
     @Column(nullable = false, length = 50)
-    private String encounterType = "INPATIENT";
+    private String encounterType = "OUTPATIENT"; // OUTPATIENT, EMERGENCY, INPATIENT, OBSERVATION
 
     @Column(nullable = false, length = 30)
-    private String status = "PLANNED";
+    private String status = "PLANNED"; // PLANNED, ARRIVED, TRIAGED, IN_PROGRESS, ON_LEAVE, COMPLETED, DISCHARGED, CANCELLED
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "department_id")
@@ -63,7 +74,9 @@ public class Encounter {
     private OffsetDateTime startedAt = OffsetDateTime.now();
 
     private OffsetDateTime endedAt;
-    private String disposition;
+    
+    @Column(length = 50)
+    private String disposition; // DISCHARGE, OBSERVE, ADMIT, TRANSFER, AMA, EXPIRED
 
     @Column(nullable = false)
     private OffsetDateTime createdAt = OffsetDateTime.now();
@@ -81,6 +94,15 @@ public class Encounter {
 
     public Patient getPatient() { return patient; }
     public void setPatient(Patient patient) { this.patient = patient; }
+
+    public CareEpisode getCareEpisode() { return careEpisode; }
+    public void setCareEpisode(CareEpisode careEpisode) { this.careEpisode = careEpisode; }
+
+    public Encounter getSourceEncounter() { return sourceEncounter; }
+    public void setSourceEncounter(Encounter sourceEncounter) { this.sourceEncounter = sourceEncounter; }
+
+    public String getRelationshipType() { return relationshipType; }
+    public void setRelationshipType(String relationshipType) { this.relationshipType = relationshipType; }
 
     public String getEncounterNumber() { return encounterNumber; }
     public void setEncounterNumber(String encounterNumber) { this.encounterNumber = encounterNumber; }

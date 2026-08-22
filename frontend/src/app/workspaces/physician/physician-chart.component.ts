@@ -6,6 +6,8 @@ import { PatientContextService } from '../../core/services/patient-context.servi
 import { ApiService } from '../../core/services/api.service';
 import { Patient } from '../../core/models/patient.model';
 import {
+  CareEpisode,
+  EmergencyDispositionRequest,
   Encounter,
   Diagnosis,
   Prescription,
@@ -391,53 +393,77 @@ export type PhysicianChartTab =
         </div>
       </div>
 
-      <!-- TAB 1: Encounters & SOAP Notes -->
+      <!-- TAB 1: Encounters & Unified Care Foundation -->
       <div *ngIf="activeTab() === 'encounters'" class="space-y-6">
-        <div
-          class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 pb-4 border-b border-border"
-        >
-          <div>
-            <h2 class="text-base font-bold tracking-tight text-foreground flex items-center gap-2">
-              <ng-icon name="lucideStethoscope" size="18" class="text-primary" />
-              Inpatient Encounters & Clinical Visits
-            </h2>
-            <p class="text-xs text-muted-foreground mt-0.5">
-              Manage active inpatient encounters, bed assignments, discharge planning, and emergency
-              access overrides.
-            </p>
+        <!-- Active Care Episode Overview Banner -->
+        <div class="rounded-xl border border-border bg-card p-4 shadow-xs">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 pb-3 border-b border-border">
+            <div class="flex items-center gap-2">
+              <span class="flex size-7 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <ng-icon name="lucideStethoscope" size="16" />
+              </span>
+              <div>
+                <h3 class="text-xs font-bold text-foreground">Overarching Care Episodes</h3>
+                <p class="text-[11px] text-muted-foreground">Unified episode tracking across Outpatient visits, Emergency encounters, and Inpatient admissions.</p>
+              </div>
+            </div>
+            <div class="flex items-center gap-2">
+              <button
+                hlmBtn
+                size="sm"
+                (click)="isAdmissionModalOpen.set(true)"
+                class="gap-1.5 text-xs font-semibold shadow-xs"
+              >
+                <ng-icon name="lucideUserPlus" class="text-sm"></ng-icon> Inpatient Direct Admission
+              </button>
+              <button
+                hlmBtn
+                variant="destructive"
+                size="sm"
+                (click)="triggerBreakGlass()"
+                class="gap-1.5 text-xs font-semibold shadow-xs"
+              >
+                <ng-icon name="lucideShieldAlert" class="text-sm"></ng-icon> Break-Glass Override
+              </button>
+            </div>
           </div>
 
-          <div class="flex items-center gap-2">
-            <button
-              hlmBtn
-              size="sm"
-              (click)="isAdmissionModalOpen.set(true)"
-              class="gap-2 text-xs font-semibold shadow-xs"
-            >
-              <ng-icon name="lucideUserPlus" class="text-sm"></ng-icon> Register Admission
-            </button>
-            <button
-              hlmBtn
-              variant="destructive"
-              size="sm"
-              (click)="triggerBreakGlass()"
-              class="gap-2 text-xs font-semibold shadow-xs"
-            >
-              <ng-icon name="lucideShieldAlert" class="text-sm"></ng-icon> Emergency Break-Glass
-            </button>
+          <div *ngIf="careEpisodes().length > 0" class="mt-3 grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div *ngFor="let ep of careEpisodes()" class="p-3 rounded-lg border border-border bg-muted/20 text-xs space-y-1">
+              <div class="flex justify-between items-center">
+                <span class="font-mono font-bold text-primary">{{ ep.episodeCode }}</span>
+                <span hlmBadge [variant]="ep.status === 'ACTIVE' ? 'default' : 'secondary'" class="text-[10px]">{{ ep.status }}</span>
+              </div>
+              <p class="font-semibold text-foreground truncate">{{ ep.title || 'General Care Episode' }}</p>
+              <p class="text-[11px] text-muted-foreground">{{ ep.episodeType }} • Started {{ ep.startedAt | date:'shortDate' }}</p>
+              <p *ngIf="ep.primaryDiagnosisName" class="text-[11px] text-primary/90 truncate">Dx: {{ ep.primaryDiagnosisName }}</p>
+            </div>
+          </div>
+          <div *ngIf="careEpisodes().length === 0" class="mt-2 text-center text-muted-foreground text-xs py-2">
+            No overarching Care Episodes recorded yet. A new episode is automatically established upon first clinical encounter.
           </div>
         </div>
 
+        <!-- Unified Encounters Table -->
         <div class="rounded-xl border border-border bg-card overflow-hidden shadow-xs">
+          <div class="p-4 border-b border-border bg-muted/20 flex justify-between items-center">
+            <h3 class="text-xs font-semibold text-foreground flex items-center gap-2">
+              <ng-icon name="lucideActivity" size="14" class="text-primary" />
+              Unified Encounter History (Outpatient, Emergency, Inpatient)
+            </h3>
+            <span class="text-[11px] text-muted-foreground">{{ encounters().length }} encounters</span>
+          </div>
+
           <div class="overflow-x-auto">
             <table hlmTable class="w-full text-xs">
               <thead hlmTableHeader>
                 <tr hlmTableRow class="bg-muted/50 border-b border-border">
-                  <th hlmTableHead class="py-3 px-4 text-left font-semibold">Encounter ID</th>
-                  <th hlmTableHead class="py-3 px-4 text-left font-semibold">Type / Class</th>
-                  <th hlmTableHead class="py-3 px-4 text-left font-semibold">Chief Complaint</th>
-                  <th hlmTableHead class="py-3 px-4 text-left font-semibold">Status Stage</th>
-                  <th hlmTableHead class="py-3 px-4 text-right font-semibold">Action</th>
+                  <th hlmTableHead class="py-3 px-4 text-left font-semibold">Encounter #</th>
+                  <th hlmTableHead class="py-3 px-4 text-left font-semibold">Workflow / Class</th>
+                  <th hlmTableHead class="py-3 px-4 text-left font-semibold">Care Episode</th>
+                  <th hlmTableHead class="py-3 px-4 text-left font-semibold">Chief Complaint / Reason</th>
+                  <th hlmTableHead class="py-3 px-4 text-left font-semibold">Status / Disposition</th>
+                  <th hlmTableHead class="py-3 px-4 text-right font-semibold">Actions</th>
                 </tr>
               </thead>
               <tbody hlmTableBody class="divide-y divide-border">
@@ -447,47 +473,80 @@ export type PhysicianChartTab =
                   class="hover:bg-muted/40 transition-colors"
                 >
                   <td hlmTableCell class="py-3 px-4 font-mono font-bold text-foreground">
-                    #ENC-{{ enc.id }}
+                    {{ enc.encounterNumber || ('#ENC-' + enc.id) }}
                   </td>
-                  <td hlmTableCell class="py-3 px-4 font-medium text-foreground">
-                    {{ enc.encounterType }}
-                  </td>
-                  <td hlmTableCell class="py-3 px-4 text-muted-foreground">
-                    {{ enc.chiefComplaint || 'Clinical evaluation' }}
-                  </td>
-                  <td hlmTableCell class="py-3 px-4">
+                  <td hlmTableCell class="py-3 px-4 font-medium">
                     <span
-                      hlmBadge
-                      [variant]="
-                        enc.status === 'FINISHED' || enc.status === 'COMPLETED'
-                          ? 'secondary'
-                          : 'default'
-                      "
-                      class="text-[10px]"
+                      class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold"
+                      [ngClass]="{
+                        'bg-amber-500/10 text-amber-500 border border-amber-500/20': enc.encounterType === 'EMERGENCY',
+                        'bg-blue-500/10 text-blue-500 border border-blue-500/20': enc.encounterType === 'OUTPATIENT',
+                        'bg-purple-500/10 text-purple-500 border border-purple-500/20': enc.encounterType === 'INPATIENT',
+                        'bg-cyan-500/10 text-cyan-500 border border-cyan-500/20': enc.encounterType === 'OBSERVATION'
+                      }"
                     >
-                      {{ enc.status }}
+                      {{ enc.encounterType }}
                     </span>
                   </td>
+                  <td hlmTableCell class="py-3 px-4 font-mono text-[11px] text-muted-foreground">
+                    {{ enc.careEpisodeCode || '—' }}
+                  </td>
+                  <td hlmTableCell class="py-3 px-4 text-muted-foreground max-w-xs truncate">
+                    {{ enc.chiefComplaint || enc.reasonForVisit || 'Clinical Consultation' }}
+                  </td>
+                  <td hlmTableCell class="py-3 px-4">
+                    <div class="flex items-center gap-1.5">
+                      <span
+                        hlmBadge
+                        [variant]="
+                          enc.status === 'FINISHED' || enc.status === 'COMPLETED'
+                            ? 'secondary'
+                            : 'default'
+                        "
+                        class="text-[10px]"
+                      >
+                        {{ enc.status }}
+                      </span>
+                      <span *ngIf="enc.disposition" class="text-[10px] font-semibold text-muted-foreground">
+                        ({{ enc.disposition }})
+                      </span>
+                    </div>
+                  </td>
                   <td hlmTableCell class="py-3 px-4 text-right">
-                    <button
-                      *ngIf="enc.status === 'ACTIVE' || enc.status === 'IN_PROGRESS'"
-                      hlmBtn
-                      variant="outline"
-                      size="sm"
-                      (click)="finalizeEncounter(enc.id)"
-                      class="h-7 text-[11px]"
-                    >
-                      Finalize Visit
-                    </button>
+                    <div class="flex items-center justify-end gap-1.5">
+                      <!-- Emergency Disposition Action -->
+                      <button
+                        *ngIf="enc.encounterType === 'EMERGENCY' && (enc.status === 'IN_PROGRESS' || enc.status === 'ACTIVE' || enc.status === 'TRIAGED')"
+                        hlmBtn
+                        size="sm"
+                        (click)="openDispositionModal(enc)"
+                        class="h-7 text-[11px] bg-amber-600 hover:bg-amber-700 text-white font-semibold"
+                      >
+                        <ng-icon name="lucideActivity" size="12" class="mr-1" />
+                        Disposition (Admit/Observe/Discharge)
+                      </button>
+
+                      <!-- Outpatient Complete Action -->
+                      <button
+                        *ngIf="enc.encounterType !== 'EMERGENCY' && (enc.status === 'ACTIVE' || enc.status === 'IN_PROGRESS')"
+                        hlmBtn
+                        variant="outline"
+                        size="sm"
+                        (click)="finalizeEncounter(enc.id)"
+                        class="h-7 text-[11px]"
+                      >
+                        Complete Visit
+                      </button>
+                    </div>
                   </td>
                 </tr>
                 <tr *ngIf="encounters().length === 0" hlmTableRow>
                   <td
-                    colspan="5"
+                    colspan="6"
                     hlmTableCell
                     class="py-12 text-center text-muted-foreground text-xs"
                   >
-                    No encounters recorded for this patient.
+                    No clinical encounters recorded for this patient.
                   </td>
                 </tr>
               </tbody>
@@ -2118,6 +2177,93 @@ export type PhysicianChartTab =
         </div>
       </div>
 
+      <!-- MODAL 11: Emergency Disposition (Discharge / Observe / Admit) -->
+      <div
+        *ngIf="showDispositionModal()"
+        class="fixed inset-0 z-50 bg-background/80 backdrop-blur-xs flex items-center justify-center p-4"
+      >
+        <div
+          class="w-full max-w-md rounded-xl border border-border bg-card p-6 shadow-lg space-y-4"
+        >
+          <div class="flex justify-between items-center border-b border-border pb-3">
+            <h3 class="text-sm font-bold text-foreground flex items-center gap-2">
+              <ng-icon name="lucideActivity" size="16" class="text-amber-500" />
+              Emergency Disposition Engine
+            </h3>
+            <button
+              hlmBtn
+              variant="ghost"
+              size="sm"
+              (click)="showDispositionModal.set(false)"
+              class="size-7 p-0"
+            >
+              <ng-icon name="lucideX" size="16" />
+            </button>
+          </div>
+
+          <div class="space-y-3 text-xs">
+            <div>
+              <label class="font-medium text-foreground block mb-1">Disposition Decision *</label>
+              <select
+                [(ngModel)]="dispositionData.disposition"
+                class="w-full p-2 rounded-md border border-input bg-background font-semibold"
+              >
+                <option value="DISCHARGE">Discharge Home (Ambulatory Discharge)</option>
+                <option value="OBSERVE">Transfer to Emergency Observation Unit (EOU)</option>
+                <option value="ADMIT">Admit to Inpatient Ward (Creates Inpatient Encounter)</option>
+                <option value="TRANSFER">Transfer to External Facility / Higher Level of Care</option>
+                <option value="AMA">Discharge Against Medical Advice (AMA)</option>
+              </select>
+            </div>
+
+            <div *ngIf="dispositionData.disposition === 'ADMIT'">
+              <label class="font-medium text-foreground block mb-1">Inpatient Admission Reason *</label>
+              <input
+                type="text"
+                [(ngModel)]="dispositionData.admissionReason"
+                placeholder="e.g. Acute exacerbation requiring IV therapy / bed care"
+                class="w-full p-2 rounded-md border border-input bg-background"
+              />
+            </div>
+
+            <div>
+              <label class="font-medium text-foreground block mb-1">Clinical Notes / Justification</label>
+              <textarea
+                [(ngModel)]="dispositionData.notes"
+                placeholder="Document clinical assessment, stabilization summary, and rationale..."
+                class="w-full p-2 rounded-md border border-input bg-background h-16"
+              ></textarea>
+            </div>
+
+            <div *ngIf="dispositionData.disposition === 'DISCHARGE'">
+              <label class="font-medium text-foreground block mb-1">Discharge Instructions to Patient</label>
+              <textarea
+                [(ngModel)]="dispositionData.dischargeInstructions"
+                placeholder="Medication instructions, warning signs to return, follow-up clinic..."
+                class="w-full p-2 rounded-md border border-input bg-background h-16"
+              ></textarea>
+            </div>
+          </div>
+
+          <div class="flex justify-end gap-2 pt-2 border-t border-border">
+            <button hlmBtn variant="outline" size="sm" (click)="showDispositionModal.set(false)">
+              Cancel
+            </button>
+            <button
+              hlmBtn
+              variant="default"
+              size="sm"
+              [disabled]="savingDisposition()"
+              (click)="submitDisposition()"
+              class="bg-amber-600 hover:bg-amber-700 text-white font-semibold"
+            >
+              <ng-icon name="lucideSave" size="14" class="mr-1" />
+              {{ savingDisposition() ? 'Executing...' : 'Confirm Disposition' }}
+            </button>
+          </div>
+        </div>
+      </div>
+
       <!-- Shared Break Glass & Inpatient Admission Modals -->
       <app-break-glass-modal
         [isOpen]="isBreakGlassModalOpen()"
@@ -2136,7 +2282,8 @@ export class PhysicianChartComponent implements OnInit {
   activeTab = signal<PhysicianChartTab>('encounters');
   patients = signal<Patient[]>([]);
 
-  // Clinical data signals across all subsystems
+  // Clinical data signals across all subsystems (Unified Care Foundation)
+  careEpisodes = signal<CareEpisode[]>([]);
   encounters = signal<Encounter[]>([]);
   diagnoses = signal<Diagnosis[]>([]);
   prescriptions = signal<Prescription[]>([]);
@@ -2155,6 +2302,17 @@ export class PhysicianChartComponent implements OnInit {
   // Modals state
   isBreakGlassModalOpen = signal(false);
   isAdmissionModalOpen = signal(false);
+
+  showDispositionModal = signal(false);
+  savingDisposition = signal(false);
+  selectedEncounterForDisposition = signal<Encounter | null>(null);
+  dispositionData = {
+    disposition: 'DISCHARGE' as 'DISCHARGE' | 'OBSERVE' | 'ADMIT' | 'TRANSFER' | 'AMA',
+    notes: '',
+    dischargeInstructions: '',
+    admissionReason: '',
+    bedId: '',
+  };
 
   showDiagnosisModal = signal(false);
   savingDiagnosis = signal(false);
@@ -2283,6 +2441,12 @@ export class PhysicianChartComponent implements OnInit {
   loadPatientClinicalData(patientId: string): void {
     if (!patientId) return;
 
+    // Care Episodes
+    this.apiService.getCareEpisodes(patientId).subscribe({
+      next: (res) => this.careEpisodes.set(res || []),
+      error: () => this.careEpisodes.set([]),
+    });
+
     // Encounters
     this.apiService.getEncountersByPatient(patientId).subscribe({
       next: (res) => this.encounters.set(res || []),
@@ -2365,6 +2529,45 @@ export class PhysicianChartComponent implements OnInit {
 
   triggerBreakGlass(): void {
     this.isBreakGlassModalOpen.set(true);
+  }
+
+  openDispositionModal(enc: Encounter): void {
+    this.selectedEncounterForDisposition.set(enc);
+    this.dispositionData = {
+      disposition: 'DISCHARGE',
+      notes: '',
+      dischargeInstructions: '',
+      admissionReason: enc.chiefComplaint || enc.reasonForVisit || 'Emergency Admission',
+      bedId: '',
+    };
+    this.showDispositionModal.set(true);
+  }
+
+  submitDisposition(): void {
+    const enc = this.selectedEncounterForDisposition();
+    if (!enc?.id || this.savingDisposition()) return;
+
+    this.savingDisposition.set(true);
+    this.apiService
+      .recordEmergencyDisposition(enc.id, {
+        disposition: this.dispositionData.disposition,
+        notes: this.dispositionData.notes,
+        dischargeInstructions: this.dispositionData.dischargeInstructions,
+        admissionReason: this.dispositionData.admissionReason,
+      })
+      .subscribe({
+        next: () => {
+          this.savingDisposition.set(false);
+          this.showDispositionModal.set(false);
+          toast.success(`Disposition recorded: ${this.dispositionData.disposition}`);
+          const active = this.patientContext.activePatient();
+          if (active?.id) this.loadPatientClinicalData(active.id);
+        },
+        error: () => {
+          this.savingDisposition.set(false);
+          toast.error('Failed to record disposition');
+        },
+      });
   }
 
   finalizeEncounter(id?: string): void {

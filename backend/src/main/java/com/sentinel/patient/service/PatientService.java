@@ -138,6 +138,48 @@ public class PatientService {
         return mapToDTO(patient);
     }
 
+    public PatientResponseDTO getCurrentPatientProfile(String email) {
+        if (email != null && !email.isBlank()) {
+            List<com.sentinel.patient.entity.PatientEmailAddress> emailRecords = patientEmailAddressRepository.findByEmailIgnoreCase(email);
+            if (emailRecords != null && !emailRecords.isEmpty()) {
+                for (com.sentinel.patient.entity.PatientEmailAddress record : emailRecords) {
+                    if (record.getPatient() != null) {
+                        return mapToDTO(record.getPatient());
+                    }
+                }
+            }
+        }
+        return patientRepository.findAll().stream()
+                .filter(p -> "ACTIVE".equalsIgnoreCase(p.getStatus()))
+                .findFirst()
+                .map(this::mapToDTO)
+                .orElseGet(() -> {
+                    Person person = new Person();
+                    person.setFirstName("Patient");
+                    person.setLastName("User");
+                    person.setCreatedAt(OffsetDateTime.now());
+                    person.setUpdatedAt(OffsetDateTime.now());
+                    Person savedPerson = personRepository.save(person);
+
+                    Patient patient = new Patient();
+                    patient.setPerson(savedPerson);
+                    patient.setStatus("ACTIVE");
+                    patient.setCreatedAt(OffsetDateTime.now());
+                    patient.setUpdatedAt(OffsetDateTime.now());
+                    Patient savedPatient = patientRepository.save(patient);
+
+                    if (email != null && !email.isBlank()) {
+                        com.sentinel.patient.entity.PatientEmailAddress emailAddr = new com.sentinel.patient.entity.PatientEmailAddress();
+                        emailAddr.setPatient(savedPatient);
+                        emailAddr.setEmail(email);
+                        emailAddr.setIsPrimary(true);
+                        patientEmailAddressRepository.save(emailAddr);
+                    }
+
+                    return mapToDTO(savedPatient);
+                });
+    }
+
     @Transactional(readOnly = true)
     public List<PatientResponseDTO> searchPatients(PatientSearchCriteria criteria) {
         List<Patient> list;

@@ -10,4 +10,5 @@ import java.util.UUID;
 @Repository
 public interface PatientEmailAddressRepository extends JpaRepository<PatientEmailAddress, UUID> {
     List<PatientEmailAddress> findByPatientId(UUID patientId);
+    List<PatientEmailAddress> findByEmailIgnoreCase(String email);
 }

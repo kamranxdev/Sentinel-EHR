@@ -36,6 +36,15 @@ public class PatientController {
         return new ResponseEntity<>(ApiResponse.success("Patient registered successfully", response), HttpStatus.CREATED);
     }
 
+    @GetMapping("/me")
+    @Operation(summary = "Get current authenticated patient profile")
+    public ResponseEntity<ApiResponse<PatientResponseDTO>> getCurrentPatient(
+            @org.springframework.security.core.annotation.AuthenticationPrincipal org.springframework.security.core.userdetails.UserDetails userDetails) {
+        String email = userDetails != null ? userDetails.getUsername() : null;
+        PatientResponseDTO response = patientService.getCurrentPatientProfile(email);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
     @GetMapping("/{patientId}")
     @Operation(summary = "Get patient by ID")
     public ResponseEntity<ApiResponse<PatientResponseDTO>> getPatient(

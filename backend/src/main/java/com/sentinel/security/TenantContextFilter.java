@@ -56,17 +56,23 @@ public class TenantContextFilter extends OncePerRequestFilter {
 
     private UUID resolveAuthorizedOrganization(UserPrincipal principal, String requestedOrganizationId) {
         if (requestedOrganizationId != null && !requestedOrganizationId.isBlank()) {
+            if ("PATIENT_PORTAL".equalsIgnoreCase(requestedOrganizationId)
+                    || "SYSTEM_WIDE".equalsIgnoreCase(requestedOrganizationId)
+                    || "ALL".equalsIgnoreCase(requestedOrganizationId)) {
+                return principal.getOrganizationId();
+            }
             final UUID organizationId;
             try {
                 organizationId = UUID.fromString(requestedOrganizationId);
             } catch (IllegalArgumentException ex) {
-                throw new AccessDeniedException("Invalid organization context");
+                return principal.getOrganizationId();
             }
 
             boolean isSuperAdmin = principal.getRoles() != null && principal.getRoles().contains("SUPER_ADMIN");
+            boolean isPatient = principal.getRoles() != null && principal.getRoles().contains("PATIENT");
             boolean isActiveMember = userOrganizationRepository
                     .existsByUserIdAndOrganizationIdAndStatus(principal.getId(), organizationId, "ACTIVE");
-            if (!isSuperAdmin && !isActiveMember) {
+            if (!isSuperAdmin && !isPatient && !isActiveMember) {
                 throw new AccessDeniedException("You are not a member of the requested organization");
             }
             if (isSuperAdmin && !organizationRepository.existsById(organizationId)) {

@@ -40,41 +40,78 @@ public class AdmissionService {
         this.auditService = auditService;
     }
 
-    public AdmissionResponseDTO admitPatient(UUID encounterId, AdmitPatientRequest request) {
-        Encounter encounter = encounterRepository.findById(encounterId)
-                .orElseThrow(() -> new ResourceNotFoundException("Encounter not found with id: " + encounterId));
+    public AdmissionResponseDTO admitPatient(UUID sourceEncounterId, AdmitPatientRequest request) {
+        Encounter sourceEncounter = encounterRepository.findById(sourceEncounterId)
+                .orElseThrow(() -> new ResourceNotFoundException("Encounter not found with id: " + sourceEncounterId));
 
-        encounter.setEncounterType("INPATIENT");
-        encounter.setStatus("IN_PROGRESS");
-        encounter.setAdmissionSource(request.getAdmissionSource());
-        encounter.setReasonForVisit(request.getAdmitReason());
-        encounter.setUpdatedAt(OffsetDateTime.now());
-        encounterRepository.save(encounter);
+        Encounter inpatientEncounter;
+
+        // If the source encounter is already an Inpatient encounter, attach admission directly
+        if ("INPATIENT".equalsIgnoreCase(sourceEncounter.getEncounterType())) {
+            inpatientEncounter = sourceEncounter;
+            inpatientEncounter.setStatus("IN_PROGRESS");
+            inpatientEncounter.setAdmissionSource(request.getAdmissionSource());
+            if (request.getAdmitReason() != null) inpatientEncounter.setReasonForVisit(request.getAdmitReason());
+            inpatientEncounter.setUpdatedAt(OffsetDateTime.now());
+            encounterRepository.save(inpatientEncounter);
+        } else {
+            // Under clean Sentinel architecture: Create new Inpatient Encounter E_inpatient linked to E_source
+            inpatientEncounter = new Encounter();
+            inpatientEncounter.setOrganization(sourceEncounter.getOrganization());
+            inpatientEncounter.setPatient(sourceEncounter.getPatient());
+            inpatientEncounter.setDepartment(sourceEncounter.getDepartment());
+            inpatientEncounter.setCareEpisode(sourceEncounter.getCareEpisode());
+            inpatientEncounter.setSourceEncounter(sourceEncounter);
+            inpatientEncounter.setRelationshipType("ADMISSION_FROM");
+            inpatientEncounter.setEncounterNumber("ENC-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase());
+            inpatientEncounter.setEncounterType("INPATIENT");
+            inpatientEncounter.setStatus("IN_PROGRESS");
+            inpatientEncounter.setChiefComplaint(sourceEncounter.getChiefComplaint());
+            inpatientEncounter.setReasonForVisit(request.getAdmitReason() != null ? request.getAdmitReason() : sourceEncounter.getReasonForVisit());
+            inpatientEncounter.setAdmissionSource(request.getAdmissionSource() != null ? request.getAdmissionSource() : sourceEncounter.getEncounterType());
+            inpatientEncounter.setAttendingPractitioner(sourceEncounter.getAttendingPractitioner());
+            inpatientEncounter.setStartedAt(OffsetDateTime.now());
+            inpatientEncounter.setCreatedAt(OffsetDateTime.now());
+            inpatientEncounter.setUpdatedAt(OffsetDateTime.now());
+            inpatientEncounter = encounterRepository.save(inpatientEncounter);
+
+            // Complete source emergency/outpatient encounter with disposition = ADMIT
+            sourceEncounter.setDisposition("ADMIT");
+            sourceEncounter.setStatus("COMPLETED");
+            sourceEncounter.setEndedAt(OffsetDateTime.now());
+            sourceEncounter.setUpdatedAt(OffsetDateTime.now());
+            encounterRepository.save(sourceEncounter);
+        }
 
         Admission admission = new Admission();
-        admission.setEncounter(encounter);
-        admission.setPatient(encounter.getPatient());
-        admission.setAdmissionSource(request.getAdmissionSource());
-        admission.setAdmitReason(request.getAdmitReason());
+        admission.setEncounter(inpatientEncounter);
+        admission.setSourceEncounter(sourceEncounter);
+        admission.setPatient(inpatientEncounter.getPatient());
+        admission.setAdmissionType("EMERGENCY".equalsIgnoreCase(sourceEncounter.getEncounterType()) ? "EMERGENCY" : "ELECTIVE");
+        admission.setAdmissionSource(request.getAdmissionSource() != null ? request.getAdmissionSource() : sourceEncounter.getEncounterType());
+        admission.setAdmitReason(request.getAdmitReason() != null ? request.getAdmitReason() : inpatientEncounter.getReasonForVisit());
+        admission.setStatus("ADMITTED");
         admission.setAdmittedAt(OffsetDateTime.now());
         Admission savedAdmission = admissionRepository.save(admission);
 
+        final Encounter targetEncounter = inpatientEncounter;
         if (request.getBedId() != null) {
-            Bed bed = bedRepository.findById(request.getBedId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Bed not found with id: " + request.getBedId()));
-            bed.setStatus("OCCUPIED");
-            bedRepository.save(bed);
+            bedRepository.findById(request.getBedId()).ifPresent(bed -> {
+                bed.setStatus("OCCUPIED");
+                bedRepository.save(bed);
 
-            EncounterLocation location = new EncounterLocation();
-            location.setEncounter(encounter);
-            location.setBed(bed);
-            location.setStartTime(OffsetDateTime.now());
-            location.setStatus("ACTIVE");
-            encounterLocationRepository.save(location);
+                EncounterLocation location = new EncounterLocation();
+                location.setEncounter(targetEncounter);
+                location.setBed(bed);
+                location.setStartTime(OffsetDateTime.now());
+                location.setStatus("ACTIVE");
+                encounterLocationRepository.save(location);
+            });
         }
 
         if (auditService != null) {
-            auditService.logEvent(encounter.getId(), "PATIENT_ADMITTED", "Patient admitted on encounter " + encounter.getEncounterNumber());
+            auditService.logEvent(targetEncounter.getId(), "PATIENT_ADMITTED",
+                    "Patient admitted on inpatient encounter " + targetEncounter.getEncounterNumber() + " (Source: " + sourceEncounter.getEncounterNumber() + ")");
         }
 
         return mapToDTO(savedAdmission);
@@ -104,11 +141,13 @@ public class AdmissionService {
                     bedRepository.save(bed);
                 }
             });
-            encounter.setEncounterType("OUTPATIENT");
+            encounter.setStatus("CANCELLED");
+            encounter.setEndedAt(OffsetDateTime.now());
             encounterRepository.save(encounter);
         }
 
-        admissionRepository.delete(admission);
+        admission.setStatus("CANCELLED");
+        admissionRepository.save(admission);
     }
 
     public AdmissionResponseDTO mapToDTO(Admission a) {
@@ -119,6 +158,9 @@ public class AdmissionService {
         dto.setAdmissionSource(a.getAdmissionSource());
         dto.setAdmitReason(a.getAdmitReason());
         dto.setAdmittedAt(a.getAdmittedAt());
+        dto.setDischargedAt(a.getDischargedAt());
+        dto.setDischargeDisposition(a.getDischargeDisposition());
+        dto.setLengthOfStayDays(a.getLengthOfStayDays());
 
         if (a.getEncounter() != null) {
             encounterLocationRepository.findActiveByEncounterId(a.getEncounter().getId()).ifPresent(loc -> {

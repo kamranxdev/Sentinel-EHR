@@ -422,6 +422,18 @@ export const routes: Routes = [
     canActivate: [authGuard, roleGuard],
     data: { roles: ['PATIENT'] },
   },
+  {
+    path: 'patient/billing',
+    loadComponent: () =>
+      import('./workspaces/patient/patient-billing.component').then((m) => m.PatientBillingComponent),
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['PATIENT'] },
+  },
+  {
+    path: 'patient/invoices',
+    redirectTo: () => '/patient/billing',
+    pathMatch: 'full',
+  },
 
   // --- RECEPTIONIST WORKSPACE ROUTES ---
   {

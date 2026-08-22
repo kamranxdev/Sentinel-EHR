@@ -129,10 +129,10 @@ import {
           </button>
           <button
             (click)="openIntakeModal()"
-            class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition-colors shadow-sm"
+            class="inline-flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 transition-colors shadow-sm"
           >
             <ng-icon name="lucideUserPlus" size="14" />
-            <span>5-Step Patient Intake</span>
+            <span>Patient Registration & Intake</span>
           </button>
         </div>
       </div>
@@ -179,19 +179,19 @@ import {
               </span>
               <span
                 class="text-[10px] font-mono font-medium px-2 py-0.5 rounded bg-muted text-muted-foreground"
-                >5-Step Wizard</span
+                >Outpatient & Emergency</span
               >
             </div>
-            <h3 class="text-sm font-bold text-foreground">Patient Intake & Registration</h3>
+            <h3 class="text-sm font-bold text-foreground">Patient Registration & Emergency Intake</h3>
             <p class="text-xs text-muted-foreground">
-              Demographic wizard with PIN Code address validation & electronic ABDM/DPDP consent.
+              Standard demographic registration or fast-track emergency walk-in intake with insurance & consent.
             </p>
           </div>
           <button
             (click)="openIntakeModal()"
             class="text-xs font-semibold text-emerald-500 hover:text-emerald-600 flex items-center gap-1.5 text-left"
           >
-            <span>Start Registration</span>
+            <span>Start Registration & Intake</span>
             <ng-icon name="lucideArrowRight" size="14" />
           </button>
         </div>

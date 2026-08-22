@@ -14,6 +14,7 @@ import java.util.UUID;
 public interface EncounterRepository extends JpaRepository<Encounter, UUID> {
     List<Encounter> findByPatientId(UUID patientId);
     List<Encounter> findByPatientIdOrderByStartedAtDesc(UUID patientId);
+    List<Encounter> findByCareEpisodeIdOrderByStartedAtDesc(UUID careEpisodeId);
     Optional<Encounter> findByEncounterNumber(String encounterNumber);
     Optional<Encounter> findByAppointmentId(UUID appointmentId);
     long countByOrganizationIdAndStatus(UUID organizationId, String status);

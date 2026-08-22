@@ -101,30 +101,30 @@ import { StatCardComponent } from '../../shared/ui/stat-card.component';
             hlmBtn
             variant="default"
             size="sm"
-            class="text-xs gap-1.5 bg-sky-600 hover:bg-sky-700 text-white"
+            class="text-xs gap-1.5 bg-sky-600 hover:bg-sky-700 text-white font-semibold"
           >
             <ng-icon name="lucideCalendar" size="14" />
-            <span>Book Appointment</span>
+            <span>Book Outpatient Appointment</span>
           </button>
           <button
             (click)="openIntakeModal()"
             hlmBtn
             variant="outline"
             size="sm"
-            class="text-xs gap-1.5 text-emerald-600 border-emerald-500/30"
+            class="text-xs gap-1.5 text-emerald-600 border-emerald-500/30 font-semibold"
           >
             <ng-icon name="lucideUserPlus" size="14" />
-            <span>New Patient Intake</span>
+            <span>Patient Registration & Emergency Intake</span>
           </button>
           <button
             (click)="openRteModal()"
             hlmBtn
             variant="outline"
             size="sm"
-            class="text-xs gap-1.5 text-purple-600 border-purple-500/30"
+            class="text-xs gap-1.5 text-purple-600 border-purple-500/30 font-semibold"
           >
             <ng-icon name="lucideShieldCheck" size="14" />
-            <span>RTE Inquiry</span>
+            <span>Verify Insurance (RTE)</span>
           </button>
           <button
             hlmBtn

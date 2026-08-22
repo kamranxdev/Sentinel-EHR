@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@Tag(name = "Encounters", description = "Endpoints for clinical encounters")
+@Tag(name = "Encounters", description = "Endpoints for clinical encounters across Outpatient, Emergency, and Inpatient workflows")
 public class EncounterController {
 
     private final EncounterService encounterService;
@@ -40,12 +40,38 @@ public class EncounterController {
     }
 
     @PostMapping("/api/v1/encounters/{encounterId}/admit")
-    @Operation(summary = "Admit patient — promotes encounter to INPATIENT and creates admission record")
+    @Operation(summary = "Admit patient from Emergency or Outpatient — creates linked Inpatient encounter and admission record")
     public ResponseEntity<ApiResponse<EncounterResponseDTO>> admitPatient(
             @PathVariable UUID encounterId,
             @Valid @RequestBody AdmissionRequest request) {
         EncounterResponseDTO response = encounterService.promoteToAdmission(encounterId, request);
-        return ResponseEntity.ok(ApiResponse.success("Patient admitted successfully", response));
+        return ResponseEntity.ok(ApiResponse.success("Patient admitted successfully; inpatient encounter created", response));
+    }
+
+    @PostMapping("/api/v1/encounters/{encounterId}/disposition")
+    @Operation(summary = "Record Emergency disposition decision (DISCHARGE, OBSERVE, ADMIT)")
+    public ResponseEntity<ApiResponse<EncounterResponseDTO>> recordDisposition(
+            @PathVariable UUID encounterId,
+            @Valid @RequestBody EmergencyDispositionRequest request) {
+        EncounterResponseDTO response = encounterService.recordDisposition(encounterId, request);
+        return ResponseEntity.ok(ApiResponse.success("Emergency disposition recorded successfully", response));
+    }
+
+    @PostMapping("/api/v1/encounters/{encounterId}/participants")
+    @Operation(summary = "Add a care team participant to an encounter")
+    public ResponseEntity<ApiResponse<EncounterParticipantResponseDTO>> addParticipant(
+            @PathVariable UUID encounterId,
+            @Valid @RequestBody AddEncounterParticipantRequest request) {
+        EncounterParticipantResponseDTO response = encounterService.addParticipant(encounterId, request);
+        return new ResponseEntity<>(ApiResponse.success("Participant added successfully", response), HttpStatus.CREATED);
+    }
+
+    @GetMapping("/api/v1/encounters/{encounterId}/participants")
+    @Operation(summary = "Get all participants in an encounter")
+    public ResponseEntity<ApiResponse<List<EncounterParticipantResponseDTO>>> getParticipants(
+            @PathVariable UUID encounterId) {
+        List<EncounterParticipantResponseDTO> response = encounterService.getParticipants(encounterId);
+        return ResponseEntity.ok(ApiResponse.success(response));
     }
 
     @GetMapping("/api/v1/encounters/{encounterId}")

@@ -16,7 +16,7 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
   }
-  if (orgId) {
+  if (orgId && /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(orgId)) {
     headers['X-Organization-ID'] = orgId;
   }
 

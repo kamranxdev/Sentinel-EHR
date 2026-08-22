@@ -678,16 +678,26 @@ export class App implements OnInit, OnDestroy {
             label: 'My Health Chart & Reports',
             routerLink: '/patient/chart',
           },
+          {
+            icon: 'lucideHospital',
+            label: 'Doctor Visits & Encounters',
+            routerLink: '/patient/encounters',
+          },
           { icon: 'lucideActivity', label: 'Vitals & Flowsheet', routerLink: '/patient/vitals' },
         ],
       },
       {
-        label: 'Care & Appointments',
+        label: 'Care & Billing',
         items: [
           {
             icon: 'lucideCalendarClock',
             label: 'Appointments & Schedule',
             routerLink: '/patient/appointments',
+          },
+          {
+            icon: 'lucideReceipt',
+            label: 'Invoices & Online Billing',
+            routerLink: '/patient/billing',
           },
           { icon: 'lucideUserRound', label: 'My Health Profile', routerLink: '/patient/profile' },
         ],

@@ -1,11 +1,58 @@
 import { User } from './auth-user.model';
 import { Patient } from './patient.model';
 
+export type CareEpisodeType =
+  | 'OUTPATIENT_CARE'
+  | 'EMERGENCY_EPISODE'
+  | 'ACUTE_ILLNESS'
+  | 'CHRONIC_CARE'
+  | 'SURGICAL_EPISODE'
+  | string;
+
+export type CareEpisodeStatus = 'ACTIVE' | 'PLANNED' | 'ON_HOLD' | 'COMPLETED' | 'CANCELLED' | string;
+
+export interface CareEpisode {
+  id?: string;
+  organizationId?: string;
+  patientId?: string;
+  patient?: Patient;
+  patientName?: string;
+  episodeCode?: string;
+  episodeType: CareEpisodeType;
+  status: CareEpisodeStatus;
+  title?: string;
+  notes?: string;
+  primaryDiagnosisCode?: string;
+  primaryDiagnosisName?: string;
+  primaryPractitionerId?: string;
+  primaryPractitionerName?: string;
+  startedAt?: string;
+  endedAt?: string;
+  encounters?: Encounter[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface EncounterParticipant {
+  id?: string;
+  encounterId?: string;
+  practitionerId?: string;
+  practitionerName?: string;
+  practitionerEmail?: string;
+  participantRole: 'PRIMARY' | 'ATTENDING' | 'CONSULTANT' | 'ADMITTING' | 'DISCHARGING' | 'NURSE' | 'RESIDENT' | string;
+  periodStart?: string;
+  periodEnd?: string;
+}
+
 export interface Encounter {
   id?: string;
   patient?: Patient;
   patientId?: string;
   organizationId?: string;
+  careEpisodeId?: string;
+  careEpisodeCode?: string;
+  sourceEncounterId?: string;
+  relationshipType?: string;
   departmentId?: string;
   departmentName?: string;
   encounterNumber?: string;
@@ -30,10 +77,25 @@ export interface Encounter {
   startedAt?: string;
   endTime?: string;
   endedAt?: string;
-  status: 'ACTIVE' | 'COMPLETED' | 'DISCHARGED' | 'CANCELLED' | string;
+  disposition?: 'DISCHARGE' | 'OBSERVE' | 'ADMIT' | 'TRANSFER' | 'AMA' | 'EXPIRED' | string;
+  participants?: EncounterParticipant[];
+  status: 'PLANNED' | 'ARRIVED' | 'TRIAGED' | 'ACTIVE' | 'IN_PROGRESS' | 'COMPLETED' | 'DISCHARGED' | 'CANCELLED' | string;
   encounterDate?: string;
   createdByEmail?: string;
   createdAt?: string;
+}
+
+export interface EmergencyDispositionRequest {
+  disposition: 'DISCHARGE' | 'OBSERVE' | 'ADMIT' | 'TRANSFER' | 'AMA';
+  notes?: string;
+  dischargeInstructions?: string;
+  admittingPractitionerId?: string;
+  admittingDepartmentId?: string;
+  wardId?: string;
+  roomId?: string;
+  bedId?: string;
+  admissionType?: string;
+  admissionReason?: string;
 }
 
 export interface Allergy {

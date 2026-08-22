@@ -55,6 +55,7 @@ import {
   lucideRefreshCw,
   lucideMapPin,
   lucideUserCheck,
+  lucideReceipt,
 } from '@ng-icons/lucide';
 
 @Component({
@@ -92,6 +93,7 @@ import {
       lucideRefreshCw,
       lucideMapPin,
       lucideUserCheck,
+      lucideReceipt,
     }),
   ],
   template: `
@@ -165,6 +167,16 @@ import {
           >
             <ng-icon name="lucideFileText" size="14" class="text-primary" />
             <span>My Health Chart</span>
+          </a>
+          <a
+            routerLink="/patient/billing"
+            hlmBtn
+            variant="outline"
+            size="sm"
+            class="gap-1.5 text-xs flex-1 sm:flex-initial"
+          >
+            <ng-icon name="lucideReceipt" size="14" class="text-primary" />
+            <span>Invoices & Pay</span>
           </a>
           <button
             (click)="downloadFhirRecord()"

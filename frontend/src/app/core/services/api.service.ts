@@ -23,6 +23,9 @@ import {
   InpatientTransferRecord,
 } from '../models/patient.model';
 import {
+  CareEpisode,
+  EncounterParticipant,
+  EmergencyDispositionRequest,
   Encounter,
   Allergy,
   Diagnosis,
@@ -248,50 +251,47 @@ export class ApiService {
   }
 
   getMyPatientProfile(): Observable<Patient> {
-    let storedUser: any = null;
-    try {
-      const raw = localStorage.getItem('sentinel_user');
-      if (raw) storedUser = JSON.parse(raw);
-      if (storedUser && storedUser.data) storedUser = storedUser.data;
-    } catch (e) {
-      console.warn('Could not parse stored sentinel_user', e);
-    }
-
-    const assignedId =
-      storedUser?.assignedPatientIds && storedUser.assignedPatientIds.length > 0
-        ? storedUser.assignedPatientIds[0]
-        : storedUser?.patientId;
-
-    if (assignedId) {
-      return this.getPatientById(assignedId).pipe(switchMap((p) => this.enrichPatientProfile(p)));
-    }
-
-    const searchKey = storedUser?.fullName || storedUser?.email || storedUser?.email || '';
-
-    if (!searchKey) {
-      return throwError(() => new Error('No active user profile found in session.'));
-    }
-
-    return this.searchPatients(searchKey).pipe(
-      switchMap((patients) => {
-        if (patients && patients.length > 0) {
-          const match =
-            patients.find(
-              (p) =>
-                (storedUser?.email && p.email?.toLowerCase() === storedUser.email.toLowerCase()) ||
-                (storedUser?.fullName &&
-                  p.fullName?.toLowerCase() === storedUser.fullName.toLowerCase()),
-            ) || patients[0];
-          return this.enrichPatientProfile(match);
+    return this.get<any>('/patients/me').pipe(
+      map((res: any) => (res && res.data ? res.data : res)),
+      map((p) => this.normalizePatient(p)),
+      switchMap((p) => this.enrichPatientProfile(p)),
+      catchError(() => {
+        let storedUser: any = null;
+        try {
+          const raw = localStorage.getItem('sentinel_user');
+          if (raw) storedUser = JSON.parse(raw);
+          if (storedUser && storedUser.data) storedUser = storedUser.data;
+        } catch (e) {
+          console.warn('Could not parse stored sentinel_user', e);
         }
 
-        return this.getPatients().pipe(
-          switchMap((all) => {
-            if (all && all.length > 0) {
-              return this.enrichPatientProfile(all[0]);
+        const assignedId =
+          storedUser?.assignedPatientIds && storedUser.assignedPatientIds.length > 0
+            ? storedUser.assignedPatientIds[0]
+            : storedUser?.patientId;
+
+        if (assignedId) {
+          return this.getPatientById(assignedId).pipe(
+            switchMap((p) => this.enrichPatientProfile(p)),
+            catchError(() => this.searchPatients(storedUser?.fullName || storedUser?.email || '').pipe(
+              switchMap((list) => list.length > 0 ? this.enrichPatientProfile(list[0]) : throwError(() => new Error('No patient found'))),
+            )),
+          );
+        }
+
+        const searchKey = storedUser?.fullName || storedUser?.email || '';
+        return this.searchPatients(searchKey).pipe(
+          switchMap((patients) => {
+            if (patients && patients.length > 0) {
+              return this.enrichPatientProfile(patients[0]);
             }
-            return throwError(
-              () => new Error('No patient chart record found for active user account.'),
+            return this.getPatients().pipe(
+              switchMap((all) => {
+                if (all && all.length > 0) {
+                  return this.enrichPatientProfile(all[0]);
+                }
+                return throwError(() => new Error('No patient chart record found.'));
+              }),
             );
           }),
         );
@@ -650,8 +650,41 @@ export class ApiService {
   }
 
   // =========================================================================
-  // 4. Encounters & Clinical Visits
+  // 4. Care Episodes & Clinical Encounters (Unified Care Foundation)
   // =========================================================================
+  getCareEpisodes(patientId?: string): Observable<CareEpisode[]> {
+    if (patientId) {
+      return this.get<CareEpisode[]>(`/patients/${patientId}/care-episodes`).pipe(
+        map((list) => (Array.isArray(list) ? list : [])),
+      );
+    }
+    return this.get<CareEpisode[]>('/care-episodes/search').pipe(
+      map((list) => (Array.isArray(list) ? list : [])),
+    );
+  }
+
+  getCareEpisodeById(id: string): Observable<CareEpisode> {
+    return this.get<CareEpisode>(`/care-episodes/${id}`);
+  }
+
+  createCareEpisode(payload: Partial<CareEpisode>): Observable<CareEpisode> {
+    return this.post<CareEpisode>('/care-episodes', payload);
+  }
+
+  updateCareEpisode(id: string, payload: Partial<CareEpisode>): Observable<CareEpisode> {
+    return this.patch<CareEpisode>(`/care-episodes/${id}`, payload);
+  }
+
+  closeCareEpisode(id: string, payload?: any): Observable<CareEpisode> {
+    return this.post<CareEpisode>(`/care-episodes/${id}/close`, payload || {});
+  }
+
+  getCareEpisodeEncounters(episodeId: string): Observable<Encounter[]> {
+    return this.get<Encounter[]>(`/care-episodes/${episodeId}/encounters`).pipe(
+      map((list) => (Array.isArray(list) ? list : [])),
+    );
+  }
+
   getEncountersByPatient(patientId: string): Observable<Encounter[]> {
     return this.get<Encounter[]>(`/patients/${patientId}/encounters`).pipe(
       map((list) =>
@@ -684,6 +717,26 @@ export class ApiService {
 
   completeEncounter(encounterId: string): Observable<Encounter> {
     return this.post<Encounter>(`/encounters/${encounterId}/complete`, {});
+  }
+
+  recordEmergencyDisposition(
+    encounterId: string,
+    payload: EmergencyDispositionRequest | any,
+  ): Observable<Encounter> {
+    return this.post<Encounter>(`/encounters/${encounterId}/disposition`, payload);
+  }
+
+  getEncounterParticipants(encounterId: string): Observable<EncounterParticipant[]> {
+    return this.get<EncounterParticipant[]>(`/encounters/${encounterId}/participants`).pipe(
+      map((list) => (Array.isArray(list) ? list : [])),
+    );
+  }
+
+  addEncounterParticipant(
+    encounterId: string,
+    payload: { practitionerId: string; participantRole?: string },
+  ): Observable<EncounterParticipant> {
+    return this.post<EncounterParticipant>(`/encounters/${encounterId}/participants`, payload);
   }
 
   // =========================================================================
@@ -1074,7 +1127,7 @@ export class ApiService {
   recordVitals(vitals: Partial<Vitals>): Observable<Vitals> {
     const patientId = vitals.patientId || vitals.patient?.id;
     if (!patientId) {
-      return of(vitals as Vitals);
+      return throwError(() => new Error('Patient ID is required to record vitals.'));
     }
     return this.recordPatientVitals(patientId, vitals);
   }
@@ -2291,6 +2344,11 @@ export class ApiService {
 
   getAllClaims(): Observable<InsuranceClaim[]> {
     return this.get<InsuranceClaim[]>('/insurance-claims');
+  }
+
+  getPatientClaims(patientId: string): Observable<InsuranceClaim[]> {
+    return this.get<InsuranceClaim[]>(`/patients/${patientId}/claims`).pipe(
+    );
   }
 
   // =========================================================================

@@ -42,6 +42,14 @@ public class InsuranceClaimController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
+    @GetMapping("/api/v1/patients/{patientId}/claims")
+    @Operation(summary = "Get claims for a patient")
+    public ResponseEntity<ApiResponse<List<InsuranceClaimResponseDTO>>> getPatientClaims(
+            @PathVariable UUID patientId) {
+        List<InsuranceClaimResponseDTO> response = claimService.getPatientClaims(patientId);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
     @GetMapping("/api/v1/insurance-claims/{claimId}")
     @Operation(summary = "Get insurance claim by ID")
     public ResponseEntity<ApiResponse<InsuranceClaimResponseDTO>> getClaim(
