@@ -24,6 +24,8 @@ public class PractitionerController {
         this.practitionerService = practitionerService;
     }
 
+
+
     @PostMapping
     @Operation(summary = "Create a new practitioner")
     public ResponseEntity<ApiResponse<PractitionerResponseDTO>> createPractitioner(

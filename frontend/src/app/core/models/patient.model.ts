@@ -44,9 +44,10 @@ export interface Patient {
   bloodType?: string;
   bloodGroup?: string;
   rhFactor?: string;
-  phone: string;
-  email: string;
-  address: string;
+  phone?: string;
+  phoneNumber?: string;
+  email?: string;
+  address?: string;
   district?: string;
   state?: string;
   countryCode?: string;

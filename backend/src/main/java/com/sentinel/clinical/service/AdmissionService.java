@@ -6,10 +6,15 @@ import com.sentinel.clinical.dto.AdmitPatientRequest;
 import com.sentinel.clinical.entity.Admission;
 import com.sentinel.clinical.entity.Encounter;
 import com.sentinel.clinical.entity.EncounterLocation;
+import com.sentinel.clinical.entity.CareTeam;
+import com.sentinel.clinical.entity.CareTeamMember;
 import com.sentinel.clinical.repository.AdmissionRepository;
+import com.sentinel.clinical.repository.CareTeamMemberRepository;
+import com.sentinel.clinical.repository.CareTeamRepository;
 import com.sentinel.clinical.repository.EncounterLocationRepository;
 import com.sentinel.clinical.repository.EncounterRepository;
 import com.sentinel.common.exception.ResourceNotFoundException;
+import com.sentinel.identity.entity.User;
 import com.sentinel.tenancy.entity.Bed;
 import com.sentinel.tenancy.repository.BedRepository;
 import org.springframework.stereotype.Service;
@@ -26,17 +31,23 @@ public class AdmissionService {
     private final EncounterRepository encounterRepository;
     private final BedRepository bedRepository;
     private final EncounterLocationRepository encounterLocationRepository;
+    private final CareTeamRepository careTeamRepository;
+    private final CareTeamMemberRepository careTeamMemberRepository;
     private final AuditService auditService;
 
     public AdmissionService(AdmissionRepository admissionRepository,
                             EncounterRepository encounterRepository,
                             BedRepository bedRepository,
                             EncounterLocationRepository encounterLocationRepository,
+                            CareTeamRepository careTeamRepository,
+                            CareTeamMemberRepository careTeamMemberRepository,
                             AuditService auditService) {
         this.admissionRepository = admissionRepository;
         this.encounterRepository = encounterRepository;
         this.bedRepository = bedRepository;
         this.encounterLocationRepository = encounterLocationRepository;
+        this.careTeamRepository = careTeamRepository;
+        this.careTeamMemberRepository = careTeamMemberRepository;
         this.auditService = auditService;
     }
 
@@ -109,6 +120,35 @@ public class AdmissionService {
             });
         }
 
+        // Auto-provision CareTeam and initial member for this inpatient encounter
+        try {
+            CareTeam careTeam = careTeamRepository.findFirstByEncounterId(targetEncounter.getId()).orElseGet(() -> {
+                CareTeam ct = new CareTeam();
+                ct.setOrganization(targetEncounter.getOrganization());
+                ct.setPatient(targetEncounter.getPatient());
+                ct.setEncounter(targetEncounter);
+                String pName = targetEncounter.getPatient() != null ? targetEncounter.getPatient().getFullName() : "Patient";
+                ct.setName("Inpatient Care Team for " + pName);
+                ct.setStatus("ACTIVE");
+                ct.setCreatedAt(OffsetDateTime.now());
+                return careTeamRepository.save(ct);
+            });
+
+            if (targetEncounter.getAttendingPractitioner() != null) {
+                User attDoc = targetEncounter.getAttendingPractitioner();
+                boolean exists = careTeamMemberRepository.findByCareTeamId(careTeam.getId()).stream()
+                        .anyMatch(m -> m.getUser() != null && m.getUser().getId().equals(attDoc.getId()));
+                if (!exists) {
+                    CareTeamMember mem = new CareTeamMember();
+                    mem.setCareTeam(careTeam);
+                    mem.setUser(attDoc);
+                    mem.setRole("ATTENDING_PHYSICIAN");
+                    mem.setStartedAt(OffsetDateTime.now());
+                    careTeamMemberRepository.save(mem);
+                }
+            }
+        } catch (Exception ignored) {}
+
         if (auditService != null) {
             auditService.logEvent(targetEncounter.getId(), "PATIENT_ADMITTED",
                     "Patient admitted on inpatient encounter " + targetEncounter.getEncounterNumber() + " (Source: " + sourceEncounter.getEncounterNumber() + ")");
@@ -116,6 +156,7 @@ public class AdmissionService {
 
         return mapToDTO(savedAdmission);
     }
+
 
     @Transactional(readOnly = true)
     public AdmissionResponseDTO getAdmission(UUID encounterId) {

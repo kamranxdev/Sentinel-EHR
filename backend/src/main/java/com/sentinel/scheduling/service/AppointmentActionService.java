@@ -41,6 +41,8 @@ public class AppointmentActionService {
     private final EncounterService encounterService;
     private final AuditService auditService;
     private final InvoiceRepository invoiceRepository;
+    private final com.sentinel.clinical.repository.VitalsRepository vitalsRepository;
+    private final com.sentinel.scheduling.repository.AppointmentNoteRepository appointmentNoteRepository;
 
     public AppointmentActionService(AppointmentRepository appointmentRepository,
                                     AppointmentCancellationRepository cancellationRepository,
@@ -49,7 +51,9 @@ public class AppointmentActionService {
                                     UserRepository userRepository,
                                     @Lazy EncounterService encounterService,
                                     AuditService auditService,
-                                    InvoiceRepository invoiceRepository) {
+                                    InvoiceRepository invoiceRepository,
+                                    com.sentinel.clinical.repository.VitalsRepository vitalsRepository,
+                                    com.sentinel.scheduling.repository.AppointmentNoteRepository appointmentNoteRepository) {
         this.appointmentRepository = appointmentRepository;
         this.cancellationRepository = cancellationRepository;
         this.rescheduleRepository = rescheduleRepository;
@@ -58,7 +62,10 @@ public class AppointmentActionService {
         this.encounterService = encounterService;
         this.auditService = auditService;
         this.invoiceRepository = invoiceRepository;
+        this.vitalsRepository = vitalsRepository;
+        this.appointmentNoteRepository = appointmentNoteRepository;
     }
+
 
     public AppointmentResponseDTO checkIn(UUID appointmentId, AppointmentCheckInRequest request) {
         Appointment appt = appointmentRepository.findById(appointmentId)
@@ -120,6 +127,58 @@ public class AppointmentActionService {
         appt.setStatus("TRIAGED");
         appt.setUpdatedAt(OffsetDateTime.now());
 
+        if (request.getSystolicBp() != null || request.getHeartRate() != null || request.getTemperature() != null || request.getOxygenSaturation() != null) {
+            com.sentinel.clinical.entity.Vitals vitals = new com.sentinel.clinical.entity.Vitals();
+            vitals.setPatient(appt.getPatient());
+            vitals.setOrganization(appt.getOrganization());
+            vitals.setRecordedAt(OffsetDateTime.now());
+            vitals.setSystolicBp(request.getSystolicBp());
+            vitals.setDiastolicBp(request.getDiastolicBp());
+            vitals.setHeartRate(request.getHeartRate());
+            vitals.setRespiratoryRate(request.getRespiratoryRate());
+            vitals.setTemperature(request.getTemperature());
+            vitals.setOxygenSaturation(request.getOxygenSaturation());
+            vitals.setBloodGlucose(request.getBloodGlucose());
+            vitals.setPainScore(request.getPainScore());
+            vitals.setHeightCm(request.getHeightCm());
+            vitals.setWeightKg(request.getWeightKg());
+            vitals.setNotes(request.getNotes());
+            if (request.getHeightCm() != null && request.getWeightKg() != null && request.getHeightCm().doubleValue() > 0) {
+                double hM = request.getHeightCm().doubleValue() / 100.0;
+                double bmiVal = request.getWeightKg().doubleValue() / (hM * hM);
+                vitals.setBmi(java.math.BigDecimal.valueOf(Math.round(bmiVal * 10.0) / 10.0));
+            }
+            vitalsRepository.save(vitals);
+        }
+
+        if (request.getNotes() != null && !request.getNotes().trim().isEmpty()) {
+            com.sentinel.scheduling.entity.AppointmentNote note = new com.sentinel.scheduling.entity.AppointmentNote();
+            note.setAppointment(appt);
+            note.setNoteType("NURSE_OBSERVATION");
+            note.setContent(request.getNotes());
+            note.setAuthorRole("ROLE_NURSE");
+            note.setCreatedAt(java.time.LocalDateTime.now());
+
+            com.sentinel.identity.entity.User author = null;
+            java.util.Optional<String> currentEmail = com.sentinel.security.security.SecurityContextUtils.getCurrentEmail();
+            if (currentEmail.isPresent()) {
+                author = userRepository.findByEmail(currentEmail.get()).orElse(null);
+            }
+            if (author == null) {
+                author = appt.getCreatedBy();
+            }
+            if (author == null) {
+                author = userRepository.findAll().stream().findFirst().orElse(null);
+            }
+
+            if (author != null) {
+                note.setAuthor(author);
+                note.setAuthorName(author.getFullName() != null ? author.getFullName() : (author.getEmail() != null ? author.getEmail() : "Triage Nurse"));
+                appointmentNoteRepository.save(note);
+            }
+        }
+
+
         Appointment saved = appointmentRepository.save(appt);
 
         if (auditService != null) {
@@ -128,6 +187,7 @@ public class AppointmentActionService {
 
         return mapToDTO(saved);
     }
+
 
     public AppointmentResponseDTO consult(UUID appointmentId, AppointmentConsultRequest request) {
         Appointment appt = appointmentRepository.findById(appointmentId)
@@ -140,7 +200,39 @@ public class AppointmentActionService {
         if (request.getTreatmentNotes() != null) appt.setNotes(request.getTreatmentNotes());
         appt.setUpdatedAt(OffsetDateTime.now());
 
+        if (request.getTreatmentNotes() != null && !request.getTreatmentNotes().trim().isEmpty()) {
+            com.sentinel.scheduling.entity.AppointmentNote note = new com.sentinel.scheduling.entity.AppointmentNote();
+            note.setAppointment(appt);
+            note.setNoteType("DOCTOR_CLINICAL");
+            note.setContent(request.getTreatmentNotes());
+            note.setAuthorRole("ROLE_DOCTOR");
+            note.setCreatedAt(java.time.LocalDateTime.now());
+
+            com.sentinel.identity.entity.User author = null;
+            java.util.Optional<String> currentEmail = com.sentinel.security.security.SecurityContextUtils.getCurrentEmail();
+            if (currentEmail.isPresent()) {
+                author = userRepository.findByEmail(currentEmail.get()).orElse(null);
+            }
+            if (author == null && appt.getPractitioner() != null) {
+                author = appt.getPractitioner();
+            }
+
+            if (author == null) {
+                author = appt.getCreatedBy();
+            }
+            if (author == null) {
+                author = userRepository.findAll().stream().findFirst().orElse(null);
+            }
+
+            if (author != null) {
+                note.setAuthor(author);
+                note.setAuthorName(author.getFullName() != null ? author.getFullName() : (author.getEmail() != null ? author.getEmail() : "Attending Physician"));
+                appointmentNoteRepository.save(note);
+            }
+        }
+
         Appointment saved = appointmentRepository.save(appt);
+
 
         if (auditService != null) {
             auditService.logEvent(saved.getId(), "APPOINTMENT_CONSULTED", "Doctor consultation completed for appointment " + appointmentId);
@@ -291,6 +383,8 @@ public class AppointmentActionService {
         if (a.getPatient() != null) {
             dto.setPatientId(a.getPatient().getId());
             dto.setPatientName(a.getPatient().getFullName());
+            vitalsRepository.findTopByPatientIdOrderByRecordedAtDesc(a.getPatient().getId())
+                    .ifPresent(v -> dto.setVitals(mapVitalsToDTO(v)));
         }
         if (a.getPractitioner() != null) {
             dto.setPractitionerId(a.getPractitioner().getId());
@@ -318,4 +412,30 @@ public class AppointmentActionService {
         dto.setUpdatedAt(a.getUpdatedAt());
         return dto;
     }
+
+    private com.sentinel.clinical.dto.VitalsResponseDTO mapVitalsToDTO(com.sentinel.clinical.entity.Vitals v) {
+        if (v == null) return null;
+        com.sentinel.clinical.dto.VitalsResponseDTO dto = new com.sentinel.clinical.dto.VitalsResponseDTO();
+        dto.setId(v.getId());
+        if (v.getPatient() != null) dto.setPatientId(v.getPatient().getId());
+        if (v.getEncounter() != null) dto.setEncounterId(v.getEncounter().getId());
+        dto.setSystolicBp(v.getSystolicBp());
+        dto.setDiastolicBp(v.getDiastolicBp());
+        dto.setMeanArterialPressure(v.getMeanArterialPressure());
+        dto.setHeartRate(v.getHeartRate());
+        dto.setRespiratoryRate(v.getRespiratoryRate());
+        dto.setTemperature(v.getTemperature());
+        dto.setTemperatureUnit(v.getTemperatureUnit());
+        dto.setOxygenSaturation(v.getOxygenSaturation());
+        dto.setHeightCm(v.getHeightCm());
+        dto.setWeightKg(v.getWeightKg());
+        dto.setBmi(v.getBmi());
+        dto.setBloodGlucose(v.getBloodGlucose());
+        dto.setGlucoseUnit(v.getGlucoseUnit());
+        dto.setPainScore(v.getPainScore());
+        dto.setNotes(v.getNotes());
+        dto.setRecordedAt(v.getRecordedAt());
+        return dto;
+    }
 }
+

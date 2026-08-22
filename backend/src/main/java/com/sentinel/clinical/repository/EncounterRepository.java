@@ -29,4 +29,8 @@ public interface EncounterRepository extends JpaRepository<Encounter, UUID> {
                                      @Param("organizationId") UUID organizationId,
                                      @Param("status") String status,
                                      @Param("encounterType") String encounterType);
+
+    List<Encounter> findByOrganizationIdAndEncounterTypeAndStatusNotIn(UUID organizationId, String encounterType, java.util.Collection<String> excludedStatuses);
+    List<Encounter> findByEncounterTypeAndStatusNotIn(String encounterType, java.util.Collection<String> excludedStatuses);
+    List<Encounter> findByOrganizationIdAndStatusNotIn(UUID organizationId, java.util.Collection<String> excludedStatuses);
 }

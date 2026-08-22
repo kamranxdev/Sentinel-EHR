@@ -388,133 +388,165 @@ import { StatCardComponent } from '../../shared/ui/stat-card.component';
                       *ngIf="apt.insuranceVerified"
                       hlmBadge
                       variant="outline"
-                      class="text-[10px] bg-emerald-500/10 text-emerald-600 border-emerald-500/30 gap-1"
+                      class="text-[10px] bg-emerald-500/10 text-emerald-600 border-emerald-500/30 gap-1 cursor-pointer hover:bg-emerald-500/20"
+                      (click)="openRteModal(apt.patientId || apt.patient?.id)"
+                      title="Click to view verified insurance policy"
                     >
                       <ng-icon name="lucideCheckCircle2" size="12" /> Verified
                     </span>
+                    <button
+                      *ngIf="!apt.insuranceVerified && (apt.patientId || apt.patient?.id)"
+                      (click)="openRteModal(apt.patientId || apt.patient!.id)"
+                      class="inline-flex items-center gap-1 text-[10px] font-semibold text-amber-600 hover:text-amber-700 bg-amber-500/10 border border-amber-500/30 hover:bg-amber-500/20 px-2 py-0.5 rounded-md transition-colors"
+                      title="Verify Real-Time Eligibility (RTE)"
+                    >
+                      <ng-icon name="lucideShieldCheck" size="11" />
+                      <span>Verify RTE</span>
+                    </button>
                     <span
-                      *ngIf="!apt.insuranceVerified"
+                      *ngIf="!apt.insuranceVerified && !apt.patientId && !apt.patient?.id"
                       hlmBadge
                       variant="outline"
-                      class="text-[10px] bg-amber-500/10 text-amber-600 border-amber-500/30 gap-1"
+                      class="text-[10px] bg-muted text-muted-foreground"
                     >
-                      <ng-icon name="lucideAlertTriangle" size="12" /> Pending
+                      Self-Pay / None
                     </span>
                   </div>
                 </td>
+
                 <td hlmTableCell>
                   <span
                     hlmBadge
-                    [variant]="getStageVariant(apt.status)"
-                    class="text-[10px] font-medium"
+                    variant="outline"
+                    [class]="'text-[10px] font-medium border ' + getStageBadgeClass(apt.status)"
                   >
                     {{ getStageLabel(apt.status) }}
                   </span>
                 </td>
+
                 <td hlmTableCell class="text-right">
                   <div class="flex items-center justify-end gap-1.5">
-                    <!-- Arrived action button: ONLY visible for TODAY'S appointments in SCHEDULED state -->
-                    <button
-                      *ngIf="
-                        apt.status === 'SCHEDULED' &&
-                        isToday(apt.appointmentDate)
-                      "
-                      hlmBtn
-                      size="sm"
-                      variant="default"
-                      class="text-xs gap-1 bg-emerald-600 hover:bg-emerald-700 h-8"
-                      (click)="updateStage(apt, 'ARRIVED')"
-                    >
-                      <ng-icon name="lucideClock" size="14" />
-                      <span>Mark Lobby Arrival</span>
-                    </button>
-                    <!-- Indicator badge for scheduled appointments on future or past dates -->
-                    <span
-                      *ngIf="
-                        apt.status === 'SCHEDULED' &&
-                        !isToday(apt.appointmentDate)
-                      "
-                      hlmBadge
-                      variant="outline"
-                      class="text-[10px] text-muted-foreground font-mono"
-                    >
-                      Scheduled ({{ apt.appointmentDate | date: 'shortDate' }})
-                    </span>
-                    <!-- Check in action for Arrived patients -->
-                    <button
-                      *ngIf="apt.status === 'SCHEDULED' || !apt.status || apt.status === 'ARRIVED'"
-                      hlmBtn
-                      size="sm"
-                      variant="secondary"
-                      class="text-xs gap-1 bg-sky-600 text-white hover:bg-sky-700 h-8"
-                      (click)="updateStage(apt, 'CHECKED_IN')"
-                    >
-                      <ng-icon name="lucideUserCheck" size="14" />
-                      <span>Complete Desk Check-In</span>
-                    </button>
-                    <span
-                      *ngIf="apt.status === 'CHECKED_IN'"
-                      class="text-xs font-semibold text-amber-600 px-2 py-1 rounded bg-amber-500/10 border border-amber-500/20"
-                    >
-                      Awaiting Nurse Triage
-                    </span>
-                    <span
-                      *ngIf="apt.status === 'TRIAGED'"
-                      class="text-xs font-semibold text-sky-600 px-2 py-1 rounded bg-sky-500/10 border border-sky-500/20"
-                    >
-                      Ready for Doctor
-                    </span>
-                    <!-- No-Show button -->
-                    <button
-                      *ngIf="apt.status === 'SCHEDULED' || apt.status === 'ARRIVED'"
-                      hlmBtn
-                      size="sm"
-                      variant="ghost"
-                      class="text-xs gap-1 text-amber-600 hover:text-amber-700 hover:bg-amber-50 dark:hover:bg-amber-950/30 h-8"
-                      (click)="markNoShow(apt)"
-                      title="Mark as No-Show"
-                    >
-                      <ng-icon name="lucideAlertTriangle" size="14" />
-                      <span>No-Show</span>
-                    </button>
-                    <!-- Cancellation button -->
-                    <button
-                      *ngIf="apt.status !== 'CANCELLED' && apt.status !== 'NO_SHOW'"
-                      hlmBtn
-                      size="sm"
-                      variant="ghost"
-                      class="text-xs gap-1 text-red-600 hover:text-red-700 h-8"
-                      (click)="openCancelModal(apt)"
-                    >
-                      <ng-icon name="lucideXCircle" size="14" />
-                      <span>Cancel</span>
-                    </button>
-                    <!-- Link to Encounter -->
-                    <button
-                      *ngIf="apt.encounterId || apt.status === 'CHECKED_IN' || apt.status === 'TRIAGED' || apt.status === 'IN_CONSULTATION' || apt.status === 'COMPLETED'"
-                      (click)="viewEncounter(apt)"
-                      hlmBtn
-                      size="sm"
-                      variant="ghost"
-                      class="text-xs gap-1 text-violet-600 hover:text-violet-700 h-8"
-                      title="View linked clinical encounter"
-                    >
-                      <ng-icon name="lucideStethoscope" size="14" />
-                      <span>Encounter</span>
-                    </button>
-                    <!-- Link to RTE verification Modal -->
-                    <button
-                      *ngIf="apt.patientId || apt.patient?.id"
-                      (click)="openRteModal(apt.patientId || apt.patient!.id)"
-                      hlmBtn
-                      size="sm"
-                      variant="ghost"
-                      class="text-xs text-sky-600 hover:text-sky-700 h-8"
-                    >
-                      RTE Check
-                    </button>
+                    <!-- Primary Workflow Action based on Status -->
+                    <ng-container [ngSwitch]="apt.status">
+                      <!-- SCHEDULED or ARRIVED -> Perform Front Desk Check-in -->
+                      <button
+                        *ngSwitchCase="'SCHEDULED'"
+                        hlmBtn
+                        size="sm"
+                        variant="default"
+                        class="text-xs font-semibold gap-1.5 bg-sky-600 hover:bg-sky-700 text-white h-8 shadow-xs"
+                        (click)="updateStage(apt, 'CHECKED_IN')"
+                      >
+                        <ng-icon name="lucideUserCheck" size="14" />
+                        <span>Check-In</span>
+                      </button>
+
+                      <button
+                        *ngSwitchCase="'ARRIVED'"
+                        hlmBtn
+                        size="sm"
+                        variant="default"
+                        class="text-xs font-semibold gap-1.5 bg-sky-600 hover:bg-sky-700 text-white h-8 shadow-xs"
+                        (click)="updateStage(apt, 'CHECKED_IN')"
+                      >
+                        <ng-icon name="lucideUserCheck" size="14" />
+                        <span>Complete Check-In</span>
+                      </button>
+
+                      <!-- CHECKED_IN -> Awaiting Nurse Triage -->
+                      <span
+                        *ngSwitchCase="'CHECKED_IN'"
+                        class="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-600 dark:text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-md"
+                      >
+                        <span class="size-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                        <span>Awaiting Triage</span>
+                      </span>
+
+                      <!-- TRIAGED -> Ready for Doctor -->
+                      <span
+                        *ngSwitchCase="'TRIAGED'"
+                        class="inline-flex items-center gap-1.5 text-xs font-semibold text-sky-600 dark:text-sky-400 bg-sky-500/10 border border-sky-500/20 px-2.5 py-1 rounded-md"
+                      >
+                        <span class="size-1.5 rounded-full bg-sky-500"></span>
+                        <span>Ready for Doctor</span>
+                      </span>
+
+                      <!-- IN_CONSULTATION -> In Consultation -->
+                      <span
+                        *ngSwitchCase="'IN_CONSULTATION'"
+                        class="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2.5 py-1 rounded-md"
+                      >
+                        <ng-icon name="lucideStethoscope" size="13" />
+                        <span>In Consult</span>
+                      </span>
+
+                      <!-- COMPLETED -->
+                      <span
+                        *ngSwitchCase="'COMPLETED'"
+                        class="inline-flex items-center gap-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-1 rounded-md"
+                      >
+                        <ng-icon name="lucideCheckCircle2" size="13" />
+                        <span>Completed</span>
+                      </span>
+
+                      <!-- CANCELLED / NO_SHOW / Default fallback -->
+                      <span
+                        *ngSwitchCase="'CANCELLED'"
+                        class="text-xs font-medium text-muted-foreground"
+                      >
+                        Cancelled
+                      </span>
+
+                      <span
+                        *ngSwitchCase="'NO_SHOW'"
+                        class="text-xs font-medium text-amber-600"
+                      >
+                        No-Show
+                      </span>
+
+                      <button
+                        *ngSwitchDefault
+                        hlmBtn
+                        size="sm"
+                        variant="default"
+                        class="text-xs font-semibold gap-1.5 bg-sky-600 hover:bg-sky-700 text-white h-8 shadow-xs"
+                        (click)="updateStage(apt, 'CHECKED_IN')"
+                      >
+                        <ng-icon name="lucideUserCheck" size="14" />
+                        <span>Check-In</span>
+                      </button>
+                    </ng-container>
+
+                    <!-- Auxiliary Actions for SCHEDULED / ARRIVED: No-Show & Cancel -->
+                    <ng-container *ngIf="apt.status === 'SCHEDULED' || apt.status === 'ARRIVED' || !apt.status">
+                      <button
+                        hlmBtn
+                        size="sm"
+                        variant="ghost"
+                        class="text-xs text-amber-600 hover:text-amber-700 hover:bg-amber-500/10 h-8 px-2"
+                        (click)="markNoShow(apt)"
+                        title="Mark patient as No-Show"
+                      >
+                        <ng-icon name="lucideAlertTriangle" size="13" />
+                        <span class="hidden xl:inline ml-1">No-Show</span>
+                      </button>
+
+                      <button
+                        hlmBtn
+                        size="sm"
+                        variant="ghost"
+                        class="text-xs text-destructive hover:text-destructive hover:bg-destructive/10 h-8 px-2"
+                        (click)="openCancelModal(apt)"
+                        title="Cancel this appointment"
+                      >
+                        <ng-icon name="lucideXCircle" size="13" />
+                        <span class="hidden xl:inline ml-1">Cancel</span>
+                      </button>
+                    </ng-container>
                   </div>
                 </td>
+
+
               </tr>
               <tr *ngIf="!isLoading() && filteredAppointments().length === 0" hlmTableRow>
                 <td
@@ -953,11 +985,20 @@ export class ReceptionistAppointmentsComponent implements OnInit {
   loadData(): void {
     this.isLoading.set(true);
     this.errorMessage.set(null);
-    this.apiService.getAppointments().subscribe({
-      next: (apts: Appointment[]) => this.appointments.set(apts),
-      error: () => this.appointments.set([]),
+    const orgId = this.authService.activeContext()?.organizationId || '';
+    this.apiService.getAppointments({ organizationId: orgId || undefined }).subscribe({
+      next: (apts: Appointment[]) => {
+        this.appointments.set(apts);
+        this.isLoading.set(false);
+      },
+      error: (err) => {
+        this.appointments.set([]);
+        this.errorMessage.set(err.message || 'Failed to load appointments.');
+        this.isLoading.set(false);
+      },
     });
   }
+
 
   loadPractitioners(): void {
     const orgId = this.authService.activeContext()?.organizationId || '';
@@ -1123,25 +1164,14 @@ export class ReceptionistAppointmentsComponent implements OnInit {
 
   updateStage(apt: Appointment, stage: string): void {
     if (!apt.id) return;
-    if (stage === 'CHECKED_IN') {
-      this.apiService.checkInPatient(apt.id).subscribe({
-        next: () => this.loadData(),
-        error: (err) => {
-        this.errorMessage.set(err.message || 'Request failed.');
+    this.apiService.updateAppointmentStage(apt.id, stage).subscribe({
+      next: () => this.loadData(),
+      error: (err) => {
+        this.errorMessage.set(err.message || 'Stage transition failed.');
         this.isLoading.set(false);
-        this.loadData()
+        this.loadData();
       },
-      });
-    } else {
-      this.apiService.updateAppointmentStatus(apt.id, stage).subscribe({
-        next: () => this.loadData(),
-        error: (err) => {
-        this.errorMessage.set(err.message || 'Request failed.');
-        this.isLoading.set(false);
-        this.loadData()
-      },
-      });
-    }
+    });
   }
 
   openCancelModal(apt: Appointment): void {
@@ -1177,27 +1207,55 @@ export class ReceptionistAppointmentsComponent implements OnInit {
   getStageLabel(stage: string): string {
     switch (stage) {
       case 'SCHEDULED':
-        return '1. Booked (Pre-Arrival)';
+      case 'CONFIRMED':
+        return 'Scheduled (Pre-Arrival)';
       case 'ARRIVED':
-        return '2. Lobby Arrival';
+        return 'Lobby Arrived';
       case 'CHECKED_IN':
-        return '3. Desk Checked In (Awaiting Triage)';
+        return '● Checked In (Awaiting Triage)';
       case 'TRIAGED':
-        return '4. Triaged (Ready for Physician)';
+        return '✓ Triaged (Ready for Doctor)';
       case 'IN_CONSULTATION':
-        return '5. Clinical Consultation';
+        return 'In Consultation';
       case 'COMPLETED':
-        return '6. Discharged & Completed';
+        return 'Completed';
       case 'CANCELLED':
-        return 'Cancelled / No-Show';
+        return 'Cancelled';
+      case 'NO_SHOW':
+        return 'No-Show';
       default:
         return stage || 'Scheduled';
+    }
+  }
+
+  getStageBadgeClass(stage: string): string {
+    switch (stage) {
+      case 'SCHEDULED':
+      case 'CONFIRMED':
+        return 'bg-slate-500/10 text-slate-700 dark:text-slate-300 border-slate-500/30';
+      case 'ARRIVED':
+        return 'bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/30';
+      case 'CHECKED_IN':
+        return 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/40 font-bold animate-pulse';
+      case 'TRIAGED':
+        return 'bg-teal-500/10 text-teal-700 dark:text-teal-300 border-teal-500/30 font-bold';
+      case 'IN_CONSULTATION':
+        return 'bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-500/30 font-bold';
+      case 'COMPLETED':
+        return 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/30 font-bold';
+      case 'CANCELLED':
+        return 'bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-500/30';
+      case 'NO_SHOW':
+        return 'bg-orange-500/10 text-orange-700 dark:text-orange-300 border-orange-500/30';
+      default:
+        return 'bg-muted text-muted-foreground border-border';
     }
   }
 
   getStageVariant(stage: string): 'outline' | 'secondary' | 'default' | 'destructive' {
     switch (stage) {
       case 'SCHEDULED':
+      case 'CONFIRMED':
         return 'outline';
       case 'ARRIVED':
         return 'secondary';
@@ -1210,9 +1268,11 @@ export class ReceptionistAppointmentsComponent implements OnInit {
       case 'COMPLETED':
         return 'secondary';
       case 'CANCELLED':
+      case 'NO_SHOW':
         return 'destructive';
       default:
         return 'outline';
     }
   }
 }
+

@@ -13,4 +13,7 @@ public interface CareTeamRepository extends JpaRepository<CareTeam, UUID> {
     List<CareTeam> findByEncounterId(UUID encounterId);
     List<CareTeam> findByPatientId(UUID patientId);
     Optional<CareTeam> findFirstByEncounterId(UUID encounterId);
+    List<CareTeam> findByOrganizationIdAndStatus(UUID organizationId, String status);
+    List<CareTeam> findByStatus(String status);
 }
+

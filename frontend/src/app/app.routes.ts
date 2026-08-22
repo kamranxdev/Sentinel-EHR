@@ -207,6 +207,14 @@ export const routes: Routes = [
     canActivate: [authGuard, roleGuard],
     data: { roles: ['NURSE', 'SUPER_ADMIN', 'ORGANIZATION_ADMIN'] },
   },
+  {
+    path: 'nurse/inpatients',
+    loadComponent: () =>
+      import('./workspaces/nurse/nurse-inpatients.component').then((m) => m.NurseInpatientsComponent),
+    canActivate: [authGuard, roleGuard],
+    data: { roles: ['NURSE'] },
+  },
+
 
   {
     path: 'auth/register-org',

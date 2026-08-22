@@ -468,9 +468,11 @@ export class App implements OnInit, OnDestroy {
         {
           label: 'Inpatient Ward & Bedside Care',
           items: [
+            { icon: 'lucideUsers', label: 'My Inpatients & Care Team', routerLink: '/nurse/inpatients' },
             { icon: 'lucideBed', label: 'Spatial Bed & Ward Census', routerLink: '/nurse/beds' },
           ],
         },
+
       ];
     }
     if (this.isReceptionist()) {

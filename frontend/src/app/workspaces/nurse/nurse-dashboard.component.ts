@@ -662,22 +662,37 @@ export interface NursingShiftTask {
                 <div class="flex items-center gap-2 shrink-0">
                   <span
                     hlmBadge
-                    [variant]="apt.status === 'CHECKED_IN' ? 'secondary' : 'outline'"
+                    variant="outline"
                     class="text-[10px]"
+                    [ngClass]="
+                      apt.status === 'CHECKED_IN'
+                        ? 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/40 font-bold animate-pulse'
+                        : apt.status === 'TRIAGED'
+                          ? 'bg-teal-500/10 text-teal-700 dark:text-teal-300 border-teal-500/30 font-bold'
+                          : 'bg-muted text-muted-foreground border-border'
+                    "
                   >
-                    {{ apt.status === 'CHECKED_IN' ? 'Awaiting Vitals' : 'Scheduled' }}
+                    {{
+                      apt.status === 'CHECKED_IN'
+                        ? 'Ready for Triage'
+                        : apt.status === 'TRIAGED'
+                          ? 'Triaged'
+                          : 'Awaiting Desk Check-in'
+                    }}
                   </span>
                   <a
+                    *ngIf="apt.status === 'CHECKED_IN'"
                     routerLink="/nurse/appointments"
                     hlmBtn
-                    variant="outline"
+                    variant="default"
                     size="sm"
-                    class="h-7 text-xs font-semibold gap-1 text-amber-600 hover:text-amber-700"
+                    class="h-7 text-xs font-bold gap-1 bg-amber-600 hover:bg-amber-700 text-white shadow-xs"
                   >
-                    <span>Triage</span>
+                    <span>Perform Triage</span>
                     <ng-icon name="lucideArrowRight" size="12" />
                   </a>
                 </div>
+
               </div>
 
               <div
@@ -833,28 +848,47 @@ export class NurseDashboardComponent implements OnInit {
     this.isLoading = true;
     this.errorMessage = '';
 
-    // 1. Load Inpatients from occupied hospital beds in assigned ward
-    this.apiService.getBeds().subscribe({
-      next: (beds) => {
-        const occupied = Array.isArray(beds)
-          ? beds.filter((b) => b.status === 'OCCUPIED' && b.currentEncounter?.patient)
-          : [];
-        const items: NurseAssignedInpatient[] = occupied.map((b) => ({
-          patient: b.currentEncounter!.patient!,
-          bedCode: b.bedNumber || b.bedCode || '',
-          wardName: b.wardName || b.departmentName || '',
-          roomNumber: b.roomNumber || '',
-          admissionDiagnosis: b.currentEncounter?.chiefComplaint || '',
-          ewsScore: 0,
-          acuityLevel: 'STABLE',
-          fallRisk: 'LOW',
-          codeStatus: 'FULL_CODE',
-          isolation: 'NONE',
-          attendingPhysician: b.currentEncounter?.attendingPractitionerId || '',
-          medsDueCount: 0,
-          ivLineActive: false,
-        }));
-        this.assignedInpatients.set(items);
+    const user = this.authService.currentUser();
+    const orgId = this.authService.activeContext()?.organizationId;
+    const userId = user?.userId || user?.id;
+
+    // 1. Load Inpatients from Care Team endpoint
+    this.apiService.getPractitionerInpatients(undefined, orgId, undefined, userId).subscribe({
+      next: (items) => {
+        const inpatients = Array.isArray(items) ? items : [];
+        const mapped: NurseAssignedInpatient[] = inpatients.map((i) => {
+          const attending =
+            i.careTeamMembers?.find(
+              (m) => m.roleCategory === 'PHYSICIAN' || m.role?.toUpperCase().includes('ATTENDING'),
+            )?.name || 'Assigned Physician';
+          const patientObj: Patient = {
+            id: i.patientId,
+            patientCode: i.patientCode,
+            fullName: i.fullName,
+            gender: i.gender,
+            dateOfBirth: i.dateOfBirth,
+            phone: i.phoneNumber || '',
+            phoneNumber: i.phoneNumber,
+            bloodGroup: i.bloodGroup,
+          };
+
+          return {
+            patient: patientObj,
+            bedCode: i.bedCode || i.bedNumber || 'Unassigned',
+            wardName: i.wardName || 'Inpatient Ward',
+            roomNumber: i.roomNumber || '',
+            admissionDiagnosis: i.admissionDiagnosis || 'Inpatient Care',
+            ewsScore: i.ewsScore ?? 0,
+            acuityLevel: i.acuityLevel || 'STABLE',
+            fallRisk: i.fallRisk || 'LOW',
+            codeStatus: i.codeStatus || 'FULL_CODE',
+            isolation: i.isolation || 'NONE',
+            attendingPhysician: attending,
+            medsDueCount: 0,
+            ivLineActive: false,
+          };
+        });
+        this.assignedInpatients.set(mapped);
         this.isLoading = false;
       },
       error: (err) => {
@@ -864,15 +898,20 @@ export class NurseDashboardComponent implements OnInit {
     });
 
     // 2. Load Triage Outpatient Queue
-    this.apiService.getAppointments().subscribe({
+    const queue$ = orgId
+      ? this.apiService.getAppointmentsByOrganization(orgId)
+      : this.apiService.getAppointments();
+
+    queue$.subscribe({
       next: (apps) => {
         this.triageQueue.set(Array.isArray(apps) ? apps : []);
       },
       error: (err) => {
         this.errorMessage = err.message || 'Failed to load triage queue';
         this.isLoading = false;
-      }
+      },
     });
+
 
     // 3. Shift Tasks
     this.shiftTasks.set([]);
@@ -914,9 +953,9 @@ export class NurseDashboardComponent implements OnInit {
   });
 
   getPendingTriageCount(): number {
-    return this.triageQueue().filter((a) => a.status === 'CHECKED_IN' || a.status === 'ARRIVED')
-      .length;
+    return this.triageQueue().filter((a) => a.status === 'CHECKED_IN').length;
   }
+
 
   openBedsideChart(patient: Patient): void {
     this.patientContext.setActivePatient(patient);

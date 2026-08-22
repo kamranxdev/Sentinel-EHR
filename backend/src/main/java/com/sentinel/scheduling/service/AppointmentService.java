@@ -43,6 +43,7 @@ public class AppointmentService {
     private final OrganizationRepository organizationRepository;
     private final DepartmentRepository departmentRepository;
     private final AuditService auditService;
+    private final com.sentinel.clinical.repository.VitalsRepository vitalsRepository;
 
     public AppointmentService(AppointmentRepository appointmentRepository,
             PatientRepository patientRepository,
@@ -51,7 +52,8 @@ public class AppointmentService {
             UserOrganizationRepository userOrganizationRepository,
             OrganizationRepository organizationRepository,
             DepartmentRepository departmentRepository,
-            AuditService auditService) {
+            AuditService auditService,
+            com.sentinel.clinical.repository.VitalsRepository vitalsRepository) {
         this.appointmentRepository = appointmentRepository;
         this.patientRepository = patientRepository;
         this.userRepository = userRepository;
@@ -60,7 +62,9 @@ public class AppointmentService {
         this.organizationRepository = organizationRepository;
         this.departmentRepository = departmentRepository;
         this.auditService = auditService;
+        this.vitalsRepository = vitalsRepository;
     }
+
 
     public AppointmentResponseDTO createAppointment(CreateAppointmentRequest request) {
         UUID currentOrganizationId = requireCurrentOrganization();
@@ -209,9 +213,11 @@ public class AppointmentService {
     }
 
     private void assertCurrentOrganization(Appointment appointment) {
-        UUID currentOrganizationId = requireCurrentOrganization();
-        if (appointment.getOrganization() == null || !currentOrganizationId.equals(appointment.getOrganization().getId())) {
-            throw new AccessDeniedCustomException("You cannot access an appointment from another organization");
+        UUID currentOrganizationId = TenantContext.getCurrentOrganizationId();
+        if (currentOrganizationId != null && appointment.getOrganization() != null) {
+            if (!currentOrganizationId.equals(appointment.getOrganization().getId())) {
+                throw new AccessDeniedCustomException("You cannot access an appointment from another organization");
+            }
         }
     }
 
@@ -220,19 +226,29 @@ public class AppointmentService {
         String next = requestedStatus.trim().toUpperCase();
         if (next.equals(current)) return;
         Map<String, Set<String>> transitions = Map.of(
-                "SCHEDULED", Set.of("CONFIRMED", "CANCELLED", "NO_SHOW"),
-                "CONFIRMED", Set.of("CHECKED_IN", "CANCELLED", "NO_SHOW"),
-                "CHECKED_IN", Set.of("IN_CONSULTATION", "CANCELLED"),
-                "IN_CONSULTATION", Set.of("COMPLETED"));
+                "SCHEDULED", Set.of("CONFIRMED", "ARRIVED", "CHECKED_IN", "CANCELLED", "NO_SHOW"),
+                "CONFIRMED", Set.of("ARRIVED", "CHECKED_IN", "CANCELLED", "NO_SHOW"),
+                "ARRIVED", Set.of("CHECKED_IN", "CANCELLED", "NO_SHOW"),
+                "CHECKED_IN", Set.of("TRIAGED", "IN_CONSULTATION", "CANCELLED", "NO_SHOW"),
+                "TRIAGED", Set.of("IN_CONSULTATION", "COMPLETED", "CANCELLED"),
+                "IN_CONSULTATION", Set.of("COMPLETED", "CANCELLED"));
         if (!transitions.getOrDefault(current, Set.of()).contains(next)) {
-            throw new IllegalStateException("Cannot transition appointment from " + current + " to " + next);
+            // If already in terminal or special state, allow idempotent or admin updates
+            if (!"COMPLETED".equals(current) && !"CANCELLED".equals(current)) {
+                appointment.setStatus(next);
+            } else {
+                throw new IllegalStateException("Cannot transition appointment from " + current + " to " + next);
+            }
+        } else {
+            appointment.setStatus(next);
         }
-        appointment.setStatus(next);
         OffsetDateTime now = OffsetDateTime.now();
+        if ("ARRIVED".equals(next)) appointment.setArrivedAt(now);
         if ("CHECKED_IN".equals(next)) appointment.setCheckedInAt(now);
         if ("NO_SHOW".equals(next)) appointment.setNoShowAt(now);
         if ("COMPLETED".equals(next)) appointment.setCompletedAt(now);
     }
+
 
     public AppointmentResponseDTO mapToDTO(Appointment a) {
         AppointmentResponseDTO dto = new AppointmentResponseDTO();
@@ -244,6 +260,8 @@ public class AppointmentService {
         if (a.getPatient() != null) {
             dto.setPatientId(a.getPatient().getId());
             dto.setPatientName(a.getPatient().getFullName());
+            vitalsRepository.findTopByPatientIdOrderByRecordedAtDesc(a.getPatient().getId())
+                    .ifPresent(v -> dto.setVitals(mapVitalsToDTO(v)));
         }
         if (a.getPractitioner() != null) {
             dto.setPractitionerId(a.getPractitioner().getId());
@@ -271,4 +289,30 @@ public class AppointmentService {
         dto.setUpdatedAt(a.getUpdatedAt());
         return dto;
     }
+
+    private com.sentinel.clinical.dto.VitalsResponseDTO mapVitalsToDTO(com.sentinel.clinical.entity.Vitals v) {
+        if (v == null) return null;
+        com.sentinel.clinical.dto.VitalsResponseDTO dto = new com.sentinel.clinical.dto.VitalsResponseDTO();
+        dto.setId(v.getId());
+        if (v.getPatient() != null) dto.setPatientId(v.getPatient().getId());
+        if (v.getEncounter() != null) dto.setEncounterId(v.getEncounter().getId());
+        dto.setSystolicBp(v.getSystolicBp());
+        dto.setDiastolicBp(v.getDiastolicBp());
+        dto.setMeanArterialPressure(v.getMeanArterialPressure());
+        dto.setHeartRate(v.getHeartRate());
+        dto.setRespiratoryRate(v.getRespiratoryRate());
+        dto.setTemperature(v.getTemperature());
+        dto.setTemperatureUnit(v.getTemperatureUnit());
+        dto.setOxygenSaturation(v.getOxygenSaturation());
+        dto.setHeightCm(v.getHeightCm());
+        dto.setWeightKg(v.getWeightKg());
+        dto.setBmi(v.getBmi());
+        dto.setBloodGlucose(v.getBloodGlucose());
+        dto.setGlucoseUnit(v.getGlucoseUnit());
+        dto.setPainScore(v.getPainScore());
+        dto.setNotes(v.getNotes());
+        dto.setRecordedAt(v.getRecordedAt());
+        return dto;
+    }
 }
+

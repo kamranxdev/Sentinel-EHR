@@ -9,6 +9,10 @@ public class AppointmentTriageRequest {
     private BigDecimal respiratoryRate;
     private BigDecimal temperature;
     private BigDecimal oxygenSaturation;
+    private BigDecimal bloodGlucose;
+    private BigDecimal painScore;
+    private BigDecimal heightCm;
+    private BigDecimal weightKg;
     private String notes;
 
     public AppointmentTriageRequest() {}
@@ -25,6 +29,15 @@ public class AppointmentTriageRequest {
     public void setTemperature(BigDecimal temperature) { this.temperature = temperature; }
     public BigDecimal getOxygenSaturation() { return oxygenSaturation; }
     public void setOxygenSaturation(BigDecimal oxygenSaturation) { this.oxygenSaturation = oxygenSaturation; }
+    public BigDecimal getBloodGlucose() { return bloodGlucose; }
+    public void setBloodGlucose(BigDecimal bloodGlucose) { this.bloodGlucose = bloodGlucose; }
+    public BigDecimal getPainScore() { return painScore; }
+    public void setPainScore(BigDecimal painScore) { this.painScore = painScore; }
+    public BigDecimal getHeightCm() { return heightCm; }
+    public void setHeightCm(BigDecimal heightCm) { this.heightCm = heightCm; }
+    public BigDecimal getWeightKg() { return weightKg; }
+    public void setWeightKg(BigDecimal weightKg) { this.weightKg = weightKg; }
     public String getNotes() { return notes; }
     public void setNotes(String notes) { this.notes = notes; }
 }
+

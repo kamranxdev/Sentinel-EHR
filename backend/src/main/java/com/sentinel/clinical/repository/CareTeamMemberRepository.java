@@ -10,4 +10,8 @@ import java.util.UUID;
 @Repository
 public interface CareTeamMemberRepository extends JpaRepository<CareTeamMember, UUID> {
     List<CareTeamMember> findByCareTeamId(UUID careTeamId);
+    List<CareTeamMember> findByUserId(UUID userId);
+    List<CareTeamMember> findByPractitionerId(UUID practitionerId);
+    List<CareTeamMember> findByCareTeamIdAndEndedAtIsNull(UUID careTeamId);
 }
+

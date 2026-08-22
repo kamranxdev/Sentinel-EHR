@@ -228,34 +228,13 @@ import {
                 <td hlmTableCell class="py-3.5 px-4">
                   <span
                     hlmBadge
-                    [variant]="
-                      apt.status === 'SCHEDULED'
-                        ? 'default'
-                        : apt.status === 'COMPLETED'
-                          ? 'secondary'
-                          : apt.status === 'IN_CONSULTATION'
-                            ? 'default'
-                            : 'outline'
-                    "
-                    [class.bg-emerald-500/15]="apt.status === 'COMPLETED'"
-                    [class.text-emerald-700]="apt.status === 'COMPLETED'"
-                    [class.dark:text-emerald-400]="apt.status === 'COMPLETED'"
-                    [class.bg-rose-500/15]="apt.status === 'CANCELLED'"
-                    [class.text-rose-700]="apt.status === 'CANCELLED'"
-                    [class.dark:text-rose-400]="apt.status === 'CANCELLED'"
-                    class="text-[10px] font-bold tracking-wider px-2 py-0.5"
+                    variant="outline"
+                    [class]="'text-[10px] font-medium border px-2.5 py-0.5 ' + getStageBadgeClass(apt.status)"
                   >
-                    {{
-                      apt.status === 'CHECKED_IN'
-                        ? 'Checked In (Desk)'
-                        : apt.status === 'TRIAGED'
-                          ? 'Triaged (Nurse)'
-                          : apt.status === 'IN_CONSULTATION'
-                            ? 'In Consultation'
-                            : apt.status
-                    }}
+                    {{ getStageLabel(apt.status) }}
                   </span>
                 </td>
+
 
                 <!-- Actions -->
                 <td hlmTableCell class="py-3.5 px-4 text-right">
@@ -1493,4 +1472,53 @@ export class PatientAppointmentsComponent implements OnInit {
       error: (err) => { this.errorMessage = err.message || 'Failed'; this.isLoading = false; }
     });
   }
-} 
+
+  getStageLabel(stage?: string): string {
+    switch (stage) {
+      case 'SCHEDULED':
+      case 'CONFIRMED':
+        return 'Scheduled';
+      case 'ARRIVED':
+        return 'Lobby Arrived';
+      case 'CHECKED_IN':
+        return 'Checked In (Awaiting Triage)';
+      case 'TRIAGED':
+        return 'Triaged (Ready for Doctor)';
+      case 'IN_CONSULTATION':
+        return 'In Consultation';
+      case 'COMPLETED':
+        return 'Completed';
+      case 'CANCELLED':
+        return 'Cancelled';
+      case 'NO_SHOW':
+        return 'No-Show';
+      default:
+        return stage || 'Scheduled';
+    }
+  }
+
+  getStageBadgeClass(stage?: string): string {
+    switch (stage) {
+      case 'SCHEDULED':
+      case 'CONFIRMED':
+        return 'bg-slate-500/10 text-slate-700 dark:text-slate-300 border-slate-500/30';
+      case 'ARRIVED':
+        return 'bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/30';
+      case 'CHECKED_IN':
+        return 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/40 font-bold';
+      case 'TRIAGED':
+        return 'bg-teal-500/10 text-teal-700 dark:text-teal-300 border-teal-500/30 font-bold';
+      case 'IN_CONSULTATION':
+        return 'bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-500/30 font-bold';
+      case 'COMPLETED':
+        return 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/30 font-bold';
+      case 'CANCELLED':
+        return 'bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-500/30';
+      case 'NO_SHOW':
+        return 'bg-orange-500/10 text-orange-700 dark:text-orange-300 border-orange-500/30';
+      default:
+        return 'bg-muted text-muted-foreground border-border';
+    }
+  }
+}
+ 

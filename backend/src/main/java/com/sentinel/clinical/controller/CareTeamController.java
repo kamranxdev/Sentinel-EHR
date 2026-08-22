@@ -51,6 +51,15 @@ public class CareTeamController {
         return new ResponseEntity<>(ApiResponse.success("Member added to care team", response), HttpStatus.CREATED);
     }
 
+    @PostMapping("/api/v1/encounters/{encounterId}/care-team/members")
+    @Operation(summary = "Add member directly to an encounter care team")
+    public ResponseEntity<ApiResponse<CareTeamResponseDTO>> addEncounterMember(
+            @PathVariable UUID encounterId,
+            @Valid @RequestBody AddCareTeamMemberRequest request) {
+        CareTeamResponseDTO response = careTeamService.addEncounterMember(encounterId, request);
+        return new ResponseEntity<>(ApiResponse.success("Member added to encounter care team", response), HttpStatus.CREATED);
+    }
+
     @DeleteMapping("/api/v1/care-teams/{careTeamId}/members/{memberId}")
     @Operation(summary = "Remove member from care team")
     public ResponseEntity<ApiResponse<Void>> removeMember(
@@ -60,3 +69,5 @@ public class CareTeamController {
         return ResponseEntity.ok(ApiResponse.success("Member removed from care team", null));
     }
 }
+
+

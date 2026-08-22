@@ -615,39 +615,40 @@ export interface FastTriageForm {
                   <!-- Awaiting Desk Check-in State -->
                   <div
                     *ngIf="apt.status === 'SCHEDULED' || apt.status === 'ARRIVED'"
-                    class="flex items-center justify-end gap-1 text-[11px] text-muted-foreground"
+                    class="flex items-center justify-end gap-1 text-[11px] text-muted-foreground font-medium"
                   >
                     <ng-icon name="lucideClock" size="12" class="text-amber-500" />
                     <span>Awaiting Desk Check-in</span>
                   </div>
 
-                  <!-- Triaged: View / Update Triage Record -->
-                  <button
+                  <!-- Triaged: Triage Completed Indicator -->
+                  <div
                     *ngIf="apt.status === 'TRIAGED'"
-                    hlmBtn
-                    variant="outline"
-                    size="sm"
-                    class="h-7 text-xs gap-1 border-emerald-500/30 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/10"
-                    (click)="openTriageModal(apt)"
+                    class="flex items-center justify-end gap-1 text-[11px] font-semibold text-teal-700 dark:text-teal-300"
                   >
-                    <ng-icon name="lucideCheckCircle2" size="12" />
-                    <span>View / Edit Triage Record</span>
-                  </button>
+                    <ng-icon name="lucideCheckCircle2" size="13" class="text-teal-600" />
+                    <span>Triage Completed</span>
+                  </div>
 
-                  <!-- In Consultation or Completed: View Triage Record -->
-                  <button
-                    *ngIf="apt.status === 'IN_CONSULTATION' || apt.status === 'COMPLETED'"
-                    hlmBtn
-                    variant="outline"
-                    size="sm"
-                    class="h-7 text-xs gap-1 text-muted-foreground"
-                    (click)="openTriageModal(apt)"
+                  <!-- In Consultation -->
+                  <div
+                    *ngIf="apt.status === 'IN_CONSULTATION'"
+                    class="flex items-center justify-end gap-1 text-[11px] font-semibold text-purple-700 dark:text-purple-300"
                   >
-                    <ng-icon name="lucideStethoscope" size="12" />
-                    <span>View Triage Record</span>
-                  </button>
+                    <ng-icon name="lucideStethoscope" size="13" class="text-purple-600" />
+                    <span>In Consultation</span>
+                  </div>
 
-                  <!-- Cancelled -->
+                  <!-- Completed -->
+                  <div
+                    *ngIf="apt.status === 'COMPLETED'"
+                    class="flex items-center justify-end gap-1 text-[11px] font-semibold text-emerald-700 dark:text-emerald-300"
+                  >
+                    <ng-icon name="lucideCheckCircle2" size="13" class="text-emerald-600" />
+                    <span>Encounter Completed</span>
+                  </div>
+
+                  <!-- Cancelled / No-Show -->
                   <span
                     *ngIf="apt.status === 'CANCELLED' || apt.status === 'NO_SHOW'"
                     class="text-[11px] text-muted-foreground"
@@ -655,6 +656,7 @@ export interface FastTriageForm {
                     —
                   </span>
                 </td>
+
               </tr>
 
               <tr *ngIf="filteredAppointments().length === 0" hlmTableRow>
@@ -1261,20 +1263,29 @@ export class NurseAppointmentsComponent implements OnInit {
 
     const aptId = this.selectedAppointment.id;
     if (aptId) {
+      const vitalsPayload = {
+        systolicBp: this.triageForm.systolicBp || 120,
+        diastolicBp: this.triageForm.diastolicBp || 80,
+        heartRate: this.triageForm.heartRate || 72,
+        respiratoryRate: this.triageForm.respiratoryRate || 16,
+        temperature: this.triageForm.temperature || 36.8,
+        oxygenSaturation: this.triageForm.oxygenSaturation || 98,
+        bloodGlucose: this.triageForm.bloodGlucose || undefined,
+        painScore: this.triageForm.painScore || 0,
+        heightCm: this.triageForm.heightCm || undefined,
+        weightKg: this.triageForm.weightKg || undefined,
+        notes: this.triageForm.nursingNotes || 'Nursing triage intake completed at station',
+        triageLevel: (this.computedNews2() || 0) >= 5 ? 'CRITICAL' : 'ROUTINE',
+      };
+
       this.apiService
-        .recordTriageVitals(aptId, {
-          systolicBp: this.triageForm.systolicBp || 120,
-          diastolicBp: this.triageForm.diastolicBp || 80,
-          heartRate: this.triageForm.heartRate || 72,
-          respiratoryRate: this.triageForm.respiratoryRate || 16,
-          temperature: this.triageForm.temperature || 36.8,
-          oxygenSaturation: this.triageForm.oxygenSaturation || 98,
-          bloodGlucose: this.triageForm.bloodGlucose || undefined,
-          notes: this.triageForm.nursingNotes || 'Nursing triage completed at station',
-          triageLevel: (this.computedNews2() || 0) >= 5 ? 'CRITICAL' : 'ROUTINE',
-        })
+        .recordTriageVitals(aptId, vitalsPayload)
         .subscribe({
           next: () => {
+            if (this.selectedAppointment) {
+              this.selectedAppointment.status = 'TRIAGED';
+              this.selectedAppointment.vitals = vitalsPayload as any;
+            }
             toast.success(
               `Triage intake completed for ${this.selectedAppointment?.patient?.fullName || this.selectedAppointment?.patientName || 'Patient'}`,
             );
@@ -1282,8 +1293,10 @@ export class NurseAppointmentsComponent implements OnInit {
             this.loadAppointments();
           },
           error: () => {
-            // Update local status optimistically if network returns fallback
-            this.selectedAppointment!.status = 'TRIAGED';
+            if (this.selectedAppointment) {
+              this.selectedAppointment.status = 'TRIAGED';
+              this.selectedAppointment.vitals = vitalsPayload as any;
+            }
             toast.success(
               `Triage saved for ${this.selectedAppointment?.patient?.fullName || this.selectedAppointment?.patientName || 'Patient'}`,
             );
@@ -1294,4 +1307,5 @@ export class NurseAppointmentsComponent implements OnInit {
     }
   }
 }
+
 

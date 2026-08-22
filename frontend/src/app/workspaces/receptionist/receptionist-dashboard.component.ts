@@ -403,12 +403,13 @@ import {
                 <td hlmTableCell>
                   <span
                     hlmBadge
-                    [variant]="getStageVariant(apt.status)"
-                    class="text-[10px] font-medium"
+                    variant="outline"
+                    [class]="'text-[10px] font-medium border ' + getStageBadgeClass(apt.status)"
                   >
                     {{ getStageLabel(apt.status) }}
                   </span>
                 </td>
+
                 <td hlmTableCell class="text-right">
                   <div class="flex items-center justify-end gap-1.5">
                     <button
@@ -534,7 +535,8 @@ export class ReceptionistDashboardComponent implements OnInit {
   loadData(): void {
     this.isLoading.set(true);
     this.errorMessage.set(null);
-    this.apiService.getAppointments().subscribe({
+    const orgId = this.authService.activeContext()?.organizationId || '';
+    this.apiService.getAppointments({ organizationId: orgId || undefined }).subscribe({
       next: (apts) => {
         this.appointments.set(apts);
         this.isLoading.set(false);
@@ -598,27 +600,55 @@ export class ReceptionistDashboardComponent implements OnInit {
   getStageLabel(stage: string): string {
     switch (stage) {
       case 'SCHEDULED':
-        return '1. Booked (Pre-Arrival)';
+      case 'CONFIRMED':
+        return 'Scheduled (Pre-Arrival)';
       case 'ARRIVED':
-        return '2. Lobby Arrival';
+        return 'Lobby Arrived';
       case 'CHECKED_IN':
-        return '3. Desk Checked In (Awaiting Triage)';
+        return '● Checked In (Awaiting Triage)';
       case 'TRIAGED':
-        return '4. Triaged (Ready for Physician)';
+        return '✓ Triaged (Ready for Doctor)';
       case 'IN_CONSULTATION':
-        return '5. Clinical Consultation';
+        return 'In Consultation';
       case 'COMPLETED':
-        return '6. Discharged & Completed';
+        return 'Completed';
       case 'CANCELLED':
-        return 'Cancelled / No-Show';
+        return 'Cancelled';
+      case 'NO_SHOW':
+        return 'No-Show';
       default:
         return stage || 'Scheduled';
+    }
+  }
+
+  getStageBadgeClass(stage: string): string {
+    switch (stage) {
+      case 'SCHEDULED':
+      case 'CONFIRMED':
+        return 'bg-slate-500/10 text-slate-700 dark:text-slate-300 border-slate-500/30';
+      case 'ARRIVED':
+        return 'bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/30';
+      case 'CHECKED_IN':
+        return 'bg-amber-500/10 text-amber-700 dark:text-amber-300 border-amber-500/40 font-bold animate-pulse';
+      case 'TRIAGED':
+        return 'bg-teal-500/10 text-teal-700 dark:text-teal-300 border-teal-500/30 font-bold';
+      case 'IN_CONSULTATION':
+        return 'bg-purple-500/10 text-purple-700 dark:text-purple-300 border-purple-500/30 font-bold';
+      case 'COMPLETED':
+        return 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border-emerald-500/30 font-bold';
+      case 'CANCELLED':
+        return 'bg-rose-500/10 text-rose-700 dark:text-rose-300 border-rose-500/30';
+      case 'NO_SHOW':
+        return 'bg-orange-500/10 text-orange-700 dark:text-orange-300 border-orange-500/30';
+      default:
+        return 'bg-muted text-muted-foreground border-border';
     }
   }
 
   getStageVariant(stage: string): 'outline' | 'secondary' | 'default' | 'destructive' {
     switch (stage) {
       case 'SCHEDULED':
+      case 'CONFIRMED':
         return 'outline';
       case 'ARRIVED':
         return 'secondary';
@@ -631,9 +661,11 @@ export class ReceptionistDashboardComponent implements OnInit {
       case 'COMPLETED':
         return 'secondary';
       case 'CANCELLED':
+      case 'NO_SHOW':
         return 'destructive';
       default:
         return 'outline';
     }
   }
 }
+

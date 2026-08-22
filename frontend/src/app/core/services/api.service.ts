@@ -123,7 +123,13 @@ import {
   SecurityEventLog,
   CreateAbacPolicyRequest,
 } from '../models/security-policy.model';
-import { CareTeam, CareTeamMember, AddCareTeamMemberRequest } from '../models/care-team.model';
+import {
+  CareTeam,
+  CareTeamMember,
+  AddCareTeamMemberRequest,
+  InpatientCareItem,
+  CareTeamMemberInfo,
+} from '../models/care-team.model';
 import {
   Department,
   Ward,
@@ -177,12 +183,13 @@ export class ApiService {
   }
 
   // Generic HTTP helper methods with automatic ApiResponse envelope unwrapping
-  get<T>(endpoint: string): Observable<T> {
+  get<T>(endpoint: string, params?: any): Observable<T> {
     const url = endpoint.startsWith('http')
       ? endpoint
       : `${this.baseUrl}${endpoint.startsWith('/') ? '' : '/'}${endpoint}`;
-    return this.http.get<any>(url).pipe(map((res) => this.unwrap<T>(res)));
+    return this.http.get<any>(url, { params }).pipe(map((res) => this.unwrap<T>(res)));
   }
+
 
   post<T>(endpoint: string, body: any): Observable<T> {
     const url = endpoint.startsWith('http')
@@ -1272,9 +1279,23 @@ export class ApiService {
     organizationId?: string;
     patientId?: string;
   }): Observable<Appointment[]> {
+    if (filters?.organizationId) {
+      if (filters.practitionerId) {
+        return this.get<Appointment[]>(
+          `/organizations/${encodeURIComponent(filters.organizationId)}/practitioners/${encodeURIComponent(filters.practitionerId)}/appointments`,
+        ).pipe(
+          map((list) => (Array.isArray(list) ? list.map((a) => this.normalizeAppointment(a)) : [])),
+        );
+      }
+      return this.get<Appointment[]>(
+        `/organizations/${encodeURIComponent(filters.organizationId)}/appointments`,
+      ).pipe(
+        map((list) => (Array.isArray(list) ? list.map((a) => this.normalizeAppointment(a)) : [])),
+      );
+    }
+
     const params: string[] = [];
     if (filters?.practitionerId) params.push(`practitionerId=${encodeURIComponent(filters.practitionerId)}`);
-    if (filters?.organizationId) params.push(`organizationId=${encodeURIComponent(filters.organizationId)}`);
     if (filters?.patientId) params.push(`patientId=${encodeURIComponent(filters.patientId)}`);
 
     const queryString = params.length > 0 ? `?${params.join('&')}` : '';
@@ -1282,6 +1303,7 @@ export class ApiService {
       map((list) => (Array.isArray(list) ? list.map((a) => this.normalizeAppointment(a)) : [])),
     );
   }
+
 
   getAppointmentById(id: string): Observable<Appointment> {
     return this.get<Appointment>(`/appointments/${id}`).pipe(
@@ -2264,6 +2286,64 @@ export class ApiService {
       `/care-teams/${careTeamId}/members/${memberId}`,
     );
   }
+
+  addEncounterCareTeamMember(
+    encounterId: string,
+    payload: AddCareTeamMemberRequest,
+  ): Observable<CareTeamMember> {
+    return this.post<CareTeamMember>(`/encounters/${encounterId}/care-team/members`, payload);
+  }
+
+  getInpatients(filters?: {
+    organizationId?: string;
+    practitionerId?: string;
+    userId?: string;
+    role?: string;
+  }): Observable<InpatientCareItem[]> {
+    const params: Record<string, string> = {};
+    if (filters?.practitionerId) params['practitionerId'] = filters.practitionerId;
+    if (filters?.userId) params['userId'] = filters.userId;
+    if (filters?.role && filters.role !== 'ALL') params['role'] = filters.role;
+
+    if (filters?.organizationId) {
+      if (filters?.practitionerId) {
+        return this.get<InpatientCareItem[]>(
+          `/organizations/${filters.organizationId}/practitioners/${filters.practitionerId}/inpatients`,
+          params,
+        );
+      }
+      if (filters?.userId) {
+        return this.get<InpatientCareItem[]>(
+          `/organizations/${filters.organizationId}/users/${filters.userId}/inpatients`,
+          params,
+        );
+      }
+      return this.get<InpatientCareItem[]>(
+        `/organizations/${filters.organizationId}/inpatients`,
+        params,
+      );
+    }
+    return this.get<InpatientCareItem[]>('/inpatients', params);
+  }
+
+  getInpatientsByOrganization(
+    organizationId: string,
+    filters?: { practitionerId?: string; userId?: string; role?: string },
+  ): Observable<InpatientCareItem[]> {
+    return this.getInpatients({ organizationId, ...filters });
+  }
+
+  getPractitionerInpatients(
+    practitionerId?: string,
+    organizationId?: string,
+    role?: string,
+    userId?: string,
+  ): Observable<InpatientCareItem[]> {
+    return this.getInpatients({ practitionerId, organizationId, role, userId });
+  }
+
+
+
 
   // =========================================================================
   // 24. Insurance Payers, Plans, Authorizations & Claims

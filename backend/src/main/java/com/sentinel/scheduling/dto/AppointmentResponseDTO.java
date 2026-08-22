@@ -28,6 +28,7 @@ public class AppointmentResponseDTO {
     private OffsetDateTime noShowAt;
     private OffsetDateTime createdAt;
     private OffsetDateTime updatedAt;
+    private com.sentinel.clinical.dto.VitalsResponseDTO vitals;
 
     public AppointmentResponseDTO() {}
 
@@ -79,4 +80,7 @@ public class AppointmentResponseDTO {
     public void setCreatedAt(OffsetDateTime createdAt) { this.createdAt = createdAt; }
     public OffsetDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(OffsetDateTime updatedAt) { this.updatedAt = updatedAt; }
+    public com.sentinel.clinical.dto.VitalsResponseDTO getVitals() { return vitals; }
+    public void setVitals(com.sentinel.clinical.dto.VitalsResponseDTO vitals) { this.vitals = vitals; }
 }
+
