@@ -107,6 +107,25 @@ public class InvoiceService {
         return mapToDTO(saved);
     }
 
+    @Transactional(readOnly = true)
+    public List<InvoiceResponseDTO> getAllInvoices() {
+        UUID orgId = com.sentinel.security.TenantContext.getCurrentOrganizationId();
+        List<Invoice> invoices;
+        if (orgId != null) {
+            invoices = invoiceRepository.findByOrganizationId(orgId);
+        } else {
+            invoices = invoiceRepository.findAll();
+        }
+        return invoices.stream().map(this::mapToDTO).collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<InvoiceResponseDTO> getPatientInvoices(UUID patientId) {
+        return invoiceRepository.findByPatientIdOrderByIssuedAtDesc(patientId).stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+    }
+
     public InvoiceResponseDTO finalizeInvoice(UUID invoiceId) {
         Invoice invoice = invoiceRepository.findById(invoiceId)
                 .orElseThrow(() -> new ResourceNotFoundException("Invoice not found with id: " + invoiceId));
@@ -116,6 +135,20 @@ public class InvoiceService {
 
         if (auditService != null) {
             auditService.logEvent(saved.getId(), "INVOICE_FINALIZED", "Finalized and issued invoice " + saved.getInvoiceNumber());
+        }
+
+        return mapToDTO(saved);
+    }
+
+    public InvoiceResponseDTO voidInvoice(UUID invoiceId) {
+        Invoice invoice = invoiceRepository.findById(invoiceId)
+                .orElseThrow(() -> new ResourceNotFoundException("Invoice not found with id: " + invoiceId));
+
+        invoice.setStatus("VOIDED");
+        Invoice saved = invoiceRepository.save(invoice);
+
+        if (auditService != null) {
+            auditService.logEvent(saved.getId(), "INVOICE_VOIDED", "Voided invoice " + saved.getInvoiceNumber());
         }
 
         return mapToDTO(saved);

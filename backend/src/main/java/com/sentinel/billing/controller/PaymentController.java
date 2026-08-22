@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -26,7 +27,28 @@ public class PaymentController {
         this.paymentService = paymentService;
     }
 
+    @GetMapping("/api/v1/payments")
+    @PreAuthorize("hasAnyAuthority('INVOICE_READ', 'BILLING_READ', 'BILLING_STAFF', 'SUPER_ADMIN', 'ORGANIZATION_ADMIN')")
+    @Operation(summary = "Get all payments (optionally filtered by patient)")
+    public ResponseEntity<ApiResponse<List<PaymentResponseDTO>>> getAllPayments(
+            @RequestParam(required = false) UUID patientId) {
+        List<PaymentResponseDTO> response = (patientId != null)
+                ? paymentService.getPatientPayments(patientId)
+                : paymentService.getAllPayments();
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
+    @GetMapping("/api/v1/patients/{patientId}/payments")
+    @PreAuthorize("hasAnyAuthority('INVOICE_READ', 'BILLING_READ', 'BILLING_STAFF', 'SUPER_ADMIN', 'ORGANIZATION_ADMIN')")
+    @Operation(summary = "Get all payments for a patient")
+    public ResponseEntity<ApiResponse<List<PaymentResponseDTO>>> getPatientPayments(
+            @PathVariable UUID patientId) {
+        List<PaymentResponseDTO> response = paymentService.getPatientPayments(patientId);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
     @PostMapping("/api/v1/invoices/{invoiceId}/payments")
+    @PreAuthorize("hasAnyAuthority('INVOICE_CREATE', 'BILLING_WRITE', 'BILLING_STAFF', 'SUPER_ADMIN', 'ORGANIZATION_ADMIN')")
     @Operation(summary = "Record a payment against an invoice")
     public ResponseEntity<ApiResponse<PaymentResponseDTO>> recordPayment(
             @PathVariable UUID invoiceId,
@@ -36,6 +58,7 @@ public class PaymentController {
     }
 
     @GetMapping("/api/v1/invoices/{invoiceId}/payments")
+    @PreAuthorize("hasAnyAuthority('INVOICE_READ', 'BILLING_READ', 'BILLING_STAFF', 'SUPER_ADMIN', 'ORGANIZATION_ADMIN')")
     @Operation(summary = "Get all payments for an invoice")
     public ResponseEntity<ApiResponse<List<PaymentResponseDTO>>> getInvoicePayments(
             @PathVariable UUID invoiceId) {
@@ -43,7 +66,17 @@ public class PaymentController {
         return ResponseEntity.ok(ApiResponse.success(response));
     }
 
+    @GetMapping("/api/v1/payments/{paymentId}")
+    @PreAuthorize("hasAnyAuthority('INVOICE_READ', 'BILLING_READ', 'BILLING_STAFF', 'SUPER_ADMIN', 'ORGANIZATION_ADMIN')")
+    @Operation(summary = "Get payment by ID")
+    public ResponseEntity<ApiResponse<PaymentResponseDTO>> getPayment(
+            @PathVariable UUID paymentId) {
+        PaymentResponseDTO response = paymentService.getPayment(paymentId);
+        return ResponseEntity.ok(ApiResponse.success(response));
+    }
+
     @PostMapping("/api/v1/payments/{paymentId}/refund")
+    @PreAuthorize("hasAnyAuthority('INVOICE_CREATE', 'BILLING_WRITE', 'BILLING_STAFF', 'SUPER_ADMIN', 'ORGANIZATION_ADMIN')")
     @Operation(summary = "Process a refund against a payment")
     public ResponseEntity<ApiResponse<RefundResponseDTO>> processRefund(
             @PathVariable UUID paymentId,

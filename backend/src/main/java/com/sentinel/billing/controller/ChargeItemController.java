@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,6 +26,7 @@ public class ChargeItemController {
     }
 
     @PostMapping("/api/v1/encounters/{encounterId}/charge-items")
+    @PreAuthorize("hasAnyAuthority('INVOICE_CREATE', 'BILLING_WRITE', 'BILLING_STAFF', 'SUPER_ADMIN', 'ORGANIZATION_ADMIN')")
     @Operation(summary = "Post a charge item to an encounter")
     public ResponseEntity<ApiResponse<ChargeItemResponseDTO>> createChargeItem(
             @PathVariable UUID encounterId,
@@ -34,6 +36,7 @@ public class ChargeItemController {
     }
 
     @GetMapping("/api/v1/encounters/{encounterId}/charge-items")
+    @PreAuthorize("hasAnyAuthority('INVOICE_READ', 'BILLING_READ', 'BILLING_STAFF', 'SUPER_ADMIN', 'ORGANIZATION_ADMIN')")
     @Operation(summary = "Get all charge items for an encounter")
     public ResponseEntity<ApiResponse<List<ChargeItemResponseDTO>>> getEncounterCharges(
             @PathVariable UUID encounterId) {
@@ -42,6 +45,7 @@ public class ChargeItemController {
     }
 
     @GetMapping("/api/v1/charge-items/{chargeItemId}")
+    @PreAuthorize("hasAnyAuthority('INVOICE_READ', 'BILLING_READ', 'BILLING_STAFF', 'SUPER_ADMIN', 'ORGANIZATION_ADMIN')")
     @Operation(summary = "Get charge item by ID")
     public ResponseEntity<ApiResponse<ChargeItemResponseDTO>> getChargeItem(
             @PathVariable UUID chargeItemId) {
@@ -50,6 +54,7 @@ public class ChargeItemController {
     }
 
     @DeleteMapping("/api/v1/charge-items/{chargeItemId}")
+    @PreAuthorize("hasAnyAuthority('INVOICE_CREATE', 'BILLING_WRITE', 'BILLING_STAFF', 'SUPER_ADMIN', 'ORGANIZATION_ADMIN')")
     @Operation(summary = "Void/delete a charge item")
     public ResponseEntity<ApiResponse<Void>> deleteChargeItem(
             @PathVariable UUID chargeItemId) {
@@ -57,7 +62,8 @@ public class ChargeItemController {
         return ResponseEntity.ok(ApiResponse.success("Charge item deleted successfully", null));
     }
 
-    @GetMapping("/api/v1/billing/charges")
+    @GetMapping({"/api/v1/charge-items", "/api/v1/billing/charges"})
+    @PreAuthorize("hasAnyAuthority('INVOICE_READ', 'BILLING_READ', 'BILLING_STAFF', 'SUPER_ADMIN', 'ORGANIZATION_ADMIN')")
     @Operation(summary = "Get all charge items globally")
     public ResponseEntity<ApiResponse<List<ChargeItemResponseDTO>>> getAllChargeItems() {
         List<ChargeItemResponseDTO> response = chargeItemService.getAllChargeItems();

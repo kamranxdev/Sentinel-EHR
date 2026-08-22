@@ -83,6 +83,32 @@ public class PaymentService {
     }
 
     @Transactional(readOnly = true)
+    public List<PaymentResponseDTO> getAllPayments() {
+        UUID orgId = com.sentinel.security.TenantContext.getCurrentOrganizationId();
+        List<Payment> payments;
+        if (orgId != null) {
+            payments = paymentRepository.findByOrganizationId(orgId);
+        } else {
+            payments = paymentRepository.findAll();
+        }
+        return payments.stream().map(this::mapToDTO).collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<PaymentResponseDTO> getPatientPayments(UUID patientId) {
+        return paymentRepository.findByPatientIdOrderByPaidAtDesc(patientId).stream()
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public PaymentResponseDTO getPayment(UUID paymentId) {
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Payment not found with id: " + paymentId));
+        return mapToDTO(payment);
+    }
+
+    @Transactional(readOnly = true)
     public List<PaymentResponseDTO> getInvoicePayments(UUID invoiceId) {
         return paymentRepository.findByInvoiceId(invoiceId).stream()
                 .map(this::mapToDTO)

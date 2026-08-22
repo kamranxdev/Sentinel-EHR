@@ -1732,21 +1732,21 @@ export class ApiService {
   // 15. Billing, Invoices & Ledger
   // =========================================================================
   getPatientInvoices(patientId: string): Observable<Invoice[]> {
-    return this.get<Invoice[]>(`/billing/invoices/patient/${patientId}`).pipe(
+    return this.get<Invoice[]>(`/patients/${patientId}/invoices`).pipe(
     );
   }
 
   getPatientPayments(patientId: string): Observable<Payment[]> {
-    return this.get<Payment[]>(`/billing/payments/patient/${patientId}`).pipe(
+    return this.get<Payment[]>(`/patients/${patientId}/payments`).pipe(
     );
   }
 
   createInvoice(invoice: Partial<Invoice>): Observable<Invoice> {
-    return this.post<Invoice>('/billing/invoices', invoice);
+    return this.post<Invoice>('/invoices', invoice);
   }
 
   recordPayment(payment: Partial<Payment>): Observable<Payment> {
-    return this.post<Payment>('/billing/payments', payment);
+    return this.post<Payment>(`/invoices/${payment.invoiceId || ''}/payments`, payment);
   }
 
   createBillingAccount(
@@ -2548,19 +2548,19 @@ export class ApiService {
   // 31. Financial Revenue & Billing Accounts (Billing Staff)
   // =========================================================================
   getAllBillingAccounts(): Observable<BillingAccount[]> {
-    return this.get<BillingAccount[]>('/billing/accounts');
+    return this.get<BillingAccount[]>('/billing-accounts');
   }
 
   getAllInvoices(): Observable<Invoice[]> {
-    return this.get<Invoice[]>('/billing/invoices');
+    return this.get<Invoice[]>('/invoices');
   }
 
   getAllChargeItems(): Observable<ChargeItem[]> {
-    return this.get<ChargeItem[]>('/billing/charges');
+    return this.get<ChargeItem[]>('/charge-items');
   }
 
   voidInvoice(invoiceId: string): Observable<Invoice> {
-    return this.post<Invoice>('/billing/invoices/' + invoiceId + '/void', {});
+    return this.post<Invoice>(`/invoices/${invoiceId}/void`, {});
   }
 
   confirmAppointment(id: string): Observable<Appointment> {

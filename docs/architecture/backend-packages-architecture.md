@@ -181,8 +181,11 @@ Sentinel-EHR is structured into modular domain packages within Spring Boot 3 / J
   - `Payment` & `PaymentAllocation`: Split payments (Cash, Card, UPI, Insurance).
   - `InsuranceClaim` & `InsuranceAuthorization`: Third-party payer claims and pre-authorizations.
 * **Key Services & Controllers**:
-  - `BillingController`, `InvoiceController`: Invoicing and fee calculations.
-  - `PaymentController`: Payment gateway integrations and receipt generation.
+  - `BillingAccountController`: Patient financial accounts and ledgers.
+  - `InvoiceController`: Itemized invoicing, charge line items, finalization, and voiding.
+  - `PaymentController`: Payment collections, receipt tracking, and refunds.
+  - `ChargeItemController`: Clinical encounter charge capture and fee posting.
+  - `PriceListController`: Organization tariff lists and procedure price items.
   - `InsuranceClaimController`: Electronic claim submission and status tracking.
 
 ---

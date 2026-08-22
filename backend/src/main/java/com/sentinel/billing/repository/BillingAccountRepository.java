@@ -12,4 +12,5 @@ import java.util.UUID;
 public interface BillingAccountRepository extends JpaRepository<BillingAccount, UUID> {
     Optional<BillingAccount> findByPatientIdAndOrganizationId(UUID patientId, UUID organizationId);
     List<BillingAccount> findByPatientId(UUID patientId);
+    List<BillingAccount> findByOrganizationId(UUID organizationId);
 }

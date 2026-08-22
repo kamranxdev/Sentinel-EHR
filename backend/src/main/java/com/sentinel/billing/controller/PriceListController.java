@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -27,6 +28,7 @@ public class PriceListController {
     }
 
     @PostMapping({ "/api/v1/organizations/{organizationId}/price-lists" })
+    @PreAuthorize("hasAnyAuthority('INVOICE_CREATE', 'BILLING_WRITE', 'BILLING_STAFF', 'SUPER_ADMIN', 'ORGANIZATION_ADMIN')")
     @Operation(summary = "Create a price list for an organization")
     public ResponseEntity<ApiResponse<PriceListResponseDTO>> createPriceList(
             @PathVariable UUID organizationId,
@@ -37,6 +39,7 @@ public class PriceListController {
     }
 
     @GetMapping({ "/api/v1/organizations/{organizationId}/price-lists" })
+    @PreAuthorize("hasAnyAuthority('INVOICE_READ', 'BILLING_READ', 'BILLING_STAFF', 'SUPER_ADMIN', 'ORGANIZATION_ADMIN')")
     @Operation(summary = "Get price lists for an organization")
     public ResponseEntity<ApiResponse<List<PriceListResponseDTO>>> getOrganizationPriceLists(
             @PathVariable UUID organizationId) {
@@ -45,6 +48,7 @@ public class PriceListController {
     }
 
     @PostMapping("/api/v1/price-lists/{priceListId}/items")
+    @PreAuthorize("hasAnyAuthority('INVOICE_CREATE', 'BILLING_WRITE', 'BILLING_STAFF', 'SUPER_ADMIN', 'ORGANIZATION_ADMIN')")
     @Operation(summary = "Add an item to a price list")
     public ResponseEntity<ApiResponse<PriceListItemResponseDTO>> addItem(
             @PathVariable UUID priceListId,
@@ -55,6 +59,7 @@ public class PriceListController {
     }
 
     @GetMapping("/api/v1/price-lists/{priceListId}/items")
+    @PreAuthorize("hasAnyAuthority('INVOICE_READ', 'BILLING_READ', 'BILLING_STAFF', 'SUPER_ADMIN', 'ORGANIZATION_ADMIN')")
     @Operation(summary = "Get items in a price list")
     public ResponseEntity<ApiResponse<List<PriceListItemResponseDTO>>> getPriceListItems(
             @PathVariable UUID priceListId) {

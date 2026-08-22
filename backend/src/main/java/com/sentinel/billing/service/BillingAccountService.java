@@ -74,6 +74,18 @@ public class BillingAccountService {
     }
 
     @Transactional(readOnly = true)
+    public List<BillingAccountResponseDTO> getAllAccounts() {
+        UUID orgId = com.sentinel.security.TenantContext.getCurrentOrganizationId();
+        List<BillingAccount> accounts;
+        if (orgId != null) {
+            accounts = billingAccountRepository.findByOrganizationId(orgId);
+        } else {
+            accounts = billingAccountRepository.findAll();
+        }
+        return accounts.stream().map(this::mapToDTO).collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
     public BillingAccountResponseDTO getBillingAccount(UUID accountId) {
         BillingAccount account = billingAccountRepository.findById(accountId)
                 .orElseThrow(() -> new ResourceNotFoundException("Billing account not found with id: " + accountId));
